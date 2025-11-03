@@ -77,11 +77,19 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      
+    - name: Get package version
+      id: package-version
+      run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+      
+    - name: Generate timestamp
+      id: timestamp
+      run: echo "timestamp=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
       
     - name: Download all artifacts
       uses: actions/download-artifact@v4
@@ -89,6 +97,8 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: v${{ steps.package-version.outputs.version }}-${{ steps.timestamp.outputs.timestamp }}
+        name: Release v${{ steps.package-version.outputs.version }} (${{ steps.timestamp.outputs.timestamp }})
         files: |
           electron-app-windows/**/*
           electron-app-macos/**/*
@@ -96,5 +106,18 @@ jobs:
         draft: false
         prerelease: false
         generate_release_notes: true
+        body: |
+          🚀 **Automatic Release**
+          
+          **Version:** ${{ steps.package-version.outputs.version }}
+          **Build Date:** ${{ steps.timestamp.outputs.timestamp }}
+          **Commit:** ${{ github.sha }}
+          
+          This release was automatically generated from the latest commit to the main branch.
+          
+          ## 📦 Downloads
+          - **Windows**: `.exe` installer and `.zip` portable
+          - **macOS**: `.dmg` installer and `.zip` portable  
+          - **Linux**: `.deb` and `.rpm` packages, plus `.zip` portable
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

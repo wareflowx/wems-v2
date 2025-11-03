@@ -10,18 +10,36 @@ A modern Electron application template built with React, TypeScript, Vite, and s
 
 ## ✨ Features
 
+### Core Framework
 - **⚡ Electron 39.0** - Cross-platform desktop app framework
-- **⚛️ React 19.2** - Modern React with latest features
-- **🔷 TypeScript 5.3** - Type-safe development
-- **⚡ Vite 5.4** - Fast build tool and dev server
-- **🎨 shadcn/ui** - Beautiful, accessible UI components built on Radix UI
-- **🎭 Tailwind CSS 3.4** - Utility-first CSS framework
+- **⚛️ React 19.2** - Modern React with latest features and concurrent rendering
+- **🔷 TypeScript 5.3** - Type-safe development with advanced type inference
+- **⚡ Vite 5.4** - Lightning-fast build tool and dev server with HMR
+
+### UI & Styling
+- **🎨 shadcn/ui** - Beautiful, accessible UI components built on Radix UI primitives
+- **🎭 Tailwind CSS 3.4** - Utility-first CSS framework with custom design system
 - **🌙 Theme Support** - Light, dark, and system theme modes with persistence
+- **� Responsiove Design** - Mobile-first approach with Tailwind breakpoints
+- **🎯 Lucide React 0.552** - Beautiful, customizable SVG icons
+
+### State Management & Forms
+- **🔄 TanStack Query 5.90** - Powerful data fetching and caching library
+- **📝 React Hook Form 7.66** - Performant forms with easy validation
+- **✅ Zod 4.1** - TypeScript-first schema validation library
+- **🎛️ Class Variance Authority** - Type-safe component variants
+
+### Routing & Navigation
 - **🧭 React Router v7.9** - Client-side routing with modern patterns
-- **📱 Responsive Design** - Mobile-first approach with Tailwind breakpoints
+- **📍 Nested Routes** - Hierarchical routing with layout components
+- **🔗 Type-safe Navigation** - Full TypeScript support for routes
+
+### Development Tools
 - **🔧 Electron Forge 7.10** - Complete build and packaging toolchain
 - **📦 Modern Tooling** - ESLint 8.57, PostCSS 8.5, Autoprefixer 10.4
 - **🎯 Developer Experience** - Hot reload, TypeScript path mapping, and comprehensive linting
+- **🚀 GitHub Actions** - Automated CI/CD with cross-platform builds
+- **📋 Type Safety** - End-to-end TypeScript with strict configuration
 
 ## 🚀 Quick Start
 
@@ -79,14 +97,23 @@ src/
 
 ## 🎨 UI Components
 
-This template includes a complete set of shadcn/ui components:
+This template includes a complete set of shadcn/ui components and modern libraries:
 
-- **Layout**: Button, Card, Dialog, Sheet, Tabs
-- **Forms**: Input, Label, Select, Checkbox, Radio Group
-- **Navigation**: Navigation Menu, Breadcrumb, Pagination
-- **Feedback**: Alert, Toast, Progress, Skeleton
-- **Data Display**: Table, Avatar, Badge, Separator
-- **Overlay**: Popover, Tooltip, Hover Card, Context Menu
+### UI Components
+- **Layout**: Button, Card, Dialog, Sheet, Tabs, Accordion
+- **Forms**: Input, Label, Select, Checkbox, Radio Group, Switch, Slider
+- **Navigation**: Navigation Menu, Breadcrumb, Pagination, Command Palette
+- **Feedback**: Alert, Toast, Progress, Skeleton, Sonner notifications
+- **Data Display**: Table, Avatar, Badge, Separator, Calendar, Charts
+- **Overlay**: Popover, Tooltip, Hover Card, Context Menu, Drawer
+
+### Integrated Libraries
+- **React Hook Form** - Form state management with minimal re-renders
+- **Zod** - Runtime type validation and schema parsing
+- **TanStack Query** - Server state management and caching
+- **Lucide React** - Consistent icon system with 1000+ icons
+- **Tailwind Merge** - Intelligent class merging for dynamic styles
+- **Class Variance Authority** - Type-safe component variant system
 
 ## 🌙 Theme System
 
@@ -195,28 +222,47 @@ This template includes GitHub Actions workflows for automated building and relea
 - **Platforms**: Windows, macOS, and Linux
 - **Outputs**: Executable files for all platforms
 - **Artifacts**: Automatically uploaded and stored for 30 days
+- **Note**: Regular pushes to main only build and test - no release is created
 
 #### Release Workflow
-- **Triggers**: Git tags starting with `v` (e.g., `v1.0.0`)
+- **Triggers**: Every push to main branch (automatic)
 - **Features**: 
   - Cross-platform builds
-  - Code signing support (macOS and Windows)
   - Automatic GitHub releases
   - Release notes generation
+  - Timestamped versions
 
-#### Creating a Release
+#### Automatic Releases
 
-1. **Tag your release**:
+The workflow automatically creates releases on every push to the main branch:
+
+1. **Simply push your changes**:
    ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
+   # Make your changes and commit
+   git add .
+   git commit -m "feat: add new feature"
+   git push origin main
+   # → This automatically triggers build and release
    ```
 
 2. **GitHub Actions will automatically**:
-   - Build for all platforms
-   - Create distributable packages
-   - Create a GitHub release
-   - Upload all build artifacts
+   - Build for all platforms (Windows, macOS, Linux)
+   - Create distributable packages (.exe, .dmg, .deb, .rpm, .zip)
+   - Generate a release tag using package.json version + timestamp
+   - Create a GitHub release with all artifacts
+   - Generate release notes from commits
+
+3. **Release naming convention**:
+   - **Tag**: `v1.0.0-20241103-183045` (version + timestamp)
+   - **Name**: `Release v1.0.0 (20241103-183045)`
+   - **Automatic**: No manual tagging required
+
+4. **Release artifacts include**:
+   - **Windows**: `.exe` installer and `.zip` portable
+   - **macOS**: `.dmg` installer and `.zip` portable  
+   - **Linux**: `.deb` and `.rpm` packages, plus `.zip` portable
+
+**No manual steps needed** - just push to main and get a release!
 
 #### Code Signing Setup (Optional)
 

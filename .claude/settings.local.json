@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh run:*)",
+      "Bash(gh release view:*)",
+      "Bash(gh api:*)",
+      "Bash(git push:*)",
+      "Bash(curl:*)",
+      "Bash(pnpm build:*)",
+      "Bash(gh repo view:*)"
+    ]
+  }
+}

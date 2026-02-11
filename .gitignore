@@ -1,0 +1,16 @@
+node_modules
+.DS_Store
+dist
+dist-ssr
+dist-electron
+out
+release
+*.local
+count.txt
+.env
+.nitro
+.tanstack
+.wrangler
+.output
+.vinxi
+todos.json

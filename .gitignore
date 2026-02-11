@@ -14,3 +14,8 @@ count.txt
 .output
 .vinxi
 todos.json
+
+# Database
+*.db
+*.db-shm
+*.db-wal

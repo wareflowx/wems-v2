@@ -29,6 +29,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
     }
     throw new Error(`Invalid channel: ${channel}`)
   },
+
+  // Database API
+  db: {
+    query: (table: string, method: string, args: unknown[]) =>
+      ipcRenderer.invoke('db:query', table, method, args),
+    execute: (sql: string, params?: unknown[]) =>
+      ipcRenderer.invoke('db:execute', sql, params),
+    transaction: (operations: Array<{ table: string; method: string; args: unknown[] }>) =>
+      ipcRenderer.invoke('db:transaction', operations),
+  },
 })
 
 // Type declarations for the exposed API
@@ -38,6 +48,11 @@ declare global {
       sendMessage: (channel: string, data: unknown) => void
       on: (channel: string, callback: (...args: unknown[]) => void) => (() => void) | undefined
       invoke: (channel: string, ...args: unknown[]) => Promise<unknown>
+      db: {
+        query: (table: string, method: string, args: unknown[]) => Promise<unknown>
+        execute: (sql: string, params?: unknown[]) => Promise<unknown>
+        transaction: (operations: Array<{ table: string; method: string; args: unknown[] }>) => Promise<unknown[]>
+      }
     }
   }
 }

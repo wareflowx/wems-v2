@@ -27,6 +27,9 @@ const config = defineConfig({
         vite: {
           build: {
             outDir: 'dist-electron',
+            rollupOptions: {
+              external: ['better-sqlite3', 'drizzle-orm'],
+            },
           },
         },
       },

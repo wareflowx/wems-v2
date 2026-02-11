@@ -35,10 +35,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: List release directory (before build)
+        run: ls -la release/ || echo "No release directory yet"
+
       - name: Build and publish Electron app
         run: pnpm electron:build --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List release directory (after build)
+        run: ls -la release/
 
       - name: Upload artifacts (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -61,8 +67,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-installer
-          path: release/*.{exe,msi}
-          if-no-files-found: warn
+          path: |
+            release/*.exe
+            release/**/*.exe
+          if-no-files-found: error
 
   create-release:
     needs: release

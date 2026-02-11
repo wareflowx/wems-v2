@@ -39,7 +39,7 @@ jobs:
         run: npx electron-rebuild -f -w better-sqlite3
 
       - name: List release directory (before build)
-        run: ls -la release/ || echo "No release directory yet"
+        run: ls release/ || echo "No release directory yet"
 
       - name: Build and publish Electron app
         run: pnpm electron:build --publish always

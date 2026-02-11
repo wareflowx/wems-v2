@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  build:
     strategy:
       fail-fast: false
       matrix:
@@ -32,38 +32,26 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Rebuild native modules for Electron
-        run: npx electron-rebuild -f -w better-sqlite3
-
-
-      - name: Build and publish Electron app
+      - name: Build Electron app
         run: pnpm electron:build --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: List release directory (after build)
-        run: ls -la release/
-
-      - name: Upload artifacts (Linux)
+      - name: Upload artifacts
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: linux-appimage
           path: release/*.AppImage
-          if-no-files-found: warn
 
-      - name: Upload artifacts (macOS)
+      - name: Upload artifacts
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
           name: macos-dmg
           path: release/*.dmg
-          if-no-files-found: warn
 
-      - name: Upload artifacts (Windows)
+      - name: Upload artifacts
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
@@ -71,10 +59,9 @@ jobs:
           path: |
             release/*.exe
             release/**/*.exe
-          if-no-files-found: error
 
   create-release:
-    needs: release
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -88,7 +75,7 @@ jobs:
       - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*
-          generate_release_notes: true
-          draft: false
-          prerelease: false
+              files: artifacts/**/*
+              generate_release_notes: true
+              draft: false
+              prerelease: false

@@ -39,8 +39,7 @@ jobs:
         run: npx electron-rebuild -f -w better-sqlite3
 
       - name: List release directory (before build)
-        run: ls release/ || echo "No release directory yet"
-        shell: pwsh
+        run: node -e "console.log('Release directory contents:'); const fs=require('fs');try{console.log(JSON.stringify(fs.readdirSync('./release')))}catch(e){console.log('No release directory yet')}"
 
       - name: Build and publish Electron app
         run: pnpm electron:build --publish always

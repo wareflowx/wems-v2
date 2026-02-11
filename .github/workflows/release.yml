@@ -40,6 +40,7 @@ jobs:
 
       - name: List release directory (before build)
         run: ls release/ || echo "No release directory yet"
+        shell: pwsh
 
       - name: Build and publish Electron app
         run: pnpm electron:build --publish always

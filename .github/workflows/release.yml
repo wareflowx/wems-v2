@@ -33,7 +33,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Build Electron app
-        run: pnpm electron:build --publish always
+        run: pnpm run --pnpm-electron="pnpm electron:build --publish always"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

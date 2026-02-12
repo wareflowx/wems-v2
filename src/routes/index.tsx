@@ -1,8 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { Zap, Code, Smartphone, Rocket } from 'lucide-react'
+import { createFileRoute, Navigate } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/')({ component: App })
+export const Route = createFileRoute('/')({
+  component: Index,
+})
 
-function App() {
-  return <div>test</div>
+function Index() {
+  return (
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-4">Home</h1>
+      <p className="text-gray-600">Welcome to WEMS</p>
+    </div>
+  )
 }

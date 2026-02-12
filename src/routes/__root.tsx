@@ -1,12 +1,12 @@
-import { HeadContent, Scripts, createRootRoute, Outlet } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import { SidebarProvider, Sidebar } from '@/components/ui/sidebar'
-import { AppSidebar } from '@/components/AppSidebar'
-import { AppLayout } from '@/components/AppLayout'
-// import { TitleBar } from '@/components/electron/TitleBar'
-import '@/lib/i18n'
-
+import {
+  HeadContent,
+  Scripts,
+  createRootRoute,
+  Outlet,
+} from '@tanstack/react-router'
+import { SidebarProvider, SidebarInset, Sidebar } from '@/components/ui/sidebar'
+import { AppHeader } from '@/components/app-header'
+import { AppSidebar } from '@/components/app-sidebar'
 import appCss from '../styles.css?url'
 
 const RootDocument = ({ children }: { children: React.ReactNode }) => {
@@ -17,17 +17,6 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
       </head>
       <body>
         {children}
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
         <Scripts />
       </body>
     </html>
@@ -36,15 +25,17 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
 
 const RootLayout = () => {
   return (
-    <>
-      {/* <TitleBar /> */}
-      <SidebarProvider>
-        <Sidebar collapsible="icon">
-          <AppSidebar />
-        </Sidebar>
-        <AppLayout />
-      </SidebarProvider>
-    </>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <div className="flex-1">
+          <AppHeader />
+          <div className="bg-sidebar">
+            <Outlet />
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }
 
@@ -59,7 +50,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'WEMS',
       },
     ],
     links: [

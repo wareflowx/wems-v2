@@ -44,6 +44,9 @@ async function createWindow() {
     title: 'WEMS',
     width: 1200,
     height: 800,
+    resizable: true,
+    minWidth: 800,
+    minHeight: 600,
     webPreferences: {
       preload,
       nodeIntegration: false,

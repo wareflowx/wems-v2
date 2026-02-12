@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { setupDatabaseIPC } from './database'
@@ -10,6 +10,27 @@ const __dirname = path.dirname(__filename)
 // Setup database IPC handlers
 setupDatabaseIPC()
 
+// Setup window IPC handlers
+ipcMain.on('window-minimize', () => {
+  if (win) win.minimize()
+})
+
+ipcMain.on('window-maximize', () => {
+  if (win) win.maximize()
+})
+
+ipcMain.on('window-unmaximize', () => {
+  if (win) win.unmaximize()
+})
+
+ipcMain.on('window-close', () => {
+  if (win) win.close()
+})
+
+ipcMain.handle('window-is-maximized', () => {
+  return win ? win.isMaximized() : false
+})
+
 let win: BrowserWindow | null = null
 
 const preload = path.join(__dirname, './preload.js')
@@ -20,7 +41,7 @@ const indexHtml = path.join(__dirname, '../dist/index.html')
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: 'TanStack Start + Electron',
+    title: 'WEMS',
     width: 1200,
     height: 800,
     webPreferences: {

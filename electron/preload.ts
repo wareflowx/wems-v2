@@ -39,6 +39,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     transaction: (operations: Array<{ table: string; method: string; args: unknown[] }>) =>
       ipcRenderer.invoke('db:transaction', operations),
   },
+
+  // Window API
+  window: {
+    minimize: () => ipcRenderer.send('window-minimize'),
+    maximize: () => ipcRenderer.send('window-maximize'),
+    unmaximize: () => ipcRenderer.send('window-unmaximize'),
+    close: () => ipcRenderer.send('window-close'),
+    isMaximized: () => ipcRenderer.invoke('window-is-maximized'),
+  },
 })
 
 // Type declarations for the exposed API
@@ -52,6 +61,13 @@ declare global {
         query: (table: string, method: string, args: unknown[]) => Promise<unknown>
         execute: (sql: string, params?: unknown[]) => Promise<unknown>
         transaction: (operations: Array<{ table: string; method: string; args: unknown[] }>) => Promise<unknown[]>
+      }
+      window: {
+        minimize: () => void
+        maximize: () => void
+        unmaximize: () => void
+        close: () => void
+        isMaximized: () => Promise<boolean>
       }
     }
   }

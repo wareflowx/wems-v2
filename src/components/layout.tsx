@@ -1,8 +1,8 @@
 import { Link, useLocation } from '@tanstack/react-router';
 import { Button } from './ui/button';
-import { ThemeToggle } from './ThemeToggle';
+import { ThemeToggle } from './theme-toggle';
 import { ReactNode } from 'react';
-import TitleBar from './TitleBar';
+import TitleBar from './title-bar';
 
 interface LayoutProps {
   children: ReactNode;

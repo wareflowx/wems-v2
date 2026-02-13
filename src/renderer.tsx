@@ -34,9 +34,15 @@ console.log(
 );
 
 const container = document.getElementById('root');
+console.log('Container found:', container);
+
 if (!container) {
+  console.error('Root element not found!');
   throw new Error('Root element not found');
 }
 
+console.log('Creating root...');
 const root = createRoot(container);
+console.log('Root created, rendering App...');
 root.render(<App />);
+console.log('App rendered');

@@ -9,32 +9,8 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
+    asar: false,
     executableName: 'electron-shadcn',
-  },
-  hooks: {
-    // Copy package.json to app root for native module resolution
-    packageAfterCopy: [
-      {
-        from: './package.json',
-        to: 'package.json',
-      },
-    ],
-    afterPackage: async (forgeConfig, outputPlatform, outputArch, outputPaths) => {
-      const fs = await import('fs');
-      const path = await import('path');
-
-      for (const outPath of outputPaths) {
-        const packageJsonSource = path.join(__dirname, 'package.json');
-        const packageJsonDest = path.join(outPath, 'resources', 'app.asar.unpacked', 'package.json');
-
-        // Copy package.json outside asar so native modules can resolve correctly
-        fs.copyFile(packageJsonSource, packageJsonDest, (err) => {
-          if (err) console.error('Failed to copy package.json:', err);
-          else console.log('✅ Copied package.json for native module resolution');
-        });
-      }
-    },
   },
   rebuildConfig: {
     only: ['better-sqlite3'], // Only rebuild native modules

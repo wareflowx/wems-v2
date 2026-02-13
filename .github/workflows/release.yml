@@ -33,7 +33,7 @@ jobs:
         # Windows code signing
         WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
         WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-      run: npm run publish
+      run: npm run make
       
     - name: Upload release assets
       uses: softprops/action-gh-release@v1

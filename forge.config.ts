@@ -12,7 +12,10 @@ const config: ForgeConfig = {
     asar: true,
     executableName: 'electron-shadcn',
   },
-  rebuildConfig: {},
+  rebuildConfig: {
+    only: ['better-sqlite3'], // Only rebuild native modules
+    force: true, // Force rebuild even if already built
+  },
   makers: [
     new MakerSquirrel({}),
     new MakerZIP({}, ['darwin']),

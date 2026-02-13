@@ -34,6 +34,13 @@ export default function Layout({ children }: LayoutProps) {
                 <Link to="/about">About</Link>
               </Button>
               <Button
+                variant={location.pathname === '/posts' ? 'default' : 'ghost'}
+                size="sm"
+                asChild
+              >
+                <Link to="/posts">Posts</Link>
+              </Button>
+              <Button
                 variant={
                   location.pathname === '/settings' ? 'default' : 'ghost'
                 }

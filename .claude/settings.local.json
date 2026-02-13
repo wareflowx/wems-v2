@@ -6,7 +6,9 @@
       "Bash(gh run list:*)",
       "Bash(gh run:*)",
       "Bash(git tag:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run rebuild:*)"
     ]
   }
 }

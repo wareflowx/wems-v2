@@ -108,7 +108,7 @@ export const registerPostHandlers = () => {
       console.log(`🗑️ Deleting post with id: ${id}...`);
       await db.delete(posts).where(eq(posts.id, id));
       console.log(`✅ Post deleted successfully`);
-      return { success: true };
+      return { success: true, data: undefined };
     } catch (error) {
       const message = (error as Error).message;
       console.error('❌ Error deleting post:', message);

@@ -3,14 +3,27 @@
  *
  * This file provides custom React hooks that combine:
  * - TanStack Query for caching, loading states, and automatic refetching
- * - window.electronAPI for IPC communication with the main process
+ * - (window as any).electronAPI for IPC communication with the main process
  *
  * Architecture:
- * React Component → Custom Hook → TanStack Query → window.electronAPI → IPC → Main Process → Database
+ * React Component → Custom Hook → TanStack Query → (window as any).electronAPI → IPC → Main Process → Database
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Post, NewPost, ApiResponse } from '../preload-api/types';
+
+// Define types locally to avoid import issues with global Window types
+export type Post = {
+  id: number;
+  title: string;
+  content: string;
+  createdAt: number;
+};
+
+export type NewPost = Omit<Post, 'id' | 'createdAt'>;
+
+export type ApiResponse<T> =
+  | { success: true; data: T }
+  | { success: false; error: string };
 
 // ========================================
 // QUERIES (GET requests)
@@ -32,7 +45,7 @@ export const usePosts = () => {
     queryKey: ['posts'],
     queryFn: async () => {
       console.log('📥 Fetching posts via IPC...');
-      const result = await window.electronAPI.posts.getAll();
+      const result = await (window as any).electronAPI.posts.getAll();
 
       // Check for success/error response
       if (!result.success) {
@@ -64,7 +77,7 @@ export const usePost = (id: number) => {
     queryKey: ['posts', id],
     queryFn: async () => {
       console.log(`📥 Fetching post ${id} via IPC...`);
-      const result = await window.electronAPI.posts.getById(id);
+      const result = await (window as any).electronAPI.posts.getById(id);
 
       if (!result.success) {
         throw new Error(result.error);
@@ -102,7 +115,7 @@ export const useCreatePost = () => {
   return useMutation({
     mutationFn: async (postData: NewPost) => {
       console.log('➕ Creating post via IPC...', postData.title);
-      const result = await window.electronAPI.posts.create(postData);
+      const result = await (window as any).electronAPI.posts.create(postData);
 
       if (!result.success) {
         throw new Error(result.error);
@@ -142,7 +155,7 @@ export const useUpdatePost = () => {
   return useMutation({
     mutationFn: async ({ id, postData }: { id: number; postData: Partial<NewPost> }) => {
       console.log(`✏️ Updating post ${id} via IPC...`);
-      const result = await window.electronAPI.posts.update(id, postData);
+      const result = await (window as any).electronAPI.posts.update(id, postData);
 
       if (!result.success) {
         throw new Error(result.error);
@@ -181,7 +194,7 @@ export const useDeletePost = () => {
   return useMutation({
     mutationFn: async (id: number) => {
       console.log(`🗑️ Deleting post ${id} via IPC...`);
-      const result = await window.electronAPI.posts.delete(id);
+      const result = await (window as any).electronAPI.posts.delete(id);
 
       if (!result.success) {
         throw new Error(result.error);

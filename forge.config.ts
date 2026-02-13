@@ -79,7 +79,8 @@ const config: ForgeConfig = {
       [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
       [FuseV1Options.EnableNodeCliInspectArguments]: false,
       [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
-      [FuseV1Options.OnlyLoadAppFromAsar]: true,
+      // Disabled to allow loading native modules from unpacked files
+      // [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
 };

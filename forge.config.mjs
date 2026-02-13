@@ -1,11 +1,10 @@
-import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
-const config: ForgeConfig = {
+export default {
   packagerConfig: {
     asar: true,
     executableName: 'electron-shadcn',
@@ -28,19 +27,19 @@ const config: ForgeConfig = {
         {
           // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
           entry: 'src/main.ts',
-          config: 'vite.main.config.mts',
+          config: 'vite.main.config.mjs',
           target: 'main',
         },
         {
           entry: 'src/preload.ts',
-          config: 'vite.preload.config.mts',
+          config: 'vite.preload.config.mjs',
           target: 'preload',
         },
       ],
       renderer: [
         {
           name: 'main_window',
-          config: 'vite.renderer.config.mts',
+          config: 'vite.renderer.config.mjs',
         },
       ],
     }),
@@ -57,5 +56,3 @@ const config: ForgeConfig = {
     }),
   ],
 };
-
-export default config;

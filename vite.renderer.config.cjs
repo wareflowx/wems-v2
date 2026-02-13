@@ -1,12 +1,12 @@
-import path from 'path';
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
-import babel from '@rollup/plugin-babel';
-import tailwindcss from '@tailwindcss/vite';
-import { tanstackRouter } from '@tanstack/router-vite-plugin';
+const path = require('path');
+const { defineConfig } = require('vite');
+const react = require('@vitejs/plugin-react-swc');
+const babel = require('@rollup/plugin-babel');
+const tailwindcss = require('@tailwindcss/vite');
+const { tanstackRouter } = require('@tanstack/router-vite-plugin');
 
 // https://vitejs.dev/config
-export default defineConfig({
+module.exports = defineConfig({
   plugins: [
     tanstackRouter({
       target: "react",

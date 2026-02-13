@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite';
+const { defineConfig } = require('vite');
 
 // https://vitejs.dev/config
-export default defineConfig({
+module.exports = defineConfig({
   // Rolldown is automatically used when importing from 'rolldown-vite'
 });

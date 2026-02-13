@@ -1,11 +1,11 @@
-import type { ForgeConfig } from '@electron-forge/shared-types';
-import { MakerSquirrel } from '@electron-forge/maker-squirrel';
-import { MakerZIP } from '@electron-forge/maker-zip';
-import { VitePlugin } from '@electron-forge/plugin-vite';
-import { FusesPlugin } from '@electron-forge/plugin-fuses';
-import { FuseV1Options, FuseVersion } from '@electron/fuses';
+const path = require('path');
+const { MakerSquirrel } = require('@electron-forge/maker-squirrel');
+const { MakerZIP } = require('@electron-forge/maker-zip');
+const { VitePlugin } = require('@electron-forge/plugin-vite');
+const { FusesPlugin } = require('@electron-forge/plugin-fuses');
+const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
-const config: ForgeConfig = {
+const config = {
   packagerConfig: {
     asar: true,
     executableName: 'electron-shadcn',
@@ -28,19 +28,19 @@ const config: ForgeConfig = {
         {
           // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
           entry: 'src/main.ts',
-          config: 'vite.main.config.mts',
+          config: 'vite.main.config.cjs',
           target: 'main',
         },
         {
           entry: 'src/preload.ts',
-          config: 'vite.preload.config.mts',
+          config: 'vite.preload.config.cjs',
           target: 'preload',
         },
       ],
       renderer: [
         {
           name: 'main_window',
-          config: 'vite.renderer.config.ts',
+          config: 'vite.renderer.config.cjs',
         },
       ],
     }),
@@ -58,4 +58,4 @@ const config: ForgeConfig = {
   ],
 };
 
-export default config;
+module.exports = config;

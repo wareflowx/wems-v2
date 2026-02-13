@@ -27,7 +27,7 @@ jobs:
     
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest]
         
     steps:
     - name: Checkout code
@@ -52,40 +52,15 @@ jobs:
     - name: Build application
       run: npm run make
       
-    - name: List build output (Unix)
-      if: runner.os != 'Windows'
-      run: |
-        echo "Build output structure:"
-        find out -type f -name "*" 2>/dev/null || echo "No out directory found"
-        ls -la out/ 2>/dev/null || echo "No out directory"
-        
     - name: List build output (Windows)
-      if: runner.os == 'Windows'
       run: |
         echo "Build output structure:"
         if (Test-Path out) { Get-ChildItem -Recurse out | Select-Object FullName } else { echo "No out directory found" }
-      
+
     - name: Upload artifacts (Windows)
-      if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
         name: electron-app-windows
-        path: out/make/**/*
-        retention-days: 30
-        
-    - name: Upload artifacts (macOS)
-      if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v4
-      with:
-        name: electron-app-macos
-        path: out/make/**/*
-        retention-days: 30
-        
-    - name: Upload artifacts (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v4
-      with:
-        name: electron-app-linux
         path: out/make/**/*
         retention-days: 30
 
@@ -132,24 +107,20 @@ jobs:
         name: ${{ steps.release-tag.outputs.name }}
         files: |
           electron-app-windows/**/*
-          electron-app-macos/**/*
-          electron-app-linux/**/*
         draft: false
         prerelease: false
         generate_release_notes: true
         body: |
           🚀 **Manual Release**
-          
+
           **Version:** ${{ steps.package-version.outputs.version }}
           **Build Date:** ${{ steps.timestamp.outputs.timestamp }}
           **Commit:** ${{ github.sha }}
           **Trigger:** ${{ github.event_name }}
-          
+
           This release was manually triggered from the GitHub Actions interface.
-          
+
           ## 📦 Downloads
           - **Windows**: `.exe` installer and `.zip` portable
-          - **macOS**: `.dmg` installer and `.zip` portable  
-          - **Linux**: `.deb` and `.rpm` packages, plus `.zip` portable
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,6 +1,7 @@
 import path from 'path';
 import { app } from 'electron';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
+import fs from 'fs';
 
 // Lazy database initialization to avoid Vite bundling issues with native modules
 let db: ReturnType<typeof drizzle> | null = null;
@@ -9,39 +10,63 @@ function getDbPath() {
   return path.join(app.getPath('userData'), 'database.db');
 }
 
-async function runMigrations(sqlite: any) {
-  // Create posts table if it doesn't exist
-  const tableExists = sqlite.prepare(
-    "SELECT name FROM sqlite_master WHERE type='table' AND name='posts'"
-  ).get();
+function logToFile(message: string, error?: any) {
+  const logPath = path.join(app.getPath('userData'), 'debug.log');
+  const timestamp = new Date().toISOString();
+  const logMessage = error
+    ? `${timestamp} - ${message}: ${error.message}\n${error.stack}\n`
+    : `${timestamp} - ${message}\n`;
+  fs.appendFileSync(logPath, logMessage);
+}
 
-  if (!tableExists) {
-    console.log('Creating posts table...');
-    sqlite.exec(`
-      CREATE TABLE posts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        content TEXT NOT NULL
-      )
-    `);
-    console.log('✅ Posts table created');
+async function runMigrations(sqlite: any) {
+  try {
+    // Create posts table if it doesn't exist
+    const tableExists = sqlite.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='posts'"
+    ).get();
+
+    if (!tableExists) {
+      logToFile('Creating posts table...');
+      sqlite.exec(`
+        CREATE TABLE posts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          content TEXT NOT NULL
+        )
+      `);
+      logToFile('✅ Posts table created');
+    }
+  } catch (error) {
+    logToFile('Error running migrations', error);
+    throw error;
   }
 }
 
 export async function getDb() {
   if (!db) {
-    // Dynamic import to avoid Vite trying to bundle the native module
-    const Database = (await import('better-sqlite3')).default;
-    const sqlite = new Database(getDbPath());
+    try {
+      logToFile('Initializing database...');
 
-    // Enable WAL mode for better concurrency
-    sqlite.pragma('journal_mode = WAL');
+      // Load better-sqlite3 using module.require to avoid asar issues
+      const Database = module.require('better-sqlite3');
+      logToFile('Loaded better-sqlite3 via module.require');
 
-    // Run migrations
-    await runMigrations(sqlite);
+      const sqlite = new Database(getDbPath());
+      logToFile('Database connection created');
 
-    db = drizzle({ client: sqlite });
-    console.log('✅ Database initialized at:', getDbPath());
+      // Enable WAL mode for better concurrency
+      sqlite.pragma('journal_mode = WAL');
+
+      // Run migrations
+      await runMigrations(sqlite);
+
+      db = drizzle({ client: sqlite });
+      logToFile(`✅ Database initialized at: ${getDbPath()}`);
+    } catch (error) {
+      logToFile('Fatal error in getDb', error);
+      throw error;
+    }
   }
   return db;
 }

@@ -9,6 +9,22 @@ import {
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS } from "./constants";
+import fs from "fs";
+
+// Logging system for production debugging
+function logToFile(message: string, error?: any) {
+  try {
+    const userDataPath = app.getPath('userData');
+    const logPath = path.join(userDataPath, 'app.log');
+    const timestamp = new Date().toISOString();
+    const logMessage = error
+      ? `${timestamp} - ${message}: ${error.message}\n${error.stack}\n`
+      : `${timestamp} - ${message}\n`;
+    fs.appendFileSync(logPath, logMessage);
+  } catch (e) {
+    // Can't log if app.getPath fails
+  }
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,13 +89,33 @@ async function setupORPC() {
 
 app.whenReady().then(async () => {
   try {
+    logToFile('App starting...');
+    logToFile(`User data path: ${app.getPath('userData')}`);
+    logToFile('Creating window...');
     createWindow();
+    logToFile('Window created');
     await installExtensions();
+    logToFile('Extensions installed');
     checkForUpdates();
+    logToFile('Update check complete');
     await setupORPC();
+    logToFile('ORPC setup complete');
+    logToFile('App initialization complete');
   } catch (error) {
+    logToFile('Error during app initialization', error);
     console.error("Error during app initialization:", error);
   }
+});
+
+// Catch unhandled errors
+process.on('uncaughtException', (error) => {
+  logToFile('Uncaught Exception', error);
+  console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logToFile(`Unhandled Rejection at ${promise}`, reason);
+  console.error('Unhandled Rejection:', reason);
 });
 
 //osX only

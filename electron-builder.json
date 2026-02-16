@@ -1,0 +1,28 @@
+{
+  "appId": "com.electron-shadcn",
+  "productName": "electron-shadcn",
+  "directories": {
+    "output": "dist",
+    "buildResources": "build"
+  },
+  "files": [
+    "out/**/*",
+    "package.json"
+  ],
+  "extraResources": [
+    "src/db/migrations/**/*"
+  ],
+  "asar": true,
+  "asarUnpack": [
+    "node_modules/better-sqlite3/**"
+  ],
+  "win": {
+    "target": ["nsis"],
+    "icon": "build/icon.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "perMachine": true
+  }
+}

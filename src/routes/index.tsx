@@ -1,74 +1,63 @@
 import { SiElectron, SiReact, SiVite } from "@icons-pack/react-simple-icons";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
-import { getAppVersion } from "@/actions/app";
 import ExternalLink from "@/components/external-link";
-import LangToggle from "@/components/lang-toggle";
-import NavigationMenu from "@/components/navigation-menu";
-import ToggleTheme from "@/components/toggle-theme";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router"
+import { AppSidebar } from "@/components/app-sidebar"
+import { SiteHeader } from "@/components/site-header"
+import { SidebarProvider } from "@/components/ui/sidebar"
 
-/*
- * Update this page to modify your home page.
- * You can delete this file component to start from a blank page.
- */
+export const iframeHeight = "800px"
+
+export const description = "A sidebar with a header and a search form."
 
 function HomePage() {
-  const iconSize = 48;
-
-  const [appVersion, setAppVersion] = useState("0.0.0");
-  const [, startGetAppVersion] = useTransition();
-  const { t } = useTranslation();
-
-  useEffect(
-    () => startGetAppVersion(() => getAppVersion().then(setAppVersion)),
-    []
-  );
+  const { t } = useTranslation()
+  const iconSize = 48
 
   return (
-    <>
-      <NavigationMenu />
-      <div className="flex h-full flex-col items-center justify-center">
-        <div className="flex flex-col items-end justify-center gap-0.5">
-          <div className="inline-flex gap-2">
-            <SiReact size={iconSize} />
-            <SiVite size={iconSize} />
-            <SiElectron size={iconSize} />
-          </div>
-          <span className="flex items-end justify-end">
-            <h1 className="font-bold font-mono text-4xl">{t("appName")}</h1>
-            <p className="text-muted-foreground text-sm">v{appVersion}</p>
-          </span>
-          <div className="flex w-full justify-between">
-            <ExternalLink
-              className="flex gap-2 text-muted-foreground text-sm"
-              href="https://github.com/LuanRoger"
-            >
-              {t("madeBy")}
-            </ExternalLink>
-            <div className="flex items-center gap-2">
-              <LangToggle />
-              <ToggleTheme />
+    <div className="[--header-height:calc(--spacing(14))]">
+      <SidebarProvider className="flex flex-col">
+        <SiteHeader />
+        <div className="flex flex-1">
+          <AppSidebar />
+          <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-col items-end justify-center gap-0.5">
+              <div className="inline-flex gap-2">
+                <SiReact size={iconSize} />
+                <SiVite size={iconSize} />
+                <SiElectron size={iconSize} />
+              </div>
+              <span className="flex items-end justify-end">
+                <h1 className="font-bold font-mono text-4xl">{t("appName")}</h1>
+              </span>
+              <div className="flex w-full justify-between">
+                <ExternalLink
+                  className="flex gap-2 text-muted-foreground text-sm"
+                  href="https://github.com/LuanRoger"
+                >
+                  {t("madeBy")}
+                </ExternalLink>
+              </div>
+            </div>
+
+            {/* Database Section */}
+            <div className="mt-8 text-center w-full">
+              <h2 className="text-xl font-semibold mb-4">Database</h2>
+              <Link
+                to="/posts"
+                className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 inline-block"
+              >
+                Manage Posts
+              </Link>
             </div>
           </div>
         </div>
-
-        {/* Database Section */}
-        <div className="mt-8 text-center">
-          <h2 className="text-xl font-semibold mb-4">Database</h2>
-          <Link
-            to="/posts"
-            className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 inline-block"
-          >
-            Manage Posts
-          </Link>
-        </div>
-      </div>
-    </>
-  );
+      </SidebarProvider>
+    </div>
+  )
 }
 
 export const Route = createFileRoute("/")({
   component: HomePage,
-});
+})

@@ -16,7 +16,7 @@ function HomePage() {
   const iconSize = 48
 
   return (
-    <div className="[--header-height:calc(--spacing(14))]">
+    <div className="[--header-height:calc(--spacing(8))]">
       <SidebarProvider className="flex flex-col">
         <SiteHeader />
         <div className="flex flex-1">

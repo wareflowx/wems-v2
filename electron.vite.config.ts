@@ -1,5 +1,6 @@
 import { defineConfig } from 'electron-vite';
 import { resolve } from 'path';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   // Main process configuration
@@ -35,6 +36,13 @@ export default defineConfig({
   // Renderer process configuration
   renderer: {
     root: '.',
+    server: {
+      host: '127.0.0.1',
+      port: 5173
+    },
+    plugins: [
+      tailwindcss()
+    ],
     build: {
       rollupOptions: {
         input: resolve(__dirname, 'index.html'),

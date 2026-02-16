@@ -31,7 +31,8 @@ const __dirname = path.dirname(__filename);
 const inDevelopment = process.env.NODE_ENV === "development";
 
 function createWindow() {
-  const preload = path.join(__dirname, "preload.js");
+  // electron-vite 5.0: preload is in out/preload/, main is in out/main/
+  const preload = path.join(__dirname, "../preload/preload.js");
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
@@ -51,8 +52,8 @@ function createWindow() {
 
   // Development: load from dev server
   // Production: load from built files
-  if (process.env.NODE_ENV === "development" && MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+  if (inDevelopment) {
+    mainWindow.loadURL('http://127.0.0.1:5173/');
   } else {
     // In production, load from the built renderer files
     // The main process is in out/main/, renderer in out/renderer/

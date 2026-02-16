@@ -34,16 +34,17 @@ export default defineConfig({
 
   // Renderer process configuration
   renderer: {
-    resolve: {
-      alias: {
-        '@': resolve(__dirname, 'src')
-      }
-    },
+    root: '.',
     build: {
       rollupOptions: {
         input: resolve(__dirname, 'index.html'),
       },
       target: 'chrome108' // Electron 40+ equivalent
+    },
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, 'src')
+      }
     }
   }
 });

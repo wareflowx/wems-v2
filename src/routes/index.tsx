@@ -7,6 +7,7 @@ import ExternalLink from "@/components/external-link";
 import LangToggle from "@/components/lang-toggle";
 import NavigationMenu from "@/components/navigation-menu";
 import ToggleTheme from "@/components/toggle-theme";
+import { Link } from "@tanstack/react-router";
 
 /*
  * Update this page to modify your home page.
@@ -51,6 +52,17 @@ function HomePage() {
               <ToggleTheme />
             </div>
           </div>
+        </div>
+
+        {/* Database Section */}
+        <div className="mt-8 text-center">
+          <h2 className="text-xl font-semibold mb-4">Database</h2>
+          <Link
+            to="/posts"
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 inline-block"
+          >
+            Manage Posts
+          </Link>
         </div>
       </div>
     </>

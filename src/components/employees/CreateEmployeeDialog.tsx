@@ -23,7 +23,7 @@ import { useTranslation } from 'react-i18next'
 interface CreateEmployeeDialogProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  onSuccess?: () => void
+  onCreate?: (data: typeof formData) => void
 }
 
 const steps = [
@@ -32,7 +32,7 @@ const steps = [
   { id: 3, title: 'Review', icon: Check },
 ]
 
-export function CreateEmployeeDialog({ open, onOpenChange, onSuccess }: CreateEmployeeDialogProps) {
+export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmployeeDialogProps) {
   const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(1)
 
@@ -69,24 +69,7 @@ export function CreateEmployeeDialog({ open, onOpenChange, onSuccess }: CreateEm
   }
 
   const handleSubmit = () => {
-    // TODO: Implement backend logic
-    console.log(formData)
-    onSuccess?.()
-    onOpenChange?.(false)
-    // Reset form
-    setCurrentStep(1)
-    setFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      dateOfBirth: '',
-      address: '',
-      department: '',
-      position: '',
-      contractType: '',
-      startDate: '',
-    })
+    onCreate?.(formData)
   }
 
   const isStepValid = () => {

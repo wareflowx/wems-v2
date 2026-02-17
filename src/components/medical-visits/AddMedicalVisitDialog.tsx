@@ -23,13 +23,13 @@ import { Plus } from 'lucide-react'
 interface AddMedicalVisitDialogProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  onConfirm?: () => void
+  onAdd?: (data: { employee: string; type: string; scheduledDate: string }) => void
 }
 
 export function AddMedicalVisitDialog({
   open,
   onOpenChange,
-  onConfirm,
+  onAdd,
 }: AddMedicalVisitDialogProps) {
   const { t } = useTranslation()
   const [employee, setEmployee] = useState<string>('')
@@ -37,14 +37,7 @@ export function AddMedicalVisitDialog({
   const [scheduledDate, setScheduledDate] = useState<string>('')
 
   const handleSubmit = () => {
-    // TODO: Implement backend logic
-    console.log('Adding medical visit:', { employee, type, scheduledDate })
-    onConfirm?.()
-    onOpenChange?.(false)
-    // Reset form
-    setEmployee('')
-    setType('')
-    setScheduledDate('')
+    onAdd?.({ employee, type, scheduledDate })
   }
 
   const isFormValid = employee && type && scheduledDate

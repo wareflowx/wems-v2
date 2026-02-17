@@ -29,6 +29,7 @@ import {
 import { useState, useMemo } from 'react'
 import { AddMedicalVisitDialog } from '@/components/medical-visits/AddMedicalVisitDialog'
 import { DeleteMedicalVisitDialog } from '@/components/medical-visits/DeleteMedicalVisitDialog'
+import { useMedicalVisits, useCreateMedicalVisit, useDeleteMedicalVisit } from '@/lib/hooks'
 
 interface MedicalVisit {
   id: number
@@ -56,12 +57,10 @@ export function MedicalVisitsPage() {
   const [selectedVisit, setSelectedVisit] = useState<MedicalVisit | undefined>(undefined)
   const itemsPerPage = 10
 
-  const visits: MedicalVisit[] = [
-    { id: 1, employee: 'Jean Dupont', employeeId: 1, type: 'Visite périodique', scheduledDate: '2025-02-15', status: 'scheduled', daysUntil: 3 },
-    { id: 2, employee: 'Marie Martin', employeeId: 2, type: 'Visite de reprise', scheduledDate: '2025-02-01', status: 'overdue', daysUntil: -10 },
-    { id: 3, employee: 'Pierre Bernard', employeeId: 3, type: 'Visite initiale', scheduledDate: '2025-03-20', status: 'scheduled', daysUntil: 36 },
-    { id: 4, employee: 'Sophie Petit', employeeId: 4, type: 'Visite périodique', scheduledDate: '2025-02-10', status: 'completed', actualDate: '2025-02-10', fitnessStatus: 'Apt' },
-  ]
+  // Use TanStack Query hooks
+  const { data: visits = [], isLoading } = useMedicalVisits()
+  const createMedicalVisit = useCreateMedicalVisit()
+  const deleteMedicalVisit = useDeleteMedicalVisit()
 
   // Get unique types, statuses and employees
   const uniqueTypes = useMemo(() => {
@@ -135,13 +134,13 @@ export function MedicalVisitsPage() {
     return sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
   }
 
-  // KPIs
-  const kpis = {
+  // KPIs - calculated dynamically
+  const kpis = useMemo(() => ({
     totalVisits: visits.length,
     overdueVisits: visits.filter(v => v.status === 'overdue').length,
     upcomingVisits: visits.filter(v => v.status === 'scheduled').length,
     completedVisits: visits.filter(v => v.status === 'completed').length,
-  }
+  }), [visits])
 
   const getStatusBadge = (status: string, daysUntil?: number) => {
     const statusMap = {
@@ -231,6 +230,44 @@ export function MedicalVisitsPage() {
   const handleEdit = (visit: MedicalVisit) => {
     // TODO: Implement edit functionality
     console.log('Edit visit:', visit)
+  }
+
+  const handleAddMedicalVisit = (data: any) => {
+    createMedicalVisit.mutate(data, {
+      onSuccess: () => {
+        setAddDialogOpen(false)
+      }
+    })
+  }
+
+  const handleDeleteMedicalVisit = () => {
+    if (selectedVisit) {
+      deleteMedicalVisit.mutate(selectedVisit.id, {
+        onSuccess: () => {
+          setDeleteDialogOpen(false)
+          setSelectedVisit(undefined)
+        }
+      })
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <TooltipProvider>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+          <div className="min-h-full space-y-3">
+            <PageHeaderCard
+              icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+              title={t('medicalVisits.title')}
+              description={t('medicalVisits.description')}
+            />
+            <div className="flex items-center justify-center p-8">
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </TooltipProvider>
+    )
   }
 
   return (
@@ -510,18 +547,12 @@ export function MedicalVisitsPage() {
       <AddMedicalVisitDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
-        onConfirm={() => {
-          // TODO: Implement backend logic
-          console.log('Adding medical visit')
-        }}
+        onAdd={handleAddMedicalVisit}
       />
       <DeleteMedicalVisitDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        onConfirm={() => {
-          // TODO: Implement backend logic
-          console.log('Deleting medical visit:', selectedVisit?.id)
-        }}
+        onConfirm={handleDeleteMedicalVisit}
         visit={selectedVisit}
       />
     </TooltipProvider>

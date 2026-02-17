@@ -1,5 +1,7 @@
 import { Outlet } from "@tanstack/react-router";
-import BaseLayout from "@/layouts/base-layout";
+import { AppSidebar } from "@/components/app-sidebar"
+import { SiteHeader } from "@/components/site-header"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 
 /* import { TanStackRouterDevtools } from '@tanstack/react-router-devtools' */
 
@@ -9,10 +11,19 @@ import BaseLayout from "@/layouts/base-layout";
 
 export function RootPage() {
   return (
-    <BaseLayout>
-      <Outlet />
-      {/* Uncomment the following line to enable the router devtools */}
-      {/* <TanStackRouterDevtools /> */}
-    </BaseLayout>
+    <div className="[--header-height:calc(--spacing(8))]">
+      <SidebarProvider className="flex flex-col">
+        <SiteHeader />
+        <div className="flex flex-1">
+          <AppSidebar />
+          <SidebarInset>
+            <header className="h-14 border-b"></header>
+            <Outlet />
+            {/* Uncomment the following line to enable the router devtools */}
+            {/* <TanStackRouterDevtools /> */}
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </div>
   );
 }

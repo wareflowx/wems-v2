@@ -18,7 +18,7 @@ export function useCaces(filters?: CacesFilters) {
 }
 
 // Hook for fetching single CACES certification
-export function useCaces(id: number) {
+export function useCace(id: number) {
   return useQuery({
     queryKey: queryKeys.caces.detail(id),
     queryFn: () => cacesApi.getById(id),

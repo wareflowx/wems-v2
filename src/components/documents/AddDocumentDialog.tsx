@@ -24,13 +24,13 @@ import { CacesFileUpload } from '@/components/caces/CacesFileUpload'
 interface AddDocumentDialogProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  onConfirm?: () => void
+  onAdd?: (data: { employee: string; type: string; name: string; document: string }) => void
 }
 
 export function AddDocumentDialog({
   open,
   onOpenChange,
-  onConfirm,
+  onAdd,
 }: AddDocumentDialogProps) {
   const { t } = useTranslation()
   const [employee, setEmployee] = useState<string>('')
@@ -39,15 +39,7 @@ export function AddDocumentDialog({
   const [document, setDocument] = useState<string>('')
 
   const handleSubmit = () => {
-    // TODO: Implement backend logic
-    console.log('Adding document:', { employee, type, name, document })
-    onConfirm?.()
-    onOpenChange?.(false)
-    // Reset form
-    setEmployee('')
-    setType('')
-    setName('')
-    setDocument('')
+    onAdd?.({ employee, type, name, document })
   }
 
   const isFormValid = employee && type && name && document

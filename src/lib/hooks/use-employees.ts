@@ -7,7 +7,7 @@ import {
   type Employee,
 } from '@/lib/api/employees'
 import { queryKeys } from '@/lib/query-keys'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/lib/utils/toast'
 
 // Hook for fetching employees list
 export function useEmployees(filters?: EmployeeFilters) {

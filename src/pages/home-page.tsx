@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState, useMemo } from "react";
+import { useAlerts } from "@/lib/hooks";
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -40,72 +41,13 @@ export function HomePage() {
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
   const [detailFilter, setDetailFilter] = useState<string>("all");
 
-  // Mock data
-  const allAlerts = [
-    {
-      id: 1,
-      type: "CACES expiré",
-      employee: "Jean Dupont",
-      employeeId: 1,
-      category: "1A",
-      severity: "critical",
-      date: "2025-02-10",
-    },
-    {
-      id: 2,
-      type: "Visite en retard",
-      employee: "Marie Martin",
-      employeeId: 2,
-      visitType: "Visite de reprise",
-      severity: "critical",
-      date: "2025-02-01",
-    },
-    {
-      id: 3,
-      type: "CACES expiration proche",
-      employee: "Pierre Bernard",
-      employeeId: 3,
-      category: "3",
-      severity: "warning",
-      daysLeft: 5,
-      date: "2025-02-15",
-    },
-    {
-      id: 4,
-      type: "CACES expiration proche",
-      employee: "Sophie Petit",
-      employeeId: 4,
-      category: "5",
-      severity: "warning",
-      daysLeft: 12,
-      date: "2025-02-22",
-    },
-    {
-      id: 5,
-      type: "Visite planifiée",
-      employee: "Luc Dubois",
-      employeeId: 5,
-      visitType: "Visite périodique",
-      severity: "info",
-      date: "2025-03-01",
-    },
-  ];
+  // Use TanStack Query hook for alerts
+  const { data: allAlerts = [], isLoading } = useAlerts({ search, severity: severityFilter, type: typeFilter === 'all' ? undefined : typeFilter });
 
+  // Client-side filtering for employee and detail filters only
+  // (search, severity, and type are already filtered by API)
   const recentAlerts = useMemo(() => {
     return allAlerts.filter((alert) => {
-      const matchesSearch =
-        search === "" ||
-        alert.employee.toLowerCase().includes(search.toLowerCase()) ||
-        alert.type.toLowerCase().includes(search.toLowerCase());
-
-      const matchesType =
-        typeFilter === "all" ||
-        (typeFilter === "caces" && alert.type.includes("CACES")) ||
-        (typeFilter === "medical" && alert.type.includes("Visite"));
-
-      const matchesSeverity =
-        severityFilter === "all" || alert.severity === severityFilter;
-
       const matchesEmployee =
         employeeFilter === "all" || alert.employee === employeeFilter;
 
@@ -114,22 +56,9 @@ export function HomePage() {
         (alert.category && detailFilter === `CACES ${alert.category}`) ||
         (alert.visitType && detailFilter === alert.visitType);
 
-      return (
-        matchesSearch &&
-        matchesType &&
-        matchesSeverity &&
-        matchesEmployee &&
-        matchesDetail
-      );
+      return matchesEmployee && matchesDetail;
     });
-  }, [
-    allAlerts,
-    search,
-    typeFilter,
-    severityFilter,
-    employeeFilter,
-    detailFilter,
-  ]);
+  }, [allAlerts, employeeFilter, detailFilter]);
 
   // Get unique employees and details
   const uniqueEmployees = useMemo(() => {
@@ -146,12 +75,21 @@ export function HomePage() {
     return Array.from(details);
   }, [allAlerts]);
 
-  const kpis = {
-    totalEmployees: 42,
-    activeEmployees: 38,
-    criticalAlerts: 2,
-    warningAlerts: 2,
-  };
+  // Calculate KPIs dynamically from alerts data
+  const kpis = useMemo(() => {
+    const criticalAlerts = allAlerts.filter(a => a.severity === 'critical').length
+    const warningAlerts = allAlerts.filter(a => a.severity === 'warning').length
+    const infoAlerts = allAlerts.filter(a => a.severity === 'info').length
+
+    return {
+      totalEmployees: 42, // This would come from employees API in future
+      activeEmployees: 38, // This would come from employees API in future
+      criticalAlerts,
+      warningAlerts,
+      infoAlerts,
+      totalAlerts: allAlerts.length,
+    }
+  }, [allAlerts])
 
   const getAlertBadge = (severity: string, daysLeft?: number) => {
     if (severity === "critical")
@@ -209,6 +147,30 @@ export function HomePage() {
     return <span className="text-gray-400">-</span>;
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 py-6">
+        <div className="min-h-full space-y-3">
+          <Card className="p-3 bg-background shadow-sm rounded-md">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5">
+                <Sparkles className="h-4 w-4 text-gray-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-gray-700">
+                  <span className="font-medium">{t("dashboard.title")}</span> - Vue d'ensemble de votre entreprise et alertes importantes
+                </p>
+              </div>
+            </div>
+          </Card>
+          <div className="flex items-center justify-center p-8">
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 py-6">
       <div className="min-h-full space-y-3">
@@ -254,10 +216,9 @@ export function HomePage() {
             <CardContent className="p-0">
               <div className="text-2xl font-bold">{kpis.criticalAlerts}</div>
               <p className="text-xs text-muted-foreground">
-                {((kpis.criticalAlerts / recentAlerts.length) * 100).toFixed(
-                  0,
-                )}
-                % du total
+                {kpis.totalAlerts > 0
+                  ? `${((kpis.criticalAlerts / kpis.totalAlerts) * 100).toFixed(0)}% du total`
+                  : '-'}
               </p>
             </CardContent>
           </Card>
@@ -271,10 +232,9 @@ export function HomePage() {
             <CardContent className="p-0">
               <div className="text-2xl font-bold">{kpis.warningAlerts}</div>
               <p className="text-xs text-muted-foreground">
-                {((kpis.warningAlerts / recentAlerts.length) * 100).toFixed(
-                  0,
-                )}
-                % du total
+                {kpis.totalAlerts > 0
+                  ? `${((kpis.warningAlerts / kpis.totalAlerts) * 100).toFixed(0)}% du total`
+                  : '-'}
               </p>
             </CardContent>
           </Card>
@@ -286,7 +246,7 @@ export function HomePage() {
               <Bell className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent className="p-0">
-              <div className="text-2xl font-bold">{recentAlerts.length}</div>
+              <div className="text-2xl font-bold">{kpis.totalAlerts}</div>
               <p className="text-xs text-muted-foreground">Total alertes</p>
             </CardContent>
           </Card>

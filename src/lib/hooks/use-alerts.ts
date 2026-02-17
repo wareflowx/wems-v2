@@ -13,7 +13,7 @@ export function useAlerts(filters?: AlertFilters) {
 // Hook for fetching single alert
 export function useAlert(id: number) {
   return useQuery({
-    queryKey: ['alerts', 'detail', id],
+    queryKey: queryKeys.alerts.detail(id),
     queryFn: () => alertsApi.getById(id),
     enabled: !!id,
   })

@@ -41,8 +41,6 @@ export function AddCacesDialog({
   const handleSubmit = () => {
     onAdd?.({ employee, category, issueDate, expiryDate, document })
   }
-    setDocument('')
-  }
 
   const isFormValid = employee && category && issueDate && expiryDate
 

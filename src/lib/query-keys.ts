@@ -51,6 +51,8 @@ export const queryKeys = {
     all: ['alerts'] as const,
     lists: () => ['alerts', 'list'] as const,
     list: (filters: string) => ['alerts', 'list', filters] as const,
+    details: () => ['alerts', 'detail'] as const,
+    detail: (id: number) => ['alerts', 'detail', id] as const,
   },
 
   // Reference Data (Settings)

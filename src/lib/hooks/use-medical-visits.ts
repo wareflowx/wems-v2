@@ -4,8 +4,10 @@ import {
   type MedicalVisitFilters,
   type CreateMedicalVisitInput,
   type UpdateMedicalVisitInput,
+  type MedicalVisit,
 } from '@/lib/api/medical-visits'
 import { queryKeys } from '@/lib/query-keys'
+import { useToast } from '@/lib/utils/toast'
 
 // Hook for fetching medical visits list
 export function useMedicalVisits(filters?: MedicalVisitFilters) {
@@ -27,6 +29,7 @@ export function useMedicalVisit(id: number) {
 // Hook for creating medical visit
 export function useCreateMedicalVisit() {
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   return useMutation({
     mutationFn: (input: CreateMedicalVisitInput) => medicalVisitsApi.create(input),
@@ -34,13 +37,14 @@ export function useCreateMedicalVisit() {
     onMutate: async (newVisit) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.medicalVisits.lists() })
 
-      const previousVisits = queryClient.getQueryData(
-        queryKeys.medicalVisits.list('{}')
-      )
+      const previousQueries = new Map()
+      queryClient.getQueriesData({ queryKey: queryKeys.medicalVisits.lists() }).forEach(([key, data]) => {
+        previousQueries.set(JSON.stringify(key), data as MedicalVisit[])
+      })
 
-      queryClient.setQueryData(
-        queryKeys.medicalVisits.list('{}'),
-        (old: any[] = []) => [
+      queryClient.setQueriesData(
+        { queryKey: queryKeys.medicalVisits.lists() },
+        (old: MedicalVisit[] = []) => [
           ...old,
           {
             ...newVisit,
@@ -51,16 +55,22 @@ export function useCreateMedicalVisit() {
         ]
       )
 
-      return { previousVisits }
+      return { previousQueries }
     },
 
     onError: (err, variables, context) => {
-      if (context?.previousVisits) {
-        queryClient.setQueryData(
-          queryKeys.medicalVisits.list('{}'),
-          context.previousVisits
-        )
+      if (context?.previousQueries) {
+        context.previousQueries.forEach((data, keyStr) => {
+          const key = JSON.parse(keyStr)
+          queryClient.setQueryData(key, data)
+        })
       }
+
+      toast({
+        title: 'Failed to create medical visit',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        variant: 'destructive',
+      })
     },
 
     onSuccess: () => {
@@ -73,6 +83,7 @@ export function useCreateMedicalVisit() {
 // Hook for updating medical visit
 export function useUpdateMedicalVisit() {
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   return useMutation({
     mutationFn: (input: UpdateMedicalVisitInput) => medicalVisitsApi.update(input),
@@ -80,28 +91,35 @@ export function useUpdateMedicalVisit() {
     onMutate: async ({ id, updates }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.medicalVisits.lists() })
 
-      const previousVisits = queryClient.getQueryData(
-        queryKeys.medicalVisits.list('{}')
-      )
+      const previousQueries = new Map()
+      queryClient.getQueriesData({ queryKey: queryKeys.medicalVisits.lists() }).forEach(([key, data]) => {
+        previousQueries.set(JSON.stringify(key), data as MedicalVisit[])
+      })
 
-      queryClient.setQueryData(
-        queryKeys.medicalVisits.list('{}'),
-        (old: any[] = []) =>
+      queryClient.setQueriesData(
+        { queryKey: queryKeys.medicalVisits.lists() },
+        (old: MedicalVisit[] = []) =>
           old.map((visit) =>
             visit.id === id ? { ...visit, ...updates } : visit
           )
       )
 
-      return { previousVisits }
+      return { previousQueries }
     },
 
     onError: (err, variables, context) => {
-      if (context?.previousVisits) {
-        queryClient.setQueryData(
-          queryKeys.medicalVisits.list('{}'),
-          context.previousVisits
-        )
+      if (context?.previousQueries) {
+        context.previousQueries.forEach((data, keyStr) => {
+          const key = JSON.parse(keyStr)
+          queryClient.setQueryData(key, data)
+        })
       }
+
+      toast({
+        title: 'Failed to update medical visit',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        variant: 'destructive',
+      })
     },
 
     onSuccess: () => {
@@ -115,6 +133,7 @@ export function useUpdateMedicalVisit() {
 // Hook for deleting medical visit
 export function useDeleteMedicalVisit() {
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   return useMutation({
     mutationFn: (id: number) => medicalVisitsApi.delete(id),
@@ -122,25 +141,32 @@ export function useDeleteMedicalVisit() {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.medicalVisits.lists() })
 
-      const previousVisits = queryClient.getQueryData(
-        queryKeys.medicalVisits.list('{}')
+      const previousQueries = new Map()
+      queryClient.getQueriesData({ queryKey: queryKeys.medicalVisits.lists() }).forEach(([key, data]) => {
+        previousQueries.set(JSON.stringify(key), data as MedicalVisit[])
+      })
+
+      queryClient.setQueriesData(
+        { queryKey: queryKeys.medicalVisits.lists() },
+        (old: MedicalVisit[] = []) => old.filter((visit) => visit.id !== id)
       )
 
-      queryClient.setQueryData(
-        queryKeys.medicalVisits.list('{}'),
-        (old: any[] = []) => old.filter((visit) => visit.id !== id)
-      )
-
-      return { previousVisits }
+      return { previousQueries }
     },
 
     onError: (err, variables, context) => {
-      if (context?.previousVisits) {
-        queryClient.setQueryData(
-          queryKeys.medicalVisits.list('{}'),
-          context.previousVisits
-        )
+      if (context?.previousQueries) {
+        context.previousQueries.forEach((data, keyStr) => {
+          const key = JSON.parse(keyStr)
+          queryClient.setQueryData(key, data)
+        })
       }
+
+      toast({
+        title: 'Failed to delete medical visit',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        variant: 'destructive',
+      })
     },
 
     onSuccess: () => {

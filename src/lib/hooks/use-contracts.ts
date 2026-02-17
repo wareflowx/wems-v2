@@ -4,8 +4,10 @@ import {
   type ContractFilters,
   type CreateContractInput,
   type UpdateContractInput,
+  type Contract,
 } from '@/lib/api/contracts'
 import { queryKeys } from '@/lib/query-keys'
+import { useToast } from '@/lib/utils/toast'
 
 // Hook for fetching contracts list
 export function useContracts(filters?: ContractFilters) {
@@ -27,6 +29,7 @@ export function useContract(id: number) {
 // Hook for creating contract
 export function useCreateContract() {
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   return useMutation({
     mutationFn: (input: CreateContractInput) => contractsApi.create(input),
@@ -34,13 +37,14 @@ export function useCreateContract() {
     onMutate: async (newContract) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.contracts.lists() })
 
-      const previousContracts = queryClient.getQueryData(
-        queryKeys.contracts.list('{}')
-      )
+      const previousQueries = new Map()
+      queryClient.getQueriesData({ queryKey: queryKeys.contracts.lists() }).forEach(([key, data]) => {
+        previousQueries.set(JSON.stringify(key), data as Contract[])
+      })
 
-      queryClient.setQueryData(
-        queryKeys.contracts.list('{}'),
-        (old: any[] = []) => [
+      queryClient.setQueriesData(
+        { queryKey: queryKeys.contracts.lists() },
+        (old: Contract[] = []) => [
           ...old,
           {
             ...newContract,
@@ -49,16 +53,22 @@ export function useCreateContract() {
         ]
       )
 
-      return { previousContracts }
+      return { previousQueries }
     },
 
     onError: (err, variables, context) => {
-      if (context?.previousContracts) {
-        queryClient.setQueryData(
-          queryKeys.contracts.list('{}'),
-          context.previousContracts
-        )
+      if (context?.previousQueries) {
+        context.previousQueries.forEach((data, keyStr) => {
+          const key = JSON.parse(keyStr)
+          queryClient.setQueryData(key, data)
+        })
       }
+
+      toast({
+        title: 'Failed to create contract',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        variant: 'destructive',
+      })
     },
 
     onSuccess: () => {
@@ -70,6 +80,7 @@ export function useCreateContract() {
 // Hook for updating contract
 export function useUpdateContract() {
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   return useMutation({
     mutationFn: (input: UpdateContractInput) => contractsApi.update(input),
@@ -77,28 +88,35 @@ export function useUpdateContract() {
     onMutate: async ({ id, updates }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.contracts.lists() })
 
-      const previousContracts = queryClient.getQueryData(
-        queryKeys.contracts.list('{}')
-      )
+      const previousQueries = new Map()
+      queryClient.getQueriesData({ queryKey: queryKeys.contracts.lists() }).forEach(([key, data]) => {
+        previousQueries.set(JSON.stringify(key), data as Contract[])
+      })
 
-      queryClient.setQueryData(
-        queryKeys.contracts.list('{}'),
-        (old: any[] = []) =>
+      queryClient.setQueriesData(
+        { queryKey: queryKeys.contracts.lists() },
+        (old: Contract[] = []) =>
           old.map((contract) =>
             contract.id === id ? { ...contract, ...updates } : contract
           )
       )
 
-      return { previousContracts }
+      return { previousQueries }
     },
 
     onError: (err, variables, context) => {
-      if (context?.previousContracts) {
-        queryClient.setQueryData(
-          queryKeys.contracts.list('{}'),
-          context.previousContracts
-        )
+      if (context?.previousQueries) {
+        context.previousQueries.forEach((data, keyStr) => {
+          const key = JSON.parse(keyStr)
+          queryClient.setQueryData(key, data)
+        })
       }
+
+      toast({
+        title: 'Failed to update contract',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        variant: 'destructive',
+      })
     },
 
     onSuccess: () => {
@@ -111,6 +129,7 @@ export function useUpdateContract() {
 // Hook for deleting contract
 export function useDeleteContract() {
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   return useMutation({
     mutationFn: (id: number) => contractsApi.delete(id),
@@ -118,25 +137,32 @@ export function useDeleteContract() {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.contracts.lists() })
 
-      const previousContracts = queryClient.getQueryData(
-        queryKeys.contracts.list('{}')
+      const previousQueries = new Map()
+      queryClient.getQueriesData({ queryKey: queryKeys.contracts.lists() }).forEach(([key, data]) => {
+        previousQueries.set(JSON.stringify(key), data as Contract[])
+      })
+
+      queryClient.setQueriesData(
+        { queryKey: queryKeys.contracts.lists() },
+        (old: Contract[] = []) => old.filter((contract) => contract.id !== id)
       )
 
-      queryClient.setQueryData(
-        queryKeys.contracts.list('{}'),
-        (old: any[] = []) => old.filter((contract) => contract.id !== id)
-      )
-
-      return { previousContracts }
+      return { previousQueries }
     },
 
     onError: (err, variables, context) => {
-      if (context?.previousContracts) {
-        queryClient.setQueryData(
-          queryKeys.contracts.list('{}'),
-          context.previousContracts
-        )
+      if (context?.previousQueries) {
+        context.previousQueries.forEach((data, keyStr) => {
+          const key = JSON.parse(keyStr)
+          queryClient.setQueryData(key, data)
+        })
       }
+
+      toast({
+        title: 'Failed to delete contract',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        variant: 'destructive',
+      })
     },
 
     onSuccess: () => {

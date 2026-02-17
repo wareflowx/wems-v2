@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip'
+import { useAlerts } from '@/lib/hooks'
 
 interface Alert {
   id: number
@@ -44,17 +45,10 @@ export function AlertsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  const alerts: Alert[] = [
-    { id: 1, type: 'CACES expiré', employee: 'Jean Dupont', employeeId: 1, category: '1A', severity: 'critical', date: '2025-03-15' },
-    { id: 2, type: 'CACES expiré', employee: 'Luc Dubois', employeeId: 5, category: '5', severity: 'critical', date: '2025-02-10' },
-    { id: 3, type: 'Visite en retard', employee: 'Marie Martin', employeeId: 2, visitType: 'Visite de reprise', severity: 'critical', date: '2025-02-01' },
-    { id: 4, type: 'CACES expiration proche', employee: 'Pierre Bernard', employeeId: 3, category: '3', daysLeft: 5, severity: 'warning', date: '2025-02-15' },
-    { id: 5, type: 'Visite planifiée', employee: 'Sophie Petit', employeeId: 4, visitType: 'Visite périodique', severity: 'info', date: '2025-02-20' },
-    { id: 6, type: 'Visite planifiée', employee: 'Jean Dupont', employeeId: 1, visitType: 'Visite initiale', severity: 'info', date: '2025-03-01' },
-    { id: 7, type: 'CACES expiration proche', employee: 'Marie Martin', employeeId: 2, category: '7', daysLeft: 25, severity: 'warning', date: '2025-03-01' },
-  ]
+  // Use TanStack Query hook for alerts
+  const { data: alerts = [], isLoading } = useAlerts({ search, severity: severityFilter, type: typeFilter })
 
-  // Get unique severities and types
+  // Get unique severities and types from current data
   const uniqueSeverities = useMemo(() => {
     const severities = new Set(alerts.map(a => a.severity))
     return Array.from(severities)
@@ -65,33 +59,38 @@ export function AlertsPage() {
     return Array.from(types)
   }, [alerts])
 
-  // Filter alerts
-  const filteredAlerts = useMemo(() => {
-    return alerts.filter((alert) => {
-      const matchesSearch =
-        search === '' ||
-        alert.employee.toLowerCase().includes(search.toLowerCase()) ||
-        alert.type.toLowerCase().includes(search.toLowerCase())
-
-      const matchesSeverity = severityFilter === 'all' || alert.severity === severityFilter
-      const matchesType = typeFilter === 'all' || alert.type === typeFilter
-
-      return matchesSearch && matchesSeverity && matchesType
-    })
-  }, [alerts, search, severityFilter, typeFilter])
-
-  // Sort alerts
+  // Client-side sorting
   const sortedAlerts = useMemo(() => {
-    const sorted = [...filteredAlerts].sort((a, b) => {
-      let aValue: any = a[sortColumn as keyof typeof a]
-      let bValue: any = b[sortColumn as keyof typeof b]
+    return [...alerts].sort((a, b) => {
+      let aVal: any, bVal: any
 
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+      switch (sortColumn) {
+        case 'employee':
+          aVal = a.employee.toLowerCase()
+          bVal = b.employee.toLowerCase()
+          break
+        case 'type':
+          aVal = a.type.toLowerCase()
+          bVal = b.type.toLowerCase()
+          break
+        case 'severity':
+          const severityOrder = { critical: 3, warning: 2, info: 1 }
+          aVal = severityOrder[a.severity as keyof typeof severityOrder] || 0
+          bVal = severityOrder[b.severity as keyof typeof severityOrder] || 0
+          break
+        case 'date':
+          aVal = new Date(a.date).getTime()
+          bVal = new Date(b.date).getTime()
+          break
+        default:
+          return 0
+      }
+
+      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1
+      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1
       return 0
     })
-    return sorted
-  }, [filteredAlerts, sortColumn, sortDirection])
+  }, [alerts, sortColumn, sortDirection])
 
   // Pagination
   const totalPages = Math.ceil(sortedAlerts.length / itemsPerPage)
@@ -192,6 +191,23 @@ export function AlertsPage() {
         <TooltipTrigger>{badge}</TooltipTrigger>
         <TooltipContent className="max-w-xs"><p>{type}</p></TooltipContent>
       </Tooltip>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+        <div className="min-h-full space-y-3">
+          <PageHeaderCard
+            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+            title={t('alerts.title')}
+            description={t('alerts.description')}
+          />
+          <div className="flex items-center justify-center p-8">
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
     )
   }
 

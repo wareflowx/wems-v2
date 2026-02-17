@@ -5,7 +5,7 @@ import ExternalLink from "@/components/external-link";
 import { Link } from "@tanstack/react-router"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 
 export const iframeHeight = "800px"
 
@@ -21,6 +21,8 @@ function HomePage() {
         <SiteHeader />
         <div className="flex flex-1">
           <AppSidebar />
+          <SidebarInset>
+          <header className="h-14 border-b"></header>
           <div className="flex flex-1 flex-col gap-4 p-4">
             <div className="flex flex-col items-end justify-center gap-0.5">
               <div className="inline-flex gap-2">
@@ -29,14 +31,14 @@ function HomePage() {
                 <SiElectron size={iconSize} />
               </div>
               <span className="flex items-end justify-end">
-                <h1 className="font-bold font-mono text-4xl">{t("appName")}</h1>
+                <h1 className="font-bold font-mono text-4xl">{t("app.name")}</h1>
               </span>
               <div className="flex w-full justify-between">
                 <ExternalLink
                   className="flex gap-2 text-muted-foreground text-sm"
                   href="https://github.com/LuanRoger"
                 >
-                  {t("madeBy")}
+                  Made by LuanRoger
                 </ExternalLink>
               </div>
             </div>
@@ -52,6 +54,7 @@ function HomePage() {
               </Link>
             </div>
           </div>
+          </SidebarInset>
         </div>
       </SidebarProvider>
     </div>

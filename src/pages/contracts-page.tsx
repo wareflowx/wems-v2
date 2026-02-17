@@ -7,8 +7,9 @@ import {
 import { PageHeaderCard } from '@/components/ui/page-header-card'
 import { MetricsSection } from '@/components/ui/metrics-section'
 import { useTranslation } from 'react-i18next'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { ContractTable, type Contract } from '@/components/contracts/contract-table'
+import { useContracts } from '@/lib/hooks'
 
 export function ContractsPage() {
   const { t } = useTranslation()
@@ -18,99 +19,11 @@ export function ContractsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  // Mock data - tous les contrats de tous les employés
-  const contracts: Contract[] = [
-    {
-      id: 1,
-      employee: 'Jean Dupont',
-      employeeId: 1,
-      type: 'CDI',
-      startDate: '2020-03-15',
-      endDate: null,
-      status: 'active',
-      duration: 59, // mois
-      renewable: false,
-      renewalCount: 0,
-      salary: 3500,
-      department: 'Production',
-    },
-    {
-      id: 2,
-      employee: 'Marie Martin',
-      employeeId: 2,
-      type: 'CDD',
-      startDate: '2024-09-01',
-      endDate: '2025-03-01',
-      status: 'active',
-      duration: 6,
-      renewable: true,
-      renewalCount: 0,
-      salary: 3200,
-      department: 'Administration',
-      trialPeriod: false,
-    },
-    {
-      id: 3,
-      employee: 'Pierre Bernard',
-      employeeId: 3,
-      type: 'Intérim',
-      startDate: '2024-06-01',
-      endDate: '2025-02-28',
-      status: 'ending_soon',
-      duration: 9,
-      renewable: false,
-      salary: 3800,
-      department: 'Production',
-      agency: 'Interim-Aglo',
-    },
-    {
-      id: 4,
-      employee: 'Sophie Petit',
-      employeeId: 4,
-      type: 'CDI',
-      startDate: '2020-09-20',
-      endDate: null,
-      status: 'active',
-      duration: 53,
-      renewable: false,
-      salary: 4200,
-      department: 'RH',
-    },
-    {
-      id: 5,
-      employee: 'Luc Dubois',
-      employeeId: 5,
-      type: 'CDD',
-      startDate: '2024-02-01',
-      endDate: '2024-08-01',
-      status: 'completed',
-      duration: 6,
-      renewable: true,
-      renewalCount: 0,
-      salary: 3100,
-      department: 'Production',
-      trialPeriod: true,
-      trialEndDate: '2024-03-01',
-      renewed: false,
-    },
-    {
-      id: 6,
-      employee: 'Claude Monnet',
-      employeeId: 6,
-      type: 'Intérim',
-      startDate: '2024-11-01',
-      endDate: '2025-05-01',
-      status: 'trial_period',
-      duration: 6,
-      endDate: '2025-02-01',
-      salary: 3600,
-      department: 'Production',
-      agency: 'Temp-World',
-    },
-  ]
+  // Use TanStack Query hook for contracts
+  const { data: contracts = [], isLoading } = useContracts()
 
-  // KPIs
-  const kpis = {
+  // KPIs - calculated dynamically
+  const kpis = useMemo(() => ({
     totalContracts: contracts.length,
     activeContracts: contracts.filter(c => c.status === 'active').length,
     endingSoon: contracts.filter(c => c.status === 'ending_soon').length,
@@ -118,7 +31,7 @@ export function ContractsPage() {
     cdi: contracts.filter(c => c.type === 'CDI').length,
     cdd: contracts.filter(c => c.type === 'CDD').length,
     interim: contracts.filter(c => c.type === 'Intérim').length,
-  }
+  }), [contracts])
 
   // Reset page when filters change
   useEffect(() => {
@@ -143,6 +56,23 @@ export function ContractsPage() {
   const handleRenewContract = (contract: Contract) => {
     // TODO: Open renew contract dialog
     console.log('Renew contract:', contract)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+        <div className="min-h-full space-y-3">
+          <PageHeaderCard
+            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+            title={t('contracts.title')}
+            description={t('contracts.description')}
+          />
+          <div className="flex items-center justify-center p-8">
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

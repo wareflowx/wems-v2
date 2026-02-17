@@ -34,9 +34,38 @@ import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
 import { AddItemDialog } from "@/components/ui/add-item-dialog";
 import { EditItemDialog } from "@/components/ui/edit-item-dialog";
 import { useState } from "react";
+import {
+  useDepartments,
+  useJobTitles,
+  useContractTypes,
+  useAddDepartment,
+  useAddJobTitle,
+  useAddContractType,
+  useUpdateDepartment,
+  useUpdateJobTitle,
+  useUpdateContractType,
+  useDeleteDepartment,
+  useDeleteJobTitle,
+  useDeleteContractType,
+} from "@/lib/hooks";
 
 export function SettingsReferencePage() {
   const { t } = useTranslation();
+
+  const { data: departments = [], isLoading: isLoadingDepartments } = useDepartments();
+  const { data: jobTitles = [], isLoading: isLoadingJobs } = useJobTitles();
+  const { data: contractTypes = [], isLoading: isLoadingContracts } = useContractTypes();
+
+  const addDepartment = useAddDepartment();
+  const addJobTitle = useAddJobTitle();
+  const addContractType = useAddContractType();
+  const updateDepartment = useUpdateDepartment();
+  const updateJobTitle = useUpdateJobTitle();
+  const updateContractType = useUpdateContractType();
+  const deleteDepartment = useDeleteDepartment();
+  const deleteJobTitle = useDeleteJobTitle();
+  const deleteContractType = useDeleteContractType();
+
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     type: "department" | "job" | "contract";
@@ -69,47 +98,36 @@ export function SettingsReferencePage() {
     value: "",
   });
 
-  const [departments, setDepartments] = useState([
-    "Production",
-    "Administration",
-    "RH",
-    "Commercial",
-    "Maintenance",
-  ]);
-  const [jobTitles, setJobTitles] = useState([
-    "Opérateur",
-    "Technicien",
-    "Comptable",
-    "Responsable RH",
-    "Commercial",
-  ]);
-  const [contractTypes, setContractTypes] = useState([
-    "CDI",
-    "CDD",
-    "Intérim",
-    "Alternance",
-  ]);
-
   const handleDelete = (type: "department" | "job" | "contract", value: string, index: number) => {
     setDeleteDialog({ open: true, type, value, index });
   };
 
   const confirmDelete = () => {
-    const { type, index } = deleteDialog;
-    if (index >= 0) {
-      switch (type) {
-        case "department":
-          setDepartments(departments.filter((_, i) => i !== index));
-          break;
-        case "job":
-          setJobTitles(jobTitles.filter((_, i) => i !== index));
-          break;
-        case "contract":
-          setContractTypes(contractTypes.filter((_, i) => i !== index));
-          break;
-      }
+    const { type, value } = deleteDialog;
+
+    switch (type) {
+      case "department":
+        deleteDepartment.mutate(value, {
+          onSuccess: () => {
+            setDeleteDialog({ ...deleteDialog, open: false });
+          }
+        });
+        break;
+      case "job":
+        deleteJobTitle.mutate(value, {
+          onSuccess: () => {
+            setDeleteDialog({ ...deleteDialog, open: false });
+          }
+        });
+        break;
+      case "contract":
+        deleteContractType.mutate(value, {
+          onSuccess: () => {
+            setDeleteDialog({ ...deleteDialog, open: false });
+          }
+        });
+        break;
     }
-    setDeleteDialog({ ...deleteDialog, open: false });
   };
 
   const handleAdd = (type: "department" | "job" | "contract") => {
@@ -118,15 +136,28 @@ export function SettingsReferencePage() {
 
   const confirmAdd = (value: string) => {
     const { type } = addDialog;
+
     switch (type) {
       case "department":
-        setDepartments([...departments, value]);
+        addDepartment.mutate(value, {
+          onSuccess: () => {
+            setAddDialog({ ...addDialog, open: false });
+          }
+        });
         break;
       case "job":
-        setJobTitles([...jobTitles, value]);
+        addJobTitle.mutate(value, {
+          onSuccess: () => {
+            setAddDialog({ ...addDialog, open: false });
+          }
+        });
         break;
       case "contract":
-        setContractTypes([...contractTypes, value]);
+        addContractType.mutate(value, {
+          onSuccess: () => {
+            setAddDialog({ ...addDialog, open: false });
+          }
+        });
         break;
     }
   };
@@ -180,21 +211,40 @@ export function SettingsReferencePage() {
   };
 
   const confirmEdit = (newValue: string) => {
-    const { type, index } = editDialog;
-    if (index >= 0) {
-      switch (type) {
-        case "department":
-          setDepartments(departments.map((item, i) => (i === index ? newValue : item)));
-          break;
-        case "job":
-          setJobTitles(jobTitles.map((item, i) => (i === index ? newValue : item)));
-          break;
-        case "contract":
-          setContractTypes(contractTypes.map((item, i) => (i === index ? newValue : item)));
-          break;
-      }
+    const { type, value: oldValue, index } = editDialog;
+
+    switch (type) {
+      case "department":
+        updateDepartment.mutate(
+          { oldName: oldValue, newName: newValue },
+          {
+            onSuccess: () => {
+              setEditDialog({ ...editDialog, open: false });
+            }
+          }
+        );
+        break;
+      case "job":
+        updateJobTitle.mutate(
+          { oldTitle: oldValue, newTitle: newValue },
+          {
+            onSuccess: () => {
+              setEditDialog({ ...editDialog, open: false });
+            }
+          }
+        );
+        break;
+      case "contract":
+        updateContractType.mutate(
+          { oldType: oldValue, newType: newValue },
+          {
+            onSuccess: () => {
+              setEditDialog({ ...editDialog, open: false });
+            }
+          }
+        );
+        break;
     }
-    setEditDialog({ ...editDialog, open: false });
   };
 
   const getEditDialogTitle = () => {
@@ -255,6 +305,23 @@ export function SettingsReferencePage() {
   const getDeleteDescription = () => {
     return t("settingsReferenceData.deleteWarning", { value: deleteDialog.value });
   };
+
+  if (isLoadingDepartments || isLoadingJobs || isLoadingContracts) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+        <div className="min-h-full space-y-3">
+          <PageHeaderCard
+            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+            title={t("settingsReferenceData.title")}
+            description={t("settingsReferenceData.description")}
+          />
+          <div className="flex items-center justify-center p-8">
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <TooltipProvider>

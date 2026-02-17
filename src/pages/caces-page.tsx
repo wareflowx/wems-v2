@@ -24,6 +24,8 @@ import { Link } from '@tanstack/react-router'
 import { AddCacesDialog } from '@/components/caces/AddCacesDialog'
 import { EditCacesDialog } from '@/components/caces/EditCacesDialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useCaces, useCreateCaces, useUpdateCaces, useDeleteCaces } from '@/lib/hooks'
+import { PageHeaderSkeleton } from '@/components/ui/table-skeleton'
 
 export function CacesPage() {
   const { t } = useTranslation()
@@ -38,21 +40,19 @@ export function CacesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  const caces = [
-    { id: 1, employee: 'Jean Dupont', employeeId: 1, category: '1A', dateObtained: '2020-03-15', expirationDate: '2025-03-15', daysLeft: -10, status: 'expired' },
-    { id: 2, employee: 'Marie Martin', employeeId: 2, category: '3', dateObtained: '2023-06-10', expirationDate: '2028-06-10', daysLeft: 856, status: 'valid' },
-    { id: 3, employee: 'Pierre Bernard', employeeId: 3, category: '5', dateObtained: '2019-11-20', expirationDate: '2025-02-10', daysLeft: 5, status: 'warning' },
-    { id: 4, employee: 'Sophie Petit', employeeId: 4, category: '7', dateObtained: '2022-01-05', expirationDate: '2027-01-05', daysLeft: 335, status: 'valid' },
-    { id: 5, employee: 'Luc Dubois', employeeId: 5, category: '1B', dateObtained: '2024-02-01', expirationDate: '2029-02-01', daysLeft: 1093, status: 'valid' },
-  ]
+  // Use TanStack Query hooks
+  const { data: caces = [], isLoading } = useCaces()
+  const createCaces = useCreateCaces()
+  const updateCaces = useUpdateCaces()
+  const deleteCaces = useDeleteCaces()
 
-  // KPIs
-  const kpis = {
+  // KPIs - calculated dynamically
+  const kpis = useMemo(() => ({
     totalCaces: caces.length,
     expiredCaces: caces.filter(c => c.status === 'expired').length,
     warningCaces: caces.filter(c => c.status === 'warning').length,
     validCaces: caces.filter(c => c.status === 'valid').length,
-  }
+  }), [caces])
 
   // Get unique categories, statuses and employees
   const uniqueCategories = useMemo(() => {
@@ -235,6 +235,38 @@ export function CacesPage() {
         <TooltipTrigger>{badge}</TooltipTrigger>
         <TooltipContent className="max-w-xs"><p>{tooltipContent()}</p></TooltipContent>
       </Tooltip>
+    )
+  }
+
+  const handleAddCaces = (data: any) => {
+    createCaces.mutate(data, {
+      onSuccess: () => {
+        setIsAddDialogOpen(false)
+      }
+    })
+  }
+
+  const handleEditCaces = (data: any) => {
+    updateCaces.mutate({ id: editingCaces.id, ...data }, {
+      onSuccess: () => {
+        setEditingCaces(null)
+      }
+    })
+  }
+
+  const handleDeleteCaces = (id: number) => {
+    deleteCaces.mutate(id, {
+      onSuccess: () => {
+        // Dialog will be closed by the component calling this
+      }
+    })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+        <PageHeaderSkeleton showMetrics metricsCount={4} />
+      </div>
     )
   }
 
@@ -551,10 +583,12 @@ export function CacesPage() {
       <AddCacesDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
+        onAdd={handleAddCaces}
       />
       <EditCacesDialog
         open={editingCaces !== null}
         onOpenChange={(open) => !open && setEditingCaces(null)}
+        onUpdate={handleEditCaces}
         caces={editingCaces}
       />
     </>

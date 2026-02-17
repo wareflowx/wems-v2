@@ -35,6 +35,7 @@ import { DeleteEmployeeDialog } from "@/components/employees/DeleteEmployeeDialo
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { Link } from "@tanstack/react-router";
+import { useEmployees, useCreateEmployee, useDeleteEmployee } from "@/lib/hooks";
 
 export function EmployeesPage() {
   const { t } = useTranslation();
@@ -50,66 +51,27 @@ export function EmployeesPage() {
   } | null>(null);
   const itemsPerPage = 10;
 
-  const employees = [
-    {
-      id: 1,
-      firstName: "Jean",
-      lastName: "Dupont",
-      contract: "CDI",
-      jobTitle: "operator",
-      workLocation: "Site A",
-      status: "active",
-      startDate: "2023-01-15",
-    },
-    {
-      id: 2,
-      firstName: "Marie",
-      lastName: "Martin",
-      contract: "CDD",
-      jobTitle: "accountant",
-      workLocation: "Site B",
-      status: "active",
-      startDate: "2022-06-01",
-    },
-    {
-      id: 3,
-      firstName: "Pierre",
-      lastName: "Bernard",
-      contract: "Intérim",
-      jobTitle: "technician",
-      workLocation: "Site A",
-      status: "on_leave",
-      startDate: "2021-03-10",
-    },
-    {
-      id: 4,
-      firstName: "Sophie",
-      lastName: "Petit",
-      contract: "CDI",
-      jobTitle: "hrManager",
-      workLocation: "Site C",
-      status: "active",
-      startDate: "2020-09-20",
-    },
-    {
-      id: 5,
-      firstName: "Luc",
-      lastName: "Dubois",
-      contract: "CDD",
-      jobTitle: "operator",
-      workLocation: "Site A",
-      status: "active",
-      startDate: "2024-01-08",
-    },
-  ];
+  // Use TanStack Query hooks
+  const { data: employees = [], isLoading } = useEmployees()
+  const createEmployee = useCreateEmployee()
+  const deleteEmployee = useDeleteEmployee()
 
-  // KPIs
-  const kpis = {
-    totalEmployees: employees.length,
-    activeEmployees: employees.filter((e) => e.status === "active").length,
-    onLeaveEmployees: employees.filter((e) => e.status === "on_leave").length,
-    newHiresThisMonth: 3,
-  };
+  // KPIs - calculated dynamically
+  const kpis = useMemo(() => {
+    // Calculate new hires this month
+    const now = new Date()
+    const newHiresThisMonth = employees.filter((e) => {
+      const startDate = new Date(e.startDate)
+      return startDate.getMonth() === now.getMonth() && startDate.getFullYear() === now.getFullYear()
+    }).length
+
+    return {
+      totalEmployees: employees.length,
+      activeEmployees: employees.filter((e) => e.status === "active").length,
+      onLeaveEmployees: employees.filter((e) => e.status === "on_leave").length,
+      newHiresThisMonth,
+    }
+  }, [employees])
 
   // Get unique contracts and statuses
   const uniqueContracts = useMemo(() => {
@@ -223,6 +185,42 @@ export function EmployeesPage() {
       </span>
     );
   };
+
+  const handleAddEmployee = (data: any) => {
+    createEmployee.mutate(data, {
+      onSuccess: () => {
+        setIsCreateDialogOpen(false)
+      }
+    })
+  }
+
+  const handleDeleteEmployee = () => {
+    if (employeeToDelete) {
+      deleteEmployee.mutate(employeeToDelete.id, {
+        onSuccess: () => {
+          setIsDeleteDialogOpen(false)
+          setEmployeeToDelete(null)
+        }
+      })
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+        <div className="min-h-full space-y-3">
+          <PageHeaderCard
+            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+            title={t("employees.title")}
+            description={t("employees.description")}
+          />
+          <div className="flex items-center justify-center p-8">
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -462,16 +460,12 @@ export function EmployeesPage() {
       <CreateEmployeeDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
-        onSuccess={() => {
-          // TODO: Refresh employees list
-        }}
+        onCreate={handleAddEmployee}
       />
       <DeleteEmployeeDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
-        onConfirm={() => {
-          // TODO: Refresh employees list
-        }}
+        onConfirm={handleDeleteEmployee}
         employeeId={employeeToDelete?.id}
         employeeName={employeeToDelete?.name}
       />

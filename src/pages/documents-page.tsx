@@ -24,6 +24,7 @@ import { useState, useMemo } from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DeleteDocumentDialog } from '@/components/documents/DeleteDocumentDialog'
 import { AddDocumentDialog } from '@/components/documents/AddDocumentDialog'
+import { useDocuments, useCreateDocument, useDeleteDocument } from '@/lib/hooks'
 
 export function DocumentsPage() {
   const { t } = useTranslation()
@@ -39,12 +40,18 @@ export function DocumentsPage() {
   const [deletingDocument, setDeletingDocument] = useState<any>(null)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
-  const documents = [
-    { id: 1, name: 'Contrat_CDID_Dupont.pdf', type: 'Contrat', employee: 'Jean Dupont', employeeId: 1, uploadDate: '2024-01-15', size: '2.4 MB', category: 'pdf' },
-    { id: 2, name: 'CACES_1A_Certificat.pdf', type: 'CACES', employee: 'Marie Martin', employeeId: 2, uploadDate: '2023-11-20', size: '1.8 MB', category: 'pdf' },
-    { id: 3, name: 'Visite_Medicale_Initial.pdf', type: 'Visite médicale', employee: 'Pierre Bernard', employeeId: 3, uploadDate: '2024-01-10', size: '945 KB', category: 'pdf' },
-    { id: 4, name: 'Photo_Identification.jpg', type: 'Identification', employee: 'Sophie Petit', employeeId: 4, uploadDate: '2023-09-15', size: '2.1 MB', category: 'image' },
-  ]
+  // Use TanStack Query hook for documents
+  const { data: documents = [], isLoading } = useDocuments()
+  const createDocument = useCreateDocument()
+  const deleteDocument = useDeleteDocument()
+
+  const handleAddDocument = (data: { employee: string; type: string; name: string; document: string }) => {
+    createDocument.mutate(data, {
+      onSuccess: () => {
+        setIsAddDialogOpen(false)
+      }
+    })
+  }
 
   // Get unique types, categories and employees
   const uniqueTypes = useMemo(() => {
@@ -167,13 +174,26 @@ export function DocumentsPage() {
     )
   }
 
-  // KPIs
-  const kpis = {
-    totalDocuments: documents.length,
-    pdfDocuments: documents.filter(d => d.category === 'pdf').length,
-    imageDocuments: documents.filter(d => d.category === 'image').length,
-    thisMonth: 2
-  }
+  // KPIs - calculated dynamically
+  const kpis = useMemo(() => {
+    const totalDocuments = documents.length
+    const pdfDocuments = documents.filter(d => d.category === 'pdf').length
+    const imageDocuments = documents.filter(d => d.category === 'image').length
+
+    // Calculate documents uploaded this month
+    const now = new Date()
+    const thisMonth = documents.filter(d => {
+      const uploadDate = new Date(d.uploadDate)
+      return uploadDate.getMonth() === now.getMonth() && uploadDate.getFullYear() === now.getFullYear()
+    }).length
+
+    return {
+      totalDocuments,
+      pdfDocuments,
+      imageDocuments,
+      thisMonth
+    }
+  }, [documents])
 
   const getFileIcon = (category: string) => {
     const iconConfig = {
@@ -186,6 +206,31 @@ export function DocumentsPage() {
     return (
       <div className={`p-2 rounded-lg border ${config.bg} ${config.border} ${config.text}`}>
         {config.icon}
+      </div>
+    )
+  }
+
+  const handleDeleteDocument = (document: any) => {
+    deleteDocument.mutate(document.id, {
+      onSuccess: () => {
+        setDeletingDocument(null)
+      }
+    })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+        <div className="min-h-full space-y-3">
+          <PageHeaderCard
+            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+            title={t('documents.title')}
+            description={t('documents.description')}
+          />
+          <div className="flex items-center justify-center p-8">
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
       </div>
     )
   }
@@ -516,10 +561,12 @@ export function DocumentsPage() {
       <AddDocumentDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
+        onAdd={handleAddDocument}
       />
       <DeleteDocumentDialog
         open={deletingDocument !== null}
         onOpenChange={(open) => !open && setDeletingDocument(null)}
+        onConfirm={() => deletingDocument && handleDeleteDocument(deletingDocument)}
         document={deletingDocument}
       />
     </>

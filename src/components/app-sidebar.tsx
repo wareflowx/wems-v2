@@ -108,7 +108,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={t("sidebar.dashboard")}>
-                  <Link to="/home">
+                  <Link to="/">
                     <Home />
                     <span>{t("sidebar.dashboard")}</span>
                   </Link>

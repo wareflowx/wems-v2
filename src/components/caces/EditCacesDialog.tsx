@@ -32,14 +32,14 @@ interface Caces {
 interface EditCacesDialogProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  onConfirm?: () => void
+  onUpdate?: (data: { employee: string; category: string; issueDate: string; expiryDate: string; document: string }) => void
   caces?: Caces
 }
 
 export function EditCacesDialog({
   open,
   onOpenChange,
-  onConfirm,
+  onUpdate,
   caces,
 }: EditCacesDialogProps) {
   const { t } = useTranslation()
@@ -61,10 +61,7 @@ export function EditCacesDialog({
   }, [caces])
 
   const handleSubmit = () => {
-    // TODO: Implement backend logic
-    console.log('Updating CACES:', { id: caces?.id, employee, category, issueDate, expiryDate, document })
-    onConfirm?.()
-    onOpenChange?.(false)
+    onUpdate?.({ employee, category, issueDate, expiryDate, document })
   }
 
   const isFormValid = employee && category && issueDate && expiryDate

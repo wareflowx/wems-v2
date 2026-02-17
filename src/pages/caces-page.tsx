@@ -25,6 +25,7 @@ import { AddCacesDialog } from '@/components/caces/AddCacesDialog'
 import { EditCacesDialog } from '@/components/caces/EditCacesDialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useCaces, useCreateCaces, useUpdateCaces, useDeleteCaces } from '@/lib/hooks'
+import { PageHeaderSkeleton } from '@/components/ui/table-skeleton'
 
 export function CacesPage() {
   const { t } = useTranslation()
@@ -264,16 +265,7 @@ export function CacesPage() {
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-        <div className="min-h-full space-y-3">
-          <PageHeaderCard
-            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
-            title={t('caces.title')}
-            description={t('caces.description')}
-          />
-          <div className="flex items-center justify-center p-8">
-            <p className="text-muted-foreground">Loading...</p>
-          </div>
-        </div>
+        <PageHeaderSkeleton showMetrics metricsCount={4} />
       </div>
     )
   }

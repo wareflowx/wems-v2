@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip'
 import { useAlerts } from '@/lib/hooks'
+import { PageHeaderSkeleton } from '@/components/ui/table-skeleton'
 
 interface Alert {
   id: number
@@ -196,18 +197,11 @@ export function AlertsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-        <div className="min-h-full space-y-3">
-          <PageHeaderCard
-            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
-            title={t('alerts.title')}
-            description={t('alerts.description')}
-          />
-          <div className="flex items-center justify-center p-8">
-            <p className="text-muted-foreground">Loading...</p>
-          </div>
+      <TooltipProvider>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+          <PageHeaderSkeleton showMetrics metricsCount={4} />
         </div>
-      </div>
+      </TooltipProvider>
     )
   }
 

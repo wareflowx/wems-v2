@@ -9,9 +9,69 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsAlertsRouteImport } from './routes/settings/alerts'
+import { Route as SettingsBackupRouteImport } from './routes/settings/backup'
+import { Route as SettingsReferenceRouteImport } from './routes/settings/reference'
+import { Route as SettingsSystemRouteImport } from './routes/settings/system'
+import { Route as EmployeesRouteImport } from './routes/employees'
+import { Route as DocumentsRouteImport } from './routes/documents'
+import { Route as CacesRouteImport } from './routes/caces'
+import { Route as MedicalVisitsRouteImport } from './routes/medical-visits'
+import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as ContractsRouteImport } from './routes/contracts'
 import { Route as PostsRouteImport } from './routes/posts'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SettingsAlertsRoute = SettingsAlertsRouteImport.update({
+  id: '/settings/alerts',
+  path: '/settings/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsBackupRoute = SettingsBackupRouteImport.update({
+  id: '/settings/backup',
+  path: '/settings/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsReferenceRoute = SettingsReferenceRouteImport.update({
+  id: '/settings/reference-data',
+  path: '/settings/reference-data',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsSystemRoute = SettingsSystemRouteImport.update({
+  id: '/settings/system',
+  path: '/settings/system',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployeesRoute = EmployeesRouteImport.update({
+  id: '/employees',
+  path: '/employees',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CacesRoute = CacesRouteImport.update({
+  id: '/caces',
+  path: '/caces',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MedicalVisitsRoute = MedicalVisitsRouteImport.update({
+  id: '/medical-visits',
+  path: '/medical-visits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlertsRoute = AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContractsRoute = ContractsRouteImport.update({
+  id: '/contracts',
+  path: '/contracts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsRoute = PostsRouteImport.update({
   id: '/posts',
   path: '/posts',
@@ -26,31 +86,141 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/posts': typeof PostsRoute
+  '/employees': typeof EmployeesRoute
+  '/documents': typeof DocumentsRoute
+  '/caces': typeof CacesRoute
+  '/medical-visits': typeof MedicalVisitsRoute
+  '/alerts': typeof AlertsRoute
+  '/contracts': typeof ContractsRoute
+  '/settings/alerts': typeof SettingsAlertsRoute
+  '/settings/backup': typeof SettingsBackupRoute
+  '/settings/reference-data': typeof SettingsReferenceRoute
+  '/settings/system': typeof SettingsSystemRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/posts': typeof PostsRoute
+  '/employees': typeof EmployeesRoute
+  '/documents': typeof DocumentsRoute
+  '/caces': typeof CacesRoute
+  '/medical-visits': typeof MedicalVisitsRoute
+  '/alerts': typeof AlertsRoute
+  '/contracts': typeof ContractsRoute
+  '/settings/alerts': typeof SettingsAlertsRoute
+  '/settings/backup': typeof SettingsBackupRoute
+  '/settings/reference-data': typeof SettingsReferenceRoute
+  '/settings/system': typeof SettingsSystemRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/posts': typeof PostsRoute
+  '/employees': typeof EmployeesRoute
+  '/documents': typeof DocumentsRoute
+  '/caces': typeof CacesRoute
+  '/medical-visits': typeof MedicalVisitsRoute
+  '/alerts': typeof AlertsRoute
+  '/contracts': typeof ContractsRoute
+  '/settings/alerts': typeof SettingsAlertsRoute
+  '/settings/backup': typeof SettingsBackupRoute
+  '/settings/reference-data': typeof SettingsReferenceRoute
+  '/settings/system': typeof SettingsSystemRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts'
+  fullPaths: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts'
-  id: '__root__' | '/' | '/posts'
+  to: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
+  id: '__root__' | '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PostsRoute: typeof PostsRoute
+  EmployeesRoute: typeof EmployeesRoute
+  DocumentsRoute: typeof DocumentsRoute
+  CacesRoute: typeof CacesRoute
+  MedicalVisitsRoute: typeof MedicalVisitsRoute
+  AlertsRoute: typeof AlertsRoute
+  ContractsRoute: typeof ContractsRoute
+  SettingsAlertsRoute: typeof SettingsAlertsRoute
+  SettingsBackupRoute: typeof SettingsBackupRoute
+  SettingsReferenceRoute: typeof SettingsReferenceRoute
+  SettingsSystemRoute: typeof SettingsSystemRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings/alerts': {
+      id: '/settings/alerts'
+      path: '/settings/alerts'
+      fullPath: '/settings/alerts'
+      preLoaderRoute: typeof SettingsAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/backup': {
+      id: '/settings/backup'
+      path: '/settings/backup'
+      fullPath: '/settings/backup'
+      preLoaderRoute: typeof SettingsBackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/reference-data': {
+      id: '/settings/reference-data'
+      path: '/settings/reference-data'
+      fullPath: '/settings/reference-data'
+      preLoaderRoute: typeof SettingsReferenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/system': {
+      id: '/settings/system'
+      path: '/settings/system'
+      fullPath: '/settings/system'
+      preLoaderRoute: typeof SettingsSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employees': {
+      id: '/employees'
+      path: '/employees'
+      fullPath: '/employees'
+      preLoaderRoute: typeof EmployeesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/caces': {
+      id: '/caces'
+      path: '/caces'
+      fullPath: '/caces'
+      preLoaderRoute: typeof CacesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/medical-visits': {
+      id: '/medical-visits'
+      path: '/medical-visits'
+      fullPath: '/medical-visits'
+      preLoaderRoute: typeof MedicalVisitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contracts': {
+      id: '/contracts'
+      path: '/contracts'
+      fullPath: '/contracts'
+      preLoaderRoute: typeof ContractsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts': {
       id: '/posts'
       path: '/posts'
@@ -71,6 +241,16 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PostsRoute: PostsRoute,
+  EmployeesRoute: EmployeesRoute,
+  DocumentsRoute: DocumentsRoute,
+  CacesRoute: CacesRoute,
+  MedicalVisitsRoute: MedicalVisitsRoute,
+  AlertsRoute: AlertsRoute,
+  ContractsRoute: ContractsRoute,
+  SettingsAlertsRoute: SettingsAlertsRoute,
+  SettingsBackupRoute: SettingsBackupRoute,
+  SettingsReferenceRoute: SettingsReferenceRoute,
+  SettingsSystemRoute: SettingsSystemRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

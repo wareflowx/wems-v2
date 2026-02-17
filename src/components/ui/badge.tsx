@@ -42,4 +42,66 @@ function Badge({
   )
 }
 
+interface StatusBadgeProps {
+  color: "blue" | "green" | "yellow" | "orange" | "red" | "teal" | "gray" | "purple" | "cyan" | "violet" | "indigo" | "emerald" | "amber" | "rose"
+  children: React.ReactNode
+  className?: string
+}
+
+export function StatusBadge({ color, children, className }: StatusBadgeProps) {
+  const colorClasses = {
+    blue: "bg-blue-500/15 border border-blue-500/25 text-blue-600",
+    green: "bg-green-500/15 border border-green-500/25 text-green-600",
+    yellow: "bg-yellow-500/15 border border-yellow-500/25 text-yellow-600",
+    orange: "bg-orange-500/15 border border-orange-500/25 text-orange-600",
+    red: "bg-red-500/15 border border-red-500/25 text-red-600",
+    teal: "bg-teal-500/15 border border-teal-500/25 text-teal-600",
+    gray: "bg-gray-500/15 border border-gray-500/25 text-gray-600",
+    purple: "bg-purple-500/15 border border-purple-500/25 text-purple-600",
+    cyan: "bg-cyan-500/15 border border-cyan-500/25 text-cyan-600",
+    violet: "bg-violet-500/15 border border-violet-500/25 text-violet-600",
+    indigo: "bg-indigo-500/15 border border-indigo-500/25 text-indigo-600",
+    emerald: "bg-emerald-500/15 border border-emerald-500/25 text-emerald-600",
+    amber: "bg-amber-500/15 border border-amber-500/25 text-amber-600",
+    rose: "bg-rose-500/15 border border-rose-500/25 text-rose-600",
+  }
+
+  return (
+    <span className={cn("inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium", colorClasses[color], className)}>
+      {children}
+    </span>
+  )
+}
+
+interface DetailBadgeProps {
+  color: "blue" | "green" | "yellow" | "orange" | "red" | "teal" | "gray" | "purple" | "cyan" | "violet" | "indigo" | "emerald" | "amber" | "rose"
+  children: React.ReactNode
+  className?: string
+}
+
+export function DetailBadge({ color, children, className }: DetailBadgeProps) {
+  const colorClasses = {
+    blue: "bg-blue-500/15 border border-blue-500/25 text-blue-600",
+    green: "bg-green-500/15 border border-green-500/25 text-green-600",
+    yellow: "bg-yellow-500/15 border border-yellow-500/25 text-yellow-600",
+    orange: "bg-orange-500/15 border border-orange-500/25 text-orange-600",
+    red: "bg-red-500/15 border border-red-500/25 text-red-600",
+    teal: "bg-teal-500/15 border border-teal-500/25 text-teal-600",
+    gray: "bg-gray-500/15 border border-gray-500/25 text-gray-600",
+    purple: "bg-purple-500/15 border border-purple-500/25 text-purple-600",
+    cyan: "bg-cyan-500/15 border border-cyan-500/25 text-cyan-600",
+    violet: "bg-violet-500/15 border border-violet-500/25 text-violet-600",
+    indigo: "bg-indigo-500/15 border border-indigo-500/25 text-indigo-600",
+    emerald: "bg-emerald-500/15 border border-emerald-500/25 text-emerald-600",
+    amber: "bg-amber-500/15 border border-amber-500/25 text-amber-600",
+    rose: "bg-rose-500/15 border border-rose-500/25 text-rose-600",
+  }
+
+  return (
+    <span className={cn("inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium", colorClasses[color], className)}>
+      {children}
+    </span>
+  )
+}
+
 export { Badge, badgeVariants }

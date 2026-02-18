@@ -37,6 +37,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import { Link } from "@tanstack/react-router";
 
 import { NavMain } from "@/components/nav-main";
@@ -140,6 +141,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <Separator className="group-data-[collapsible=icon]:bg-border mx-2" />
+
         <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.management")}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -182,6 +185,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <Separator className="group-data-[collapsible=icon]:bg-border mx-2" />
+
         <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.quickActions")}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -209,6 +214,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <Separator className="group-data-[collapsible=icon]:bg-border mx-2" />
+
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
@@ -246,7 +254,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
               <button className="w-full">
                 <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">{t("sidebar.toggle")}</span>
-                <SidebarTrigger className="ml-auto" />
+                <SidebarTrigger className="ml-auto size-4" />
               </button>
             </SidebarMenuButton>
           </SidebarMenuItem>

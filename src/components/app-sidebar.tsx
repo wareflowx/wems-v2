@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useTranslation } from "react-i18next"
-import { getAppVersion } from "@/actions/app"
-import { SiElectron, SiReact, SiVite } from "@icons-pack/react-simple-icons"
+import * as React from "react";
+import { useTranslation } from "react-i18next";
+import { getAppVersion } from "@/actions/app";
+import { SiElectron, SiReact, SiVite } from "@icons-pack/react-simple-icons";
 import {
   AlertTriangle,
   Calendar,
@@ -18,7 +18,7 @@ import {
   Plus,
   SquareTerminal,
   BookOpen,
-  Settings2
+  Settings2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,12 +33,13 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarRail,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link } from "@tanstack/react-router";
 
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavSecondary } from "@/components/nav-secondary";
+import { NavUser } from "@/components/nav-user";
 
 const data = {
   user: {
@@ -75,15 +76,15 @@ const data = {
       icon: Settings2,
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { t } = useTranslation()
-  const [appVersion, setAppVersion] = React.useState("0.0.0")
+  const { t } = useTranslation();
+  const [appVersion, setAppVersion] = React.useState("0.0.0");
 
   React.useEffect(() => {
-    getAppVersion().then(setAppVersion)
-  }, [])
+    getAppVersion().then(setAppVersion);
+  }, []);
 
   return (
     <Sidebar
@@ -91,15 +92,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       collapsible="icon"
       {...props}
     >
-      <SidebarHeader className="h-14 border-b bg-card">
-        <div className="flex items-center justify-center gap-3 px-3 py-2">
-          <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-1.5 rounded-lg">
-            <Users className="h-4 w-4 text-white" />
-          </div>
-          <h1 className="text-lg font-semibold text-gray-900 group-data-[collapsible=icon]:hidden">
-            {t("app.name")}
-          </h1>
-        </div>
+      <SidebarHeader className="border-b bg-card">
+        <SidebarMenu>
+          <SidebarMenuItem className="flex gap-2 p-1">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-1.5 rounded-lg">
+              <Users className="h-4 w-4 text-white" />
+            </div>
+            <h1 className="text-lg font-semibold text-gray-900 group-data-[collapsible=icon]:hidden">
+              {t("app.name")}
+            </h1>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="bg-card">
         <SidebarGroup>
@@ -237,7 +240,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
+              <button className="w-full">
+                <span className="flex-1 text-left">{t("sidebar.toggle")}</span>
+                <SidebarTrigger className="ml-auto" />
+              </button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

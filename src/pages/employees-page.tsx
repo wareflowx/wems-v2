@@ -35,7 +35,7 @@ import { DeleteEmployeeDialog } from "@/components/employees/DeleteEmployeeDialo
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { Link } from "@tanstack/react-router";
-import { useEmployees, useCreateEmployee, useDeleteEmployee } from "@/hooks";
+import { useEmployees, useCreateEmployee, useDeleteEmployee, usePositions, useWorkLocations } from "@/hooks";
 
 export function EmployeesPage() {
   const { t } = useTranslation();
@@ -53,6 +53,8 @@ export function EmployeesPage() {
 
   // Use TanStack Query hooks
   const { data: employees = [], isLoading } = useEmployees()
+  const { data: positions = [] } = usePositions()
+  const { data: workLocations = [] } = useWorkLocations()
   const createEmployee = useCreateEmployee()
   const deleteEmployee = useDeleteEmployee()
 
@@ -61,8 +63,8 @@ export function EmployeesPage() {
     // Calculate new hires this month
     const now = new Date()
     const newHiresThisMonth = employees.filter((e) => {
-      const startDate = new Date(e.startDate)
-      return startDate.getMonth() === now.getMonth() && startDate.getFullYear() === now.getFullYear()
+      const hireDate = new Date(e.hireDate)
+      return hireDate.getMonth() === now.getMonth() && hireDate.getFullYear() === now.getFullYear()
     }).length
 
     return {
@@ -155,33 +157,40 @@ export function EmployeesPage() {
     );
   };
 
-  const getPositionBadge = (position: string) => {
-    const positionColors: { [key: string]: string } = {
-      operator: "bg-emerald-500",
-      technician: "bg-amber-500",
-      accountant: "bg-indigo-500",
-      hrManager: "bg-rose-500",
-    };
-    const dotColor = positionColors[position] || "bg-gray-500";
+  const getPositionBadge = (positionId?: number) => {
+    if (!positionId) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border border-border">
+          <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+          -
+        </span>
+      )
+    }
+    const position = positions.find(p => p.id === positionId)
+    const dotColor = position?.color || "bg-gray-500"
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border border-border">
         <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></span>
-        {t(`positions.${position}`)}
+        {position?.name || '-'}
       </span>
     );
   };
 
-  const getWorkLocationBadge = (location: string) => {
-    const locationColors: { [key: string]: string } = {
-      "Site A": "bg-cyan-500",
-      "Site B": "bg-amber-500",
-      "Site C": "bg-violet-500",
-    };
-    const dotColor = locationColors[location] || "bg-gray-500";
+  const getWorkLocationBadge = (workLocationId?: number) => {
+    if (!workLocationId) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border border-border">
+          <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+          -
+        </span>
+      )
+    }
+    const location = workLocations.find(w => w.id === workLocationId)
+    const dotColor = location?.color || "bg-gray-500"
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border border-border">
         <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></span>
-        {location}
+        {location?.name || '-'}
       </span>
     );
   };
@@ -390,16 +399,16 @@ export function EmployeesPage() {
                           {getContractBadge(employee.contract)}
                         </TableCell>
                         <TableCell className="px-4">
-                          {getPositionBadge(employee.jobTitle)}
+                          {getPositionBadge(employee.positionId ?? undefined)}
                         </TableCell>
                         <TableCell className="px-4">
-                          {getWorkLocationBadge(employee.workLocation)}
+                          {getWorkLocationBadge(employee.workLocationId ?? undefined)}
                         </TableCell>
                         <TableCell className="px-4">
                           {getStatusBadge(employee.status)}
                         </TableCell>
                         <TableCell className="px-4 text-gray-700">
-                          {employee.startDate}
+                          {employee.hireDate}
                         </TableCell>
                         <TableCell className="px-4">
                           <div className="flex items-center justify-end gap-2">

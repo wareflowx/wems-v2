@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CreateEmployeeDialog } from "@/components/employees/CreateEmployeeDialog";
+import { CreateEmployeeDialog, type CreateEmployeeData } from "@/components/employees/CreateEmployeeDialog";
 import { DeleteEmployeeDialog } from "@/components/employees/DeleteEmployeeDialog";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { MetricsSection } from "@/components/ui/metrics-section";
@@ -186,7 +186,7 @@ export function EmployeesPage() {
     );
   };
 
-  const handleAddEmployee = (data: any) => {
+  const handleAddEmployee = (data: CreateEmployeeData) => {
     createEmployee.mutate(data, {
       onSuccess: () => {
         setIsCreateDialogOpen(false)

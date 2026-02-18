@@ -19,11 +19,25 @@ import {
 } from '@/components/ui/select'
 import { Check, User, Briefcase } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { usePositions, useWorkLocations } from '@/hooks'
 
 interface CreateEmployeeDialogProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  onCreate?: (data: typeof formData) => void
+  onCreate?: (data: CreateEmployeeData) => void
+}
+
+export interface CreateEmployeeData {
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  positionId?: number
+  workLocationId?: number
+  contract: string
+  department: string
+  status?: 'active' | 'on_leave' | 'terminated'
+  hireDate: string
 }
 
 const steps = [
@@ -36,23 +50,23 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
   const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(1)
 
-  // Form state
-  const [formData, setFormData] = useState({
-    // Personal Info
+  const { data: positions = [] } = usePositions()
+  const { data: workLocations = [] } = useWorkLocations()
+
+  // Form state - matches DB schema
+  const [formData, setFormData] = useState<CreateEmployeeData>({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    dateOfBirth: '',
-    address: '',
-    // Professional Info
+    positionId: undefined,
+    workLocationId: undefined,
+    contract: '',
     department: '',
-    position: '',
-    contractType: '',
-    startDate: '',
+    hireDate: '',
   })
 
-  const updateFormData = (field: string, value: string) => {
+  const updateFormData = <K extends keyof CreateEmployeeData>(field: K, value: CreateEmployeeData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -70,6 +84,38 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
 
   const handleSubmit = () => {
     onCreate?.(formData)
+    // Reset form after submit
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      positionId: undefined,
+      workLocationId: undefined,
+      contract: '',
+      department: '',
+      hireDate: '',
+    })
+    setCurrentStep(1)
+  }
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      // Reset form when closing
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        positionId: undefined,
+        workLocationId: undefined,
+        contract: '',
+        department: '',
+        hireDate: '',
+      })
+      setCurrentStep(1)
+    }
+    onOpenChange?.(isOpen)
   }
 
   const isStepValid = () => {
@@ -77,14 +123,41 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
       case 1:
         return formData.firstName && formData.lastName && formData.email
       case 2:
-        return formData.department && formData.position && formData.contractType && formData.startDate
+        return formData.department && formData.contract && formData.hireDate
       default:
         return true
     }
   }
 
+  // Get position name for display
+  const getPositionName = (id?: number) => {
+    if (!id) return '-'
+    return positions.find(p => p.id === id)?.name || '-'
+  }
+
+  // Get work location name for display
+  const getWorkLocationName = (id?: number) => {
+    if (!id) return '-'
+    return workLocations.find(w => w.id === id)?.name || '-'
+  }
+
+  // Map contract value to display
+  const getContractDisplay = (contract: string) => {
+    const map: Record<string, string> = {
+      'CDI': 'CDI',
+      'cdi': 'CDI',
+      'CDD': 'CDD',
+      'cdd': 'CDD',
+      'Intérim': 'Intérim',
+      'interim': 'Intérim',
+      'Alternance': 'Alternance',
+      'alternance': 'Alternance',
+    }
+    return map[contract] || contract
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('employees.addEmployee')}</DialogTitle>
@@ -174,27 +247,9 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
                   <Input
                     id="phone"
                     type="tel"
-                    value={formData.phone}
+                    value={formData.phone || ''}
                     onChange={(e) => updateFormData('phone', e.target.value)}
                     placeholder="+33 6 12 34 56 78"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">{t('employeeDetail.dateOfBirth')}</Label>
-                  <Input
-                    id="dateOfBirth"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={(e) => updateFormData('dateOfBirth', e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="address">{t('employeeDetail.address')}</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => updateFormData('address', e.target.value)}
-                    placeholder="123 Rue de la République, 75001 Paris"
                   />
                 </div>
               </div>
@@ -208,50 +263,88 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="department">{t('employees.department')} *</Label>
-                  <Select value={formData.department} onValueChange={(value) => updateFormData('department', value)}>
+                  <Select
+                    value={formData.department}
+                    onValueChange={(value) => updateFormData('department', value)}
+                  >
                     <SelectTrigger id="department">
                       <SelectValue placeholder={t('employees.department')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="production">Production</SelectItem>
-                      <SelectItem value="administration">Administration</SelectItem>
-                      <SelectItem value="rh">RH</SelectItem>
-                      <SelectItem value="it">IT</SelectItem>
-                      <SelectItem value="logistics">Logistics</SelectItem>
+                      <SelectItem value="Production">Production</SelectItem>
+                      <SelectItem value="Administration">Administration</SelectItem>
+                      <SelectItem value="RH">RH</SelectItem>
+                      <SelectItem value="IT">IT</SelectItem>
+                      <SelectItem value="Logistics">Logistics</SelectItem>
+                      <SelectItem value="Maintenance">Maintenance</SelectItem>
+                      <SelectItem value="Quality">Quality</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="position">{t('employees.position')} *</Label>
-                  <Input
-                    id="position"
-                    value={formData.position}
-                    onChange={(e) => updateFormData('position', e.target.value)}
-                    placeholder="Operator"
-                  />
+                  <Select
+                    value={formData.positionId?.toString() || ''}
+                    onValueChange={(value) => updateFormData('positionId', value ? parseInt(value) : undefined)}
+                  >
+                    <SelectTrigger id="position">
+                      <SelectValue placeholder={t('employees.position')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {positions.map((position) => (
+                        <SelectItem key={position.id} value={position.id.toString()}>
+                          {position.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="contractType">{t('employeeDetail.contractType')} *</Label>
-                  <Select value={formData.contractType} onValueChange={(value) => updateFormData('contractType', value)}>
-                    <SelectTrigger id="contractType">
+                  <Label htmlFor="workLocation">{t('employees.workLocation')}</Label>
+                  <Select
+                    value={formData.workLocationId?.toString() || ''}
+                    onValueChange={(value) => updateFormData('workLocationId', value ? parseInt(value) : undefined)}
+                  >
+                    <SelectTrigger id="workLocation">
+                      <SelectValue placeholder={t('employees.workLocation')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {workLocations.map((location) => (
+                        <SelectItem key={location.id} value={location.id.toString()}>
+                          {location.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="contract">{t('employeeDetail.contractType')} *</Label>
+                  <Select
+                    value={formData.contract}
+                    onValueChange={(value) => updateFormData('contract', value)}
+                  >
+                    <SelectTrigger id="contract">
                       <SelectValue placeholder={t('employeeDetail.contractType')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="cdi">CDI</SelectItem>
-                      <SelectItem value="cdd">CDD</SelectItem>
-                      <SelectItem value="alternance">Alternance</SelectItem>
-                      <SelectItem value="stage">Stage</SelectItem>
-                      <SelectItem value="freelance">Freelance</SelectItem>
+                      <SelectItem value="CDI">CDI</SelectItem>
+                      <SelectItem value="CDD">CDD</SelectItem>
+                      <SelectItem value="Intérim">Intérim</SelectItem>
+                      <SelectItem value="Alternance">Alternance</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="startDate">{t('employeeDetail.startDate')} *</Label>
+                  <Label htmlFor="hireDate">{t('employeeDetail.startDate')} *</Label>
                   <Input
-                    id="startDate"
+                    id="hireDate"
                     type="date"
-                    value={formData.startDate}
-                    onChange={(e) => updateFormData('startDate', e.target.value)}
+                    value={formData.hireDate}
+                    onChange={(e) => updateFormData('hireDate', e.target.value)}
                   />
                 </div>
               </div>
@@ -280,14 +373,6 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
                       <span className="text-muted-foreground">{t('employeeDetail.phone')}:</span>
                       <span className="font-medium">{formData.phone || '-'}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t('employeeDetail.dateOfBirth')}:</span>
-                      <span className="font-medium">{formData.dateOfBirth || '-'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t('employeeDetail.address')}:</span>
-                      <span className="font-medium">{formData.address || '-'}</span>
-                    </div>
                   </div>
                 </div>
 
@@ -297,19 +382,23 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('employees.department')}:</span>
-                      <span className="font-medium capitalize">{formData.department}</span>
+                      <span className="font-medium">{formData.department || '-'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('employees.position')}:</span>
-                      <span className="font-medium">{formData.position}</span>
+                      <span className="font-medium">{getPositionName(formData.positionId)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{t('employees.workLocation')}:</span>
+                      <span className="font-medium">{getWorkLocationName(formData.workLocationId)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('employeeDetail.contractType')}:</span>
-                      <span className="font-medium uppercase">{formData.contractType}</span>
+                      <span className="font-medium">{getContractDisplay(formData.contract)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('employeeDetail.startDate')}:</span>
-                      <span className="font-medium">{formData.startDate}</span>
+                      <span className="font-medium">{formData.hireDate || '-'}</span>
                     </div>
                   </div>
                 </div>

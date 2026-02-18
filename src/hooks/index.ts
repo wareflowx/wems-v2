@@ -1,6 +1,7 @@
 // Centralized hooks exports
 
 export * from './use-employees'
+export * from './use-positions-worklocations'
 export * from './use-contracts'
 export * from './use-documents'
 export * from './use-caces'

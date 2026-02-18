@@ -37,7 +37,6 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
 import { Link } from "@tanstack/react-router";
 
 import { NavMain } from "@/components/nav-main";
@@ -141,7 +140,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <Separator className="group-data-[collapsible=icon]:bg-border mx-2" />
 
         <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.management")}</SidebarGroupLabel>
@@ -185,7 +183,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <Separator className="group-data-[collapsible=icon]:bg-border mx-2" />
 
         <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.quickActions")}</SidebarGroupLabel>
@@ -215,7 +212,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <Separator className="group-data-[collapsible=icon]:bg-border mx-2" />
 
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>

@@ -20,7 +20,7 @@ import {
   BookOpen,
   Settings2,
   Trash2,
-  HelpCircle,
+  MessageCircleQuestion
 } from "lucide-react";
 import {
   Sidebar,
@@ -108,7 +108,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="bg-card">
         <SidebarGroup>
-          <SidebarGroupLabel>{t("sidebar.application")}</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.overview")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -127,6 +127,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("sidebar.alerts")}>
+                  <Link to="/alerts">
+                    <AlertTriangle />
+                    <span>{t("sidebar.alerts")}</span>
+                  </Link>
+                </SidebarMenuButton>
+                <SidebarMenuBadge>16</SidebarMenuBadge>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>{t("sidebar.management")}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={t("sidebar.documents")}>
                   <Link to="/documents">
@@ -152,15 +169,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </Link>
                 </SidebarMenuButton>
                 <SidebarMenuBadge>9</SidebarMenuBadge>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.alerts")}>
-                  <Link to="/alerts">
-                    <AlertTriangle />
-                    <span>{t("sidebar.alerts")}</span>
-                  </Link>
-                </SidebarMenuButton>
-                <SidebarMenuBadge>16</SidebarMenuBadge>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={t("sidebar.contracts")}>
@@ -215,7 +223,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={t("sidebar.trash")}>
                   <Link to="/trash">
-                    <Trash />
+                    <Trash2 />
                     <span>{t("sidebar.trash")}</span>
                   </Link>
                 </SidebarMenuButton>
@@ -223,7 +231,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={t("sidebar.help")}>
                   <Link to="/help">
-                    <HelpCircle />
+                    <MessageCircleQuestion />
                     <span>{t("sidebar.help")}</span>
                   </Link>
                 </SidebarMenuButton>

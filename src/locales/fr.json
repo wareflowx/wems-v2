@@ -3,6 +3,8 @@
     "name": "WEMS"
   },
   "sidebar": {
+    "overview": "Vue d'ensemble",
+    "management": "Gestion",
     "application": "Application",
     "settings": "Paramètres",
     "dashboard": "Tableau de bord",

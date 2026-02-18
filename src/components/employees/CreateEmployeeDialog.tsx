@@ -84,19 +84,8 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
 
   const handleSubmit = () => {
     onCreate?.(formData)
-    // Reset form after submit
-    setFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      positionId: undefined,
-      workLocationId: undefined,
-      contract: '',
-      department: '',
-      hireDate: '',
-    })
-    setCurrentStep(1)
+    // Close dialog after submit
+    onOpenChange?.(false)
   }
 
   const handleOpenChange = (isOpen: boolean) => {

@@ -42,6 +42,8 @@ import { Link } from "@tanstack/react-router";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
+import { CreatePositionDialog } from "@/components/positions/CreatePositionDialog";
+import { CreateWorkLocationDialog } from "@/components/work-locations/CreateWorkLocationDialog";
 
 const data = {
   user: {
@@ -83,6 +85,8 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
   const [appVersion, setAppVersion] = React.useState("0.0.0");
+  const [isPositionDialogOpen, setIsPositionDialogOpen] = React.useState(false);
+  const [isWorkLocationDialogOpen, setIsWorkLocationDialogOpen] = React.useState(false);
 
   React.useEffect(() => {
     getAppVersion().then(setAppVersion);
@@ -257,6 +261,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
+
+      {/* Dialogs */}
+      <CreatePositionDialog
+        open={isPositionDialogOpen}
+        onOpenChange={setIsPositionDialogOpen}
+      />
+      <CreateWorkLocationDialog
+        open={isWorkLocationDialogOpen}
+        onOpenChange={setIsWorkLocationDialogOpen}
+      />
     </Sidebar>
   );
 }

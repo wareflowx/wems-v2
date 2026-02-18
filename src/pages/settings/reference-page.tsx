@@ -47,7 +47,7 @@ import {
   useDeleteDepartment,
   useDeleteJobTitle,
   useDeleteContractType,
-} from "@/lib/hooks";
+} from "@/hooks";
 
 export function SettingsReferencePage() {
   const { t } = useTranslation();

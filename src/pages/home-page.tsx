@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState, useMemo } from "react";
-import { useAlerts } from "@/lib/hooks";
+import { useAlerts } from "@/hooks";
 
 export function HomePage() {
   const { t } = useTranslation();

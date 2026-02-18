@@ -35,7 +35,7 @@ import { DeleteEmployeeDialog } from "@/components/employees/DeleteEmployeeDialo
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { Link } from "@tanstack/react-router";
-import { useEmployees, useCreateEmployee, useDeleteEmployee } from "@/lib/hooks";
+import { useEmployees, useCreateEmployee, useDeleteEmployee } from "@/hooks";
 
 export function EmployeesPage() {
   const { t } = useTranslation();

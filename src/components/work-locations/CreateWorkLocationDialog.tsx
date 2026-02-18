@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
+import { useCreateWorkLocation } from "@/hooks/use-positions-worklocations";
 
 const COLORS = [
   { name: "Cyan", value: "bg-cyan-500", hex: "#06b6d4" },
@@ -30,6 +31,14 @@ export interface CreateWorkLocationDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+function generateCode(name: string): string {
+  return "SITE_" + name
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z0-9]/g, "_");
+}
+
 export function CreateWorkLocationDialog({
   open,
   onOpenChange,
@@ -37,14 +46,26 @@ export function CreateWorkLocationDialog({
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [selectedColor, setSelectedColor] = useState(COLORS[0].value);
+  const createWorkLocation = useCreateWorkLocation();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Create work location in database
-    console.log("Creating work location:", { name, color: selectedColor });
-    setName("");
-    setSelectedColor(COLORS[0].value);
-    onOpenChange(false);
+    if (!name.trim()) return;
+
+    createWorkLocation.mutate(
+      {
+        code: generateCode(name),
+        name: name.trim(),
+        color: selectedColor,
+      },
+      {
+        onSuccess: () => {
+          setName("");
+          setSelectedColor(COLORS[0].value);
+          onOpenChange(false);
+        },
+      }
+    );
   };
 
   return (

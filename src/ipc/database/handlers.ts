@@ -154,12 +154,8 @@ export const deleteWorkLocation = os.handler(async ({ input }) => {
 // Employees handlers
 export const getEmployees = os.handler(async () => {
   try {
-    console.log('[DB] getEmployees called');
     const db = await getDb();
-    console.log('[DB] db obtained, fetching employees...');
-    const allEmployees = await db.select().from(employees).orderBy(employees.id);
-    console.log('[DB] employees fetched:', allEmployees.length);
-    return allEmployees;
+    return await db.select().from(employees).orderBy(employees.id);
   } catch (error) {
     console.error('Error in getEmployees:', error);
     throw error;
@@ -182,16 +178,12 @@ export const getEmployeeById = os.handler(async ({ input }) => {
 
 export const createEmployee = os.handler(async ({ input }) => {
   try {
-    console.log('[DB] createEmployee called with input:', input);
     const validatedData = createEmployeeInputSchema.parse(input);
-    console.log('[DB] validatedData:', validatedData);
     const db = await getDb();
-    console.log('[DB] inserting employee...');
     const [newEmployee] = await db.insert(employees).values(validatedData).returning();
-    console.log('[DB] employee created:', newEmployee);
     return newEmployee;
   } catch (error) {
-    console.error('[DB] Error in createEmployee:', error);
+    console.error('Error in createEmployee:', error);
     throw error;
   }
 });

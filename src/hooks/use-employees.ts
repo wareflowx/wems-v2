@@ -15,9 +15,7 @@ export function useEmployees(filters?: EmployeeFilters) {
   return useQuery({
     queryKey: queryKeys.employees.list(JSON.stringify(filters)),
     queryFn: async () => {
-      console.log('[Hook] useEmployees queryFn called, fetching from DB...');
       const employees = await db.getEmployees()
-      console.log('[Hook] useEmployees got employees:', employees.length);
 
       // Client-side filtering (can be moved to server later)
       let filtered = [...employees]
@@ -59,12 +57,7 @@ export function useCreateEmployee() {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async (input: Parameters<typeof db.createEmployee>[0]) => {
-      console.log('[Hook] useCreateEmployee mutationFn called with:', input);
-      const result = await db.createEmployee(input);
-      console.log('[Hook] useCreateEmployee result:', result);
-      return result;
-    },
+    mutationFn: (input: Parameters<typeof db.createEmployee>[0]) => db.createEmployee(input),
 
     onMutate: async (newEmployee) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.employees.lists() })

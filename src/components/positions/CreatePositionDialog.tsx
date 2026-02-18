@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
+import { useCreatePosition } from "@/hooks/use-positions-worklocations";
 
 const COLORS = [
   { name: "Emerald", value: "bg-emerald-500", hex: "#10b981" },
@@ -30,6 +31,14 @@ export interface CreatePositionDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+function generateCode(name: string): string {
+  return name
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z0-9]/g, "_");
+}
+
 export function CreatePositionDialog({
   open,
   onOpenChange,
@@ -37,14 +46,32 @@ export function CreatePositionDialog({
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [selectedColor, setSelectedColor] = useState(COLORS[0].value);
+  const createPosition = useCreatePosition();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Create position in database
-    console.log("Creating position:", { name, color: selectedColor });
-    setName("");
-    setSelectedColor(COLORS[0].value);
-    onOpenChange(false);
+    if (!name.trim()) return;
+
+    console.log("Submitting position:", { code: generateCode(name), name: name.trim(), color: selectedColor });
+
+    createPosition.mutate(
+      {
+        code: generateCode(name),
+        name: name.trim(),
+        color: selectedColor,
+      },
+      {
+        onSuccess: () => {
+          console.log("Position created successfully");
+          setName("");
+          setSelectedColor(COLORS[0].value);
+          onOpenChange(false);
+        },
+        onError: (error) => {
+          console.error("Error creating position:", error);
+        },
+      }
+    );
   };
 
   return (

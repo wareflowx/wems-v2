@@ -53,16 +53,7 @@ export function deleteWorkLocation(data: { id: number }) {
 
 // Employees
 export function getEmployees() {
-  console.log('[Actions] getEmployees called');
-  return ipc.client.database.getEmployees()
-    .then(result => {
-      console.log('[Actions] getEmployees result:', result?.length ?? 0, 'employees');
-      return result;
-    })
-    .catch(err => {
-      console.error('[Actions] getEmployees error:', err);
-      throw err;
-    });
+  return ipc.client.database.getEmployees();
 }
 
 export function getEmployeeById(id: number) {
@@ -82,16 +73,7 @@ export function createEmployee(data: {
   hireDate: string;
   terminationDate?: string;
 }) {
-  console.log('[Actions] createEmployee called with:', data);
-  return ipc.client.database.createEmployee(data)
-    .then(result => {
-      console.log('[Actions] createEmployee result:', result);
-      return result;
-    })
-    .catch(err => {
-      console.error('[Actions] createEmployee error:', err);
-      throw err;
-    });
+  return ipc.client.database.createEmployee(data);
 }
 
 export function updateEmployee(data: {

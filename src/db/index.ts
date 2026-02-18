@@ -2,12 +2,18 @@ import path from 'path';
 import { app } from 'electron';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import fs from 'fs';
+import 'dotenv/config';
 
 // Lazy database initialization to avoid Vite bundling issues with native modules
 let db: ReturnType<typeof drizzle> | null = null;
 
 function getDbPath() {
-  return path.join(app.getPath('userData'), 'database.db');
+  // Use absolute path from project root for consistency with drizzle-kit
+  const dbFileName = process.env.DB_FILE_NAME || 'database.db';
+  // Remove 'file:' prefix if present (libsql format)
+  const filePath = dbFileName.replace('file:', '');
+  // Make it absolute relative to project root
+  return path.join(process.cwd(), filePath);
 }
 
 function logToFile(message: string, error?: any) {
@@ -21,22 +27,16 @@ function logToFile(message: string, error?: any) {
 
 async function runMigrations(sqlite: any) {
   try {
-    // Create posts table if it doesn't exist
-    const tableExists = sqlite.prepare(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='posts'"
-    ).get();
+    // Check existing tables
+    const tables = sqlite.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table'"
+    ).all();
 
-    if (!tableExists) {
-      logToFile('Creating posts table...');
-      sqlite.exec(`
-        CREATE TABLE posts (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          title TEXT NOT NULL,
-          content TEXT NOT NULL
-        )
-      `);
-      logToFile('✅ Posts table created');
-    }
+    logToFile('Existing tables: ' + JSON.stringify(tables));
+
+    // If no tables exist, we need to run migrations
+    // For now, just ensure the basic tables exist
+    // Full migrations are handled by drizzle-kit
   } catch (error) {
     logToFile('Error running migrations', error);
     throw error;

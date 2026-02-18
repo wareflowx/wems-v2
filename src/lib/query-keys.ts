@@ -62,4 +62,22 @@ export const queryKeys = {
     jobTitles: () => ['reference', 'job-titles'] as const,
     contractTypes: () => ['reference', 'contract-types'] as const,
   },
+
+  // Positions
+  positions: {
+    all: ['positions'] as const,
+    lists: () => ['positions', 'list'] as const,
+    list: (filters: string) => ['positions', 'list', filters] as const,
+    details: () => ['positions', 'detail'] as const,
+    detail: (id: number) => ['positions', 'detail', id] as const,
+  },
+
+  // Work Locations
+  workLocations: {
+    all: ['work-locations'] as const,
+    lists: () => ['work-locations', 'list'] as const,
+    list: (filters: string) => ['work-locations', 'list', filters] as const,
+    details: () => ['work-locations', 'detail'] as const,
+    detail: (id: number) => ['work-locations', 'detail', id] as const,
+  },
 } as const

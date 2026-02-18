@@ -119,6 +119,7 @@ export const positions = sqliteTable('positions', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   code: text('code').notNull().unique(), // ex: "TECHNICIAN", "OPERATOR"
   name: text('name').notNull(), // ex: "Technicien", "Opérateur"
+  color: text('color').notNull(), // ex: "bg-emerald-500", "bg-amber-500"
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -147,6 +148,7 @@ export const workLocations = sqliteTable('work_locations', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   code: text('code').notNull().unique(), // ex: "SITE_PARIS", "FACTORY_LYON"
   name: text('name').notNull(), // ex: "Site Paris", "Usine Lyon"
+  color: text('color').notNull(), // ex: "bg-cyan-500", "bg-amber-500"
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -164,10 +166,14 @@ export type NewWorkLocation = typeof workLocations.$inferInsert
 - `idx_work_locations_is_active` on `isActive`
 - `idx_work_locations_code` on `code`
 
-### 3. Employees Table (Updated)
+### 3. Employees Table (Not in scope - Future)
+
+> **Note**: Updating the employees table with FKs to positions and work_locations is **not in the current scope**. The employees will continue to use string fields (`job`, `location`) from mock data for now.
+
+The following schema is documented for reference only, to be implemented later when employees are migrated to the database.
 
 ```typescript
-// src/db/schema/employees.ts
+// src/db/schema/employees.ts - FUTURE, NOT CURRENTLY PLANNED
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
 import { positions } from './positions'
@@ -203,7 +209,7 @@ export type Employee = typeof employees.$inferSelect
 export type NewEmployee = typeof employees.$inferInsert
 ```
 
-**Relations**:
+**Relations** (for future reference):
 - `positionId` → `positions.id` (Many-to-One)
 - `workLocationId` → `work_locations.id` (Many-to-One)
 - `contractTypeId` → `contract_types.id` (Many-to-One)
@@ -224,11 +230,11 @@ const currentJobTitles = [
 
 // Migration to new structure
 const positionMigration = [
-  { code: 'OPERATOR', name: 'Opérateur', isActive: true },
-  { code: 'TECHNICIAN', name: 'Technicien', isActive: true },
-  { code: 'ACCOUNTANT', name: 'Comptable', isActive: true },
-  { code: 'HR_MANAGER', name: 'Responsable RH', isActive: true },
-  { code: 'SALES_REP', name: 'Commercial', isActive: true },
+  { code: 'OPERATOR', name: 'Opérateur', color: 'bg-emerald-500', isActive: true },
+  { code: 'TECHNICIAN', name: 'Technicien', color: 'bg-blue-500', isActive: true },
+  { code: 'ACCOUNTANT', name: 'Comptable', color: 'bg-amber-500', isActive: true },
+  { code: 'HR_MANAGER', name: 'Responsable RH', color: 'bg-violet-500', isActive: true },
+  { code: 'SALES_REP', name: 'Commercial', color: 'bg-cyan-500', isActive: true },
 ]
 ```
 
@@ -240,10 +246,10 @@ const currentLocations = ['Paris', 'Lyon', 'Marseille', 'Lille']
 
 // Migration to new structure
 const workLocationMigration = [
-  { code: 'SITE_PARIS', name: 'Site Paris', isActive: true },
-  { code: 'SITE_LYON', name: 'Site Lyon', isActive: true },
-  { code: 'SITE_MARSEILLE', name: 'Site Marseille', isActive: true },
-  { code: 'SITE_LILLE', name: 'Site Lille', isActive: true },
+  { code: 'SITE_PARIS', name: 'Site Paris', color: 'bg-cyan-500', isActive: true },
+  { code: 'SITE_LYON', name: 'Site Lyon', color: 'bg-amber-500', isActive: true },
+  { code: 'SITE_MARSEILLE', name: 'Site Marseille', color: 'bg-violet-500', isActive: true },
+  { code: 'SITE_LILLE', name: 'Site Lille', color: 'bg-emerald-500', isActive: true },
 ]
 ```
 
@@ -255,24 +261,29 @@ const workLocationMigration = [
 - **Cons**: More complex
 - **Recommendation**: ✅ Yes, for stability and internationalization
 
-## Next Steps
+## Next Steps (Current Scope)
 
 1. ✅ **Create `positions` schema** (simplified structure)
 2. ✅ **Create `work_locations` schema** (simplified structure)
-3. ✅ **Update `employees` schema** with FKs
-4. ✅ **Generate Drizzle migrations**
-5. ✅ **Create seeds for test data**
-6. ✅ **Implement RPC routes for CRUD**
-7. ✅ **Update UI components**
-8. ✅ **Create dialogs for add/edit**
-9. ✅ **Testing and validation**
+3. ✅ **Generate Drizzle migrations**
+4. 🔄 **Implement RPC routes for CRUD** (positions + work_locations)
+5. 🔄 **Create seeds for test data**
+6. 🔄 **Update UI components** (connect dialogs to backend)
+7. 🔄 **Create dialogs for add/edit** (connect to mutations)
+8. ✅ **Testing and validation**
 
-## Suggested Migration Order
+## Out of Scope
+
+- **Employees migration**: The employees table will continue using mock data with string fields (`job`, `location`). FK integration to positions and work_locations is deferred to a future phase.
+
+## Suggested Implementation Order
 
 ```
-1. positions      → independent, reference for employees
-2. work_locations → independent, reference for employees
-3. employees      → depends on positions + work_locations
+1. positions        → independent reference table
+2. work_locations   → independent reference table
+3. RPC routes       → backend CRUD for positions + work_locations
+4. UI integration   → connect dialogs to TanStack mutations
+5. Seeds            → populate test data
 ```
 
 ## Summary of Changes
@@ -292,6 +303,4 @@ const workLocationMigration = [
 - Add timestamps (`createdAt`, `updatedAt`)
 
 **Employees**:
-- Replace `job` string with `positionId` FK
-- Replace `location` string with `workLocationId` FK
-- Add `contractTypeId` FK (instead of `contract` string)
+- *(Not in scope - continues using mock data with string fields)*

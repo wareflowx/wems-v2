@@ -1,19 +1,44 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  employeesApi,
-  type EmployeeFilters,
-  type CreateEmployeeInput,
-  type UpdateEmployeeInput,
-  type Employee,
-} from '@/api/employees'
+import * as db from '@/actions/database'
 import { queryKeys } from '@/lib/query-keys'
 import { useToast } from '@/utils/toast'
+
+// Employee filters type
+export interface EmployeeFilters {
+  search?: string
+  department?: string
+  status?: string
+}
 
 // Hook for fetching employees list
 export function useEmployees(filters?: EmployeeFilters) {
   return useQuery({
     queryKey: queryKeys.employees.list(JSON.stringify(filters)),
-    queryFn: () => employeesApi.getAll(filters),
+    queryFn: async () => {
+      const employees = await db.getEmployees()
+
+      // Client-side filtering (can be moved to server later)
+      let filtered = [...employees]
+
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase()
+        filtered = filtered.filter(emp =>
+          emp.firstName.toLowerCase().includes(searchLower) ||
+          emp.lastName.toLowerCase().includes(searchLower) ||
+          `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(searchLower)
+        )
+      }
+
+      if (filters?.department && filters.department !== 'all') {
+        filtered = filtered.filter(emp => emp.department === filters.department)
+      }
+
+      if (filters?.status && filters.status !== 'all') {
+        filtered = filtered.filter(emp => emp.status === filters.status)
+      }
+
+      return filtered
+    },
   })
 }
 
@@ -21,7 +46,7 @@ export function useEmployees(filters?: EmployeeFilters) {
 export function useEmployee(id: number) {
   return useQuery({
     queryKey: queryKeys.employees.detail(id),
-    queryFn: () => employeesApi.getById(id),
+    queryFn: () => db.getEmployeeById(id),
     enabled: !!id,
   })
 }
@@ -32,26 +57,24 @@ export function useCreateEmployee() {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: (input: CreateEmployeeInput) => employeesApi.create(input),
+    mutationFn: (input: Parameters<typeof db.createEmployee>[0]) => db.createEmployee(input),
 
     onMutate: async (newEmployee) => {
-      // Cancel all employee list queries
       await queryClient.cancelQueries({ queryKey: queryKeys.employees.lists() })
 
-      // Snapshot previous queries
       const previousQueries = new Map()
       queryClient.getQueriesData({ queryKey: queryKeys.employees.lists() }).forEach(([key, data]) => {
-        previousQueries.set(JSON.stringify(key), data as Employee[])
+        previousQueries.set(JSON.stringify(key), data as db.Employee[])
       })
 
-      // Optimistically update all employee list queries
       queryClient.setQueriesData(
         { queryKey: queryKeys.employees.lists() },
-        (old: Employee[] = []) => [
+        (old: db.Employee[] = []) => [
           ...old,
           {
             ...newEmployee,
             id: Date.now(),
+            status: newEmployee.status || 'active',
           },
         ]
       )
@@ -60,7 +83,6 @@ export function useCreateEmployee() {
     },
 
     onError: (err, variables, context) => {
-      // Rollback all queries to previous state
       if (context?.previousQueries) {
         context.previousQueries.forEach((data, keyStr) => {
           const key = JSON.parse(keyStr)
@@ -68,7 +90,6 @@ export function useCreateEmployee() {
         })
       }
 
-      // Show error notification
       toast({
         title: 'Failed to create employee',
         description: err instanceof Error ? err.message : 'An error occurred',
@@ -77,7 +98,6 @@ export function useCreateEmployee() {
     },
 
     onSuccess: () => {
-      // Invalidate to trigger refetch with server data
       queryClient.invalidateQueries({ queryKey: queryKeys.employees.lists() })
     },
   })
@@ -89,22 +109,19 @@ export function useUpdateEmployee() {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: (input: UpdateEmployeeInput) => employeesApi.update(input),
+    mutationFn: (input: Parameters<typeof db.updateEmployee>[0]) => db.updateEmployee(input),
 
-    onMutate: async ({ id, updates }) => {
-      // Cancel all employee list queries
+    onMutate: async ({ id, ...updates }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.employees.lists() })
 
-      // Snapshot previous queries
       const previousQueries = new Map()
       queryClient.getQueriesData({ queryKey: queryKeys.employees.lists() }).forEach(([key, data]) => {
-        previousQueries.set(JSON.stringify(key), data as Employee[])
+        previousQueries.set(JSON.stringify(key), data as db.Employee[])
       })
 
-      // Optimistically update all employee list queries
       queryClient.setQueriesData(
         { queryKey: queryKeys.employees.lists() },
-        (old: Employee[] = []) =>
+        (old: db.Employee[] = []) =>
           old.map((emp) =>
             emp.id === id ? { ...emp, ...updates } : emp
           )
@@ -114,7 +131,6 @@ export function useUpdateEmployee() {
     },
 
     onError: (err, variables, context) => {
-      // Rollback all queries to previous state
       if (context?.previousQueries) {
         context.previousQueries.forEach((data, keyStr) => {
           const key = JSON.parse(keyStr)
@@ -122,7 +138,6 @@ export function useUpdateEmployee() {
         })
       }
 
-      // Show error notification
       toast({
         title: 'Failed to update employee',
         description: err instanceof Error ? err.message : 'An error occurred',
@@ -143,29 +158,25 @@ export function useDeleteEmployee() {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: (id: number) => employeesApi.delete(id),
+    mutationFn: (id: number) => db.deleteEmployee(id),
 
     onMutate: async (id) => {
-      // Cancel all employee list queries
       await queryClient.cancelQueries({ queryKey: queryKeys.employees.lists() })
 
-      // Snapshot previous queries
       const previousQueries = new Map()
       queryClient.getQueriesData({ queryKey: queryKeys.employees.lists() }).forEach(([key, data]) => {
-        previousQueries.set(JSON.stringify(key), data as Employee[])
+        previousQueries.set(JSON.stringify(key), data as db.Employee[])
       })
 
-      // Optimistically update all employee list queries
       queryClient.setQueriesData(
         { queryKey: queryKeys.employees.lists() },
-        (old: Employee[] = []) => old.filter((emp) => emp.id !== id)
+        (old: db.Employee[] = []) => old.filter((emp) => emp.id !== id)
       )
 
       return { previousQueries }
     },
 
     onError: (err, variables, context) => {
-      // Rollback all queries to previous state
       if (context?.previousQueries) {
         context.previousQueries.forEach((data, keyStr) => {
           const key = JSON.parse(keyStr)
@@ -173,7 +184,6 @@ export function useDeleteEmployee() {
         })
       }
 
-      // Show error notification
       toast({
         title: 'Failed to delete employee',
         description: err instanceof Error ? err.message : 'An error occurred',

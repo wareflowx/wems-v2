@@ -5,9 +5,9 @@ import {
   type CreateContractInput,
   type UpdateContractInput,
   type Contract,
-} from '@/lib/api/contracts'
+} from '@/api/contracts'
 import { queryKeys } from '@/lib/query-keys'
-import { useToast } from '@/lib/utils/toast'
+import { useToast } from '@/utils/toast'
 
 // Hook for fetching contracts list
 export function useContracts(filters?: ContractFilters) {

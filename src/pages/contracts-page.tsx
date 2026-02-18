@@ -9,7 +9,7 @@ import { MetricsSection } from '@/components/ui/metrics-section'
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect, useMemo } from 'react'
 import { ContractTable, type Contract } from '@/components/contracts/contract-table'
-import { useContracts } from '@/lib/hooks'
+import { useContracts } from '@/hooks'
 
 export function ContractsPage() {
   const { t } = useTranslation()

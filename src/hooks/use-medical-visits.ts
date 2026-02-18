@@ -5,9 +5,9 @@ import {
   type CreateMedicalVisitInput,
   type UpdateMedicalVisitInput,
   type MedicalVisit,
-} from '@/lib/api/medical-visits'
+} from '@/api/medical-visits'
 import { queryKeys } from '@/lib/query-keys'
-import { useToast } from '@/lib/utils/toast'
+import { useToast } from '@/utils/toast'
 
 // Hook for fetching medical visits list
 export function useMedicalVisits(filters?: MedicalVisitFilters) {

@@ -5,9 +5,9 @@ import {
   type CreateCacesInput,
   type UpdateCacesInput,
   type Caces,
-} from '@/lib/api/caces'
+} from '@/api/caces'
 import { queryKeys } from '@/lib/query-keys'
-import { useToast } from '@/lib/utils/toast'
+import { useToast } from '@/utils/toast'
 
 // Hook for fetching CACES certifications list
 export function useCaces(filters?: CacesFilters) {

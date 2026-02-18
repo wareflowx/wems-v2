@@ -29,7 +29,7 @@ import {
 import { useState, useMemo } from 'react'
 import { AddMedicalVisitDialog } from '@/components/medical-visits/AddMedicalVisitDialog'
 import { DeleteMedicalVisitDialog } from '@/components/medical-visits/DeleteMedicalVisitDialog'
-import { useMedicalVisits, useCreateMedicalVisit, useDeleteMedicalVisit } from '@/lib/hooks'
+import { useMedicalVisits, useCreateMedicalVisit, useDeleteMedicalVisit } from '@/hooks'
 
 interface MedicalVisit {
   id: number

@@ -5,9 +5,9 @@ import {
   type CreateEmployeeInput,
   type UpdateEmployeeInput,
   type Employee,
-} from '@/lib/api/employees'
+} from '@/api/employees'
 import { queryKeys } from '@/lib/query-keys'
-import { useToast } from '@/lib/utils/toast'
+import { useToast } from '@/utils/toast'
 
 // Hook for fetching employees list
 export function useEmployees(filters?: EmployeeFilters) {

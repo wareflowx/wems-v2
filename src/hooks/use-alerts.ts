@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { alertsApi, type AlertFilters } from '@/lib/api/alerts'
+import { alertsApi, type AlertFilters } from '@/api/alerts'
 import { queryKeys } from '@/lib/query-keys'
 
 // Hook for fetching alerts list

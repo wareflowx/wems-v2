@@ -24,7 +24,7 @@ import { Link } from '@tanstack/react-router'
 import { AddCacesDialog } from '@/components/caces/AddCacesDialog'
 import { EditCacesDialog } from '@/components/caces/EditCacesDialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useCaces, useCreateCaces, useUpdateCaces, useDeleteCaces } from '@/lib/hooks'
+import { useCaces, useCreateCaces, useUpdateCaces, useDeleteCaces } from '@/hooks'
 import { PageHeaderSkeleton } from '@/components/ui/table-skeleton'
 
 export function CacesPage() {

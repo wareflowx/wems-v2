@@ -24,7 +24,7 @@ import { useState, useMemo } from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DeleteDocumentDialog } from '@/components/documents/DeleteDocumentDialog'
 import { AddDocumentDialog } from '@/components/documents/AddDocumentDialog'
-import { useDocuments, useCreateDocument, useDeleteDocument } from '@/lib/hooks'
+import { useDocuments, useCreateDocument, useDeleteDocument } from '@/hooks'
 
 export function DocumentsPage() {
   const { t } = useTranslation()

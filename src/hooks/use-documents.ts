@@ -5,9 +5,9 @@ import {
   type CreateDocumentInput,
   type UpdateDocumentInput,
   type Document,
-} from '@/lib/api/documents'
+} from '@/api/documents'
 import { queryKeys } from '@/lib/query-keys'
-import { useToast } from '@/lib/utils/toast'
+import { useToast } from '@/utils/toast'
 
 // Hook for fetching documents list
 export function useDocuments(filters?: DocumentFilters) {

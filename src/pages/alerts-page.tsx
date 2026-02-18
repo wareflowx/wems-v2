@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip'
-import { useAlerts } from '@/lib/hooks'
+import { useAlerts } from '@/hooks'
 import { PageHeaderSkeleton } from '@/components/ui/table-skeleton'
 
 interface Alert {

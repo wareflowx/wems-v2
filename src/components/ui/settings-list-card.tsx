@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils'
 import { LucideIcon } from 'lucide-react'
 import { DetailBadge } from '@/components/ui/badge'
 

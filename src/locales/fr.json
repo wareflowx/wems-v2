@@ -18,7 +18,9 @@
     "quickActions": "Actions rapides",
     "addPosition": "Ajouter un poste",
     "addWorkLocation": "Ajouter un lieu de travail",
-    "toggle": "Ouvrir/Fermer"
+    "toggle": "Ouvrir/Fermer",
+    "trash": "Corbeille",
+    "help": "Aide"
   },
   "dashboard": {
     "title": "Tableau de bord",

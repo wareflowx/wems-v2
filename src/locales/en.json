@@ -18,7 +18,9 @@
     "quickActions": "Quick Actions",
     "addPosition": "Add Position",
     "addWorkLocation": "Add Work Location",
-    "toggle": "Toggle Sidebar"
+    "toggle": "Toggle Sidebar",
+    "trash": "Trash",
+    "help": "Help"
   },
   "dashboard": {
     "title": "Dashboard",

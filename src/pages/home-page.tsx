@@ -252,44 +252,6 @@ export function HomePage() {
           </Card>
         </div>
 
-        {/* Quick Links */}
-        <div className="flex flex-wrap gap-2">
-          <Link to="/employees">
-            <Button variant="outline" className="gap-2">
-              <Users className="h-4 w-4" />
-              {t("employees.title")}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <Link to="/medical-visits">
-            <Button variant="outline" className="gap-2">
-              <Stethoscope className="h-4 w-4" />
-              {t("medicalVisits.title")}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <Link to="/caces">
-            <Button variant="outline" className="gap-2">
-              <ShieldAlert className="h-4 w-4" />
-              {t("caces.title")}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <Link to="/documents">
-            <Button variant="outline" className="gap-2">
-              <FileText className="h-4 w-4" />
-              {t("documents.title")}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <Link to="/alerts">
-            <Button variant="outline" className="gap-2">
-              <Bell className="h-4 w-4" />
-              {t("alerts.title")}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
 
         {/* Search and Filters */}
         <div className="flex flex-wrap gap-2">

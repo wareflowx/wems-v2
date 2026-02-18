@@ -19,6 +19,8 @@ import {
   SquareTerminal,
   BookOpen,
   Settings2,
+  Trash2,
+  HelpCircle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -173,46 +175,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>{t("sidebar.settings")}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.alerts")}>
-                  <Link to="/settings/alerts">
-                    <AlertTriangle />
-                    <span>{t("sidebar.alerts")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.referenceData")}>
-                  <Link to="/settings/reference-data">
-                    <FileText />
-                    <span>{t("sidebar.referenceData")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.backup")}>
-                  <Link to="/settings/backup">
-                    <Calendar />
-                    <span>{t("sidebar.backup")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.system")}>
-                  <Link to="/settings/system">
-                    <CheckCircle2 />
-                    <span>{t("sidebar.system")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.quickActions")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -239,8 +201,38 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("sidebar.settings")}>
+                  <Link to="/settings">
+                    <Settings2 />
+                    <span>{t("sidebar.settings")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("sidebar.trash")}>
+                  <Link to="/trash">
+                    <Trash />
+                    <span>{t("sidebar.trash")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("sidebar.help")}>
+                  <Link to="/help">
+                    <HelpCircle />
+                    <span>{t("sidebar.help")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="bg-card border-t">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>

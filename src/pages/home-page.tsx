@@ -172,11 +172,11 @@ export function HomePage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 py-6">
+    <div className="flex flex-1 flex-col bg-sidebar gap-4 p-4 py-6">
       <div className="min-h-full space-y-3">
         {/* Header */}
         <div className="mb-2">
-          <Card className="p-3 bg-background shadow-sm rounded-md">
+          <Card className="p-3 bg-card shadow-sm rounded-md">
             <div className="flex items-start gap-3">
               <div className="mt-0.5">
                 <Sparkles className="h-4 w-4 text-gray-600" />

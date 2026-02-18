@@ -245,7 +245,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
               <button className="w-full">
-                <span className="flex-1 text-left">{t("sidebar.toggle")}</span>
+                <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">{t("sidebar.toggle")}</span>
                 <SidebarTrigger className="ml-auto" />
               </button>
             </SidebarMenuButton>

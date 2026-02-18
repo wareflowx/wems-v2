@@ -17,7 +17,8 @@
     "contracts": "Contrats",
     "quickActions": "Actions rapides",
     "addPosition": "Ajouter un poste",
-    "addWorkLocation": "Ajouter un lieu de travail"
+    "addWorkLocation": "Ajouter un lieu de travail",
+    "toggle": "Ouvrir/Fermer"
   },
   "dashboard": {
     "title": "Tableau de bord",

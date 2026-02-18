@@ -17,7 +17,8 @@
     "contracts": "Contracts",
     "quickActions": "Quick Actions",
     "addPosition": "Add Position",
-    "addWorkLocation": "Add Work Location"
+    "addWorkLocation": "Add Work Location",
+    "toggle": "Toggle Sidebar"
   },
   "dashboard": {
     "title": "Dashboard",

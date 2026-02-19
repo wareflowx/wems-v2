@@ -167,7 +167,7 @@ export function PositionsPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-lg border overflow-x-auto">
+            <div className="rounded-lg border bg-card overflow-x-auto">
               <Table className="w-full">
                 <TableHeader>
                   <TableRow>

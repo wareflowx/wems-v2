@@ -14,7 +14,7 @@ export function PageHeaderCard({
 }: PageHeaderCardProps) {
   return (
     <div className="mb-2">
-      <Card className="p-3 bg-background shadow-sm rounded-md">
+      <Card className="p-3 bg-card shadow-sm rounded-md">
         <div className="flex items-start gap-3">
           <div className="mt-0.5">{icon}</div>
           <div className="flex-1">

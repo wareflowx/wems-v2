@@ -44,6 +44,7 @@ export function useCreateContract() {
       await queryClient.cancelQueries({ queryKey: queryKeys.contracts.lists() });
 
       const previousContracts = queryClient.getQueryData(queryKeys.contracts.lists());
+      const previousByEmployee = queryClient.getQueryData(queryKeys.contracts.byEmployee(newContract.employeeId));
 
       queryClient.setQueryData(
         queryKeys.contracts.lists(),
@@ -57,12 +58,25 @@ export function useCreateContract() {
         ]
       );
 
-      return { previousContracts };
+      if (newContract.employeeId) {
+        queryClient.setQueryData(
+          queryKeys.contracts.byEmployee(newContract.employeeId),
+          (old: db.Contract[] = []) => [
+            ...old,
+            { ...newContract, id: Date.now(), isActive: newContract.isActive ?? true },
+          ]
+        );
+      }
+
+      return { previousContracts, previousByEmployee };
     },
 
     onError: (err, variables, context) => {
       if (context?.previousContracts) {
         queryClient.setQueryData(queryKeys.contracts.lists(), context.previousContracts);
+      }
+      if (context?.previousByEmployee && variables.employeeId) {
+        queryClient.setQueryData(queryKeys.contracts.byEmployee(variables.employeeId), context.previousByEmployee);
       }
       toast({
         title: "Failed to create contract",

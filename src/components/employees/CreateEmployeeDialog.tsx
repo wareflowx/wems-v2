@@ -110,10 +110,16 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
     onOpenChange?.(isOpen)
   }
 
+  // Email validation helper
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
   const isStepValid = () => {
     switch (currentStep) {
       case 1:
-        return formData.firstName && formData.lastName && formData.email
+        return formData.firstName && formData.lastName && formData.email && isValidEmail(formData.email)
       case 2:
         return formData.department && formData.contractType && formData.hireDate
       default:

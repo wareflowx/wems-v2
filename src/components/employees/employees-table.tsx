@@ -66,7 +66,13 @@ export function EmployeesTable({
 
   // Get contract for an employee
   const getEmployeeContract = (employeeId: number): Contract | undefined => {
-    return contracts.find((c) => c.employeeId === employeeId && c.isActive);
+    const now = new Date()
+    return contracts.find((c) => {
+      if (c.employeeId !== employeeId || !c.isActive) return false
+      // Check if contract has ended
+      if (c.endDate && new Date(c.endDate) < now) return false
+      return true
+    })
   }
 
   // Get unique contracts and statuses

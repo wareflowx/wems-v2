@@ -1,6 +1,5 @@
-// Centralized API exports
+// Centralized API exports (deprecated - using @/actions/database instead)
 
-export * from './employees'
 export * from './contracts'
 export * from './documents'
 export * from './caces'

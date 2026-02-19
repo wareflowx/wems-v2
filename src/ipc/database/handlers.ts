@@ -200,8 +200,9 @@ export const updateEmployee = os.handler(async ({ input }) => {
     const validatedData = updateEmployeeInputSchema.parse(input);
     const db = await getDb();
 
-    // Build update object with only provided fields
-    const updateData: Record<string, unknown> = {};
+    // Build update object with only provided fields using Partial type
+    type EmployeeUpdateKeys = 'firstName' | 'lastName' | 'email' | 'phone' | 'positionId' | 'workLocationId' | 'department' | 'status' | 'hireDate' | 'terminationDate';
+    const updateData: Partial<Pick<typeof employees, EmployeeUpdateKeys>> = {};
     if (validatedData.firstName !== undefined) updateData.firstName = validatedData.firstName;
     if (validatedData.lastName !== undefined) updateData.lastName = validatedData.lastName;
     if (validatedData.email !== undefined) updateData.email = validatedData.email;

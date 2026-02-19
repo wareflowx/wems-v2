@@ -7,11 +7,8 @@ import { createPostInputSchema, createPositionInputSchema, updatePositionInputSc
 // Posts handlers
 export const getPosts = os.handler(async () => {
   try {
-    console.log('getPosts called');
     const db = await getDb();
-    console.log('DB obtained:', db);
     const allPosts = await db.select().from(posts).orderBy(posts.id);
-    console.log('Posts fetched:', allPosts);
     return allPosts;
   } catch (error) {
     console.error('Error in getPosts:', error);
@@ -21,13 +18,9 @@ export const getPosts = os.handler(async () => {
 
 export const createPost = os.handler(async ({ input }) => {
   try {
-    console.log('createPost called with input:', input);
-    const db = await getDb();
-    console.log('DB obtained:', db);
     const validatedData = createPostInputSchema.parse(input);
-    console.log('Validated data:', validatedData);
+    const db = await getDb();
     const [newPost] = await db.insert(posts).values(validatedData).returning();
-    console.log('New post created:', newPost);
     return newPost;
   } catch (error) {
     console.error('Error in createPost:', error);
@@ -48,13 +41,9 @@ export const getPositions = os.handler(async () => {
 
 export const createPosition = os.handler(async ({ input }) => {
   try {
-    console.log('createPosition handler called with input:', input);
     const validatedData = createPositionInputSchema.parse(input);
-    console.log('Validated data:', validatedData);
     const db = await getDb();
-    console.log('DB obtained, inserting...');
     const [newPosition] = await db.insert(positions).values(validatedData).returning();
-    console.log('Position created:', newPosition);
     return newPosition;
   } catch (error) {
     console.error('Error in createPosition:', error);
@@ -184,19 +173,22 @@ export const createEmployee = os.handler(async ({ input }) => {
     // Extract contract info from input
     const { contractType, contractStartDate, contractEndDate, ...employeeData } = validatedData;
 
-    // Insert employee first
-    const [newEmployee] = await db.insert(employees).values(employeeData).returning();
+    // Use transaction to ensure atomicity
+    const result = await db.transaction(async (tx) => {
+      const [newEmployee] = await tx.insert(employees).values(employeeData).returning();
 
-    // Create contract record with employeeId
-    await db.insert(contracts).values({
-      employeeId: newEmployee.id,
-      contractType: contractType,
-      startDate: contractStartDate || employeeData.hireDate,
-      endDate: contractEndDate || null,
-      isActive: true,
+      await tx.insert(contracts).values({
+        employeeId: newEmployee.id,
+        contractType: contractType,
+        startDate: contractStartDate || employeeData.hireDate,
+        endDate: contractEndDate || null,
+        isActive: true,
+      });
+
+      return newEmployee;
     });
 
-    return newEmployee;
+    return result;
   } catch (error) {
     console.error('Error in createEmployee:', error);
     throw error;

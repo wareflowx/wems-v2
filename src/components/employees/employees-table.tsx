@@ -47,6 +47,7 @@ interface EmployeesTableProps {
   contracts: Contract[];
   onDeleteClick: (employee: { id: number; name: string }) => void;
   onAddClick?: () => void;
+  onEditClick?: (employee: Employee) => void;
 }
 
 export function EmployeesTable({
@@ -56,6 +57,7 @@ export function EmployeesTable({
   contracts,
   onDeleteClick,
   onAddClick,
+  onEditClick,
 }: EmployeesTableProps) {
   const { t } = useTranslation();
   const [globalFilter, setGlobalFilter] = useState("");
@@ -225,9 +227,11 @@ export function EmployeesTable({
           const employee = row.original;
           return (
             <div className="flex items-center justify-end gap-2">
-              <Button variant="ghost" size="icon">
-                <Edit className="h-4 w-4" />
-              </Button>
+              {onEditClick && (
+                <Button variant="ghost" size="icon" onClick={() => onEditClick(employee)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"

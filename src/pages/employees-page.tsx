@@ -13,9 +13,11 @@ import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { EmployeesTable } from "@/components/employees/employees-table";
 import { useEmployees, useCreateEmployee, useDeleteEmployee, usePositions, useWorkLocations, useContracts } from "@/hooks";
+import { useToast } from "@/utils/toast";
 
 export function EmployeesPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<{
@@ -70,6 +72,13 @@ export function EmployeesPage() {
   const handleDeleteClick = (employee: { id: number; name: string }) => {
     setEmployeeToDelete(employee)
     setIsDeleteDialogOpen(true)
+  }
+
+  const handleEditClick = () => {
+    toast({
+      title: "Edit employee",
+      description: "Employee editing coming soon",
+    })
   }
 
   if (isLoading) {
@@ -147,6 +156,7 @@ export function EmployeesPage() {
             contracts={contracts}
             onDeleteClick={handleDeleteClick}
             onAddClick={() => setIsCreateDialogOpen(true)}
+            onEditClick={handleEditClick}
           />
         </div>
       </div>

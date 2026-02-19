@@ -117,15 +117,30 @@ export function ContractsPage() {
   }, [dbContracts, employeeMap])
 
   // KPIs - calculated dynamically
-  const kpis = useMemo(() => ({
-    totalContracts: contracts.length,
-    activeContracts: contracts.filter(c => c.status === 'active').length,
-    endingSoon: contracts.filter(c => c.status === 'ending_soon').length,
-    completed: contracts.filter(c => c.status === 'completed').length,
-    cdi: contracts.filter(c => c.type === 'CDI').length,
-    cdd: contracts.filter(c => c.type === 'CDD').length,
-    interim: contracts.filter(c => c.type === 'Intérim').length,
-  }), [contracts])
+  const kpis = useMemo(() => {
+    const now = new Date()
+    const eighteenMonthsAgo = new Date()
+    eighteenMonthsAgo.setMonth(eighteenMonthsAgo.getMonth() - 18)
+
+    // CDD/Intérim contracts active for more than 18 months
+    const cddsOver18Months = contracts.filter(c => {
+      if (c.type !== 'CDD' && c.type !== 'Intérim') return false
+      if (c.status === 'completed') return false
+      const startDate = new Date(c.startDate)
+      return startDate <= eighteenMonthsAgo
+    }).length
+
+    return {
+      totalContracts: contracts.length,
+      activeContracts: contracts.filter(c => c.status === 'active').length,
+      endingSoon: contracts.filter(c => c.status === 'ending_soon').length,
+      completed: contracts.filter(c => c.status === 'completed').length,
+      cdi: contracts.filter(c => c.type === 'CDI').length,
+      cdd: contracts.filter(c => c.type === 'CDD').length,
+      interim: contracts.filter(c => c.type === 'Intérim').length,
+      cddsOver18Months,
+    }
+  }, [contracts])
 
   // Reset page when filters change
   useEffect(() => {
@@ -266,7 +281,7 @@ export function ContractsPage() {
             },
             {
               title: 'CDD/Intérim > 18 mois',
-              value: 2,
+              value: kpis.cddsOver18Months,
               description: 'À surveiller',
               icon: <AlertTriangle className="h-4 w-4" />,
               iconColor: 'text-red-500',

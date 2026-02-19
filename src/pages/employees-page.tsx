@@ -144,6 +144,7 @@ export function EmployeesPage() {
             positions={positions}
             workLocations={workLocations}
             onDeleteClick={handleDeleteClick}
+            onAddClick={() => setIsCreateDialogOpen(true)}
           />
         </div>
       </div>

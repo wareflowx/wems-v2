@@ -5,6 +5,7 @@ import {
   Edit,
   ChevronLeft,
   ChevronRight,
+  Plus,
 } from "lucide-react";
 import {
   useReactTable,
@@ -43,6 +44,7 @@ interface EmployeesTableProps {
   positions: Position[];
   workLocations: WorkLocation[];
   onDeleteClick: (employee: { id: number; name: string }) => void;
+  onAddClick?: () => void;
 }
 
 export function EmployeesTable({
@@ -50,6 +52,7 @@ export function EmployeesTable({
   positions,
   workLocations,
   onDeleteClick,
+  onAddClick,
 }: EmployeesTableProps) {
   const { t } = useTranslation();
   const [globalFilter, setGlobalFilter] = useState("");
@@ -296,6 +299,12 @@ export function EmployeesTable({
             ))}
           </SelectContent>
         </Select>
+        {onAddClick && (
+          <Button className="gap-2 ml-auto" onClick={onAddClick}>
+            <Plus className="h-4 w-4" />
+            {t("employees.addEmployee")}
+          </Button>
+        )}
       </div>
 
       {/* Table */}

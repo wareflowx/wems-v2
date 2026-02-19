@@ -81,6 +81,7 @@
     "department": "Department",
     "position": "Position",
     "workLocation": "Work location",
+    "currentContract": "Current contract",
     "actions": "Actions",
     "view": "View"
   },

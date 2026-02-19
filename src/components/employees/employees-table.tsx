@@ -103,7 +103,7 @@ export function EmployeesTable({
       },
       {
         accessorKey: "contract",
-        header: t("employeeDetail.contractType"),
+        header: t("employees.currentContract"),
         cell: ({ getValue }) => {
           const contract = getValue() as string;
           const contractColors: { [key: string]: string } = {
@@ -268,7 +268,7 @@ export function EmployeesTable({
         </div>
         <Select value={contractFilter} onValueChange={setContractFilter}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={t("employeeDetail.contractType")} />
+            <SelectValue placeholder={t("employees.currentContract")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("common.allContracts")}</SelectItem>

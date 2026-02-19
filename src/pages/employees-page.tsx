@@ -90,7 +90,7 @@ export function EmployeesPage() {
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6 bg-sidebar">
         <div className="min-h-full space-y-3">
           {/* Header */}
           <PageHeaderCard

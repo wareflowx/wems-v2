@@ -158,7 +158,12 @@
     "editContractDescription": "Edit the contract details",
     "endDateHint": "Leave empty for CDI (permanent contract)",
     "inactive": "Inactive",
-    "deleteContract": "Delete contract"
+    "deleteContract": "Delete contract",
+    "timelineStatus": {
+      "future": "Future contract",
+      "inactive": "Contract ended",
+      "inProgress": "Contract in progress"
+    }
   },
   "departments": {
     "production": "Production",

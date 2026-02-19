@@ -158,7 +158,12 @@
     "editContractDescription": "Modifier les détails du contrat",
     "endDateHint": "Laisser vide pour un CDI",
     "inactive": "Inactif",
-    "deleteContract": "Supprimer le contrat"
+    "deleteContract": "Supprimer le contrat",
+    "timelineStatus": {
+      "future": "Contrat futur",
+      "inactive": "Contrat terminé",
+      "inProgress": "Contrat en cours"
+    }
   },
   "departments": {
     "production": "Production",

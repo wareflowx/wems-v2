@@ -8,7 +8,16 @@ import {
   SearchX,
   Edit,
   Eye,
+  CheckCircle2,
+  Clock,
+  XCircle,
 } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { StatusBadge, DetailBadge } from '@/components/ui/badge'
@@ -37,6 +46,7 @@ export interface Contract {
   startDate: string
   endDate: string | null
   status: string
+  isActive: boolean
   duration: number
   renewable: boolean
   renewalCount: number
@@ -126,6 +136,36 @@ export function ContractTable({
     return <StatusBadge color={config.color}>{config.label}</StatusBadge>
   }
 
+  const getTimelineStatus = (contract: Contract) => {
+    const today = new Date()
+    const start = new Date(contract.startDate)
+
+    // Check if contract hasn't started yet (future)
+    if (start > today) {
+      return {
+        type: 'future' as const,
+        icon: <Clock className="h-4 w-4 text-blue-500" />,
+        tooltip: t('contracts.timelineStatus.future'),
+      }
+    }
+
+    // Check if contract is inactive/completed
+    if (!contract.isActive || contract.status === 'completed') {
+      return {
+        type: 'inactive' as const,
+        icon: <XCircle className="h-4 w-4 text-gray-400" />,
+        tooltip: t('contracts.timelineStatus.inactive'),
+      }
+    }
+
+    // Contract is in progress
+    return {
+      type: 'in_progress' as const,
+      icon: <CheckCircle2 className="h-4 w-4 text-green-500" />,
+      tooltip: t('contracts.timelineStatus.inProgress'),
+    }
+  }
+
   const getDaysUntilEnd = (endDate: string | null) => {
     if (!endDate) return '-'
     const end = new Date(endDate)
@@ -192,6 +232,7 @@ export function ContractTable({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="px-2 w-10"></TableHead>
               <TableHead className="px-4">{t('employeeDetail.fullName')}</TableHead>
               <TableHead className="px-4">{t('contracts.type')}</TableHead>
               <TableHead className="px-4">{t('contracts.startDate')}</TableHead>
@@ -205,7 +246,7 @@ export function ContractTable({
           <TableBody>
             {paginatedContracts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-64">
+                <TableCell colSpan={7} className="h-64">
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
                     <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                       <SearchX className="h-8 w-8 opacity-50" />
@@ -220,6 +261,20 @@ export function ContractTable({
             ) : (
               paginatedContracts.map((contract) => (
                 <TableRow key={contract.id} className="hover:bg-muted/50">
+                  <TableCell className="pl-4 pr-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="cursor-default">
+                            {getTimelineStatus(contract).icon}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{getTimelineStatus(contract).tooltip}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
                   <TableCell className="px-4">
                     <Link
                       to={`/employees/${contract.employeeId}`}

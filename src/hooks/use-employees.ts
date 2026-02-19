@@ -13,12 +13,11 @@ export interface EmployeeFilters {
 // Hook for fetching employees list
 export function useEmployees(filters?: EmployeeFilters) {
   return useQuery({
-    queryKey: queryKeys.employees.list(JSON.stringify(filters)),
-    queryFn: async () => {
-      const employees = await db.getEmployees()
-
-      // Client-side filtering (can be moved to server later)
-      let filtered = [...employees]
+    queryKey: queryKeys.employees.lists(),
+    queryFn: () => db.getEmployees(),
+    select: (data: db.Employee[]) => {
+      // Client-side filtering using select to avoid multiple cache entries
+      let filtered = [...data]
 
       if (filters?.search) {
         const searchLower = filters.search.toLowerCase()

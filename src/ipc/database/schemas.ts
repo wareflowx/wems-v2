@@ -48,13 +48,13 @@ export const deleteWorkLocationInputSchema = z.object({
 
 // Employee schemas
 export const createEmployeeInputSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Valid email is required"),
+  firstName: z.string().min(1, "First name is required").trim(),
+  lastName: z.string().min(1, "Last name is required").trim(),
+  email: z.string().email("Valid email is required").transform(val => val.toLowerCase().trim()),
   phone: z.string().optional(),
   positionId: z.number().optional(),
   workLocationId: z.number().optional(),
-  department: z.string().min(1, "Department is required"),
+  department: z.string().min(1, "Department is required").trim(),
   status: z.enum(["active", "on_leave", "terminated"]).default("active"),
   hireDate: z.string().min(1, "Hire date is required"),
   terminationDate: z.string().optional(),
@@ -66,13 +66,13 @@ export const createEmployeeInputSchema = z.object({
 
 export const updateEmployeeInputSchema = z.object({
   id: z.number(),
-  firstName: z.string().min(1, "First name is required").optional(),
-  lastName: z.string().min(1, "Last name is required").optional(),
-  email: z.string().email("Valid email is required").optional(),
+  firstName: z.string().min(1, "First name is required").trim().optional(),
+  lastName: z.string().min(1, "Last name is required").trim().optional(),
+  email: z.string().email("Valid email is required").transform(val => val.toLowerCase().trim()).optional(),
   phone: z.string().optional(),
   positionId: z.number().optional().nullable(),
   workLocationId: z.number().optional().nullable(),
-  department: z.string().min(1, "Department is required").optional(),
+  department: z.string().min(1, "Department is required").trim().optional(),
   status: z.enum(["active", "on_leave", "terminated"]).optional(),
   hireDate: z.string().min(1, "Hire date is required").optional(),
   terminationDate: z.string().optional().nullable(),

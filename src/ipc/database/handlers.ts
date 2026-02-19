@@ -156,7 +156,7 @@ export const getEmployeeById = os.handler(async ({ input }) => {
     const db = await getDb();
     const [employee] = await db.select().from(employees).where(eq(employees.id, input.id));
     if (!employee) {
-      throw new Error(`Employee with id ${input.id} not found`);
+      throw new Error('Employee not found');
     }
     return employee;
   } catch (error) {

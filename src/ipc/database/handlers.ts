@@ -1,7 +1,7 @@
 import { os } from "@orpc/server";
 import { getDb } from "@/db";
-import { posts, positions, workLocations, employees } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { posts, positions, workLocations, employees, contracts } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { createPostInputSchema, createPositionInputSchema, updatePositionInputSchema, deletePositionInputSchema, createWorkLocationInputSchema, updateWorkLocationInputSchema, deleteWorkLocationInputSchema, createEmployeeInputSchema, updateEmployeeInputSchema, deleteEmployeeInputSchema } from "./schemas";
 
 // Posts handlers
@@ -227,6 +227,95 @@ export const deleteEmployee = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error('Error in deleteEmployee:', error);
+    throw error;
+  }
+});
+
+// Contracts handlers
+export const getContracts = os.handler(async () => {
+  try {
+    const db = await getDb();
+    return await db.select().from(contracts).orderBy(desc(contracts.id));
+  } catch (error) {
+    console.error('Error in getContracts:', error);
+    throw error;
+  }
+});
+
+export const getContractsByEmployee = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(contracts)
+      .where(eq(contracts.employeeId, input.employeeId))
+      .orderBy(desc(contracts.startDate));
+  } catch (error) {
+    console.error('Error in getContractsByEmployee:', error);
+    throw error;
+  }
+});
+
+export const getActiveContractByEmployee = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const result = await db
+      .select()
+      .from(contracts)
+      .where(eq(contracts.employeeId, input.employeeId))
+      .orderBy(desc(contracts.id))
+      .limit(1);
+    return result[0] || null;
+  } catch (error) {
+    console.error('Error in getActiveContractByEmployee:', error);
+    throw error;
+  }
+});
+
+export const createContract = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const [newContract] = await db.insert(contracts).values({
+      employeeId: input.employeeId,
+      contractType: input.contractType,
+      startDate: input.startDate,
+      endDate: input.endDate || null,
+      isActive: input.isActive ?? true,
+    }).returning();
+    return newContract;
+  } catch (error) {
+    console.error('Error in createContract:', error);
+    throw error;
+  }
+});
+
+export const updateContract = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const [updated] = await db
+      .update(contracts)
+      .set({
+        contractType: input.contractType,
+        startDate: input.startDate,
+        endDate: input.endDate || null,
+        isActive: input.isActive,
+      })
+      .where(eq(contracts.id, input.id))
+      .returning();
+    return updated;
+  } catch (error) {
+    console.error('Error in updateContract:', error);
+    throw error;
+  }
+});
+
+export const deleteContract = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    await db.delete(contracts).where(eq(contracts.id, input.id));
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteContract:', error);
     throw error;
   }
 });

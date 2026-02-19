@@ -96,3 +96,40 @@ export function updateEmployee(data: {
 export function deleteEmployee(id: number) {
   return ipc.client.database.deleteEmployee({ id });
 }
+
+// Contracts
+export function getContracts() {
+  return ipc.client.database.getContracts();
+}
+
+export function getContractsByEmployee(employeeId: number) {
+  return ipc.client.database.getContractsByEmployee({ employeeId });
+}
+
+export function getActiveContractByEmployee(employeeId: number) {
+  return ipc.client.database.getActiveContractByEmployee({ employeeId });
+}
+
+export function createContract(data: {
+  employeeId: number;
+  contractType: string;
+  startDate: string;
+  endDate?: string | null;
+  isActive?: boolean;
+}) {
+  return ipc.client.database.createContract(data);
+}
+
+export function updateContract(data: {
+  id: number;
+  contractType: string;
+  startDate: string;
+  endDate?: string | null;
+  isActive: boolean;
+}) {
+  return ipc.client.database.updateContract(data);
+}
+
+export function deleteContract(id: number) {
+  return ipc.client.database.deleteContract({ id });
+}

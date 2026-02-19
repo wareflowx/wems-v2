@@ -1,4 +1,4 @@
-import { createPost, getPosts, getPositions, createPosition, updatePosition, deletePosition, getWorkLocations, createWorkLocation, updateWorkLocation, deleteWorkLocation, getEmployees, getEmployeeById, createEmployee, updateEmployee, deleteEmployee } from "./handlers";
+import { createPost, getPosts, getPositions, createPosition, updatePosition, deletePosition, getWorkLocations, createWorkLocation, updateWorkLocation, deleteWorkLocation, getEmployees, getEmployeeById, createEmployee, updateEmployee, deleteEmployee, getContracts, getContractsByEmployee, getActiveContractByEmployee, createContract, updateContract, deleteContract } from "./handlers";
 
 export const database = {
   getPosts,
@@ -16,4 +16,10 @@ export const database = {
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  getContracts,
+  getContractsByEmployee,
+  getActiveContractByEmployee,
+  createContract,
+  updateContract,
+  deleteContract,
 };

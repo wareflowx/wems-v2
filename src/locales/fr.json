@@ -151,7 +151,14 @@
     "interim": "Intérim",
     "alternance": "Alternance",
     "stage": "Stage",
-    "freelance": "Freelance"
+    "freelance": "Freelance",
+    "selectType": "Sélectionner le type de contrat",
+    "addContractDescription": "Créer un nouveau contrat pour {{name}}",
+    "editContract": "Modifier le contrat",
+    "editContractDescription": "Modifier les détails du contrat",
+    "endDateHint": "Laisser vide pour un CDI",
+    "inactive": "Inactif",
+    "deleteContract": "Supprimer le contrat"
   },
   "departments": {
     "production": "Production",

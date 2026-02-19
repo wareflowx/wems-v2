@@ -151,7 +151,14 @@
     "interim": "Temporary",
     "alternance": "Apprenticeship",
     "stage": "Internship",
-    "freelance": "Freelance"
+    "freelance": "Freelance",
+    "selectType": "Select contract type",
+    "addContractDescription": "Create a new contract for {{name}}",
+    "editContract": "Edit contract",
+    "editContractDescription": "Edit the contract details",
+    "endDateHint": "Leave empty for CDI (permanent contract)",
+    "inactive": "Inactive",
+    "deleteContract": "Delete contract"
   },
   "departments": {
     "production": "Production",

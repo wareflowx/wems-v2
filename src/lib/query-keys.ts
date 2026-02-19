@@ -17,6 +17,8 @@ export const queryKeys = {
     list: (filters: string) => ['contracts', 'list', filters] as const,
     details: () => ['contracts', 'detail'] as const,
     detail: (id: number) => ['contracts', 'detail', id] as const,
+    byEmployee: (employeeId: number) => ['contracts', 'byEmployee', employeeId] as const,
+    activeByEmployee: (employeeId: number) => ['contracts', 'activeByEmployee', employeeId] as const,
   },
 
   // Documents

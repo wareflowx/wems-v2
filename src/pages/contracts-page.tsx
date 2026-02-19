@@ -9,7 +9,75 @@ import { MetricsSection } from '@/components/ui/metrics-section'
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect, useMemo } from 'react'
 import { ContractTable, type Contract } from '@/components/contracts/contract-table'
-import { useContracts } from '@/hooks'
+import {
+  useContracts,
+  useCreateContract,
+  useUpdateContract,
+  useDeleteContract,
+} from '@/hooks'
+import { useEmployees } from '@/hooks/use-employees'
+import { CreateContractDialog } from '@/components/contracts/CreateContractDialog'
+import { EditContractDialog } from '@/components/contracts/EditContractDialog'
+import { DeleteContractDialog } from '@/components/contracts/DeleteContractDialog'
+
+// Transform database contract to table contract
+function transformContract(
+  dbContract: {
+    id: number
+    employeeId: number
+    contractType: string
+    startDate: string
+    endDate: string | null
+    isActive: boolean
+  },
+  employeeName: string
+): Contract {
+  const now = new Date()
+  const start = new Date(dbContract.startDate)
+  const end = dbContract.endDate ? new Date(dbContract.endDate) : null
+
+  // Calculate duration in months
+  let duration = 0
+  if (end) {
+    duration = Math.floor(
+      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30)
+    )
+  }
+
+  // Determine status
+  let status: string
+  if (!dbContract.isActive) {
+    status = 'completed'
+  } else if (end) {
+    const daysUntilEnd = Math.ceil(
+      (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    )
+    if (daysUntilEnd < 0) {
+      status = 'completed'
+    } else if (daysUntilEnd <= 30) {
+      status = 'ending_soon'
+    } else {
+      status = 'active'
+    }
+  } else {
+    status = 'active'
+  }
+
+  return {
+    id: dbContract.id,
+    employee: employeeName,
+    employeeId: dbContract.employeeId,
+    type: dbContract.contractType,
+    startDate: dbContract.startDate,
+    endDate: dbContract.endDate,
+    status,
+    duration,
+    renewable: dbContract.contractType === 'CDD' || dbContract.contractType === 'Intérim',
+    renewalCount: 0,
+    salary: 0,
+    department: '',
+  }
+}
 
 export function ContractsPage() {
   const { t } = useTranslation()
@@ -19,8 +87,34 @@ export function ContractsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  // Use TanStack Query hook for contracts
-  const { data: contracts = [], isLoading } = useContracts()
+  // Dialog state
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(null)
+
+  // Use TanStack Query hooks
+  const { data: dbContracts = [], isLoading } = useContracts()
+  const { data: employees = [] } = useEmployees()
+  const createContract = useCreateContract()
+  const updateContract = useUpdateContract()
+  const deleteContract = useDeleteContract()
+
+  // Create employee lookup map
+  const employeeMap = useMemo(() => {
+    const map = new Map<number, string>()
+    employees.forEach((emp) => {
+      map.set(emp.id, `${emp.firstName} ${emp.lastName}`)
+    })
+    return map
+  }, [employees])
+
+  // Transform database contracts to table format
+  const contracts: Contract[] = useMemo(() => {
+    return dbContracts.map((c) =>
+      transformContract(c, employeeMap.get(c.employeeId) || 'Unknown')
+    )
+  }, [dbContracts, employeeMap])
 
   // KPIs - calculated dynamically
   const kpis = useMemo(() => ({
@@ -39,24 +133,86 @@ export function ContractsPage() {
   }, [search, typeFilter, statusFilter])
 
   const handleAddContract = () => {
-    // TODO: Open add contract dialog
-    console.log('Add contract')
+    setCreateDialogOpen(true)
   }
 
   const handleEditContract = (contract: Contract) => {
-    // TODO: Open edit contract dialog
-    console.log('Edit contract:', contract)
+    setSelectedContract(contract)
+    setEditDialogOpen(true)
   }
 
   const handleViewContract = (contract: Contract) => {
-    // TODO: Open view contract dialog
-    console.log('View contract:', contract)
+    // For now, open edit dialog in view mode
+    setSelectedContract(contract)
+    setEditDialogOpen(true)
   }
 
   const handleRenewContract = (contract: Contract) => {
-    // TODO: Open renew contract dialog
-    console.log('Renew contract:', contract)
+    // For renewal, open edit dialog with pre-filled data
+    setSelectedContract(contract)
+    setEditDialogOpen(true)
   }
+
+  const handleDeleteContract = (contract: Contract) => {
+    setSelectedContract(contract)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleCreateContract = (data: {
+    employeeId: number
+    contractType: string
+    startDate: string
+    endDate?: string | null
+  }) => {
+    createContract.mutate({
+      employeeId: data.employeeId,
+      contractType: data.contractType,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      isActive: true,
+    })
+    setCreateDialogOpen(false)
+  }
+
+  const handleUpdateContract = (data: {
+    id: number
+    contractType: string
+    startDate: string
+    endDate: string | null
+    isActive: boolean
+  }) => {
+    updateContract.mutate({
+      id: data.id,
+      contractType: data.contractType,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      isActive: data.isActive,
+    })
+    setEditDialogOpen(false)
+    setSelectedContract(null)
+  }
+
+  const handleConfirmDelete = () => {
+    if (selectedContract) {
+      deleteContract.mutate(selectedContract.id)
+      setDeleteDialogOpen(false)
+      setSelectedContract(null)
+    }
+  }
+
+  // Get selected employee name for create dialog
+  const selectedEmployeeName = useMemo(() => {
+    if (selectedContract) {
+      return selectedContract.employee
+    }
+    return ''
+  }, [selectedContract])
+
+  // Get the database contract for edit dialog
+  const dbContractForEdit = useMemo(() => {
+    if (!selectedContract) return null
+    return dbContracts.find((c) => c.id === selectedContract.id) || null
+  }, [selectedContract, dbContracts])
 
   if (isLoading) {
     return (
@@ -136,6 +292,26 @@ export function ContractsPage() {
           onRenew={handleRenewContract}
         />
       </div>
+
+      {/* Dialogs */}
+      <CreateContractDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onCreate={handleCreateContract}
+        employees={employees}
+      />
+      <EditContractDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onUpdate={handleUpdateContract}
+        contract={dbContractForEdit}
+      />
+      <DeleteContractDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        contract={selectedContract}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   )
 }

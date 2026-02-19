@@ -180,7 +180,22 @@ export const createEmployee = os.handler(async ({ input }) => {
   try {
     const validatedData = createEmployeeInputSchema.parse(input);
     const db = await getDb();
-    const [newEmployee] = await db.insert(employees).values(validatedData).returning();
+
+    // Extract contract info from input
+    const { contractType, contractStartDate, contractEndDate, ...employeeData } = validatedData;
+
+    // Insert employee first
+    const [newEmployee] = await db.insert(employees).values(employeeData).returning();
+
+    // Create contract record with employeeId
+    await db.insert(contracts).values({
+      employeeId: newEmployee.id,
+      contractType: contractType,
+      startDate: contractStartDate || employeeData.hireDate,
+      endDate: contractEndDate || null,
+      isActive: true,
+    });
+
     return newEmployee;
   } catch (error) {
     console.error('Error in createEmployee:', error);
@@ -201,7 +216,6 @@ export const updateEmployee = os.handler(async ({ input }) => {
     if (validatedData.phone !== undefined) updateData.phone = validatedData.phone;
     if (validatedData.positionId !== undefined) updateData.positionId = validatedData.positionId;
     if (validatedData.workLocationId !== undefined) updateData.workLocationId = validatedData.workLocationId;
-    if (validatedData.contract !== undefined) updateData.contract = validatedData.contract;
     if (validatedData.department !== undefined) updateData.department = validatedData.department;
     if (validatedData.status !== undefined) updateData.status = validatedData.status;
     if (validatedData.hireDate !== undefined) updateData.hireDate = validatedData.hireDate;

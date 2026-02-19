@@ -67,11 +67,13 @@ export function createEmployee(data: {
   phone?: string;
   positionId?: number;
   workLocationId?: number;
-  contract: string;
   department: string;
   status?: "active" | "on_leave" | "terminated";
   hireDate: string;
   terminationDate?: string;
+  contractType: string;
+  contractStartDate?: string;
+  contractEndDate?: string;
 }) {
   return ipc.client.database.createEmployee(data);
 }
@@ -84,7 +86,6 @@ export function updateEmployee(data: {
   phone?: string;
   positionId?: number | null;
   workLocationId?: number | null;
-  contract?: string;
   department?: string;
   status?: "active" | "on_leave" | "terminated";
   hireDate?: string;

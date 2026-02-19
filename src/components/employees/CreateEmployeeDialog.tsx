@@ -34,10 +34,11 @@ export interface CreateEmployeeData {
   phone?: string
   positionId?: number
   workLocationId?: number
-  contract: string
+  contractType: string
   department: string
   status?: 'active' | 'on_leave' | 'terminated'
   hireDate: string
+  contractEndDate?: string
 }
 
 const steps = [
@@ -61,9 +62,10 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
     phone: '',
     positionId: undefined,
     workLocationId: undefined,
-    contract: '',
+    contractType: '',
     department: '',
     hireDate: '',
+    contractEndDate: '',
   })
 
   const updateFormData = <K extends keyof CreateEmployeeData>(field: K, value: CreateEmployeeData[K]) => {
@@ -98,9 +100,10 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
         phone: '',
         positionId: undefined,
         workLocationId: undefined,
-        contract: '',
+        contractType: '',
         department: '',
         hireDate: '',
+        contractEndDate: '',
       })
       setCurrentStep(1)
     }
@@ -112,7 +115,7 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
       case 1:
         return formData.firstName && formData.lastName && formData.email
       case 2:
-        return formData.department && formData.contract && formData.hireDate
+        return formData.department && formData.contractType && formData.hireDate
       default:
         return true
     }
@@ -312,8 +315,8 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
                 <div className="space-y-2">
                   <Label htmlFor="contract">{t('employeeDetail.contractType')} *</Label>
                   <Select
-                    value={formData.contract}
-                    onValueChange={(value) => updateFormData('contract', value)}
+                    value={formData.contractType}
+                    onValueChange={(value) => updateFormData('contractType', value)}
                   >
                     <SelectTrigger id="contract">
                       <SelectValue placeholder={t('employeeDetail.contractType')} />
@@ -336,6 +339,22 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
                     onChange={(e) => updateFormData('hireDate', e.target.value)}
                   />
                 </div>
+
+                {/* Contract end date - optional for CDD/Intérim */}
+                {['CDD', 'Intérim', 'Alternance'].includes(formData.contractType) && (
+                  <div className="space-y-2">
+                    <Label htmlFor="contractEndDate">{t('contracts.endDate')}</Label>
+                    <Input
+                      id="contractEndDate"
+                      type="date"
+                      value={formData.contractEndDate}
+                      onChange={(e) => updateFormData('contractEndDate', e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {t('contracts.endDateHint')}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -383,12 +402,18 @@ export function CreateEmployeeDialog({ open, onOpenChange, onCreate }: CreateEmp
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('employeeDetail.contractType')}:</span>
-                      <span className="font-medium">{getContractDisplay(formData.contract)}</span>
+                      <span className="font-medium">{getContractDisplay(formData.contractType)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('employeeDetail.startDate')}:</span>
                       <span className="font-medium">{formData.hireDate || '-'}</span>
                     </div>
+                    {formData.contractEndDate && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{t('contracts.endDate')}:</span>
+                        <span className="font-medium">{formData.contractEndDate}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -54,11 +54,14 @@ export const createEmployeeInputSchema = z.object({
   phone: z.string().optional(),
   positionId: z.number().optional(),
   workLocationId: z.number().optional(),
-  contract: z.string().min(1, "Contract type is required"),
   department: z.string().min(1, "Department is required"),
   status: z.enum(["active", "on_leave", "terminated"]).default("active"),
   hireDate: z.string().min(1, "Hire date is required"),
   terminationDate: z.string().optional(),
+  // Contract info - will create contract record
+  contractType: z.string().min(1, "Contract type is required"),
+  contractStartDate: z.string().optional(),
+  contractEndDate: z.string().optional(),
 });
 
 export const updateEmployeeInputSchema = z.object({
@@ -69,7 +72,6 @@ export const updateEmployeeInputSchema = z.object({
   phone: z.string().optional(),
   positionId: z.number().optional().nullable(),
   workLocationId: z.number().optional().nullable(),
-  contract: z.string().min(1, "Contract type is required").optional(),
   department: z.string().min(1, "Department is required").optional(),
   status: z.enum(["active", "on_leave", "terminated"]).optional(),
   hireDate: z.string().min(1, "Hire date is required").optional(),

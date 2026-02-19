@@ -193,7 +193,6 @@ export function ContractTable({
           <TableHeader>
             <TableRow>
               <TableHead className="px-4">{t('employeeDetail.fullName')}</TableHead>
-              <TableHead className="px-4">Employeur</TableHead>
               <TableHead className="px-4">{t('contracts.type')}</TableHead>
               <TableHead className="px-4">{t('contracts.startDate')}</TableHead>
               <TableHead className="px-4">{t('contracts.endDate')}</TableHead>
@@ -206,7 +205,7 @@ export function ContractTable({
           <TableBody>
             {paginatedContracts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-64">
+                <TableCell colSpan={6} className="h-64">
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
                     <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                       <SearchX className="h-8 w-8 opacity-50" />
@@ -232,13 +231,6 @@ export function ContractTable({
                       <div className="flex gap-1 mt-1">
                         <DetailBadge color="blue">{contract.renewalCount} renouvellement{contract.renewalCount > 1 ? 's' : ''}</DetailBadge>
                       </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4">
-                    {contract.agency ? (
-                      <DetailBadge color="orange">{contract.agency}</DetailBadge>
-                    ) : (
-                      <DetailBadge color="blue">WEMS</DetailBadge>
                     )}
                   </TableCell>
                   <TableCell className="px-4">

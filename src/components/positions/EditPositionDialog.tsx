@@ -1,0 +1,156 @@
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
+
+const COLORS = [
+  { name: "Emerald", value: "bg-emerald-500" },
+  { name: "Amber", value: "bg-amber-500" },
+  { name: "Indigo", value: "bg-indigo-500" },
+  { name: "Rose", value: "bg-rose-500" },
+  { name: "Cyan", value: "bg-cyan-500" },
+  { name: "Violet", value: "bg-violet-500" },
+  { name: "Blue", value: "bg-blue-500" },
+  { name: "Green", value: "bg-green-500" },
+  { name: "Red", value: "bg-red-500" },
+  { name: "Orange", value: "bg-orange-500" },
+];
+
+interface Position {
+  id: number;
+  code: string;
+  name: string;
+  color: string;
+  isActive: boolean;
+}
+
+interface EditPositionDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onUpdate?: (data: { code: string; name: string; color: string; isActive: boolean }) => void;
+  position?: Position | null;
+}
+
+export function EditPositionDialog({
+  open,
+  onOpenChange,
+  onUpdate,
+  position,
+}: EditPositionDialogProps) {
+  const { t } = useTranslation();
+  const [name, setName] = useState("");
+  const [selectedColor, setSelectedColor] = useState(COLORS[0].value);
+  const [isActive, setIsActive] = useState(true);
+
+  useEffect(() => {
+    if (position) {
+      setName(position.name);
+      setSelectedColor(position.color);
+      setIsActive(position.isActive);
+    }
+  }, [position]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+
+    onUpdate?.({
+      code: position?.code || name.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z0-9]/g, "_"),
+      name: name.trim(),
+      color: selectedColor,
+      isActive,
+    });
+  };
+
+  const isFormValid = name.trim();
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t("positions.editPosition")}</DialogTitle>
+          <DialogDescription>
+            {t("positions.editPositionDescription")}
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="position-name">{t("positions.name")}</Label>
+              <Input
+                id="position-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t("positions.namePlaceholder")}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>{t("positions.color")}</Label>
+              <div className="flex flex-wrap gap-2">
+                {COLORS.map((color) => (
+                  <button
+                    key={color.value}
+                    type="button"
+                    onClick={() => setSelectedColor(color.value)}
+                    className={`w-8 h-8 rounded-md ${color.value} ${
+                      selectedColor === color.value
+                        ? "ring-2 ring-offset-2 ring-gray-900"
+                        : ""
+                    } transition-all hover:scale-110`}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label>{t("positions.status")}</Label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="isActive"
+                    checked={isActive === true}
+                    onChange={() => setIsActive(true)}
+                    className="accent-green-600"
+                  />
+                  <span className="text-sm">{t("positions.active")}</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="isActive"
+                    checked={isActive === false}
+                    onChange={() => setIsActive(false)}
+                    className="accent-gray-600"
+                  />
+                  <span className="text-sm">{t("positions.inactive")}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange?.(false)}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button type="submit" disabled={!isFormValid}>
+              {t("common.save")}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

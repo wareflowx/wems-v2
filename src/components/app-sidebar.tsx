@@ -189,6 +189,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 
         <SidebarGroup>
+          <SidebarGroupLabel>{t("sidebar.referenceData")}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("positions.title")}>
+                  <Link to="/positions">
+                    <Briefcase />
+                    <span>{t("positions.title")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("workLocations.title")}>
+                  <Link to="/work-locations">
+                    <MapPin />
+                    <span>{t("workLocations.title")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+
+        <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.quickActions")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

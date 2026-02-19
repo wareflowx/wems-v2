@@ -168,13 +168,13 @@ export function WorkLocationsPage() {
 
             {/* Table */}
             <div className="rounded-lg border overflow-x-auto">
-              <Table>
+              <Table className="w-full table-fixed">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="px-4">{t("workLocations.code")}</TableHead>
+                    <TableHead className="px-4 w-[120px]">{t("workLocations.code")}</TableHead>
                     <TableHead className="px-4">{t("workLocations.name")}</TableHead>
-                    <TableHead className="px-4">{t("workLocations.status")}</TableHead>
-                    <TableHead className="px-4 text-right">{t("workLocations.actions")}</TableHead>
+                    <TableHead className="px-4 w-[100px]">{t("workLocations.status")}</TableHead>
+                    <TableHead className="px-4 w-[100px] text-right">{t("workLocations.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -201,7 +201,7 @@ export function WorkLocationsPage() {
                             {location.code}
                           </span>
                         </TableCell>
-                        <TableCell className="px-4 font-medium truncate max-w-[200px]">{location.name}</TableCell>
+                        <TableCell className="px-4 font-medium truncate">{location.name}</TableCell>
                         <TableCell className="px-4">
                           {location.isActive ? (
                             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-green-500/15 border border-green-500/25 text-green-600">

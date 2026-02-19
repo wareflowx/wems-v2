@@ -38,11 +38,13 @@ import { Link } from "@tanstack/react-router";
 import type { Employee } from "@/db/schema/employees";
 import type { Position } from "@/db/schema/positions";
 import type { WorkLocation } from "@/db/schema/work-locations";
+import type { Contract } from "@/db/schema/contracts";
 
 interface EmployeesTableProps {
   employees: Employee[];
   positions: Position[];
   workLocations: WorkLocation[];
+  contracts: Contract[];
   onDeleteClick: (employee: { id: number; name: string }) => void;
   onAddClick?: () => void;
 }
@@ -51,6 +53,7 @@ export function EmployeesTable({
   employees,
   positions,
   workLocations,
+  contracts,
   onDeleteClick,
   onAddClick,
 }: EmployeesTableProps) {
@@ -59,11 +62,16 @@ export function EmployeesTable({
   const [contractFilter, setContractFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
+  // Get contract for an employee
+  const getEmployeeContract = (employeeId: number): Contract | undefined => {
+    return contracts.find((c) => c.employeeId === employeeId && c.isActive);
+  }
+
   // Get unique contracts and statuses
   const uniqueContracts = useMemo(() => {
-    const contracts = new Set(employees.map((e) => e.contract));
-    return Array.from(contracts);
-  }, [employees]);
+    const contractTypes = new Set(contracts.map((c) => c.contractType));
+    return Array.from(contractTypes);
+  }, [contracts]);
 
   const uniqueStatuses = useMemo(() => {
     const statuses = new Set(employees.map((e) => e.status));
@@ -73,13 +81,14 @@ export function EmployeesTable({
   // Filter data manually for contract and status, use TanStack for search
   const filteredData = useMemo(() => {
     return employees.filter((employee) => {
+      const employeeContract = getEmployeeContract(employee.id);
       const matchesContract =
-        contractFilter === "all" || employee.contract === contractFilter;
+        contractFilter === "all" || employeeContract?.contractType === contractFilter;
       const matchesStatus =
         statusFilter === "all" || employee.status === statusFilter;
       return matchesContract && matchesStatus;
     });
-  }, [employees, contractFilter, statusFilter]);
+  }, [employees, contracts, contractFilter, statusFilter]);
 
   const columns: ColumnDef<Employee>[] = useMemo(
     () => [
@@ -105,23 +114,26 @@ export function EmployeesTable({
         },
       },
       {
-        accessorKey: "contract",
+        id: "currentContract",
         header: t("employees.currentContract"),
-        cell: ({ getValue }) => {
-          const contract = getValue() as string;
+        cell: ({ row }) => {
+          const employee = row.original;
+          const contract = getEmployeeContract(employee.id);
+          const contractType = contract?.contractType || "-";
           const contractColors: { [key: string]: string } = {
             CDI: "bg-blue-500/15 border border-blue-500/25 text-blue-600",
             CDD: "bg-orange-500/15 border border-orange-500/25 text-orange-600",
             Intérim: "bg-teal-500/15 border border-teal-500/25 text-teal-600",
+            Alternance: "bg-purple-500/15 border border-purple-500/25 text-purple-600",
           };
           const colors =
-            contractColors[contract] ||
+            contractColors[contractType] ||
             "bg-gray-500/15 border border-gray-500/25 text-gray-600";
           return (
             <span
               className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${colors}`}
             >
-              {contract}
+              {contractType}
             </span>
           );
         },
@@ -233,7 +245,7 @@ export function EmployeesTable({
         },
       },
     ],
-    [t, positions, workLocations, onDeleteClick]
+    [t, positions, workLocations, contracts, onDeleteClick]
   );
 
   const table = useReactTable({

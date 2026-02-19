@@ -12,7 +12,7 @@ import { DeleteEmployeeDialog } from "@/components/employees/DeleteEmployeeDialo
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { EmployeesTable } from "@/components/employees/employees-table";
-import { useEmployees, useCreateEmployee, useDeleteEmployee, usePositions, useWorkLocations } from "@/hooks";
+import { useEmployees, useCreateEmployee, useDeleteEmployee, usePositions, useWorkLocations, useContracts } from "@/hooks";
 
 export function EmployeesPage() {
   const { t } = useTranslation();
@@ -27,6 +27,7 @@ export function EmployeesPage() {
   const { data: employees = [], isLoading } = useEmployees()
   const { data: positions = [] } = usePositions()
   const { data: workLocations = [] } = useWorkLocations()
+  const { data: contracts = [] } = useContracts()
   const createEmployee = useCreateEmployee()
   const deleteEmployee = useDeleteEmployee()
 
@@ -143,6 +144,7 @@ export function EmployeesPage() {
             employees={employees}
             positions={positions}
             workLocations={workLocations}
+            contracts={contracts}
             onDeleteClick={handleDeleteClick}
             onAddClick={() => setIsCreateDialogOpen(true)}
           />

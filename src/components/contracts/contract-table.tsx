@@ -248,7 +248,7 @@ export function ContractTable({
                   <TableCell className="px-4">
                     <div className="flex flex-col">
                       <span className="text-gray-700">
-                        {contract.endDate || 'CDI'}
+                        {contract.endDate || '-'}
                       </span>
                       {contract.endDate && contract.status === 'active' && (
                         <span className="text-xs text-yellow-600 font-medium">

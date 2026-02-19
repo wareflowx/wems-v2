@@ -17,7 +17,7 @@ export function MetricsSection({ kpis }: MetricsSectionProps) {
   return (
     <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
       {kpis.map((kpi, index) => (
-        <Card key={index} className="p-4 bg-background">
+        <Card key={index} className="p-4">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
             <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
             <div className={kpi.iconColor || ""}>{kpi.icon}</div>

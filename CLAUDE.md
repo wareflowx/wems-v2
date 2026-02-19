@@ -1,5 +1,9 @@
 # WEMS v2 - Claude Development Guide
 
+## Language
+
+You MUST always respond in English, regardless of the language used by the user.
+
 ## Git Commit Convention
 
 All commits MUST include both co-authors:
@@ -44,6 +48,11 @@ EOF
 - Use TypeScript strict mode
 - Prefer composition over inheritance
 - Keep components small and focused
+
+### Component Analysis
+- When you see a component you don't know, always read its source code first to understand its default styling and behavior
+- Check if the component already has built-in styling (e.g., Card component has bg-card by default) before adding redundant classes
+- Remove any redundant or duplicate styling to keep code clean
 
 ### Testing
 - Test all mutations (create, update, delete)

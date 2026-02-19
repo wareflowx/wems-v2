@@ -15,7 +15,6 @@ import {
   Users,
   Briefcase,
   MapPin,
-  Plus,
   SquareTerminal,
   BookOpen,
   Settings2,
@@ -42,8 +41,6 @@ import { Link } from "@tanstack/react-router";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
-import { CreatePositionDialog } from "@/components/positions/CreatePositionDialog";
-import { CreateWorkLocationDialog } from "@/components/work-locations/CreateWorkLocationDialog";
 
 const data = {
   user: {
@@ -85,8 +82,6 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
   const [appVersion, setAppVersion] = React.useState("0.0.0");
-  const [isPositionDialogOpen, setIsPositionDialogOpen] = React.useState(false);
-  const [isWorkLocationDialogOpen, setIsWorkLocationDialogOpen] = React.useState(false);
 
   React.useEffect(() => {
     getAppVersion().then(setAppVersion);
@@ -213,35 +208,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
 
 
-        <SidebarGroup>
-          <SidebarGroupLabel>{t("sidebar.quickActions")}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip={t("sidebar.addPosition")}
-                  onClick={() => setIsPositionDialogOpen(true)}
-                >
-                  <Briefcase />
-                  <span>{t("sidebar.addPosition")}</span>
-                  <Plus className="ml-auto" />
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip={t("sidebar.addWorkLocation")}
-                  onClick={() => setIsWorkLocationDialogOpen(true)}
-                >
-                  <MapPin />
-                  <span>{t("sidebar.addWorkLocation")}</span>
-                  <Plus className="ml-auto" />
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
@@ -286,16 +252,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
-
-      {/* Dialogs */}
-      <CreatePositionDialog
-        open={isPositionDialogOpen}
-        onOpenChange={setIsPositionDialogOpen}
-      />
-      <CreateWorkLocationDialog
-        open={isWorkLocationDialogOpen}
-        onOpenChange={setIsWorkLocationDialogOpen}
-      />
     </Sidebar>
   );
 }

@@ -201,7 +201,7 @@ export function PositionsPage() {
                             {position.code}
                           </span>
                         </TableCell>
-                        <TableCell className="px-4 font-medium">{position.name}</TableCell>
+                        <TableCell className="px-4 font-medium truncate max-w-[200px]">{position.name}</TableCell>
                         <TableCell className="px-4">
                           {position.isActive ? (
                             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-green-500/15 border border-green-500/25 text-green-600">

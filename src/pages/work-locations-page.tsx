@@ -201,7 +201,7 @@ export function WorkLocationsPage() {
                             {location.code}
                           </span>
                         </TableCell>
-                        <TableCell className="px-4 font-medium">{location.name}</TableCell>
+                        <TableCell className="px-4 font-medium truncate max-w-[200px]">{location.name}</TableCell>
                         <TableCell className="px-4">
                           {location.isActive ? (
                             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-green-500/15 border border-green-500/25 text-green-600">

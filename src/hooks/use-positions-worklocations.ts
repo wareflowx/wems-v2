@@ -16,8 +16,7 @@ export function useCreatePosition() {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async (data: { code: string; name: string; color: string; isActive?: boolean }) => {
-      console.log('useCreatePosition mutationFn called:', data);
+    mutationFn: (data: { code: string; name: string; color: string; isActive?: boolean }) => {
       return db.createPosition(data);
     },
 

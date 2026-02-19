@@ -106,3 +106,8 @@ out/
 # Claude Code local settings
 .claude/settings.local.json
 .claude/settings.json
+
+# Database files
+*.db
+*.db-shm
+*.db-wal

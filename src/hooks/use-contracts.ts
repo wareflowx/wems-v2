@@ -40,19 +40,42 @@ export function useCreateContract() {
       isActive?: boolean;
     }) => db.createContract(data),
 
+    onMutate: async (newContract) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.contracts.lists() });
+
+      const previousContracts = queryClient.getQueryData(queryKeys.contracts.lists());
+
+      queryClient.setQueryData(
+        queryKeys.contracts.lists(),
+        (old: db.Contract[] = []) => [
+          ...old,
+          {
+            ...newContract,
+            id: Date.now(),
+            isActive: newContract.isActive ?? true,
+          },
+        ]
+      );
+
+      return { previousContracts };
+    },
+
+    onError: (err, variables, context) => {
+      if (context?.previousContracts) {
+        queryClient.setQueryData(queryKeys.contracts.lists(), context.previousContracts);
+      }
+      toast({
+        title: "Failed to create contract",
+        description: err instanceof Error ? err.message : "An error occurred",
+        variant: "destructive",
+      });
+    },
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.contracts.lists() });
       toast({
         title: "Contract created",
         description: "The contract has been created successfully",
-      });
-    },
-
-    onError: (err) => {
-      toast({
-        title: "Failed to create contract",
-        description: err instanceof Error ? err.message : "An error occurred",
-        variant: "destructive",
       });
     },
   });
@@ -71,19 +94,38 @@ export function useUpdateContract() {
       isActive: boolean;
     }) => db.updateContract(data),
 
+    onMutate: async (updatedContract) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.contracts.lists() });
+
+      const previousContracts = queryClient.getQueryData(queryKeys.contracts.lists());
+
+      queryClient.setQueryData(
+        queryKeys.contracts.lists(),
+        (old: db.Contract[] = []) =>
+          old.map((c) =>
+            c.id === updatedContract.id ? { ...c, ...updatedContract } : c
+          )
+      );
+
+      return { previousContracts };
+    },
+
+    onError: (err, variables, context) => {
+      if (context?.previousContracts) {
+        queryClient.setQueryData(queryKeys.contracts.lists(), context.previousContracts);
+      }
+      toast({
+        title: "Failed to update contract",
+        description: err instanceof Error ? err.message : "An error occurred",
+        variant: "destructive",
+      });
+    },
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.contracts.lists() });
       toast({
         title: "Contract updated",
         description: "The contract has been updated successfully",
-      });
-    },
-
-    onError: (err) => {
-      toast({
-        title: "Failed to update contract",
-        description: err instanceof Error ? err.message : "An error occurred",
-        variant: "destructive",
       });
     },
   });

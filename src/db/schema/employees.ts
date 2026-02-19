@@ -13,12 +13,11 @@ export const employees = sqliteTable('employees', {
   phone: text('phone'),
 
   // Employment references (FK)
-  positionId: integer('position_id').references(() => positions.id),
-  workLocationId: integer('work_location_id').references(() => workLocations.id),
+  positionId: integer('position_id').references(() => positions.id, { onDelete: 'set null' }),
+  workLocationId: integer('work_location_id').references(() => workLocations.id, { onDelete: 'set null' }),
 
-  // Keep as string for now (contracts/departments tables coming later)
-  contract: text('contract').notNull(),     // "CDI", "CDD", "Intérim", "Alternance"
-  department: text('department').notNull(),   // "Production", "RH", etc.
+  // Department
+  department: text('department'),   // "Production", "RH", etc.
 
   // Status & dates
   status: text('status').notNull().default('active'), // 'active' | 'on_leave' | 'terminated'

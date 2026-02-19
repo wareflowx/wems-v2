@@ -168,13 +168,13 @@ export function PositionsPage() {
 
             {/* Table */}
             <div className="rounded-lg border overflow-x-auto">
-              <Table className="w-full table-fixed">
+              <Table className="w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="px-4 w-[120px]">{t("positions.code")}</TableHead>
+                    <TableHead className="px-4">{t("positions.code")}</TableHead>
                     <TableHead className="px-4">{t("positions.name")}</TableHead>
-                    <TableHead className="px-4 w-[100px]">{t("positions.status")}</TableHead>
-                    <TableHead className="px-4 w-[100px] text-right">{t("positions.actions")}</TableHead>
+                    <TableHead className="px-4">{t("positions.status")}</TableHead>
+                    <TableHead className="px-4 text-right">{t("positions.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -201,7 +201,7 @@ export function PositionsPage() {
                             {position.code}
                           </span>
                         </TableCell>
-                        <TableCell className="px-4 font-medium truncate">{position.name}</TableCell>
+                        <TableCell className="px-4 font-medium truncate max-w-[300px]">{position.name}</TableCell>
                         <TableCell className="px-4">
                           {position.isActive ? (
                             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-green-500/15 border border-green-500/25 text-green-600">

@@ -21,6 +21,8 @@ import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as ContractsRouteImport } from './routes/contracts'
 import { Route as PostsRouteImport } from './routes/posts'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PositionsRouteImport } from './routes/positions'
+import { Route as WorkLocationsRouteImport } from './routes/work-locations'
 
 const SettingsAlertsRoute = SettingsAlertsRouteImport.update({
   id: '/settings/alerts',
@@ -82,6 +84,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PositionsRoute = PositionsRouteImport.update({
+  id: '/positions',
+  path: '/positions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkLocationsRoute = WorkLocationsRouteImport.update({
+  id: '/work-locations',
+  path: '/work-locations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -92,6 +104,8 @@ export interface FileRoutesByFullPath {
   '/medical-visits': typeof MedicalVisitsRoute
   '/alerts': typeof AlertsRoute
   '/contracts': typeof ContractsRoute
+  '/positions': typeof PositionsRoute
+  '/work-locations': typeof WorkLocationsRoute
   '/settings/alerts': typeof SettingsAlertsRoute
   '/settings/backup': typeof SettingsBackupRoute
   '/settings/reference-data': typeof SettingsReferenceRoute
@@ -106,6 +120,8 @@ export interface FileRoutesByTo {
   '/medical-visits': typeof MedicalVisitsRoute
   '/alerts': typeof AlertsRoute
   '/contracts': typeof ContractsRoute
+  '/positions': typeof PositionsRoute
+  '/work-locations': typeof WorkLocationsRoute
   '/settings/alerts': typeof SettingsAlertsRoute
   '/settings/backup': typeof SettingsBackupRoute
   '/settings/reference-data': typeof SettingsReferenceRoute
@@ -121,6 +137,8 @@ export interface FileRoutesById {
   '/medical-visits': typeof MedicalVisitsRoute
   '/alerts': typeof AlertsRoute
   '/contracts': typeof ContractsRoute
+  '/positions': typeof PositionsRoute
+  '/work-locations': typeof WorkLocationsRoute
   '/settings/alerts': typeof SettingsAlertsRoute
   '/settings/backup': typeof SettingsBackupRoute
   '/settings/reference-data': typeof SettingsReferenceRoute
@@ -128,10 +146,10 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
+  fullPaths: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
-  id: '__root__' | '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
+  to: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
+  id: '__root__' | '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -143,6 +161,8 @@ export interface RootRouteChildren {
   MedicalVisitsRoute: typeof MedicalVisitsRoute
   AlertsRoute: typeof AlertsRoute
   ContractsRoute: typeof ContractsRoute
+  PositionsRoute: typeof PositionsRoute
+  WorkLocationsRoute: typeof WorkLocationsRoute
   SettingsAlertsRoute: typeof SettingsAlertsRoute
   SettingsBackupRoute: typeof SettingsBackupRoute
   SettingsReferenceRoute: typeof SettingsReferenceRoute
@@ -235,6 +255,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/positions': {
+      id: '/positions'
+      path: '/positions'
+      fullPath: '/positions'
+      preLoaderRoute: typeof PositionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/work-locations': {
+      id: '/work-locations'
+      path: '/work-locations'
+      fullPath: '/work-locations'
+      preLoaderRoute: typeof WorkLocationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -247,6 +281,8 @@ const rootRouteChildren: RootRouteChildren = {
   MedicalVisitsRoute: MedicalVisitsRoute,
   AlertsRoute: AlertsRoute,
   ContractsRoute: ContractsRoute,
+  PositionsRoute: PositionsRoute,
+  WorkLocationsRoute: WorkLocationsRoute,
   SettingsAlertsRoute: SettingsAlertsRoute,
   SettingsBackupRoute: SettingsBackupRoute,
   SettingsReferenceRoute: SettingsReferenceRoute,

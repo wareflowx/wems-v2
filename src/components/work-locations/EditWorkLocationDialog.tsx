@@ -102,12 +102,18 @@ export function EditWorkLocationDialog({
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="location-name">{t("workLocations.name")}</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="location-name">{t("workLocations.name")}</Label>
+                <span className="text-xs text-muted-foreground">
+                  {name.length}/30
+                </span>
+              </div>
               <Input
                 id="location-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("workLocations.namePlaceholder")}
+                maxLength={30}
               />
             </div>
             <div className="grid gap-2">

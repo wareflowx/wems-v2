@@ -86,12 +86,18 @@ export function CreatePositionDialog({
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="position-name">{t("settings.positionName")}</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="position-name">{t("settings.positionName")}</Label>
+                <span className="text-xs text-muted-foreground">
+                  {name.length}/30
+                </span>
+              </div>
               <Input
                 id="position-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("settings.positionNamePlaceholder")}
+                maxLength={30}
               />
             </div>
             <div className="grid gap-2">

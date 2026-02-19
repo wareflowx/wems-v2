@@ -53,6 +53,7 @@ EOF
 - When you see a component you don't know, always read its source code first to understand its default styling and behavior
 - Check if the component already has built-in styling (e.g., Card component has bg-card by default) before adding redundant classes
 - Remove any redundant or duplicate styling to keep code clean
+- Never modify shadcn/ui components (in `@/components/ui/`) without explicit user permission
 
 ### Testing
 - Test all mutations (create, update, delete)

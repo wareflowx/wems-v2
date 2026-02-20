@@ -9,6 +9,7 @@ import {
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS } from "./constants";
+import { releaseWriteLock } from "./db";
 import fs from "fs";
 
 const inDevelopment = process.env.NODE_ENV === 'development';
@@ -145,6 +146,7 @@ process.on('unhandledRejection', (reason, promise) => {
 
 //osX only
 app.on("window-all-closed", () => {
+  releaseWriteLock();
   if (process.platform !== "darwin") {
     app.quit();
   }

@@ -9,7 +9,7 @@ import {
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS } from "./constants";
-import { releaseWriteLock } from "./db";
+import { releaseWriteLock, isWriteMode } from "./db";
 import fs from "fs";
 
 const inDevelopment = process.env.NODE_ENV === 'development';
@@ -110,6 +110,11 @@ async function setupORPC() {
 
     serverPort.start();
     rpcHandler.upgrade(serverPort);
+  });
+
+  // Expose write mode status to renderer
+  ipcMain.handle(IPC_CHANNELS.GET_WRITE_MODE, () => {
+    return isWriteMode();
   });
 }
 

@@ -19,7 +19,9 @@ import {
   BookOpen,
   Settings2,
   Trash2,
-  MessageCircleQuestion
+  MessageCircleQuestion,
+  Lock,
+  Pen
 } from "lucide-react";
 import {
   Sidebar,
@@ -82,9 +84,11 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
   const [appVersion, setAppVersion] = React.useState("0.0.0");
+  const [canWrite, setCanWrite] = React.useState(true);
 
   React.useEffect(() => {
     getAppVersion().then(setAppVersion);
+    window.getWriteMode?.().then(setCanWrite).catch(() => setCanWrite(true));
   }, []);
 
   return (
@@ -241,6 +245,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter className="bg-card border-t">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <div
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-sm ${
+                canWrite
+                  ? "bg-green-100 text-green-800"
+                  : "bg-amber-100 text-amber-800"
+              }`}
+            >
+              {canWrite ? (
+                <Pen className="h-4 w-4" />
+              ) : (
+                <Lock className="h-4 w-4" />
+              )}
+              <span className="group-data-[collapsible=icon]:hidden">
+                {canWrite ? "Write mode" : "Read only"}
+              </span>
+            </div>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
               <button className="w-full">

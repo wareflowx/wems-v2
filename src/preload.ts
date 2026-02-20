@@ -8,3 +8,6 @@ window.addEventListener("message", (event) => {
     ipcRenderer.postMessage(IPC_CHANNELS.START_ORPC_SERVER, null, [serverPort]);
   }
 });
+
+// Expose write mode to renderer
+window.getWriteMode = () => ipcRenderer.invoke(IPC_CHANNELS.GET_WRITE_MODE);

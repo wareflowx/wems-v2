@@ -52,16 +52,25 @@ jobs:
 
             ## ⚠️ CRITICAL: POST YOUR RESPONSE
 
-            After formulating your response, you MUST post it by using the Bash tool to execute:
+            After formulating your response, you MUST post it by using the Bash tool.
 
+            **If your response is short**, use:
             ```bash
             gh issue comment $ISSUE_NUMBER --body "Your response here"
+            ```
+
+            **If your response is long or contains special characters**, create a temporary markdown file first:
+            ```bash
+            cat > /tmp/comment.md << 'EOF'
+            Your multi-line response here in **markdown**
+            EOF
+            gh issue comment $ISSUE_NUMBER --body-file /tmp/comment.md
+            rm /tmp/comment.md
             ```
 
             **IMPORTANT:**
             - Do NOT just formulate your response internally
             - You MUST USE the Bash tool to run the gh issue comment command
-            - Replace "Your response here" with your actual response text
             - This is how your response appears on the GitHub issue
 
             ## Important Guidelines
@@ -71,6 +80,8 @@ jobs:
             - Ask clarifying questions if something is unclear
             - Be friendly and professional
             - Don't mention that you're an AI (just be helpful)
+            - **ALWAYS use markdown code blocks for code**: ```language\ncode here\n```
+            - Format code properly with triple backticks and language identifier
 
           claude_args: |
             --allowedTools "Bash(gh:*),Read"

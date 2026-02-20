@@ -16,7 +16,6 @@ import {
   Briefcase,
   MapPin,
   SquareTerminal,
-  BookOpen,
   Settings2,
   Trash2,
   MessageCircleQuestion

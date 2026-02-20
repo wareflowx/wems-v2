@@ -1,7 +1,7 @@
 {
   "name": "wems",
   "productName": "WEMS",
-  "version": "2.0.4",
+  "version": "2.0.6",
   "description": "WEMS - Workforce/Employee Management System",
   "main": "out/main/main.js",
   "private": true,

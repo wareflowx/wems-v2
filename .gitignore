@@ -111,3 +111,6 @@ out/
 *.db
 *.db-shm
 *.db-wal
+
+# Data directory (contains database and logs)
+data/

@@ -2,18 +2,38 @@ import path from 'path';
 import { app } from 'electron';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import fs from 'fs';
-import 'dotenv/config';
 
 // Lazy database initialization to avoid Vite bundling issues with native modules
 let db: ReturnType<typeof drizzle> | null = null;
 
+const inDevelopment = process.env.NODE_ENV === 'development';
+
+function getDataDir() {
+  // In production: use executable directory
+  // In development: use project root
+  const baseDir = inDevelopment
+    ? process.cwd()
+    : path.dirname(app.getPath('exe'));
+
+  return path.join(baseDir, 'data');
+}
+
+function ensureDataDir() {
+  const dataDir = getDataDir();
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  return dataDir;
+}
+
 function getDbPath() {
-  // Use absolute path from project root for consistency with drizzle-kit
-  const dbFileName = process.env.DB_FILE_NAME || 'database.db';
-  // Remove 'file:' prefix if present (libsql format)
-  const filePath = dbFileName.replace('file:', '');
-  // Make it absolute relative to project root
-  return path.join(process.cwd(), filePath);
+  // Default database file name
+  const dbFileName = 'database.db';
+
+  // Ensure data directory exists
+  ensureDataDir();
+
+  return path.join(getDataDir(), dbFileName);
 }
 
 function logToFile(message: string, error?: any) {

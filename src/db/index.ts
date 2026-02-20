@@ -1,6 +1,7 @@
 import path from 'path';
 import { app } from 'electron';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { migrate } from 'drizzle-orm/migrator';
 import fs from 'fs';
 
 // Lazy database initialization to avoid Vite bundling issues with native modules
@@ -64,9 +65,26 @@ async function runMigrations(sqlite: any) {
 
     logToFile('Existing tables: ' + JSON.stringify(tables));
 
-    // If no tables exist, we need to run migrations
-    // For now, just ensure the basic tables exist
-    // Full migrations are handled by drizzle-kit
+    // If no tables exist, run migrations
+    if (tables.length === 0) {
+      logToFile('No tables found, running migrations...');
+
+      const db = drizzle({ client: sqlite });
+
+      // Get migrations folder path
+      const migrationsPath = inDevelopment
+        ? path.join(process.cwd(), 'src/db/migrations')
+        : path.join(path.dirname(app.getPath('exe')), 'resources/migrations');
+
+      logToFile('Migrations path: ' + migrationsPath);
+
+      // Run migrations using drizzle
+      await migrate(db, { migrationsFolder: migrationsPath });
+
+      logToFile('Migrations completed successfully');
+    } else {
+      logToFile('Tables already exist, skipping migrations');
+    }
   } catch (error) {
     logToFile('Error running migrations', error);
     throw error;

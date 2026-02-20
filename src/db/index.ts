@@ -72,10 +72,10 @@ function acquireWriteLock(): boolean {
           logToFile(`Read-only mode: another user (${lockData.userId}@${lockData.hostname}) has write access`);
           return false;
         } else {
-          // Lock is stale, remove itFile('Removing
-          logTo stale write.unlinkSync(lockPath);
-        lock');
-          fs }
+          // Lock is stale, remove it
+          logToFile('Removing stale write lock');
+          fs.unlinkSync(lockPath);
+        }
       } catch {
         // Lock file corrupted, remove it
         logToFile('Removing corrupted write lock');

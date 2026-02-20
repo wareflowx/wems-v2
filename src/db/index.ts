@@ -1,7 +1,7 @@
 import path from 'path';
 import { app } from 'electron';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { migrate } from 'drizzle-orm/migrator';
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import fs from 'fs';
 
 // Lazy database initialization to avoid Vite bundling issues with native modules
@@ -79,8 +79,8 @@ async function runMigrations(sqlite: any) {
 
       logToFile('Migrations path: ' + migrationsPath);
 
-      // Run migrations using drizzle
-      await migrate(db, { migrationsFolder: migrationsPath });
+      // Run migrations using drizzle (synchronous for better-sqlite3)
+      migrate(db, { migrationsFolder: migrationsPath });
 
       logToFile('Migrations completed successfully');
     } else {

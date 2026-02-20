@@ -10,7 +10,10 @@
     "package.json"
   ],
   "extraResources": [
-    "src/db/migrations/**/*"
+    {
+      "from": "src/db/migrations",
+      "to": "migrations"
+    }
   ],
   "asar": true,
   "asarUnpack": [

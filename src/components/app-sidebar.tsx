@@ -16,7 +16,6 @@ import {
   Briefcase,
   MapPin,
   SquareTerminal,
-  BookOpen,
   Settings2,
   Trash2,
   MessageCircleQuestion
@@ -66,11 +65,6 @@ const data = {
     },
   ],
   navSecondary: [
-    {
-      title: "Documentation",
-      url: "https://docs.luanroger.dev/electron-shadcn",
-      icon: BookOpen,
-    },
     {
       title: "Settings",
       url: "#",

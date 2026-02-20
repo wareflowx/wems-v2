@@ -49,7 +49,6 @@ function logToFile(message: string, error?: any) {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const inDevelopment = process.env.NODE_ENV === "development";
 
 function createWindow() {
   // electron-vite 5.0: preload is in out/preload/, main is in out/main/

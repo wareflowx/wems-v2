@@ -11,18 +11,39 @@ import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS } from "./constants";
 import fs from "fs";
 
+const inDevelopment = process.env.NODE_ENV === 'development';
+
+function getDataDir() {
+  const baseDir = inDevelopment
+    ? process.cwd()
+    : path.dirname(app.getPath('exe'));
+  return path.join(baseDir, 'data');
+}
+
+function ensureDataDir() {
+  const dataDir = getDataDir();
+  if (!fs.existsSync(dataDir)) {
+    try {
+      fs.mkdirSync(dataDir, { recursive: true });
+    } catch (error) {
+      console.error(`Failed to create data directory at ${dataDir}:`, error);
+    }
+  }
+  return dataDir;
+}
+
 // Logging system for production debugging
 function logToFile(message: string, error?: any) {
   try {
-    const userDataPath = app.getPath('userData');
-    const logPath = path.join(userDataPath, 'app.log');
+    ensureDataDir();
+    const logPath = path.join(getDataDir(), 'app.log');
     const timestamp = new Date().toISOString();
     const logMessage = error
       ? `${timestamp} - ${message}: ${error.message}\n${error.stack}\n`
       : `${timestamp} - ${message}\n`;
     fs.appendFileSync(logPath, logMessage);
   } catch (e) {
-    // Can't log if app.getPath fails
+    // Can't log if directory creation fails
   }
 }
 

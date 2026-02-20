@@ -21,7 +21,12 @@ function getDataDir() {
 function ensureDataDir() {
   const dataDir = getDataDir();
   if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+    try {
+      fs.mkdirSync(dataDir, { recursive: true });
+    } catch (error) {
+      console.error(`Failed to create data directory at ${dataDir}:`, error);
+      throw new Error(`Cannot create data directory: ${dataDir}`);
+    }
   }
   return dataDir;
 }
@@ -37,12 +42,17 @@ function getDbPath() {
 }
 
 function logToFile(message: string, error?: any) {
-  const logPath = path.join(app.getPath('userData'), 'debug.log');
-  const timestamp = new Date().toISOString();
-  const logMessage = error
-    ? `${timestamp} - ${message}: ${error.message}\n${error.stack}\n`
-    : `${timestamp} - ${message}\n`;
-  fs.appendFileSync(logPath, logMessage);
+  try {
+    ensureDataDir();
+    const logPath = path.join(getDataDir(), 'debug.log');
+    const timestamp = new Date().toISOString();
+    const logMessage = error
+      ? `${timestamp} - ${message}: ${error.message}\n${error.stack}\n`
+      : `${timestamp} - ${message}\n`;
+    fs.appendFileSync(logPath, logMessage);
+  } catch (err) {
+    console.error('Failed to write log:', err);
+  }
 }
 
 async function runMigrations(sqlite: any) {

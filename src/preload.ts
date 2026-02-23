@@ -4,10 +4,10 @@ import { IPC_CHANNELS } from "./constants";
 // Expose write mode to renderer
 contextBridge.exposeInMainWorld("getWriteMode", () => ipcRenderer.invoke(IPC_CHANNELS.GET_WRITE_MODE));
 
-// Listen for MAIN_READY and forward to renderer via window event
+// Listen for MAIN_READY and forward to renderer via postMessage
 ipcRenderer.on(IPC_CHANNELS.MAIN_READY, () => {
-  console.log("[PRELOAD] Received MAIN_READY, forwarding to renderer");
-  window.dispatchEvent(new CustomEvent("main-ready"));
+  console.log("[PRELOAD] Received MAIN_READY, forwarding to renderer via postMessage");
+  window.postMessage(IPC_CHANNELS.MAIN_READY, "*");
 });
 
 // Listen for lock status changes and expose via callback

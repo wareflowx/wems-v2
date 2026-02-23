@@ -37,6 +37,48 @@ export function isFailure<T, E>(result: Result<T, E>): result is Failure<E> {
 }
 
 /**
+ * Transform the success value
+ */
+export function map<T, E, U>(
+  result: Result<T, E>,
+  fn: (value: T) => U
+): Result<U, E> {
+  switch (result._tag) {
+    case 'Success':
+      return { _tag: 'Success', value: fn(result.value) };
+    case 'Failure':
+      return result;
+  }
+}
+
+/**
+ * Transform the error value
+ */
+export function mapError<T, E, F>(
+  result: Result<T, E>,
+  fn: (error: E) => F
+): Result<T, F> {
+  switch (result._tag) {
+    case 'Success':
+      return result;
+    case 'Failure':
+      return { _tag: 'Failure', error: fn(result.error) };
+  }
+}
+
+/**
+ * Get the success value or a default
+ */
+export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
+  switch (result._tag) {
+    case 'Success':
+      return result.value;
+    case 'Failure':
+      return defaultValue;
+  }
+}
+
+/**
  * Factory functions for creating Result instances
  */
 export const Result = {
@@ -58,6 +100,7 @@ export const Result = {
 
   /**
    * Pattern match on Result - both callbacks required
+   * Includes exhaustiveness checking for compile-time safety
    */
   match: <T, E, R>(
     result: Result<T, E>,
@@ -71,6 +114,11 @@ export const Result = {
         return config.onSuccess(result.value);
       case 'Failure':
         return config.onFailure(result.error);
+      default: {
+        // Exhaustiveness check - TypeScript will error if a case is not handled
+        const _exhaustive: never = result;
+        throw new Error(`Unreachable: ${_exhaustive}`);
+      }
     }
   },
 
@@ -89,6 +137,10 @@ export const Result = {
         return config?.onSuccess?.(result.value);
       case 'Failure':
         return config?.onFailure?.(result.error);
+      default: {
+        const _exhaustive: never = result;
+        return undefined;
+      }
     }
   },
 };

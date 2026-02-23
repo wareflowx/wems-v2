@@ -74,11 +74,11 @@ function readLockFile(): LockData | null {
     if (Lock.isValid(data)) {
       return data;
     }
-    logger.debug('Invalid lock file data structure, removing corrupted lock');
+    logger.debug('Invalid lock file data structure, removing corrupted lock', 'lock');
     deleteLockFile();
     return null;
   } catch (error) {
-    logger.error('Error reading lock file, removing corrupted lock', error as Error);
+    logger.error('Error reading lock file, removing corrupted lock', error as Error, 'lock');
     deleteLockFile();
     return null;
   }
@@ -104,14 +104,14 @@ function startHeartbeat(): void {
     Lock.updateHeartbeat();
   }, LockConfig.heartbeatIntervalMs);
 
-  logger.debug(`Heartbeat started (interval: ${LockConfig.heartbeatIntervalMs}ms)`);
+  logger.debug(`Heartbeat started (interval: ${LockConfig.heartbeatIntervalMs}ms)`, 'lock');
 }
 
 function stopHeartbeat(): void {
   if (heartbeatIntervalId) {
     clearInterval(heartbeatIntervalId);
     heartbeatIntervalId = null;
-    logger.debug('Heartbeat stopped');
+    logger.debug('Heartbeat stopped', 'lock');
   }
 }
 
@@ -177,13 +177,13 @@ export const Lock = {
         if (age < LockConfig.timeoutMs) {
           // Lock is fresh - check if it's ours
           if (Lock.isOurLock(existingLock)) {
-            logger.debug('Our lock already exists, write mode enabled');
+            logger.debug('Our lock already exists, write mode enabled', 'lock');
             lockData = existingLock;
             return Result.success(true);
           }
 
           // Foreign lock exists
-          logger.debug(`Read-only mode: ${existingLock.userId}@${existingLock.hostname} has write access`);
+          logger.debug(`Read-only mode: ${existingLock.userId}@${existingLock.hostname} has write access`, 'lock');
           return Result.failure(
             new LockAlreadyExistsError(
               `${existingLock.userId}@${existingLock.hostname}`
@@ -191,7 +191,7 @@ export const Lock = {
           );
         } else {
           // Lock is stale, remove it
-          logger.debug('Removing stale write lock');
+          logger.debug('Removing stale write lock', 'lock');
           deleteLockFile();
         }
       }
@@ -207,7 +207,7 @@ export const Lock = {
 
       writeLockFile(newLock);
       lockData = newLock;
-      logger.debug('Write lock acquired');
+      logger.debug('Write lock acquired', 'lock');
 
       // Start heartbeat
       startHeartbeat();
@@ -218,7 +218,7 @@ export const Lock = {
       return Result.success(true);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Error acquiring write lock', error as Error);
+      logger.error('Error acquiring write lock', error as Error, 'lock');
       return Result.failure(new LockFileError(message));
     }
   },
@@ -241,7 +241,7 @@ export const Lock = {
 
       deleteLockFile();
       lockData = null;
-      logger.debug('Write lock released');
+      logger.debug('Write lock released', 'lock');
 
       // Emit lock change event
       lockEvents.emit('change', false);
@@ -249,7 +249,7 @@ export const Lock = {
       return Result.success(undefined);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Error releasing write lock', error as Error);
+      logger.error('Error releasing write lock', error as Error, 'lock');
       return Result.failure(new LockFileError(message));
     }
   },
@@ -287,7 +287,7 @@ export const Lock = {
       return Result.success(false);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Error checking write mode', error as Error);
+      logger.error('Error checking write mode', error as Error, 'lock');
       return Result.failure(new LockFileError(message));
     }
   },
@@ -369,7 +369,7 @@ export const Lock = {
       const currentWriteMode = isSuccess(currentResult) ? currentResult.value : true;
 
       if (lastKnownWriteMode !== currentWriteMode) {
-        logger.debug(`Lock status changed: writeMode=${currentWriteMode}`);
+        logger.debug(`Lock status changed: writeMode=${currentWriteMode}`, 'lock');
         lockEvents.emit('change', currentWriteMode);
         callback(currentWriteMode);
       }

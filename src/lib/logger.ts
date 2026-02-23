@@ -51,22 +51,19 @@ function formatTimestamp(timestamp: number): string {
 function output(entry: LogEntry): void {
   const timestamp = formatTimestamp(entry.timestamp);
   const context = entry.context ? `[${entry.context}]` : '';
-  const errorInfo = entry.error ? `\n${entry.error.stack}` : '';
+  const errorInfo = entry.error ? `\n${entry.error.stack ?? '(no stack trace available)'}` : '';
 
-  switch (entry.level) {
-    case 'debug':
-      console.debug(`${timestamp} ${context} ${entry.message}${errorInfo}`);
-      break;
-    case 'info':
-      console.info(`${timestamp} ${context} ${entry.message}${errorInfo}`);
-      break;
-    case 'warn':
-      console.warn(`${timestamp} ${context} ${entry.message}${errorInfo}`);
-      break;
-    case 'error':
-      console.error(`${timestamp} ${context} ${entry.message}${errorInfo}`);
-      break;
-  }
+  const message = `${timestamp} ${context} ${entry.message}${errorInfo}`;
+
+  // Map log levels to console methods
+  const logMethods: Record<LogLevel, 'debug' | 'info' | 'warn' | 'error'> = {
+    debug: 'debug',
+    info: 'info',
+    warn: 'warn',
+    error: 'error',
+  };
+
+  console[logMethods[entry.level]](message);
 }
 
 // Create a log entry

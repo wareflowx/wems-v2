@@ -6,7 +6,6 @@ import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS } from "./constants";
 import { releaseWriteLock, isWriteMode, startLockWatcher, getDb } from "./db";
-import { Lock } from "@/lib/lock";
 import { logger, configure } from "@/lib/logger";
 
 const inDevelopment = process.env.NODE_ENV === 'development';
@@ -91,13 +90,6 @@ async function setupORPC() {
     logger.debug('[DEBUG] getWriteMode called, result: ' + result, 'main');
     return result;
   });
-
-  // Start watching for lock changes and forward to renderer
-  if (mainWindow) {
-    startLockWatcher((writeMode) => {
-      mainWindow?.webContents.send(IPC_CHANNELS.LOCK_STATUS_CHANGED, writeMode);
-    }, 2000);
-  }
 }
 
 // Single instance lock
@@ -129,24 +121,22 @@ app.whenReady().then(async () => {
     await setupORPC();
     logger.info('ORPC setup complete', 'main');
 
-    // 2. Acquire lock
-    logger.info('Acquiring lock...', 'main');
-    const lockResult = Lock.acquire();
-    if (lockResult._tag === 'Failure') {
-      logger.error('Failed to acquire lock: ' + lockResult.error.message, lockResult.error, 'main');
-    } else {
-      logger.info(lockResult.value ? 'Write mode enabled' : 'Read-only mode enabled', 'main');
-    }
-
-    // 3. Initialize database (lazy)
+    // 2. Initialize database (lazy - also acquires lock internally)
     logger.info('Initializing database...', 'main');
     await getDb();
     logger.info('Database initialized', 'main');
 
-    // 4. Create window last
+    // 3. Create window
     logger.info('Creating window...', 'main');
     createWindow();
     logger.info('Window created', 'main');
+
+    // 4. Start lock watcher after window is created
+    logger.info('Starting lock watcher...', 'main');
+    startLockWatcher((writeMode) => {
+      mainWindow?.webContents.send(IPC_CHANNELS.LOCK_STATUS_CHANGED, writeMode);
+    }, 2000);
+    logger.info('Lock watcher started', 'main');
 
     await installExtensions();
     logger.info('Extensions installed', 'main');

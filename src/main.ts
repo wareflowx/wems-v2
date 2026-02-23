@@ -83,6 +83,9 @@ async function setupORPC() {
 
     serverPort.start();
     rpcHandler.upgrade(serverPort);
+
+    // Notify renderer that ORPC is ready
+    event.sender.postMessage(IPC_CHANNELS.ORPC_READY);
   });
 
   // Expose write mode status to renderer

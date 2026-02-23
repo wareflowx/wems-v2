@@ -30,12 +30,28 @@ class IPCManager {
     });
     this.client = createORPCClient(this.rpcLink);
 
-    // Listen for main-ready event from preload
-    window.addEventListener("main-ready", () => {
-      console.log("[IPC] main-ready event received, calling notifyRendererReady...");
-      // Call the function exposed by preload
-      (window as unknown as { notifyRendererReady?: () => void }).notifyRendererReady?.();
-    });
+    // Wait for onMainReady to be available, then register callback
+    const setupCallback = () => {
+      const globalWindow = window as unknown as {
+        onMainReady?: (callback: () => void) => void;
+        notifyRendererReady?: () => void;
+      };
+
+      if (globalWindow.onMainReady) {
+        console.log("[IPC] Registering onMainReady callback");
+        globalWindow.onMainReady(() => {
+          console.log("[IPC] onMainReady callback fired!");
+          // Notify main that renderer is ready
+          globalWindow.notifyRendererReady?.();
+        });
+      } else {
+        // Try again in 100ms
+        setTimeout(setupCallback, 100);
+      }
+    };
+
+    // Start trying to register callback
+    setTimeout(setupCallback, 0);
 
     // Listen for ORPC_READY with the port from main
     window.addEventListener("message", (event) => {

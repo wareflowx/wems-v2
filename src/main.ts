@@ -126,11 +126,19 @@ setupSingleInstance();
 
 app.whenReady().then(async () => {
   try {
+    console.log("[MAIN] app.whenReady fired!");
     logger.info('App starting...', 'main');
 
     // 1. Setup ORPC first (needed for window controls)
+    console.log("[MAIN] About to call setupORPC...");
     logger.info('Setting up ORPC...', 'main');
-    await setupORPC();
+    try {
+      await setupORPC();
+      console.log("[MAIN] setupORPC completed successfully");
+    } catch (error) {
+      console.error("[MAIN] setupORPC FAILED:", error);
+      throw error;
+    }
     logger.info('ORPC setup complete', 'main');
 
     // 2. Acquire lock

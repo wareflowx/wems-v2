@@ -9,6 +9,7 @@ import {
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS } from "./constants";
+import { releaseWriteLock, isWriteMode, startLockWatcher, getDb } from "./db";
 import fs from "fs";
 
 const inDevelopment = process.env.NODE_ENV === 'development';
@@ -110,12 +111,33 @@ async function setupORPC() {
     serverPort.start();
     rpcHandler.upgrade(serverPort);
   });
+
+  // Expose write mode status to renderer
+  ipcMain.handle(IPC_CHANNELS.GET_WRITE_MODE, () => {
+    const result = isWriteMode();
+    console.log('[DEBUG] getWriteMode called, result:', result, 'inDevelopment:', inDevelopment);
+    return result;
+  });
+
+  // Start watching for lock changes and forward to renderer
+  const mainWindow = ipcContext.mainWindow;
+  if (mainWindow) {
+    startLockWatcher((writeMode) => {
+      mainWindow.webContents.send(IPC_CHANNELS.LOCK_STATUS_CHANGED, writeMode);
+    }, 2000);
+  }
 }
 
 app.whenReady().then(async () => {
   try {
     logToFile('App starting...');
     logToFile(`User data path: ${app.getPath('userData')}`);
+
+    // Initialize database and acquire write lock
+    logToFile('Initializing database...');
+    await getDb();
+    logToFile('Database initialized');
+
     logToFile('Creating window...');
     createWindow();
     logToFile('Window created');
@@ -145,6 +167,7 @@ process.on('unhandledRejection', (reason, promise) => {
 
 //osX only
 app.on("window-all-closed", () => {
+  releaseWriteLock();
   if (process.platform !== "darwin") {
     app.quit();
   }

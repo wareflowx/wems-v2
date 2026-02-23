@@ -1,13 +1,23 @@
-import { ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import { IPC_CHANNELS } from "./constants";
 
-window.addEventListener("message", (event) => {
-  if (event.data === IPC_CHANNELS.START_ORPC_SERVER) {
-    const [serverPort] = event.ports;
+// Expose write mode to renderer
+contextBridge.exposeInMainWorld("getWriteMode", () => ipcRenderer.invoke(IPC_CHANNELS.GET_WRITE_MODE));
 
-    ipcRenderer.postMessage(IPC_CHANNELS.START_ORPC_SERVER, null, [serverPort]);
-  }
+// Listen for lock status changes and expose via callback
+let lockCallbacks: ((writeMode: boolean) => void)[] = [];
+let lastWriteMode: boolean | null = null;
+
+ipcRenderer.on(IPC_CHANNELS.LOCK_STATUS_CHANGED, (_event, writeMode: boolean) => {
+  lastWriteMode = writeMode;
+  lockCallbacks.forEach((cb) => cb(writeMode));
 });
 
-// Expose write mode to renderer
-window.getWriteMode = () => ipcRenderer.invoke(IPC_CHANNELS.GET_WRITE_MODE);
+// Expose lock status change listener to renderer
+contextBridge.exposeInMainWorld("onLockStatusChanged", (callback: (writeMode: boolean) => void) => {
+  lockCallbacks.push(callback);
+  // If we already have a known value, send it immediately
+  if (lastWriteMode !== null) {
+    callback(lastWriteMode);
+  }
+});

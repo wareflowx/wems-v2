@@ -21,6 +21,10 @@ export default function DragWindowRegion({ title }: DragWindowRegionProps) {
         setPlatform(value);
       })
       .catch((error) => {
+        // Ignore AbortError - this happens when the component unmounts before the call completes
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
         console.error("Failed to detect platform", error);
       });
 

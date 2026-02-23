@@ -88,7 +88,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   React.useEffect(() => {
     getAppVersion().then(setAppVersion);
+
+    // Initial check for write mode
     window.getWriteMode?.().then(setCanWrite).catch(() => setCanWrite(true));
+
+    // Listen for real-time lock status changes
+    window.onLockStatusChanged((writeMode) => {
+      setCanWrite(writeMode);
+    });
   }, []);
 
   return (
@@ -265,10 +272,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
-              <button className="w-full">
+              <div className="w-full flex items-center cursor-pointer">
                 <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">{t("sidebar.toggle")}</span>
                 <SidebarTrigger className="ml-auto size-4" />
-              </button>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -4,6 +4,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import fs from 'fs';
 import os from 'os';
+import { lockEvents, LOCK_EVENTS } from '@/lib/lock-events';
 
 // Lock file configuration
 const LOCK_FILE_NAME = '.write.lock';
@@ -70,6 +71,7 @@ function acquireWriteLock(): boolean {
         if (age < LOCK_TIMEOUT_MS) {
           // Lock is fresh, read-only mode
           logToFile(`Read-only mode: another user (${lockData.userId}@${lockData.hostname}) has write access`);
+          lockEvents.emit(LOCK_EVENTS.CHANGE, false);
           return false;
         } else {
           // Lock is stale, remove it
@@ -92,6 +94,7 @@ function acquireWriteLock(): boolean {
     };
     fs.writeFileSync(lockPath, JSON.stringify(lockData));
     logToFile('Write lock acquired');
+    lockEvents.emit(LOCK_EVENTS.CHANGE, true);
     return true;
   } catch (error) {
     logToFile('Error acquiring write lock', error);
@@ -105,6 +108,7 @@ export function releaseWriteLock() {
     if (fs.existsSync(lockPath)) {
       fs.unlinkSync(lockPath);
       logToFile('Write lock released');
+      lockEvents.emit(LOCK_EVENTS.CHANGE, true);
     }
   } catch (error) {
     logToFile('Error releasing write lock', error);
@@ -113,16 +117,71 @@ export function releaseWriteLock() {
 
 export function isWriteMode(): boolean {
   const lockPath = getLockFilePath();
+  console.log('[DB] isWriteMode check, lockPath:', lockPath, 'exists:', fs.existsSync(lockPath));
   if (!fs.existsSync(lockPath)) {
+    console.log('[DB] No lock file, returning true (write mode)');
     return true;
   }
 
   try {
     const lockData: LockData = JSON.parse(fs.readFileSync(lockPath, 'utf-8'));
-    return (Date.now() - lockData.timestamp) >= LOCK_TIMEOUT_MS;
+
+    // Check if this is OUR lock (same hostname, user, AND PID)
+    const isOurLock =
+      lockData.hostname === os.hostname() &&
+      lockData.userId === os.userInfo().username &&
+      lockData.pid === process.pid;
+
+    if (isOurLock) {
+      console.log('[DB] Lock is ours (same PID), returning true (write mode)');
+      return true;
+    }
+
+    // Check if lock is stale (older than timeout)
+    const isStale = (Date.now() - lockData.timestamp) >= LOCK_TIMEOUT_MS;
+
+    if (isStale) {
+      console.log('[DB] Lock is stale, returning true (write mode)');
+      return true;
+    }
+
+    console.log('[DB] Lock is foreign and fresh, returning false (read-only)');
+    return false;
   } catch {
+    console.log('[DB] Error reading lock file, returning true (write mode)');
     return true;
   }
+}
+
+// Store last known lock state for change detection
+let lastKnownWriteMode: boolean | null = null;
+
+export function startLockWatcher(callback: (isWriteMode: boolean) => void, intervalMs: number = 2000) {
+  // Get initial state immediately
+  const initialWriteMode = isWriteMode();
+  lastKnownWriteMode = initialWriteMode;
+
+  // Emit initial state to callback
+  callback(initialWriteMode);
+  lockEvents.emit(LOCK_EVENTS.CHANGE, initialWriteMode);
+
+  // Check for changes
+  const checkLock = () => {
+    const currentWriteMode = isWriteMode();
+    if (lastKnownWriteMode !== currentWriteMode) {
+      // Lock status changed (e.g., another process acquired/released lock)
+      logToFile(`Lock status changed: writeMode=${currentWriteMode}`);
+      lockEvents.emit(LOCK_EVENTS.CHANGE, currentWriteMode);
+      callback(currentWriteMode);
+    }
+    lastKnownWriteMode = currentWriteMode;
+  };
+
+  // Start polling
+  const intervalId = setInterval(checkLock, intervalMs);
+
+  // Return cleanup function
+  return () => clearInterval(intervalId);
 }
 
 function logToFile(message: string, error?: any) {

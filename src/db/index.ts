@@ -220,6 +220,7 @@ async function runMigrations(sqlite: any, canWrite: boolean) {
       const db = drizzle({ client: sqlite });
 
       // Get migrations folder path
+      // Use process.resourcesPath for production (standard Electron API for extraResources)
       const migrationsPath = inDevelopment
         ? path.join(process.cwd(), 'src/db/migrations')
         : path.join(process.resourcesPath, 'migrations');
@@ -234,8 +235,9 @@ async function runMigrations(sqlite: any, canWrite: boolean) {
       logToFile('Tables already exist, skipping migrations');
     }
   } catch (error) {
-    logToFile('Error running migrations', error);
-    throw error;
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    logToFile('Error running migrations: ' + message, error);
+    throw new Error(`Failed to run database migrations: ${message}`);
   }
 }
 

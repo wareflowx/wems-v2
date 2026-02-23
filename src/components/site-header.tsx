@@ -9,7 +9,7 @@ export function SiteHeader() {
   return (
     <header className="bg-card sticky top-0 z-50 flex w-full items-center border-b">
       <div className="flex h-(--header-height) w-full items-center gap-2">
-        <DragWindowRegion title="electron-shadcn" />
+        <DragWindowRegion title="WEMS" />
       </div>
     </header>
   )

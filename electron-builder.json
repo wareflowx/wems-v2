@@ -1,6 +1,6 @@
 {
-  "appId": "com.electron-shadcn",
-  "productName": "electron-shadcn",
+  "appId": "com.wems",
+  "productName": "WEMS",
   "directories": {
     "output": "dist",
     "buildResources": "build"

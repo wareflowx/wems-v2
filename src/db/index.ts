@@ -107,7 +107,10 @@ export const acquireWriteLock = (): boolean => {
 };
 
 export const releaseWriteLock = (): void => {
-  Lock.release();
+  const result = Lock.release();
+  if (!isSuccess(result)) {
+    logToFile('Error releasing lock: ' + result.error.message);
+  }
 };
 
 export const isWriteMode = (): boolean => {

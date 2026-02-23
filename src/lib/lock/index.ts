@@ -84,8 +84,12 @@ function readLockFile(): LockData | null {
     if (Lock.isValid(data)) {
       return data;
     }
+    logToFile('Invalid lock file data structure, removing corrupted lock');
+    deleteLockFile();
     return null;
-  } catch {
+  } catch (error) {
+    logToFile('Error reading lock file, removing corrupted lock', error);
+    deleteLockFile();
     return null;
   }
 }
@@ -211,13 +215,15 @@ export const Lock = {
 
   /**
    * Release the write lock
+   * Idempotent - returns success if lock doesn't exist
    */
-  release: (): Result<void, LockFileError | LockNotFoundError> => {
+  release: (): Result<void, LockFileError> => {
     try {
       const lockPath = getLockFilePath();
 
       if (!fs.existsSync(lockPath)) {
-        return Result.failure(new LockNotFoundError());
+        // Already released - idempotent
+        return Result.success(undefined);
       }
 
       // Stop heartbeat
@@ -255,10 +261,10 @@ export const Lock = {
         return Result.success(true);
       }
 
-      // Check if lock is stale
-      const isStale = (Date.now() - existingLock.timestamp) >= LockConfig.timeoutMs;
+      // Check if lock is stale using lastHeartbeat (activity indicator)
+      const isStale = Lock.isStale();
 
-      if (isStale) {
+      if (isStale._tag === 'Success' && isStale.value) {
         return Result.success(true);
       }
 

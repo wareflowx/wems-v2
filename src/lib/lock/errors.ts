@@ -22,10 +22,3 @@ export class LockNotFoundError extends Error {
     this.name = 'LockNotFoundError';
   }
 }
-
-export class PermissionDeniedError extends Error {
-  constructor() {
-    super('Permission denied');
-    this.name = 'PermissionDeniedError';
-  }
-}

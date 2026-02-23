@@ -6,6 +6,7 @@ export const LOCAL_STORAGE_KEYS = {
 export const IPC_CHANNELS = {
   START_ORPC_SERVER: "start-orpc-server",
   ORPC_READY: "orpc-ready",
+  MAIN_READY: "main-ready",  // Main process tells renderer it's ready to receive ORPC setup
   GET_WRITE_MODE: "get-write-mode",
   LOCK_STATUS_CHANGED: "lock-status-changed",
 };

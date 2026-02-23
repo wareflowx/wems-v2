@@ -30,9 +30,15 @@ class IPCManager {
     });
     this.client = createORPCClient(this.rpcLink);
 
-    // Set up listener for when ORPC is ready
+    // Set up listener for main process ready signal
     window.addEventListener("message", (event) => {
+      console.log("[IPC] Received message:", event.data);
+      if (event.data === IPC_CHANNELS.MAIN_READY) {
+        console.log("[IPC] MAIN_READY received, initializing ORPC...");
+        this.initialize();
+      }
       if (event.data === IPC_CHANNELS.ORPC_READY) {
+        console.log("[IPC] ORPC_READY received!");
         this.ready = true;
         if (this.resolveReady) {
           this.resolveReady();
@@ -52,8 +58,12 @@ class IPCManager {
     this.clientPort.start();
 
     // Send server port to main process
-    window.postMessage(IPC_CHANNELS.START_ORPC_SERVER, "*", [this.serverPort]);
-    console.log("[IPC] initialize: message sent");
+    try {
+      window.postMessage(IPC_CHANNELS.START_ORPC_SERVER, "*", [this.serverPort]);
+      console.log("[IPC] initialize: message sent");
+    } catch (error) {
+      console.error("[IPC] initialize: postMessage failed:", error);
+    }
     this.initialized = true;
 
     // Create a promise that resolves when main process confirms ready
@@ -68,6 +78,22 @@ class IPCManager {
     if (this.ready) {
       console.log("[IPC] waitForReady: already ready, returning");
       return;
+    }
+
+    // If not initialized yet, wait for MAIN_READY first
+    if (!this.initialized) {
+      console.log("[IPC] waitForReady: not initialized, waiting for MAIN_READY...");
+      // Wait for MAIN_READY signal (this happens in constructor via event listener)
+      // We need to create a promise that resolves when initialized
+      await new Promise<void>((resolve) => {
+        const check = setInterval(() => {
+          if (this.initialized) {
+            clearInterval(check);
+            resolve();
+          }
+        }, 100);
+      });
+      console.log("[IPC] waitForReady: now initialized, checking readyPromise...");
     }
 
     // If already initialized but not ready yet, wait for it
@@ -86,4 +112,3 @@ class IPCManager {
 }
 
 export const ipc = new IPCManager();
-ipc.initialize();

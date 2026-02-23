@@ -161,6 +161,11 @@ app.whenReady().then(async () => {
     createWindow();
     logger.info('Window created', 'main');
 
+    // Notify renderer that main is ready to receive ORPC setup
+    console.log("[MAIN] Sending MAIN_READY to renderer...");
+    mainWindow?.webContents.send(IPC_CHANNELS.MAIN_READY);
+    console.log("[MAIN] MAIN_READY sent");
+
     // 5. Start lock watcher after window is created
     logger.info('Starting lock watcher...', 'main');
     startLockWatcher((writeMode) => {

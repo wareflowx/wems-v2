@@ -30,15 +30,22 @@ class IPCManager {
     });
     this.client = createORPCClient(this.rpcLink);
 
-    // Listen for messages from preload (MAIN_READY and ORPC_READY)
+    // Listen for main-ready event from preload
+    window.addEventListener("main-ready", () => {
+      console.log("[IPC] main-ready event received, calling notifyRendererReady...");
+      // Call the function exposed by preload
+      (window as unknown as { notifyRendererReady?: () => void }).notifyRendererReady?.();
+    });
+
+    // Listen for ORPC_READY with the port from main
     window.addEventListener("message", (event) => {
       console.log("[IPC] Received message:", event.data);
-      if (event.data === IPC_CHANNELS.MAIN_READY) {
-        console.log("[IPC] MAIN_READY received, initializing ORPC...");
-        this.initialize();
-      }
-      if (event.data === IPC_CHANNELS.ORPC_READY) {
-        console.log("[IPC] ORPC_READY received!");
+      if (event.data === IPC_CHANNELS.ORPC_READY && event.ports[0]) {
+        console.log("[IPC] ORPC_READY received with port!");
+        const port = event.ports[0];
+        // Replace the client port with the one from main
+        this.rpcLink.setPort(port);
+        port.start();
         this.ready = true;
         if (this.resolveReady) {
           this.resolveReady();

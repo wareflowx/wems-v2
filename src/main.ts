@@ -78,18 +78,24 @@ function checkForUpdates() {
 async function setupORPC() {
   const { rpcHandler } = await import("./ipc/handler");
 
-  console.log("[MAIN] setupORPC: listening for START_ORPC_SERVER");
+  console.log("[MAIN] setupORPC: listening for RENDERER_READY");
 
-  ipcMain.on(IPC_CHANNELS.START_ORPC_SERVER, (event) => {
-    console.log("[MAIN] START_ORPC_SERVER received!");
-    const [serverPort] = event.ports;
+  // Listen for renderer ready signal
+  ipcMain.on(IPC_CHANNELS.RENDERER_READY, (event) => {
+    console.log("[MAIN] RENDERER_READY received!");
 
+    // Create the MessageChannel
+    const { port1: serverPort, port2: clientPort } = new MessageChannel();
+
+    // Start the server port
     serverPort.start();
+
+    // Set up the RPC handler
     rpcHandler.upgrade(serverPort);
 
     console.log("[MAIN] Sending ORPC_READY to renderer...");
-    // Notify renderer that ORPC is ready
-    event.sender.postMessage(IPC_CHANNELS.ORPC_READY);
+    // Send the client port to the renderer
+    event.sender.postMessage(IPC_CHANNELS.ORPC_READY, null, [clientPort]);
     console.log("[MAIN] ORPC_READY sent");
   });
 

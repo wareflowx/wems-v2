@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow } from "electron";
-import { ipcMain } from "electron/main";
+import { ipcMain, MessageChannelMain } from "electron/main";
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS } from "./constants";
@@ -80,12 +80,21 @@ async function setupORPC() {
 
   console.log("[MAIN] setupORPC: listening for RENDERER_READY");
 
+  let orpcReadySent = false;
+
   // Listen for renderer ready signal
-  ipcMain.on(IPC_CHANNELS.RENDERER_READY, (event) => {
+  ipcMain.on(IPC_CHANNELS.RENDERER_READY, (_event) => {
+    // Only set up once - ignore subsequent messages
+    if (orpcReadySent) {
+      console.log("[MAIN] RENDERER_READY received but ORPC already set up, ignoring");
+      return;
+    }
+
+    orpcReadySent = true;
     console.log("[MAIN] RENDERER_READY received!");
 
-    // Create the MessageChannel
-    const { port1: serverPort, port2: clientPort } = new MessageChannel();
+    // Create the MessageChannel using MessageChannelMain for Electron
+    const { port1: serverPort, port2: clientPort } = new MessageChannelMain();
 
     // Start the server port
     serverPort.start();
@@ -94,9 +103,22 @@ async function setupORPC() {
     rpcHandler.upgrade(serverPort);
 
     console.log("[MAIN] Sending ORPC_READY to renderer...");
-    // Send the client port to the renderer
-    event.sender.postMessage(IPC_CHANNELS.ORPC_READY, null, [clientPort]);
-    console.log("[MAIN] ORPC_READY sent");
+    console.log("[MAIN] clientPort type:", typeof clientPort);
+    console.log("[MAIN] clientPort constructor:", clientPort.constructor.name);
+    console.log("[MAIN] webContents URL:", mainWindow?.webContents.getURL());
+
+    // Send the port via webContents.postMessage
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      console.log("[MAIN] Window is valid, sending postMessage...");
+      try {
+        const result = mainWindow.webContents.postMessage(IPC_CHANNELS.ORPC_READY, null, [clientPort]);
+        console.log("[MAIN] ORPC_READY postMessage result:", result);
+      } catch (error) {
+        console.error("[MAIN] Error sending postMessage:", error);
+      }
+    } else {
+      console.error("[MAIN] Failed to send ORPC_READY: window is destroyed");
+    }
   });
 
   // Expose write mode status to renderer

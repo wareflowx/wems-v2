@@ -30,13 +30,15 @@ class IPCManager {
     });
     this.client = createORPCClient(this.rpcLink);
 
-    // Set up listener for main process ready signal
+    // Set up listener for main process ready signal (via preload script)
+    window.addEventListener("main-ready", () => {
+      console.log("[IPC] main-ready event received, initializing ORPC...");
+      this.initialize();
+    });
+
+    // Also listen for ORPC_READY from main process
     window.addEventListener("message", (event) => {
       console.log("[IPC] Received message:", event.data);
-      if (event.data === IPC_CHANNELS.MAIN_READY) {
-        console.log("[IPC] MAIN_READY received, initializing ORPC...");
-        this.initialize();
-      }
       if (event.data === IPC_CHANNELS.ORPC_READY) {
         console.log("[IPC] ORPC_READY received!");
         this.ready = true;

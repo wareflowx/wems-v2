@@ -341,10 +341,8 @@ export const Lock = {
    */
   watch: (callback: (isWrite: boolean) => void, intervalMs: number = 2000): (() => void) => {
     // Get initial state immediately
-    const initialWriteMode = Lock.isWriteMode().match({
-      onSuccess: (v) => v,
-      onFailure: () => true, // Default to write mode on error
-    });
+    const initialResult = Lock.isWriteMode();
+    const initialWriteMode = isSuccess(initialResult) ? initialResult.value : true;
 
     lastKnownWriteMode = initialWriteMode;
     callback(initialWriteMode);
@@ -352,10 +350,8 @@ export const Lock = {
 
     // Check for changes periodically
     const checkLock = () => {
-      const currentWriteMode = Lock.isWriteMode().match({
-        onSuccess: (v) => v,
-        onFailure: () => true,
-      });
+      const currentResult = Lock.isWriteMode();
+      const currentWriteMode = isSuccess(currentResult) ? currentResult.value : true;
 
       if (lastKnownWriteMode !== currentWriteMode) {
         logToFile(`Lock status changed: writeMode=${currentWriteMode}`);

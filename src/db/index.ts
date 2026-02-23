@@ -3,7 +3,6 @@ import { app } from 'electron';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { Lock } from '@/lib/lock';
-import { lockEvents, LOCK_EVENTS } from '@/lib/lock-events';
 
 // Lazy database initialization to avoid Vite bundling issues with native modules
 let db: ReturnType<typeof drizzle> | null = null;

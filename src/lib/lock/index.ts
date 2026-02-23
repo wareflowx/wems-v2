@@ -2,8 +2,8 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { app } from 'electron';
-import { EventEmitter } from 'events';
 import { Result } from '@/lib/result';
+import { lockEvents, LOCK_EVENTS } from '@/lib/lock-events';
 import {
   LockAlreadyExistsError,
   LockFileError,
@@ -35,9 +35,7 @@ export type LockData = {
  */
 let lockData: LockData | null = null;
 let lastKnownWriteMode: boolean | null = null;
-
-// Event emitter for lock changes
-const lockEvents = new EventEmitter();
+let heartbeatIntervalId: ReturnType<typeof setInterval> | null = null;
 
 function getDataDir(): string {
   const inDevelopment = process.env.NODE_ENV === 'development';
@@ -83,7 +81,7 @@ function readLockFile(): LockData | null {
 
   try {
     const data = JSON.parse(fs.readFileSync(lockPath, 'utf-8'));
-    if (isValid(data)) {
+    if (Lock.isValid(data)) {
       return data;
     }
     return null;
@@ -102,6 +100,24 @@ function deleteLockFile(): void {
   const lockPath = getLockFilePath();
   if (fs.existsSync(lockPath)) {
     fs.unlinkSync(lockPath);
+  }
+}
+
+function startHeartbeat(): void {
+  if (heartbeatIntervalId) return;
+
+  heartbeatIntervalId = setInterval(() => {
+    Lock.updateHeartbeat();
+  }, LockConfig.heartbeatIntervalMs);
+
+  logToFile(`Heartbeat started (interval: ${LockConfig.heartbeatIntervalMs}ms)`);
+}
+
+function stopHeartbeat(): void {
+  if (heartbeatIntervalId) {
+    clearInterval(heartbeatIntervalId);
+    heartbeatIntervalId = null;
+    logToFile('Heartbeat stopped');
   }
 }
 
@@ -179,6 +195,9 @@ export const Lock = {
       lockData = newLock;
       logToFile('Write lock acquired');
 
+      // Start heartbeat
+      startHeartbeat();
+
       // Emit lock change event
       lockEvents.emit('change', true);
 
@@ -200,6 +219,9 @@ export const Lock = {
       if (!fs.existsSync(lockPath)) {
         return Result.failure(new LockNotFoundError());
       }
+
+      // Stop heartbeat
+      stopHeartbeat();
 
       deleteLockFile();
       lockData = null;

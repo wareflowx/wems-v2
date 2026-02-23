@@ -79,6 +79,51 @@ export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
 }
 
 /**
+ * Async: Transform the success value
+ */
+export async function mapAsync<T, E, U>(
+  result: Result<T, E>,
+  fn: (value: T) => Promise<U> | U
+): Promise<Result<U, E>> {
+  switch (result._tag) {
+    case 'Success':
+      return { _tag: 'Success', value: await fn(result.value) };
+    case 'Failure':
+      return result;
+  }
+}
+
+/**
+ * Async: Transform the error value
+ */
+export async function mapErrorAsync<T, E, F>(
+  result: Result<T, E>,
+  fn: (error: E) => Promise<F> | F
+): Promise<Result<T, F>> {
+  switch (result._tag) {
+    case 'Success':
+      return result;
+    case 'Failure':
+      return { _tag: 'Failure', error: await fn(result.error) };
+  }
+}
+
+/**
+ * Async: Chain operations that return Result
+ */
+export async function flatMapAsync<T, E, U>(
+  result: Result<T, E>,
+  fn: (value: T) => Promise<Result<U, E>> | Result<U, E>
+): Promise<Result<U, E>> {
+  switch (result._tag) {
+    case 'Success':
+      return fn(result.value);
+    case 'Failure':
+      return result;
+  }
+}
+
+/**
  * Factory functions for creating Result instances
  */
 export const Result = {

@@ -2,20 +2,15 @@ import path from 'path';
 import { app } from 'electron';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
-import fs from 'fs';
-import os from 'os';
+import { Lock } from '@/lib/lock';
 import { lockEvents, LOCK_EVENTS } from '@/lib/lock-events';
-
-// Lock file configuration
-const LOCK_FILE_NAME = '.write.lock';
-const LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 // Lazy database initialization to avoid Vite bundling issues with native modules
 let db: ReturnType<typeof drizzle> | null = null;
 
 const inDevelopment = process.env.NODE_ENV === 'development';
 
-function getDataDir() {
+function getDataDir(): string {
   // In production: use executable directory
   // In development: use project root
   const baseDir = inDevelopment
@@ -25,20 +20,19 @@ function getDataDir() {
   return path.join(baseDir, 'data');
 }
 
-function ensureDataDir() {
+function ensureDataDir(): void {
   const dataDir = getDataDir();
-  if (!fs.existsSync(dataDir)) {
+  if (!require('fs').existsSync(dataDir)) {
     try {
-      fs.mkdirSync(dataDir, { recursive: true });
+      require('fs').mkdirSync(dataDir, { recursive: true });
     } catch (error) {
       console.error(`Failed to create data directory at ${dataDir}:`, error);
       throw new Error(`Cannot create data directory: ${dataDir}`);
     }
   }
-  return dataDir;
 }
 
-function getDbPath() {
+function getDbPath(): string {
   // Default database file name
   const dbFileName = 'database.db';
 
@@ -48,157 +42,22 @@ function getDbPath() {
   return path.join(getDataDir(), dbFileName);
 }
 
-function getLockFilePath() {
-  return path.join(getDataDir(), LOCK_FILE_NAME);
-}
-
-interface LockData {
-  userId: string;
-  hostname: string;
-  timestamp: number;
-  pid: number;
-}
-
-function acquireWriteLock(): boolean {
-  const lockPath = getLockFilePath();
-
+function logToFile(message: string, error?: unknown): void {
   try {
-    if (fs.existsSync(lockPath)) {
-      try {
-        const lockData: LockData = JSON.parse(fs.readFileSync(lockPath, 'utf-8'));
-        const age = Date.now() - lockData.timestamp;
-
-        if (age < LOCK_TIMEOUT_MS) {
-          // Lock is fresh, read-only mode
-          logToFile(`Read-only mode: another user (${lockData.userId}@${lockData.hostname}) has write access`);
-          lockEvents.emit(LOCK_EVENTS.CHANGE, false);
-          return false;
-        } else {
-          // Lock is stale, remove it
-          logToFile('Removing stale write lock');
-          fs.unlinkSync(lockPath);
-        }
-      } catch {
-        // Lock file corrupted, remove it
-        logToFile('Removing corrupted write lock');
-        fs.unlinkSync(lockPath);
-      }
-    }
-
-    // Create new lock
-    const lockData: LockData = {
-      userId: os.userInfo().username,
-      hostname: os.hostname(),
-      timestamp: Date.now(),
-      pid: process.pid
-    };
-    fs.writeFileSync(lockPath, JSON.stringify(lockData));
-    logToFile('Write lock acquired');
-    lockEvents.emit(LOCK_EVENTS.CHANGE, true);
-    return true;
-  } catch (error) {
-    logToFile('Error acquiring write lock', error);
-    return false;
-  }
-}
-
-export function releaseWriteLock() {
-  try {
-    const lockPath = getLockFilePath();
-    if (fs.existsSync(lockPath)) {
-      fs.unlinkSync(lockPath);
-      logToFile('Write lock released');
-      lockEvents.emit(LOCK_EVENTS.CHANGE, true);
-    }
-  } catch (error) {
-    logToFile('Error releasing write lock', error);
-  }
-}
-
-export function isWriteMode(): boolean {
-  const lockPath = getLockFilePath();
-  console.log('[DB] isWriteMode check, lockPath:', lockPath, 'exists:', fs.existsSync(lockPath));
-  if (!fs.existsSync(lockPath)) {
-    console.log('[DB] No lock file, returning true (write mode)');
-    return true;
-  }
-
-  try {
-    const lockData: LockData = JSON.parse(fs.readFileSync(lockPath, 'utf-8'));
-
-    // Check if this is OUR lock (same hostname, user, AND PID)
-    const isOurLock =
-      lockData.hostname === os.hostname() &&
-      lockData.userId === os.userInfo().username &&
-      lockData.pid === process.pid;
-
-    if (isOurLock) {
-      console.log('[DB] Lock is ours (same PID), returning true (write mode)');
-      return true;
-    }
-
-    // Check if lock is stale (older than timeout)
-    const isStale = (Date.now() - lockData.timestamp) >= LOCK_TIMEOUT_MS;
-
-    if (isStale) {
-      console.log('[DB] Lock is stale, returning true (write mode)');
-      return true;
-    }
-
-    console.log('[DB] Lock is foreign and fresh, returning false (read-only)');
-    return false;
-  } catch {
-    console.log('[DB] Error reading lock file, returning true (write mode)');
-    return true;
-  }
-}
-
-// Store last known lock state for change detection
-let lastKnownWriteMode: boolean | null = null;
-
-export function startLockWatcher(callback: (isWriteMode: boolean) => void, intervalMs: number = 2000) {
-  // Get initial state immediately
-  const initialWriteMode = isWriteMode();
-  lastKnownWriteMode = initialWriteMode;
-
-  // Emit initial state to callback
-  callback(initialWriteMode);
-  lockEvents.emit(LOCK_EVENTS.CHANGE, initialWriteMode);
-
-  // Check for changes
-  const checkLock = () => {
-    const currentWriteMode = isWriteMode();
-    if (lastKnownWriteMode !== currentWriteMode) {
-      // Lock status changed (e.g., another process acquired/released lock)
-      logToFile(`Lock status changed: writeMode=${currentWriteMode}`);
-      lockEvents.emit(LOCK_EVENTS.CHANGE, currentWriteMode);
-      callback(currentWriteMode);
-    }
-    lastKnownWriteMode = currentWriteMode;
-  };
-
-  // Start polling
-  const intervalId = setInterval(checkLock, intervalMs);
-
-  // Return cleanup function
-  return () => clearInterval(intervalId);
-}
-
-function logToFile(message: string, error?: any) {
-  try {
+    const fs = require('fs');
     ensureDataDir();
     const logPath = path.join(getDataDir(), 'debug.log');
     const timestamp = new Date().toISOString();
     const logMessage = error
-      ? `${timestamp} - ${message}: ${error.message}\n${error.stack}\n`
+      ? `${timestamp} - ${message}: ${(error as Error).message}\n${(error as Error).stack}\n`
       : `${timestamp} - ${message}\n`;
     fs.appendFileSync(logPath, logMessage);
-  } catch (err) {
-    console.error('Failed to write log:', err);
+  } catch {
+    console.error('Failed to write log:', error);
   }
 }
 
-async function runMigrations(sqlite: any, canWrite: boolean) {
+async function runMigrations(sqlite: unknown, canWrite: boolean): Promise<void> {
   try {
     // Only run migrations if in write mode
     if (!canWrite) {
@@ -206,8 +65,10 @@ async function runMigrations(sqlite: any, canWrite: boolean) {
       return;
     }
 
+    const dbInstance = drizzle({ client: sqlite });
+
     // Check existing tables
-    const tables = sqlite.prepare(
+    const tables = (sqlite as { prepare: (sql: string) => { all: () => { name: string }[] } }).prepare(
       "SELECT name FROM sqlite_master WHERE type='table'"
     ).all();
 
@@ -216,8 +77,6 @@ async function runMigrations(sqlite: any, canWrite: boolean) {
     // If no tables exist, run migrations
     if (tables.length === 0) {
       logToFile('No tables found, running migrations...');
-
-      const db = drizzle({ client: sqlite });
 
       // Get migrations folder path
       // Use process.resourcesPath for production (standard Electron API for extraResources)
@@ -228,7 +87,7 @@ async function runMigrations(sqlite: any, canWrite: boolean) {
       logToFile('Migrations path: ' + migrationsPath);
 
       // Run migrations using drizzle (synchronous for better-sqlite3)
-      migrate(db, { migrationsFolder: migrationsPath });
+      migrate(dbInstance, { migrationsFolder: migrationsPath });
 
       logToFile('Migrations completed successfully');
     } else {
@@ -240,6 +99,31 @@ async function runMigrations(sqlite: any, canWrite: boolean) {
     throw new Error(`Failed to run database migrations: ${message}`);
   }
 }
+
+// Re-export Lock functions for backward compatibility
+export const acquireWriteLock = (): boolean => {
+  const result = Lock.acquire();
+  return result.match({
+    onSuccess: (canWrite) => canWrite,
+    onFailure: () => false,
+  });
+};
+
+export const releaseWriteLock = (): void => {
+  Lock.release();
+};
+
+export const isWriteMode = (): boolean => {
+  const result = Lock.isWriteMode();
+  return result.match({
+    onSuccess: (canWrite) => canWrite,
+    onFailure: () => true, // Default to write mode on error
+  });
+};
+
+export const startLockWatcher = (callback: (isWriteMode: boolean) => void, intervalMs: number = 2000): (() => void) => {
+  return Lock.watch(callback, intervalMs);
+};
 
 export async function getDb() {
   if (!db) {

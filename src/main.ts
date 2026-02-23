@@ -6,6 +6,7 @@ import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS } from "./constants";
 import { releaseWriteLock, isWriteMode, startLockWatcher, getDb } from "./db";
+import { Lock } from "@/lib/lock";
 import { logger, configure } from "@/lib/logger";
 
 const inDevelopment = process.env.NODE_ENV === 'development';
@@ -124,17 +125,27 @@ app.whenReady().then(async () => {
     await setupORPC();
     logger.info('ORPC setup complete', 'main');
 
-    // 2. Initialize database (lazy - also acquires lock internally)
+    // 2. Acquire lock
+    logger.info('Acquiring lock...', 'main');
+    const lockResult = Lock.acquire();
+    const canWrite = lockResult._tag === 'Success' && lockResult.value;
+    if (lockResult._tag === 'Failure') {
+      logger.error('Failed to acquire lock: ' + lockResult.error.message, lockResult.error, 'main');
+    } else {
+      logger.info(canWrite ? 'Write mode enabled' : 'Read-only mode enabled', 'main');
+    }
+
+    // 3. Initialize database with lock status
     logger.info('Initializing database...', 'main');
-    await getDb();
+    await getDb(canWrite);
     logger.info('Database initialized', 'main');
 
-    // 3. Create window
+    // 4. Create window
     logger.info('Creating window...', 'main');
     createWindow();
     logger.info('Window created', 'main');
 
-    // 4. Start lock watcher after window is created
+    // 5. Start lock watcher after window is created
     logger.info('Starting lock watcher...', 'main');
     startLockWatcher((writeMode) => {
       mainWindow?.webContents.send(IPC_CHANNELS.LOCK_STATUS_CHANGED, writeMode);

@@ -122,14 +122,10 @@ export const startLockWatcher = (callback: (isWriteMode: boolean) => void, inter
   return Lock.watch(callback, intervalMs);
 };
 
-export async function getDb() {
+export async function getDb(canWrite: boolean = true) {
   if (!db) {
     try {
       logToFile('Initializing database...');
-
-      // Acquire write lock (or read-only mode)
-      const canWrite = acquireWriteLock();
-      logToFile(canWrite ? 'Write mode enabled' : 'Read-only mode enabled');
 
       // Load better-sqlite3 using module.require to avoid asar issues
       const Database = module.require('better-sqlite3');

@@ -2,10 +2,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow } from "electron";
 import { ipcMain } from "electron/main";
-import {
-  installExtension,
-  REACT_DEVELOPER_TOOLS,
-} from "electron-devtools-installer";
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS } from "./constants";
@@ -65,17 +61,9 @@ function createWindow() {
 }
 
 async function installExtensions() {
-  // Only install extensions in development
-  if (!inDevelopment) {
-    return;
-  }
-
-  try {
-    const result = await installExtension(REACT_DEVELOPER_TOOLS);
-    console.log(`Extensions installed successfully: ${result.name}`);
-  } catch {
-    console.error("Failed to install extensions");
-  }
+  // Skip extension installation - electron-devtools-installer uses deprecated APIs
+  // Extensions can be installed manually in Chrome://extensions if needed
+  return;
 }
 
 function checkForUpdates() {

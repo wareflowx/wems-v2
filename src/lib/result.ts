@@ -18,21 +18,21 @@ export type Failure<E> = {
   readonly error: E;
 };
 
-export type Result<T, E = Error> = Success<T> | Failure<E>;
+export type ResultType<T, E = Error> = Success<T> | Failure<E>;
 
 /**
- * Type guard for narrowing Result to Success.
+ * Type guard for narrowing ResultType to Success.
  * Returns true if result is Success, enabling TypeScript narrowing.
  */
-export function isSuccess<T, E>(result: Result<T, E>): result is Success<T> {
+export function isSuccess<T, E>(result: ResultType<T, E>): result is Success<T> {
   return result._tag === 'Success';
 }
 
 /**
- * Type guard for narrowing Result to Failure.
+ * Type guard for narrowing ResultType to Failure.
  * Returns true if result is Failure, enabling TypeScript narrowing.
  */
-export function isFailure<T, E>(result: Result<T, E>): result is Failure<E> {
+export function isFailure<T, E>(result: ResultType<T, E>): result is Failure<E> {
   return result._tag === 'Failure';
 }
 
@@ -40,9 +40,9 @@ export function isFailure<T, E>(result: Result<T, E>): result is Failure<E> {
  * Transform the success value
  */
 export function map<T, E, U>(
-  result: Result<T, E>,
+  result: ResultType<T, E>,
   fn: (value: T) => U
-): Result<U, E> {
+): ResultType<U, E> {
   switch (result._tag) {
     case 'Success':
       return { _tag: 'Success', value: fn(result.value) };
@@ -55,9 +55,9 @@ export function map<T, E, U>(
  * Transform the error value
  */
 export function mapError<T, E, F>(
-  result: Result<T, E>,
+  result: ResultType<T, E>,
   fn: (error: E) => F
-): Result<T, F> {
+): ResultType<T, F> {
   switch (result._tag) {
     case 'Success':
       return result;
@@ -69,7 +69,7 @@ export function mapError<T, E, F>(
 /**
  * Get the success value or a default
  */
-export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
+export function unwrapOr<T, E>(result: ResultType<T, E>, defaultValue: T): T {
   switch (result._tag) {
     case 'Success':
       return result.value;
@@ -82,9 +82,9 @@ export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
  * Async: Transform the success value
  */
 export async function mapAsync<T, E, U>(
-  result: Result<T, E>,
+  result: ResultType<T, E>,
   fn: (value: T) => Promise<U> | U
-): Promise<Result<U, E>> {
+): Promise<ResultType<U, E>> {
   switch (result._tag) {
     case 'Success':
       return { _tag: 'Success', value: await fn(result.value) };
@@ -97,9 +97,9 @@ export async function mapAsync<T, E, U>(
  * Async: Transform the error value
  */
 export async function mapErrorAsync<T, E, F>(
-  result: Result<T, E>,
+  result: ResultType<T, E>,
   fn: (error: E) => Promise<F> | F
-): Promise<Result<T, F>> {
+): Promise<ResultType<T, F>> {
   switch (result._tag) {
     case 'Success':
       return result;
@@ -112,9 +112,9 @@ export async function mapErrorAsync<T, E, F>(
  * Async: Chain operations that return Result
  */
 export async function flatMapAsync<T, E, U>(
-  result: Result<T, E>,
-  fn: (value: T) => Promise<Result<U, E>> | Result<U, E>
-): Promise<Result<U, E>> {
+  result: ResultType<T, E>,
+  fn: (value: T) => Promise<ResultType<U, E>> | ResultType<U, E>
+): Promise<ResultType<U, E>> {
   switch (result._tag) {
     case 'Success':
       return fn(result.value);
@@ -130,7 +130,7 @@ export const Result = {
   /**
    * Create a success result
    */
-  success: <T, E = Error>(value: T): Result<T, E> => ({
+  success: <T, E = Error>(value: T): ResultType<T, E> => ({
     _tag: 'Success',
     value,
   }),
@@ -138,7 +138,7 @@ export const Result = {
   /**
    * Create a failure result
    */
-  failure: <T, E = Error>(error: E): Result<T, E> => ({
+  failure: <T, E = Error>(error: E): ResultType<T, E> => ({
     _tag: 'Failure',
     error,
   }),
@@ -148,7 +148,7 @@ export const Result = {
    * Includes exhaustiveness checking for compile-time safety
    */
   match: <T, E, R>(
-    result: Result<T, E>,
+    result: ResultType<T, E>,
     config: {
       onSuccess: (value: T) => R;
       onFailure: (error: E) => R;
@@ -171,7 +171,7 @@ export const Result = {
    * Pattern match on Result - both callbacks optional
    */
   matchOpt: <T, E, R>(
-    result: Result<T, E>,
+    result: ResultType<T, E>,
     config?: {
       onSuccess?: (value: T) => R;
       onFailure?: (error: E) => R;
@@ -189,3 +189,6 @@ export const Result = {
     }
   },
 };
+
+// Backward compatibility type alias
+export type { ResultType as Result };

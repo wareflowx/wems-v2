@@ -3,6 +3,7 @@ import { app } from 'electron';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { Lock } from '@/lib/lock';
+import { isSuccess } from '@/lib/result';
 
 // Lazy database initialization to avoid Vite bundling issues with native modules
 let db: ReturnType<typeof drizzle> | null = null;
@@ -102,10 +103,7 @@ async function runMigrations(sqlite: unknown, canWrite: boolean): Promise<void> 
 // Re-export Lock functions for backward compatibility
 export const acquireWriteLock = (): boolean => {
   const result = Lock.acquire();
-  return result.match({
-    onSuccess: (canWrite) => canWrite,
-    onFailure: () => false,
-  });
+  return isSuccess(result) ? result.value : false;
 };
 
 export const releaseWriteLock = (): void => {
@@ -114,10 +112,7 @@ export const releaseWriteLock = (): void => {
 
 export const isWriteMode = (): boolean => {
   const result = Lock.isWriteMode();
-  return result.match({
-    onSuccess: (canWrite) => canWrite,
-    onFailure: () => true, // Default to write mode on error
-  });
+  return isSuccess(result) ? result.value : true;
 };
 
 export const startLockWatcher = (callback: (isWriteMode: boolean) => void, intervalMs: number = 2000): (() => void) => {

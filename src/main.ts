@@ -92,25 +92,28 @@ async function setupORPC() {
   });
 }
 
-// Single instance lock
-const gotTheLock = app.requestSingleInstanceLock();
+function setupSingleInstance(): void {
+  const gotTheLock = app.requestSingleInstanceLock();
 
-if (!gotTheLock) {
-  // Another instance is already running, quit this one
-  logger.warn('Another instance is already running, quitting...', 'main');
-  app.quit();
-} else {
-  // Handle second instance
-  app.on('second-instance', () => {
-    // Focus existing window
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore();
+  if (!gotTheLock) {
+    // Another instance is already running, quit this one
+    logger.warn('Another instance is already running, quitting...', 'main');
+    app.quit();
+  } else {
+    // Handle second instance - focus existing window
+    app.on('second-instance', () => {
+      if (mainWindow) {
+        if (mainWindow.isMinimized()) {
+          mainWindow.restore();
+        }
+        mainWindow.focus();
       }
-      mainWindow.focus();
-    }
-  });
+    });
+  }
 }
+
+// Setup single instance lock before app is ready
+setupSingleInstance();
 
 app.whenReady().then(async () => {
   try {

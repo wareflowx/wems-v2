@@ -3,6 +3,7 @@ import os from 'os';
 import path from 'path';
 import { app } from 'electron';
 import { Result, isSuccess } from '@/lib/result';
+import { logger, configure } from '@/lib/logger';
 import { lockEvents, LOCK_EVENTS } from '@/lib/lock-events';
 import {
   LockAlreadyExistsError,
@@ -58,19 +59,8 @@ function getLockFilePath(): string {
   return path.join(getDataDir(), LockConfig.fileName);
 }
 
-function logToFile(message: string, error?: unknown): void {
-  try {
-    ensureDataDir();
-    const logPath = path.join(getDataDir(), 'debug.log');
-    const timestamp = new Date().toISOString();
-    const logMessage = error
-      ? `${timestamp} - ${message}: ${(error as Error).message}\n${(error as Error).stack}\n`
-      : `${timestamp} - ${message}\n`;
-    fs.appendFileSync(logPath, logMessage);
-  } catch {
-    // Silently fail logging
-  }
-}
+// Configure lock-specific log level
+configure({ lock: 'debug' });
 
 function readLockFile(): LockData | null {
   const lockPath = getLockFilePath();
@@ -84,11 +74,11 @@ function readLockFile(): LockData | null {
     if (Lock.isValid(data)) {
       return data;
     }
-    logToFile('Invalid lock file data structure, removing corrupted lock');
+    logger.debug('Invalid lock file data structure, removing corrupted lock');
     deleteLockFile();
     return null;
   } catch (error) {
-    logToFile('Error reading lock file, removing corrupted lock', error);
+    logger.error('Error reading lock file, removing corrupted lock', error as Error);
     deleteLockFile();
     return null;
   }
@@ -114,14 +104,14 @@ function startHeartbeat(): void {
     Lock.updateHeartbeat();
   }, LockConfig.heartbeatIntervalMs);
 
-  logToFile(`Heartbeat started (interval: ${LockConfig.heartbeatIntervalMs}ms)`);
+  logger.debug(`Heartbeat started (interval: ${LockConfig.heartbeatIntervalMs}ms)`);
 }
 
 function stopHeartbeat(): void {
   if (heartbeatIntervalId) {
     clearInterval(heartbeatIntervalId);
     heartbeatIntervalId = null;
-    logToFile('Heartbeat stopped');
+    logger.debug('Heartbeat stopped');
   }
 }
 
@@ -187,13 +177,13 @@ export const Lock = {
         if (age < LockConfig.timeoutMs) {
           // Lock is fresh - check if it's ours
           if (Lock.isOurLock(existingLock)) {
-            logToFile('Our lock already exists, write mode enabled');
+            logger.debug('Our lock already exists, write mode enabled');
             lockData = existingLock;
             return Result.success(true);
           }
 
           // Foreign lock exists
-          logToFile(`Read-only mode: ${existingLock.userId}@${existingLock.hostname} has write access`);
+          logger.debug(`Read-only mode: ${existingLock.userId}@${existingLock.hostname} has write access`);
           return Result.failure(
             new LockAlreadyExistsError(
               `${existingLock.userId}@${existingLock.hostname}`
@@ -201,7 +191,7 @@ export const Lock = {
           );
         } else {
           // Lock is stale, remove it
-          logToFile('Removing stale write lock');
+          logger.debug('Removing stale write lock');
           deleteLockFile();
         }
       }
@@ -217,7 +207,7 @@ export const Lock = {
 
       writeLockFile(newLock);
       lockData = newLock;
-      logToFile('Write lock acquired');
+      logger.debug('Write lock acquired');
 
       // Start heartbeat
       startHeartbeat();
@@ -228,7 +218,7 @@ export const Lock = {
       return Result.success(true);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      logToFile('Error acquiring write lock', error);
+      logger.error('Error acquiring write lock', error as Error);
       return Result.failure(new LockFileError(message));
     }
   },
@@ -251,7 +241,7 @@ export const Lock = {
 
       deleteLockFile();
       lockData = null;
-      logToFile('Write lock released');
+      logger.debug('Write lock released');
 
       // Emit lock change event
       lockEvents.emit('change', false);
@@ -259,7 +249,7 @@ export const Lock = {
       return Result.success(undefined);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      logToFile('Error releasing write lock', error);
+      logger.error('Error releasing write lock', error as Error);
       return Result.failure(new LockFileError(message));
     }
   },
@@ -297,7 +287,7 @@ export const Lock = {
       return Result.success(false);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      logToFile('Error checking write mode', error);
+      logger.error('Error checking write mode', error as Error);
       return Result.failure(new LockFileError(message));
     }
   },
@@ -379,7 +369,7 @@ export const Lock = {
       const currentWriteMode = isSuccess(currentResult) ? currentResult.value : true;
 
       if (lastKnownWriteMode !== currentWriteMode) {
-        logToFile(`Lock status changed: writeMode=${currentWriteMode}`);
+        logger.debug(`Lock status changed: writeMode=${currentWriteMode}`);
         lockEvents.emit('change', currentWriteMode);
         callback(currentWriteMode);
       }

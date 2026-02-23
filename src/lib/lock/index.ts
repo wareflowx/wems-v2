@@ -125,6 +125,23 @@ function stopHeartbeat(): void {
   }
 }
 
+// Cleanup handlers for unexpected termination
+if (typeof process !== 'undefined') {
+  process.on('exit', () => {
+    stopHeartbeat();
+  });
+
+  process.on('SIGTERM', () => {
+    stopHeartbeat();
+    process.exit(0);
+  });
+
+  process.on('SIGINT', () => {
+    stopHeartbeat();
+    process.exit(0);
+  });
+}
+
 /**
  * Lock module with functional approach using Result type
  */
@@ -145,7 +162,10 @@ export const Lock = {
   },
 
   /**
-   * Check if lock is our own (same hostname + userId)
+   * Check if lock is our own (same hostname + userId).
+   * Note: PID is intentionally ignored to allow multiple app instances
+   * from the same user on the same machine to share write access.
+   * Use lastHeartbeat to detect active vs crashed instances.
    */
   isOurLock(data: LockData): boolean {
     return (
@@ -264,7 +284,12 @@ export const Lock = {
       // Check if lock is stale using lastHeartbeat (activity indicator)
       const isStale = Lock.isStale();
 
-      if (isStale._tag === 'Success' && isStale.value) {
+      // Propagate errors from isStale
+      if (isStale._tag === 'Failure') {
+        return Result.failure(isStale.error);
+      }
+
+      if (isStale.value) {
         return Result.success(true);
       }
 

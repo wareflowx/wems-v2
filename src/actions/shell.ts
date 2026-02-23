@@ -1,5 +1,6 @@
 import { ipc } from "@/ipc/manager";
 
-export function openExternalLink(url: string) {
+export async function openExternalLink(url: string) {
+  await ipc.waitForReady();
   return ipc.client.shell.openExternalLink({ url });
 }

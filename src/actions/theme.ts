@@ -8,6 +8,7 @@ export interface ThemePreferences {
 }
 
 export async function getCurrentTheme(): Promise<ThemePreferences> {
+  await ipc.waitForReady();
   const currentTheme = await ipc.client.theme.getCurrentThemeMode();
   const localTheme = localStorage.getItem(
     LOCAL_STORAGE_KEYS.THEME
@@ -20,6 +21,7 @@ export async function getCurrentTheme(): Promise<ThemePreferences> {
 }
 
 export async function setTheme(newTheme: ThemeMode) {
+  await ipc.waitForReady();
   const isDarkMode = newTheme === "dark";
   await ipc.client.theme.setThemeMode(newTheme);
   localStorage.setItem(LOCAL_STORAGE_KEYS.THEME, newTheme);
@@ -27,6 +29,7 @@ export async function setTheme(newTheme: ThemeMode) {
 }
 
 export async function toggleTheme() {
+  await ipc.waitForReady();
   const isDarkMode = await ipc.client.theme.toggleThemeMode();
   const newTheme = isDarkMode ? "dark" : "light";
 

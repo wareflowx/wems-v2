@@ -10,8 +10,11 @@ class IPCContext {
 
   get mainWindowContext() {
     const window = this.mainWindow;
+
+    // Return a no-op middleware if window isn't set yet
+    // Handlers should handle the case where context.window is undefined
     if (!window) {
-      throw new Error("Main window is not set in IPC context.");
+      return os.middleware(({ next }) => next({ context: { window: undefined } }));
     }
 
     return os.middleware(({ next }) =>

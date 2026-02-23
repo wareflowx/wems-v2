@@ -6,6 +6,10 @@ export const minimizeWindow = os
   .handler(({ context }) => {
     const { window } = context;
 
+    if (!window) {
+      throw new Error("Window not available");
+    }
+
     window.minimize();
   });
 
@@ -13,6 +17,10 @@ export const maximizeWindow = os
   .use(ipcContext.mainWindowContext)
   .handler(({ context }) => {
     const { window } = context;
+
+    if (!window) {
+      throw new Error("Window not available");
+    }
 
     if (window.isMaximized()) {
       window.unmaximize();
@@ -25,6 +33,10 @@ export const closeWindow = os
   .use(ipcContext.mainWindowContext)
   .handler(({ context }) => {
     const { window } = context;
+
+    if (!window) {
+      throw new Error("Window not available");
+    }
 
     window.close();
   });

@@ -60,13 +60,19 @@ class IPCManager {
 
   // Wait for ORPC to be ready before making calls
   async waitForReady(): Promise<void> {
+    console.log("[IPC] waitForReady called, ready:", this.ready, "initialized:", this.initialized);
     if (this.ready) {
+      console.log("[IPC] waitForReady: already ready, returning");
       return;
     }
 
     // If already initialized but not ready yet, wait for it
     if (this.readyPromise) {
+      console.log("[IPC] waitForReady: waiting for readyPromise...");
       await this.readyPromise;
+      console.log("[IPC] waitForReady: promise resolved");
+    } else {
+      console.log("[IPC] waitForReady: NO readyPromise, this is a problem!");
     }
   }
 

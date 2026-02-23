@@ -42,14 +42,18 @@ class IPCManager {
   }
 
   initialize() {
+    console.log("[IPC] initialize called, initialized:", this.initialized);
     if (this.initialized) {
+      console.log("[IPC] initialize: already initialized, returning");
       return;
     }
 
+    console.log("[IPC] initialize: starting clientPort and sending START_ORPC_SERVER");
     this.clientPort.start();
 
     // Send server port to main process
     window.postMessage(IPC_CHANNELS.START_ORPC_SERVER, "*", [this.serverPort]);
+    console.log("[IPC] initialize: message sent");
     this.initialized = true;
 
     // Create a promise that resolves when main process confirms ready

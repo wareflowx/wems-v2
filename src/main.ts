@@ -10,51 +10,26 @@ import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS } from "./constants";
 import { releaseWriteLock, isWriteMode, startLockWatcher, getDb } from "./db";
-import fs from "fs";
+import { Lock } from "@/lib/lock";
+import { logger, configure } from "@/lib/logger";
 
 const inDevelopment = process.env.NODE_ENV === 'development';
 
-function getDataDir() {
-  const baseDir = inDevelopment
-    ? process.cwd()
-    : path.dirname(app.getPath('exe'));
-  return path.join(baseDir, 'data');
-}
-
-function ensureDataDir() {
-  const dataDir = getDataDir();
-  if (!fs.existsSync(dataDir)) {
-    try {
-      fs.mkdirSync(dataDir, { recursive: true });
-    } catch (error) {
-      console.error(`Failed to create data directory at ${dataDir}:`, error);
-    }
-  }
-  return dataDir;
-}
-
-// Logging system for production debugging
-function logToFile(message: string, error?: any) {
-  try {
-    ensureDataDir();
-    const logPath = path.join(getDataDir(), 'app.log');
-    const timestamp = new Date().toISOString();
-    const logMessage = error
-      ? `${timestamp} - ${message}: ${error.message}\n${error.stack}\n`
-      : `${timestamp} - ${message}\n`;
-    fs.appendFileSync(logPath, logMessage);
-  } catch (e) {
-    // Can't log if directory creation fails
-  }
-}
+// Configure logger
+configure({
+  default: inDevelopment ? 'debug' : 'info',
+  lock: 'debug',
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let mainWindow: BrowserWindow | null = null;
+
 function createWindow() {
   // electron-vite 5.0: preload is in out/preload/, main is in out/main/
   const preload = path.join(__dirname, "../preload/preload.js");
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -82,6 +57,11 @@ function createWindow() {
     const rendererUrl = `file://${rendererPath}`;
     mainWindow.loadURL(rendererUrl);
   }
+
+  // Handle window closed
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
 }
 
 async function installExtensions() {
@@ -115,57 +95,103 @@ async function setupORPC() {
   // Expose write mode status to renderer
   ipcMain.handle(IPC_CHANNELS.GET_WRITE_MODE, () => {
     const result = isWriteMode();
-    console.log('[DEBUG] getWriteMode called, result:', result, 'inDevelopment:', inDevelopment);
+    logger.debug('[DEBUG] getWriteMode called, result: ' + result, 'main');
     return result;
   });
 
   // Start watching for lock changes and forward to renderer
-  const mainWindow = ipcContext.mainWindow;
   if (mainWindow) {
     startLockWatcher((writeMode) => {
-      mainWindow.webContents.send(IPC_CHANNELS.LOCK_STATUS_CHANGED, writeMode);
+      mainWindow?.webContents.send(IPC_CHANNELS.LOCK_STATUS_CHANGED, writeMode);
     }, 2000);
   }
 }
 
+// Single instance lock
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  // Another instance is already running, quit this one
+  logger.warn('Another instance is already running, quitting...', 'main');
+  app.quit();
+} else {
+  // Handle second instance
+  app.on('second-instance', () => {
+    // Focus existing window
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      mainWindow.focus();
+    }
+  });
+}
+
 app.whenReady().then(async () => {
   try {
-    logToFile('App starting...');
-    logToFile(`User data path: ${app.getPath('userData')}`);
+    logger.info('App starting...', 'main');
 
-    // Initialize database and acquire write lock
-    logToFile('Initializing database...');
-    await getDb();
-    logToFile('Database initialized');
-
-    logToFile('Creating window...');
-    createWindow();
-    logToFile('Window created');
-    await installExtensions();
-    logToFile('Extensions installed');
-    checkForUpdates();
-    logToFile('Update check complete');
+    // 1. Setup ORPC first (needed for window controls)
+    logger.info('Setting up ORPC...', 'main');
     await setupORPC();
-    logToFile('ORPC setup complete');
-    logToFile('App initialization complete');
+    logger.info('ORPC setup complete', 'main');
+
+    // 2. Acquire lock
+    logger.info('Acquiring lock...', 'main');
+    const lockResult = Lock.acquire();
+    if (lockResult._tag === 'Failure') {
+      logger.error('Failed to acquire lock: ' + lockResult.error.message, lockResult.error, 'main');
+    } else {
+      logger.info(lockResult.value ? 'Write mode enabled' : 'Read-only mode enabled', 'main');
+    }
+
+    // 3. Initialize database (lazy)
+    logger.info('Initializing database...', 'main');
+    await getDb();
+    logger.info('Database initialized', 'main');
+
+    // 4. Create window last
+    logger.info('Creating window...', 'main');
+    createWindow();
+    logger.info('Window created', 'main');
+
+    await installExtensions();
+    logger.info('Extensions installed', 'main');
+
+    checkForUpdates();
+    logger.info('Update check complete', 'main');
+
+    logger.info('App initialization complete', 'main');
   } catch (error) {
-    logToFile('Error during app initialization', error);
+    logger.error('Error during app initialization', error as Error, 'main');
     console.error("Error during app initialization:", error);
   }
 });
 
+// Handle before-quit to release lock
+app.on('before-quit', () => {
+  logger.info('App before-quit, releasing lock...', 'main');
+  releaseWriteLock();
+});
+
+// Handle will-quit as backup
+app.on('will-quit', () => {
+  logger.info('App will-quit', 'main');
+  releaseWriteLock();
+});
+
 // Catch unhandled errors
 process.on('uncaughtException', (error) => {
-  logToFile('Uncaught Exception', error);
+  logger.error('Uncaught Exception', error, 'main');
   console.error('Uncaught Exception:', error);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  logToFile(`Unhandled Rejection at ${promise}`, reason);
+  logger.error('Unhandled Rejection at ' + promise, reason as Error, 'main');
   console.error('Unhandled Rejection:', reason);
 });
 
-//osX only
+// macOS only
 app.on("window-all-closed", () => {
   releaseWriteLock();
   if (process.platform !== "darwin") {
@@ -178,4 +204,3 @@ app.on("activate", () => {
     createWindow();
   }
 });
-//osX only ends

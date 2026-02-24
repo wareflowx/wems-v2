@@ -157,7 +157,27 @@ app.whenReady().then(async () => {
     console.log("[MAIN] app.whenReady fired!");
     logger.info('App starting...', 'main');
 
-    // 1. Setup ORPC first (needed for window controls)
+    // 1. Acquire lock first (doesn't need window)
+    logger.info('Acquiring lock...', 'main');
+    const lockResult = Lock.acquire();
+    const canWrite = lockResult._tag === 'Success' && lockResult.value;
+    if (lockResult._tag === 'Failure') {
+      logger.error('Failed to acquire lock: ' + lockResult.error.message, lockResult.error, 'main');
+    } else {
+      logger.info(canWrite ? 'Write mode enabled' : 'Read-only mode enabled', 'main');
+    }
+
+    // 2. Initialize database with lock status
+    logger.info('Initializing database...', 'main');
+    await getDb(canWrite);
+    logger.info('Database initialized', 'main');
+
+    // 3. Create window FIRST (so window exists for ORPC context)
+    logger.info('Creating window...', 'main');
+    createWindow();
+    logger.info('Window created', 'main');
+
+    // 4. Setup ORPC AFTER window exists (handlers need window context)
     console.log("[MAIN] About to call setupORPC...");
     logger.info('Setting up ORPC...', 'main');
     try {
@@ -169,32 +189,12 @@ app.whenReady().then(async () => {
     }
     logger.info('ORPC setup complete', 'main');
 
-    // 2. Acquire lock
-    logger.info('Acquiring lock...', 'main');
-    const lockResult = Lock.acquire();
-    const canWrite = lockResult._tag === 'Success' && lockResult.value;
-    if (lockResult._tag === 'Failure') {
-      logger.error('Failed to acquire lock: ' + lockResult.error.message, lockResult.error, 'main');
-    } else {
-      logger.info(canWrite ? 'Write mode enabled' : 'Read-only mode enabled', 'main');
-    }
-
-    // 3. Initialize database with lock status
-    logger.info('Initializing database...', 'main');
-    await getDb(canWrite);
-    logger.info('Database initialized', 'main');
-
-    // 4. Create window
-    logger.info('Creating window...', 'main');
-    createWindow();
-    logger.info('Window created', 'main');
-
     // Notify renderer that main is ready to receive ORPC setup
     console.log("[MAIN] Sending MAIN_READY to renderer...");
     mainWindow?.webContents.send(IPC_CHANNELS.MAIN_READY);
     console.log("[MAIN] MAIN_READY sent");
 
-    // 5. Start lock watcher after window is created
+    // 5. Start lock watcher
     logger.info('Starting lock watcher...', 'main');
     startLockWatcher((writeMode) => {
       mainWindow?.webContents.send(IPC_CHANNELS.LOCK_STATUS_CHANGED, writeMode);

@@ -23,34 +23,35 @@ class IPCManager {
   }
 
   constructor() {
-    // Register callback for ORPC ready via preload
-    const globalWindow = window as unknown as {
-      onORPCReady?: (callback: (port: MessagePort) => void) => void;
-    };
-
-    if (globalWindow.onORPCReady) {
-      console.log("[IPC] Registering onORPCReady callback");
-      globalWindow.onORPCReady((port) => {
-        console.log("[IPC] ORPC_READY received with port!");
-        console.log("[IPC] port:", port);
+    // Listen for ORPC port from preload via window.postMessage
+    // This is the only way to get a valid MessagePort in the renderer
+    window.addEventListener("message", (event) => {
+      if (event.data?.type === "ORPC_PORT" && event.ports[0]) {
+        const port = event.ports[0];
+        console.log("[IPC] Received ORPC_PORT via postMessage!");
         console.log("[IPC] port.constructor:", port.constructor?.name);
-        console.log("[IPC] 'addEventListener' in port:", "addEventListener" in port);
         console.log("[IPC] typeof port.addEventListener:", typeof port.addEventListener);
+        this.initWithPort(port);
+      }
+    });
+  }
 
-        // Create the RPCLink with the port from main
-        console.log("[IPC] Creating RPCLink...");
-        this.rpcLink = new RPCLink({ port });
-        console.log("[IPC] RPCLink created!");
-        this._client = createORPCClient(this.rpcLink);
-        console.log("[IPC] Client created!");
-        port.start();
-        this.ready = true;
-        if (this.resolveReady) {
-          this.resolveReady();
-        }
-      });
-    } else {
-      console.log("[IPC] onORPCReady not available yet, will be registered later");
+  private initWithPort(port: MessagePort) {
+    console.log("[IPC] initWithPort called");
+    console.log("[IPC] port.constructor:", port.constructor?.name);
+    console.log("[IPC] typeof port.addEventListener:", typeof port.addEventListener);
+
+    try {
+      this.rpcLink = new RPCLink({ port });
+      console.log("[IPC] RPCLink created!");
+      this._client = createORPCClient(this.rpcLink);
+      console.log("[IPC] Client created!");
+      this.ready = true;
+      if (this.resolveReady) {
+        this.resolveReady();
+      }
+    } catch (error) {
+      console.error("[IPC] Error creating RPCLink:", error);
     }
   }
 
@@ -64,27 +65,44 @@ class IPCManager {
       this.initialize();
     }
 
-    // Wait for main to be ready first
+    // If we already have the port (arrived via postMessage), we're done
+    if (this.ready) {
+      return;
+    }
+
+    // Port not yet available - notify main and wait
     const globalWindow = window as unknown as {
       waitForMainReady?: () => Promise<void>;
       notifyRendererReady?: () => void;
     };
 
+    // Try to wait for main ready, but don't block if it's not available yet
     if (globalWindow.waitForMainReady) {
       console.log("[IPC] waitForReady: waiting for main ready...");
-      await globalWindow.waitForMainReady();
-      console.log("[IPC] waitForReady: main ready, notifying main...");
-
-      // Now notify main that renderer is ready
+      try {
+        // Add a timeout so we don't wait forever
+        await Promise.race([
+          globalWindow.waitForMainReady(),
+          new Promise((resolve) => setTimeout(resolve, 3000))
+        ]);
+        console.log("[IPC] waitForReady: main ready, notifying main...");
+        globalWindow.notifyRendererReady?.();
+      } catch (error) {
+        console.log("[IPC] waitForReady: waitForMainReady failed or timed out, still notifying...");
+        globalWindow.notifyRendererReady?.();
+      }
+    } else {
+      // Main ready function not available yet, try anyway
+      console.log("[IPC] waitForReady: waitForMainReady not available, notifying anyway...");
       globalWindow.notifyRendererReady?.();
     }
 
-    // Then wait for ORPC to be set up
+    // Now wait for the port to arrive via postMessage
+    console.log("[IPC] waitForReady: waiting for port via postMessage...");
     if (this.readyPromise) {
-      console.log("[IPC] waitForReady: waiting for readyPromise...");
       await this.readyPromise;
-      console.log("[IPC] waitForReady: promise resolved");
     }
+    console.log("[IPC] waitForReady: done");
   }
 
   initialize() {

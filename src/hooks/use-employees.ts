@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as db from '@/actions/database'
 import { queryKeys } from '@/lib/query-keys'
 import { useToast } from '@/utils/toast'
+import { useORPCReady } from './use-orpc-ready'
 
 // Employee filters type
 export interface EmployeeFilters {
@@ -12,9 +13,12 @@ export interface EmployeeFilters {
 
 // Hook for fetching employees list
 export function useEmployees(filters?: EmployeeFilters) {
+  const orpcReady = useORPCReady()
+
   return useQuery({
     queryKey: queryKeys.employees.lists(),
     queryFn: () => db.getEmployees(),
+    enabled: orpcReady, // Wait for ORPC to be ready
     select: (data: db.Employee[]) => {
       // Client-side filtering using select to avoid multiple cache entries
       let filtered = [...data]
@@ -43,10 +47,12 @@ export function useEmployees(filters?: EmployeeFilters) {
 
 // Hook for fetching single employee
 export function useEmployee(id: number) {
+  const orpcReady = useORPCReady()
+
   return useQuery({
     queryKey: queryKeys.employees.detail(id),
     queryFn: () => db.getEmployeeById(id),
-    enabled: !!id,
+    enabled: orpcReady && !!id, // Wait for ORPC and valid id
   })
 }
 

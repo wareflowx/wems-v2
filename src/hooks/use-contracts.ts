@@ -2,28 +2,36 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as db from "@/actions/database";
 import { queryKeys } from "@/lib/query-keys";
 import { useToast } from "@/utils/toast";
+import { useORPCReady } from "./use-orpc-ready";
 
 // Contracts
 export function useContracts() {
+  const orpcReady = useORPCReady();
+
   return useQuery({
     queryKey: queryKeys.contracts.lists(),
     queryFn: () => db.getContracts(),
+    enabled: orpcReady, // Wait for ORPC to be ready
   });
 }
 
 export function useContractsByEmployee(employeeId: number) {
+  const orpcReady = useORPCReady();
+
   return useQuery({
     queryKey: queryKeys.contracts.byEmployee(employeeId),
     queryFn: () => db.getContractsByEmployee(employeeId),
-    enabled: !!employeeId,
+    enabled: orpcReady && !!employeeId,
   });
 }
 
 export function useActiveContractByEmployee(employeeId: number) {
+  const orpcReady = useORPCReady();
+
   return useQuery({
     queryKey: queryKeys.contracts.activeByEmployee(employeeId),
     queryFn: () => db.getActiveContractByEmployee(employeeId),
-    enabled: !!employeeId,
+    enabled: orpcReady && !!employeeId,
   });
 }
 

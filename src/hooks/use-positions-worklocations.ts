@@ -2,12 +2,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query-keys'
 import * as db from '@/actions/database'
 import { useToast } from '@/utils/toast'
+import { useORPCReady } from './use-orpc-ready'
 
 // Positions
 export function usePositions() {
+  const orpcReady = useORPCReady()
+
   return useQuery({
     queryKey: queryKeys.positions.lists(),
     queryFn: () => db.getPositions(),
+    enabled: orpcReady, // Wait for ORPC to be ready
   })
 }
 
@@ -99,9 +103,12 @@ export function useDeletePosition() {
 
 // Work Locations
 export function useWorkLocations() {
+  const orpcReady = useORPCReady()
+
   return useQuery({
     queryKey: queryKeys.workLocations.lists(),
     queryFn: () => db.getWorkLocations(),
+    enabled: orpcReady, // Wait for ORPC to be ready
   })
 }
 

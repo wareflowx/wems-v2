@@ -1,141 +1,180 @@
-import { type ClientContext, createORPCClient } from "@orpc/client";
+import { createORPCClient, onError } from "@orpc/client";
 import { RPCLink } from "@orpc/client/message-port";
 import type { RouterClient } from "@orpc/server";
-import { IPC_CHANNELS } from "@/constants";
 import type { router } from "./router";
 
 type RPCClient = RouterClient<typeof router>;
 
+// Type definitions for the preload API
+interface ElectronAPI {
+  rpc: {
+    notifyReady: () => void;
+  };
+}
+
 class IPCManager {
-  private rpcLink: RPCLink<ClientContext> | null = null;
   private _client: RPCClient | null = null;
+  private _initialized = false;
+  private _readyResolve: (() => void) | null = null;
+  private _readyPromise: Promise<void> | null = null;
+  private _readyListeners: ((ready: boolean) => void)[] = [];
 
-  private initialized = false;
-  private ready = false;
-  private readyPromise: Promise<void> | null = null;
-  private resolveReady: (() => void) | null = null;
+  /**
+   * Initialize the IPC connection - call this once at app startup
+   * Best Practice: Event-driven approach - renderer gets port directly via postMessage
+   */
+  init(): void {
+    if (this._initialized) return;
+    this._initialized = true;
 
-  get client(): RPCClient {
-    if (!this._client) {
-      throw new Error(
-        "ORPC client not initialized. " +
-        "Call ipc.waitForReady() first, or ensure preload triggers " +
-        "window.notifyRendererReady() on load."
-      );
+    console.log("[IPC] Initializing ORPC...");
+
+    // Create promise that resolves when client is ready
+    this._readyPromise = new Promise((resolve) => {
+      this._readyResolve = resolve;
+    });
+
+    // Listen for port from preload via window.postMessage
+    // This is the CORRECT way - port is transferred directly, not through contextBridge
+    window.addEventListener("message", (event) => {
+      if (event.data?.type === "orpc-port-ready") {
+        const [port] = event.ports;
+        if (port) {
+          console.log("[IPC] Port received via postMessage!");
+          this._handlePort(port);
+        }
+      }
+    });
+
+    // Poll for ORPC ready as fallback (handles race condition where message might be missed)
+    this._pollForReady();
+
+    // Notify main that we're ready to receive the port
+    const api = (window as unknown as { electron?: ElectronAPI }).electron;
+    if (api?.rpc) {
+      api.rpc.notifyReady();
+      console.log("[IPC] Notified main that renderer is ready");
+    } else {
+      console.error("[IPC] electron.rpc not available");
     }
-    return this._client;
   }
 
-  constructor() {
-    // Try to get port from preload via callback
-    const globalWindow = window as unknown as {
-      onORPCPortReady?: (callback: (port: MessagePort) => void) => void;
+  /**
+   * Poll for ORPC ready state as a fallback mechanism
+   * This handles edge cases where the message handshake might fail
+   */
+  private _pollForReady(): void {
+    let attempts = 0;
+    const maxAttempts = 50; // 50 * 100ms = 5 seconds max wait
+    const pollInterval = 100;
+
+    const checkReady = () => {
+      if (this._client) return; // Already ready
+
+      attempts++;
+      if (attempts >= maxAttempts) {
+        console.warn("[IPC] Poll timeout waiting for ORPC");
+        return;
+      }
+
+      // Check if window.electron.rpc is available and re-notify if needed
+      const api = (window as unknown as { electron?: ElectronAPI }).electron;
+      if (api?.rpc) {
+        // Already notified, just wait a bit more
+        setTimeout(checkReady, pollInterval);
+      } else {
+        // Retry notification
+        setTimeout(checkReady, pollInterval);
+      }
     };
 
-    if (globalWindow.onORPCPortReady) {
-      console.log("[IPC] Registering onORPCPortReady callback...");
-      globalWindow.onORPCPortReady((port) => {
-        console.log("[IPC] onORPCPortReady callback fired!");
-        this.initWithPort(port);
-      });
-    } else {
-      console.log("[IPC] onORPCPortReady not available yet");
-    }
-
-    // Also check global __orpcPort as fallback
-    const globalWithPort = window as unknown as { __orpcPort?: MessagePort };
-    if (globalWithPort.__orpcPort) {
-      console.log("[IPC] Port already available from global!");
-      this.initWithPort(globalWithPort.__orpcPort);
-    }
+    setTimeout(checkReady, pollInterval);
   }
 
-  private initWithPort(port: MessagePort) {
-    console.log("[IPC] initWithPort called");
+  private _handlePort(port: MessagePort) {
+    console.log("[IPC] Creating ORPC client with port...");
     console.log("[IPC] port.constructor:", port.constructor?.name);
     console.log("[IPC] typeof port.addEventListener:", typeof port.addEventListener);
 
     try {
-      this.rpcLink = new RPCLink({ port });
-      console.log("[IPC] RPCLink created!");
-      this._client = createORPCClient(this.rpcLink);
-      console.log("[IPC] Client created!");
-      this.ready = true;
-      if (this.resolveReady) {
-        this.resolveReady();
+      // Best Practice: Add client-side error interceptors
+      const link = new RPCLink({ port });
+
+      this._client = createORPCClient(link, {
+        interceptors: [
+          // Client-side error handling
+          onError((error, { path }) => {
+            console.error(`[ORPC Client Error] ${path}:`, error);
+          }),
+        ],
+      });
+
+      console.log("[IPC] ORPC Client created successfully!");
+      port.start();
+
+      // Resolve the ready promise
+      if (this._readyResolve) {
+        this._readyResolve();
+        this._readyResolve = null;
       }
+
+      // Notify listeners
+      this._readyListeners.forEach((listener) => listener(true));
+      this._readyListeners = [];
     } catch (error) {
       console.error("[IPC] Error creating RPCLink:", error);
     }
   }
 
-  async waitForReady(): Promise<void> {
-    if (this.ready) {
-      return;
+  get client(): RPCClient {
+    if (!this._client) {
+      throw new Error(
+        "ORPC client not initialized. " +
+        "Call ipc.init() first in your app initialization."
+      );
     }
-
-    // If not initialized, initialize first
-    if (!this.initialized) {
-      this.initialize();
-    }
-
-    // If we already have the port (arrived via postMessage), we're done
-    if (this.ready) {
-      return;
-    }
-
-    // Port not yet available - notify main and wait
-    const globalWindow = window as unknown as {
-      waitForMainReady?: () => Promise<void>;
-      notifyRendererReady?: () => void;
-    };
-
-    // Try to wait for main ready, but don't block if it's not available yet
-    if (globalWindow.waitForMainReady) {
-      console.log("[IPC] waitForReady: waiting for main ready...");
-      try {
-        // Add a timeout so we don't wait forever
-        await Promise.race([
-          globalWindow.waitForMainReady(),
-          new Promise((resolve) => setTimeout(resolve, 3000))
-        ]);
-        console.log("[IPC] waitForReady: main ready, notifying main...");
-        globalWindow.notifyRendererReady?.();
-      } catch (error) {
-        console.log("[IPC] waitForReady: waitForMainReady failed or timed out, still notifying...");
-        globalWindow.notifyRendererReady?.();
-      }
-    } else {
-      // Main ready function not available yet, try anyway
-      console.log("[IPC] waitForReady: waitForMainReady not available, notifying anyway...");
-      globalWindow.notifyRendererReady?.();
-    }
-
-    // Now wait for the port to arrive via postMessage
-    console.log("[IPC] waitForReady: waiting for port via postMessage...");
-    if (this.readyPromise) {
-      await this.readyPromise;
-    }
-    console.log("[IPC] waitForReady: done");
+    return this._client;
   }
 
-  initialize() {
-    console.log("[IPC] initialize called, initialized:", this.initialized);
-    if (this.initialized) {
-      console.log("[IPC] initialize: already initialized, returning");
+  /**
+   * Wait for ORPC to be ready - properly waits for the client to be initialized
+   */
+  async waitForReady(): Promise<void> {
+    // If already ready, return immediately
+    if (this._client) return;
+
+    // If there's a pending promise, wait for it
+    if (this._readyPromise) {
+      await this._readyPromise;
       return;
     }
 
-    this.initialized = true;
+    // If not initialized, initialize and wait
+    this.init();
 
-    // Create a promise that resolves when main process confirms ready
-    this.readyPromise = new Promise((resolve) => {
-      this.resolveReady = resolve;
-    });
+    // Wait for the promise to resolve
+    if (this._readyPromise) {
+      await this._readyPromise;
+    }
   }
 
   isReady(): boolean {
-    return this.ready;
+    return this._client !== null;
+  }
+
+  /**
+   * Subscribe to ready state changes
+   * Returns unsubscribe function
+   */
+  onReadyChange(callback: (ready: boolean) => void): () => void {
+    if (this._client) {
+      callback(true);
+      return () => {};
+    }
+    this._readyListeners.push(callback);
+    return () => {
+      this._readyListeners = this._readyListeners.filter((cb) => cb !== callback);
+    };
   }
 }
 

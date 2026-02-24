@@ -53,13 +53,22 @@ contextBridge.exposeInMainWorld("notifyRendererReady", () => {
   ipcRenderer.send(IPC_CHANNELS.RENDERER_READY);
 });
 
-// Listen for MAIN_READY and resolve the promise
+// Listen for MAIN_READY - this means main process is ready to receive ORPC setup
+// Once received, we can safely send RENDERER_READY
 ipcRenderer.on(IPC_CHANNELS.MAIN_READY, () => {
-  console.log("[PRELOAD] Received MAIN_READY, resolving promise");
+  console.log("[PRELOAD] Received MAIN_READY, resolving promise and triggering initialization");
   mainReady = true;
   if (mainReadyResolve) {
     mainReadyResolve();
     mainReadyResolve = null;
+  }
+
+  // NOW we can safely notify main that renderer is ready
+  // (Listener is guaranteed to be set up now)
+  if (!rendererReadyNotified) {
+    rendererReadyNotified = true;
+    console.log("[PRELOAD] Sending RENDERER_READY (main is ready)");
+    ipcRenderer.send(IPC_CHANNELS.RENDERER_READY);
   }
 });
 
@@ -81,13 +90,7 @@ contextBridge.exposeInMainWorld("onLockStatusChanged", (callback: (writeMode: bo
   }
 });
 
-// CRITICAL: Trigger initialization immediately when preload loads
-// This ensures ORPC is ready before React mounts and components query data
-// By the time any component runs, the port will have arrived via postMessage
-console.log("[PRELOAD] Triggering early initialization...");
-// Call directly - don't use window.notifyRendererReady as that's for renderer
-if (!rendererReadyNotified) {
-  rendererReadyNotified = true;
-  console.log("[PRELOAD] Sending RENDERER_READY immediately");
-  ipcRenderer.send(IPC_CHANNELS.RENDERER_READY);
-}
+// CRITICAL: Wait for MAIN_READY before sending RENDERER_READY
+// This ensures the main process has set up the listener before we notify
+// The issue was that preload runs BEFORE setupORPC() in main.ts
+console.log("[PRELOAD] Waiting for MAIN_READY before triggering initialization...");

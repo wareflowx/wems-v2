@@ -39,8 +39,11 @@ let lastKnownWriteMode: boolean | null = null;
 let heartbeatIntervalId: ReturnType<typeof setInterval> | null = null;
 
 function getDataDir(): string {
+  // Use userData directory for data storage
+  // This is the proper location for app data (writable, per-user)
+  // In development: use project root for easier debugging
   const inDevelopment = process.env.NODE_ENV === 'development';
-  const baseDir = inDevelopment ? process.cwd() : path.dirname(app.getPath('exe'));
+  const baseDir = inDevelopment ? process.cwd() : app.getPath('userData');
   return path.join(baseDir, 'data');
 }
 

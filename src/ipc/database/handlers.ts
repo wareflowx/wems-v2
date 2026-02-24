@@ -142,9 +142,13 @@ export const deleteWorkLocation = os.handler(async ({ input }) => {
 
 // Employees handlers
 export const getEmployees = os.handler(async () => {
+  console.log('[DB-HANDLER] getEmployees called!');
   try {
     const db = await getDb();
-    return await db.select().from(employees).orderBy(employees.id);
+    console.log('[DB-HANDLER] getEmployees: DB obtained, querying...');
+    const result = await db.select().from(employees).orderBy(employees.id);
+    console.log('[DB-HANDLER] getEmployees: Query complete, found', result.length, 'employees');
+    return result;
   } catch (error) {
     console.error('Error in getEmployees:', error);
     throw error;

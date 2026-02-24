@@ -1,35 +1,25 @@
-import { ipc } from "../ipc/manager";
+// Window controls - use direct sys API (instant, no ORPC dependency)
 
-export async function minimizeWindow() {
+type ElectronSys = {
+  minimize: () => void;
+  maximize: () => void;
+  close: () => void;
+};
+
+export function minimizeWindow() {
   console.log("[DEBUG] minimizeWindow called");
-  try {
-    await ipc.waitForReady();
-    console.log("[DEBUG] minimizeWindow: ORPC ready, calling handler");
-    await ipc.client.window.minimizeWindow();
-    console.log("[DEBUG] minimizeWindow: done");
-  } catch (error) {
-    console.error("[DEBUG] minimizeWindow error:", error);
-  }
+  const electron = (window as unknown as { electron?: { sys?: ElectronSys } }).electron;
+  electron?.sys?.minimize();
 }
-export async function maximizeWindow() {
+
+export function maximizeWindow() {
   console.log("[DEBUG] maximizeWindow called");
-  try {
-    await ipc.waitForReady();
-    console.log("[DEBUG] maximizeWindow: ORPC ready, calling handler");
-    await ipc.client.window.maximizeWindow();
-    console.log("[DEBUG] maximizeWindow: done");
-  } catch (error) {
-    console.error("[DEBUG] maximizeWindow error:", error);
-  }
+  const electron = (window as unknown as { electron?: { sys?: ElectronSys } }).electron;
+  electron?.sys?.maximize();
 }
-export async function closeWindow() {
+
+export function closeWindow() {
   console.log("[DEBUG] closeWindow called");
-  try {
-    await ipc.waitForReady();
-    console.log("[DEBUG] closeWindow: ORPC ready, calling handler");
-    await ipc.client.window.closeWindow();
-    console.log("[DEBUG] closeWindow: done");
-  } catch (error) {
-    console.error("[DEBUG] closeWindow error:", error);
-  }
+  const electron = (window as unknown as { electron?: { sys?: ElectronSys } }).electron;
+  electron?.sys?.close();
 }

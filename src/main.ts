@@ -103,18 +103,12 @@ async function setupORPC() {
 
   // 2. ORPC handshake - Main creates channel and sends port to preload
   // This is the reliable pattern: main creates MessageChannel, sends port to preload
-  // Track configured state per webContents to handle page refresh (Ctrl+R)
-  const configuredWindows = new Set<Electron.WebContents>();
+  // NOTE: On page refresh (Ctrl+R), webContents changes, so we always create new channel
 
   ipcMain.on(IPC_CHANNELS.START_ORPC_SERVER, (event) => {
-    // If already configured for this window, ignore duplicate requests
-    if (configuredWindows.has(event.sender)) {
-      console.log("[MAIN] START_ORPC_SERVER ignored (already configured for this window)");
-      return;
-    }
+    console.log("[MAIN] START_ORPC_SERVER received from:", event.sender.id);
 
-    configuredWindows.add(event.sender);
-    console.log("[MAIN] START_ORPC_SERVER received, creating MessageChannel...");
+    console.log("[MAIN] Creating MessageChannel...");
 
     // Create MessageChannel - main process creates both ports
     const { port1: serverPort, port2: clientPort } = new MessageChannelMain();
@@ -204,7 +198,7 @@ app.whenReady().then(async () => {
     }
     logger.info('ORPC setup complete', 'main');
 
-    // Notify renderer that main is ready to receive ORPC setup
+    // Notify renderer that main is ready to receive ORPC requests
     console.log("[MAIN] Sending MAIN_READY to renderer...");
     mainWindow?.webContents.send(IPC_CHANNELS.MAIN_READY);
     console.log("[MAIN] MAIN_READY sent");

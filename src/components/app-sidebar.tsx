@@ -87,7 +87,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     window.getWriteMode?.().then(setCanWrite).catch(() => setCanWrite(true));
 
     // Listen for real-time lock status changes
-    window.onLockStatusChanged((writeMode) => {
+    window.onLockStatusChanged?.((writeMode) => {
       setCanWrite(writeMode);
     });
   }, []);

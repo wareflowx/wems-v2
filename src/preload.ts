@@ -9,19 +9,13 @@ let mainReady = false;
 let mainReadyResolve: (() => void) | null = null;
 let rendererReadyNotified = false;
 
-// Store port received from main - will be accessed by renderer via IPC
+// Store port received from main
 let orpcPort: MessagePort | null = null;
 
-// IPC handler to get the port from renderer
-ipcRenderer.on("GET_ORPC_PORT", (event) => {
-  console.log("[PRELOAD] GET_ORPC_PORT received, port:", orpcPort ? "present" : "null");
-  if (orpcPort) {
-    // Send port back to renderer via the event's sender
-    event.sender.postMessage("ORPC_PORT_RESPONSE", null, [orpcPort]);
-  }
-});
+// Callback that will be set by renderer when it's ready
+let onPortReady: ((port: MessagePort) => void) | null = null;
 
-// Listen for ORPC_READY from main and store it
+// Listen for ORPC_READY from main and forward to renderer
 ipcRenderer.on(IPC_CHANNELS.ORPC_READY, (event) => {
   console.log("[PRELOAD] ★★★ Received ORPC_READY via ipcRenderer! ★★★");
 
@@ -30,11 +24,46 @@ ipcRenderer.on(IPC_CHANNELS.ORPC_READY, (event) => {
     console.log("[PRELOAD] port.constructor:", port.constructor?.name);
     console.log("[PRELOAD] typeof port.addEventListener:", typeof port.addEventListener);
 
-    // Store the port - renderer will ask for it via IPC
+    // Store the port
     orpcPort = port;
-    console.log("[PRELOAD] ORPC port stored, waiting for renderer to request...");
+
+    // If renderer has registered callback, call it now
+    if (onPortReady) {
+      console.log("[PRELOAD] Calling onPortReady callback...");
+      onPortReady(port);
+    } else {
+      // No callback yet - wait for renderer to be ready via window event
+      console.log("[PRELOAD] No callback, waiting for renderer...");
+
+      // Poll until renderer is ready (callback is registered)
+      let attempts = 0;
+      const checkInterval = setInterval(() => {
+        attempts++;
+        if (onPortReady && orpcPort) {
+          clearInterval(checkInterval);
+          console.log("[PRELOAD] Renderer ready, calling callback!");
+          onPortReady(orpcPort);
+        }
+        if (attempts > 100) { // 10 seconds timeout
+          clearInterval(checkInterval);
+          console.log("[PRELOAD] Timeout waiting for renderer callback");
+        }
+      }, 100);
+    }
   } else {
     console.log("[PRELOAD] ERROR: No port in event.ports!");
+  }
+});
+
+// Expose function for renderer to register callback
+contextBridge.exposeInMainWorld("onORPCPortReady", (callback: (port: MessagePort) => void) => {
+  console.log("[PRELOAD] onORPCPortReady callback registered");
+  onPortReady = callback;
+
+  // If port already received, call immediately
+  if (orpcPort) {
+    console.log("[PRELOAD] Port already available, calling callback now...");
+    callback(orpcPort);
   }
 });
 

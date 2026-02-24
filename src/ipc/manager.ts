@@ -27,32 +27,27 @@ class IPCManager {
   }
 
   constructor() {
-    // Check if port was already received (set by renderer.ts global listener)
-    const globalWindow = window as unknown as { __orpcPort?: MessagePort };
-    if (globalWindow.__orpcPort) {
-      console.log("[IPC] Port already available from global!");
-      const port = globalWindow.__orpcPort;
-      this.initWithPort(port);
-      return;
+    // Try to get port from preload via callback
+    const globalWindow = window as unknown as {
+      onORPCPortReady?: (callback: (port: MessagePort) => void) => void;
+    };
+
+    if (globalWindow.onORPCPortReady) {
+      console.log("[IPC] Registering onORPCPortReady callback...");
+      globalWindow.onORPCPortReady((port) => {
+        console.log("[IPC] onORPCPortReady callback fired!");
+        this.initWithPort(port);
+      });
+    } else {
+      console.log("[IPC] onORPCPortReady not available yet");
     }
 
-    // Listen for custom event from renderer.ts global listener
-    window.addEventListener("orpc-port-ready", () => {
-      console.log("[IPC] Received orpc-port-ready event!");
-      const port = globalWindow.__orpcPort;
-      if (port) {
-        this.initWithPort(port);
-      }
-    });
-
-    // Also listen for postMessage as fallback (for direct preload->renderer)
-    window.addEventListener("message", (event) => {
-      if (event.data?.type === "ORPC_PORT" && event.ports[0]) {
-        const port = event.ports[0];
-        console.log("[IPC] Received ORPC_PORT via postMessage!");
-        this.initWithPort(port);
-      }
-    });
+    // Also check global __orpcPort as fallback
+    const globalWithPort = window as unknown as { __orpcPort?: MessagePort };
+    if (globalWithPort.__orpcPort) {
+      console.log("[IPC] Port already available from global!");
+      this.initWithPort(globalWithPort.__orpcPort);
+    }
   }
 
   private initWithPort(port: MessagePort) {

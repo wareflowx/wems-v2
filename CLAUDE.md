@@ -70,6 +70,28 @@ EOF
 - Always use proper types (avoid `any[]`)
 - Add toast notifications for error handling
 
+## Electron Documentation
+
+When working with Electron concepts (contextBridge, ipcRenderer, ipcMain, webContents, etc.), refer to the documentation in `docs/electron/`.
+
+If the documentation is incomplete or missing, ask the user to provide new Electron documentation to enrich it.
+
+Currently available:
+- `docs/electron/context-bridge.md` - Preload to renderer communication
+- `docs/electron/ipc-renderer.md` - Renderer to main communication
+- `docs/electron/ipc-main.md` - Main process IPC handlers
+- `docs/electron/process.md` - Electron process object
+- `docs/electron/web-contents.md` - WebContents API
+- `docs/electron/message-channel-main.md` - MessageChannelMain for port transfer
+- `docs/electron/browser-window.md` - BrowserWindow creation and options
+
+## Lessons Learned
+
+**Always check `docs/learning/` before starting work on known issues.** This directory contains documented solutions to past problems to avoid repeating mistakes.
+
+Currently available:
+- `docs/learning/orpc-messageport-transfer.md` - How to properly transfer MessagePort between main, preload and renderer in Electron with contextIsolation enabled
+
 ## CI/CD & Code Review
 
 ### Marty PR Review Workflow

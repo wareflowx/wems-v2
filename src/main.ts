@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow } from "electron";
-import { ipcMain } from "electron/main";
+import { ipcMain, MessageChannelMain } from "electron/main";
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS } from "./constants";
@@ -78,11 +78,47 @@ function checkForUpdates() {
 async function setupORPC() {
   const { rpcHandler } = await import("./ipc/handler");
 
-  ipcMain.on(IPC_CHANNELS.START_ORPC_SERVER, (event) => {
-    const [serverPort] = event.ports;
+  console.log("[MAIN] setupORPC: listening for RENDERER_READY");
 
+  let orpcReadySent = false;
+
+  // Listen for renderer ready signal
+  ipcMain.on(IPC_CHANNELS.RENDERER_READY, (_event) => {
+    // Only set up once - ignore subsequent messages
+    if (orpcReadySent) {
+      console.log("[MAIN] RENDERER_READY received but ORPC already set up, ignoring");
+      return;
+    }
+
+    orpcReadySent = true;
+    console.log("[MAIN] RENDERER_READY received!");
+
+    // Create the MessageChannel using MessageChannelMain for Electron
+    const { port1: serverPort, port2: clientPort } = new MessageChannelMain();
+
+    // Start the server port
     serverPort.start();
+
+    // Set up the RPC handler
     rpcHandler.upgrade(serverPort);
+
+    console.log("[MAIN] Sending ORPC_READY to renderer...");
+    console.log("[MAIN] clientPort type:", typeof clientPort);
+    console.log("[MAIN] clientPort constructor:", clientPort.constructor.name);
+    console.log("[MAIN] webContents URL:", mainWindow?.webContents.getURL());
+
+    // Send the port via webContents.postMessage
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      console.log("[MAIN] Window is valid, sending postMessage...");
+      try {
+        const result = mainWindow.webContents.postMessage(IPC_CHANNELS.ORPC_READY, null, [clientPort]);
+        console.log("[MAIN] ORPC_READY postMessage result:", result);
+      } catch (error) {
+        console.error("[MAIN] Error sending postMessage:", error);
+      }
+    } else {
+      console.error("[MAIN] Failed to send ORPC_READY: window is destroyed");
+    }
   });
 
   // Expose write mode status to renderer
@@ -118,14 +154,10 @@ setupSingleInstance();
 
 app.whenReady().then(async () => {
   try {
+    console.log("[MAIN] app.whenReady fired!");
     logger.info('App starting...', 'main');
 
-    // 1. Setup ORPC first (needed for window controls)
-    logger.info('Setting up ORPC...', 'main');
-    await setupORPC();
-    logger.info('ORPC setup complete', 'main');
-
-    // 2. Acquire lock
+    // 1. Acquire lock first (doesn't need window)
     logger.info('Acquiring lock...', 'main');
     const lockResult = Lock.acquire();
     const canWrite = lockResult._tag === 'Success' && lockResult.value;
@@ -135,17 +167,34 @@ app.whenReady().then(async () => {
       logger.info(canWrite ? 'Write mode enabled' : 'Read-only mode enabled', 'main');
     }
 
-    // 3. Initialize database with lock status
+    // 2. Initialize database with lock status
     logger.info('Initializing database...', 'main');
     await getDb(canWrite);
     logger.info('Database initialized', 'main');
 
-    // 4. Create window
+    // 3. Create window FIRST (so window exists for ORPC context)
     logger.info('Creating window...', 'main');
     createWindow();
     logger.info('Window created', 'main');
 
-    // 5. Start lock watcher after window is created
+    // 4. Setup ORPC AFTER window exists (handlers need window context)
+    console.log("[MAIN] About to call setupORPC...");
+    logger.info('Setting up ORPC...', 'main');
+    try {
+      await setupORPC();
+      console.log("[MAIN] setupORPC completed successfully");
+    } catch (error) {
+      console.error("[MAIN] setupORPC FAILED:", error);
+      throw error;
+    }
+    logger.info('ORPC setup complete', 'main');
+
+    // Notify renderer that main is ready to receive ORPC setup
+    console.log("[MAIN] Sending MAIN_READY to renderer...");
+    mainWindow?.webContents.send(IPC_CHANNELS.MAIN_READY);
+    console.log("[MAIN] MAIN_READY sent");
+
+    // 5. Start lock watcher
     logger.info('Starting lock watcher...', 'main');
     startLockWatcher((writeMode) => {
       mainWindow?.webContents.send(IPC_CHANNELS.LOCK_STATUS_CHANGED, writeMode);

@@ -1,9 +1,11 @@
 import { ipc } from "@/ipc/manager";
 
-export function getPlatform() {
+export async function getPlatform() {
+  await ipc.waitForReady();
   return ipc.client.app.currentPlatfom();
 }
 
-export function getAppVersion() {
+export async function getAppVersion() {
+  await ipc.waitForReady();
   return ipc.client.app.appVersion();
 }

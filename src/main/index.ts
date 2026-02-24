@@ -4,8 +4,8 @@ import { app, BrowserWindow } from "electron";
 import { ipcMain, MessageChannelMain } from "electron/main";
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
-import { IPC_CHANNELS } from "./constants";
-import { releaseWriteLock, isWriteMode, startLockWatcher, getDb } from "./db";
+import { IPC_CHANNELS } from "../constants";
+import { releaseWriteLock, isWriteMode, startLockWatcher, getDb } from "../db";
 import { Lock } from "@/lib/lock";
 import { logger, configure } from "@/lib/logger";
 
@@ -23,8 +23,8 @@ const __dirname = path.dirname(__filename);
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
-  // electron-vite 5.0: preload is in out/preload/, main is in out/main/
-  const preload = path.join(__dirname, "../preload/preload.js");
+  // electron-vite output: preload is in out/preload/, main is in out/main/
+  const preload = path.join(__dirname, "../preload/index.js");
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
@@ -76,7 +76,7 @@ function checkForUpdates() {
 }
 
 async function setupORPC() {
-  const { rpcHandler } = await import("./ipc/handler");
+  const { rpcHandler } = await import("../ipc/handler");
 
   console.log("[MAIN] setupORPC: setting up handlers");
 

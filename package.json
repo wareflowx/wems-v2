@@ -3,7 +3,7 @@
   "productName": "WEMS",
   "version": "2.0.6",
   "description": "WEMS - Workforce/Employee Management System",
-  "main": "out/main/main.js",
+  "main": "out/main/index.js",
   "private": true,
   "scripts": {
     "dev": "electron-vite dev",

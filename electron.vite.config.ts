@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  // Main process configuration
+  // Main process - auto-discovered at src/main/index.ts
   main: {
     resolve: {
       alias: {
@@ -11,14 +11,11 @@ export default defineConfig({
       }
     },
     build: {
-      rollupOptions: {
-        input: resolve(__dirname, 'src/main.ts'),
-        external: ['better-sqlite3', '@electron/rebuild']
-      }
+      external: ['better-sqlite3', '@electron/rebuild']
     }
   },
 
-  // Preload scripts configuration
+  // Preload scripts - auto-discovered at src/preload/index.ts
   preload: {
     resolve: {
       alias: {
@@ -26,27 +23,17 @@ export default defineConfig({
       }
     },
     build: {
-      rollupOptions: {
-        input: resolve(__dirname, 'src/preload.ts'),
-        external: ['better-sqlite3']
-      }
+      external: ['better-sqlite3']
     }
   },
 
-  // Renderer process configuration
+  // Renderer process - auto-discovered at src/renderer/index.html
   renderer: {
-    root: '.',
-    server: {
-      host: '127.0.0.1',
-      port: 5173
-    },
+    root: 'src/renderer',
     plugins: [
       tailwindcss()
     ],
     build: {
-      rollupOptions: {
-        input: resolve(__dirname, 'index.html'),
-      },
       target: 'chrome108' // Electron 40+ equivalent
     },
     resolve: {

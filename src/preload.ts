@@ -85,4 +85,9 @@ contextBridge.exposeInMainWorld("onLockStatusChanged", (callback: (writeMode: bo
 // This ensures ORPC is ready before React mounts and components query data
 // By the time any component runs, the port will have arrived via postMessage
 console.log("[PRELOAD] Triggering early initialization...");
-window.notifyRendererReady?.();
+// Call directly - don't use window.notifyRendererReady as that's for renderer
+if (!rendererReadyNotified) {
+  rendererReadyNotified = true;
+  console.log("[PRELOAD] Sending RENDERER_READY immediately");
+  ipcRenderer.send(IPC_CHANNELS.RENDERER_READY);
+}

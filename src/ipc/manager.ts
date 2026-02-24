@@ -27,14 +27,29 @@ class IPCManager {
   }
 
   constructor() {
-    // Listen for ORPC port from preload via window.postMessage
-    // This is the only way to get a valid MessagePort in the renderer
+    // Check if port was already received (set by renderer.ts global listener)
+    const globalWindow = window as unknown as { __orpcPort?: MessagePort };
+    if (globalWindow.__orpcPort) {
+      console.log("[IPC] Port already available from global!");
+      const port = globalWindow.__orpcPort;
+      this.initWithPort(port);
+      return;
+    }
+
+    // Listen for custom event from renderer.ts global listener
+    window.addEventListener("orpc-port-ready", () => {
+      console.log("[IPC] Received orpc-port-ready event!");
+      const port = globalWindow.__orpcPort;
+      if (port) {
+        this.initWithPort(port);
+      }
+    });
+
+    // Also listen for postMessage as fallback (for direct preload->renderer)
     window.addEventListener("message", (event) => {
       if (event.data?.type === "ORPC_PORT" && event.ports[0]) {
         const port = event.ports[0];
         console.log("[IPC] Received ORPC_PORT via postMessage!");
-        console.log("[IPC] port.constructor:", port.constructor?.name);
-        console.log("[IPC] typeof port.addEventListener:", typeof port.addEventListener);
         this.initWithPort(port);
       }
     });

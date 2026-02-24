@@ -17,7 +17,11 @@ class IPCManager {
 
   get client(): RPCClient {
     if (!this._client) {
-      throw new Error("ORPC client not initialized. Call waitForReady() first.");
+      throw new Error(
+        "ORPC client not initialized. " +
+        "Call ipc.waitForReady() first, or ensure preload triggers " +
+        "window.notifyRendererReady() on load."
+      );
     }
     return this._client;
   }

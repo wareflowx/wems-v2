@@ -80,3 +80,9 @@ contextBridge.exposeInMainWorld("onLockStatusChanged", (callback: (writeMode: bo
     callback(lastWriteMode);
   }
 });
+
+// CRITICAL: Trigger initialization immediately when preload loads
+// This ensures ORPC is ready before React mounts and components query data
+// By the time any component runs, the port will have arrived via postMessage
+console.log("[PRELOAD] Triggering early initialization...");
+window.notifyRendererReady?.();

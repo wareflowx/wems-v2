@@ -1,15 +1,21 @@
 import "@/styles/global.css";
+import { ipcRenderer } from "electron";
 
-// CRITICAL: Set up ORPC port listener BEFORE any other imports
-// This ensures we receive the port even if ipc/manager hasn't loaded yet
-// The port is sent via window.postMessage from preload
-window.addEventListener("message", (event) => {
-  if (event.data?.type === "ORPC_PORT" && event.ports[0]) {
-    const port = event.ports[0];
-    console.log("[RENDERER] Received ORPC_PORT via postMessage!");
-    // Store port globally for IPC manager to use
+// Request ORPC port from preload immediately
+// This is done early to ensure we get the port as soon as preload has it
+console.log("[RENDERER] Requesting ORPC port from preload...");
+ipcRenderer.send("GET_ORPC_PORT");
+
+// Listen for port response from preload
+ipcRenderer.on("ORPC_PORT_RESPONSE", (event) => {
+  const [port] = event.ports;
+  if (port) {
+    console.log("[RENDERER] Received ORPC_PORT via IPC!");
+    console.log("[RENDERER] port.constructor:", port.constructor?.name);
+    console.log("[RENDERER] typeof port.addEventListener:", typeof port.addEventListener);
+    // Store globally for IPC manager
     (window as unknown as { __orpcPort?: MessagePort }).__orpcPort = port;
-    // Dispatch custom event so IPC manager can pick it up
+    // Dispatch event so IPC manager can pick it up
     window.dispatchEvent(new CustomEvent("orpc-port-ready"));
   }
 });

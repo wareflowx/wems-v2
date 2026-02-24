@@ -9,8 +9,19 @@ let mainReady = false;
 let mainReadyResolve: (() => void) | null = null;
 let rendererReadyNotified = false;
 
-// Listen for ORPC_READY from main via ipcRenderer
-// This is the correct pattern for receiving transferred MessagePorts in Electron
+// Store port received from main - will be accessed by renderer via IPC
+let orpcPort: MessagePort | null = null;
+
+// IPC handler to get the port from renderer
+ipcRenderer.on("GET_ORPC_PORT", (event) => {
+  console.log("[PRELOAD] GET_ORPC_PORT received, port:", orpcPort ? "present" : "null");
+  if (orpcPort) {
+    // Send port back to renderer via the event's sender
+    event.sender.postMessage("ORPC_PORT_RESPONSE", null, [orpcPort]);
+  }
+});
+
+// Listen for ORPC_READY from main and store it
 ipcRenderer.on(IPC_CHANNELS.ORPC_READY, (event) => {
   console.log("[PRELOAD] ★★★ Received ORPC_READY via ipcRenderer! ★★★");
 
@@ -19,12 +30,9 @@ ipcRenderer.on(IPC_CHANNELS.ORPC_READY, (event) => {
     console.log("[PRELOAD] port.constructor:", port.constructor?.name);
     console.log("[PRELOAD] typeof port.addEventListener:", typeof port.addEventListener);
 
-    // CRITICAL: Cannot pass MessagePort through contextBridge - it gets serialized!
-    // Use window.postMessage to forward the port to the renderer
-    // The port is transferred, so we can't use it after this
-    console.log("[PRELOAD] Forwarding port to renderer via window.postMessage...");
-    window.postMessage({ type: "ORPC_PORT", port: null }, "*", [port]);
-    console.log("[PRELOAD] Port sent via postMessage!");
+    // Store the port - renderer will ask for it via IPC
+    orpcPort = port;
+    console.log("[PRELOAD] ORPC port stored, waiting for renderer to request...");
   } else {
     console.log("[PRELOAD] ERROR: No port in event.ports!");
   }

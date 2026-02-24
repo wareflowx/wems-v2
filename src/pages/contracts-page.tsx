@@ -6,8 +6,10 @@ import {
 } from 'lucide-react'
 import { PageHeaderCard } from '@/components/ui/page-header-card'
 import { MetricsSection } from '@/components/ui/metrics-section'
+import { ErrorDisplay } from '@/components/ui/error-display'
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect, useMemo } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { ContractTable, type Contract } from '@/components/contracts/contract-table'
 import {
   useContracts,
@@ -81,6 +83,7 @@ function transformContract(
 
 export function ContractsPage() {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -94,7 +97,7 @@ export function ContractsPage() {
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null)
 
   // Use TanStack Query hooks
-  const { data: dbContracts = [], isLoading } = useContracts()
+  const { data: dbContracts = [], isLoading, error } = useContracts()
   const { data: employees = [] } = useEmployees()
   const createContract = useCreateContract()
   const updateContract = useUpdateContract()
@@ -242,6 +245,23 @@ export function ContractsPage() {
             <p className="text-muted-foreground">Loading...</p>
           </div>
         </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+        <PageHeaderCard
+          icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+          title={t('contracts.title')}
+          description={t('contracts.description')}
+        />
+        <ErrorDisplay
+          title={t("contracts.errorLoading", "Failed to load contracts")}
+          message={t("contracts.errorLoadingMessage", "Make sure the application is running correctly. If the problem persists, please restart.")}
+          onRetry={() => queryClient.invalidateQueries({ queryKey: ["contracts"] })}
+        />
       </div>
     )
   }

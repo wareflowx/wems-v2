@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { MetricsSection } from "@/components/ui/metrics-section";
+import { ErrorDisplay } from "@/components/ui/error-display";
 import { useTranslation } from "react-i18next";
 import { useState, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Table,
   TableBody,
@@ -28,6 +30,7 @@ import { DeletePositionDialog } from "@/components/positions/DeletePositionDialo
 
 export function PositionsPage() {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -35,7 +38,7 @@ export function PositionsPage() {
   const [deletingPosition, setDeletingPosition] = useState<any>(null);
 
   // Use TanStack Query hooks
-  const { data: positions = [], isLoading } = usePositions();
+  const { data: positions = [], isLoading, error } = usePositions();
   const createPosition = useCreatePosition();
   const updatePosition = useUpdatePosition();
   const deletePosition = useDeletePosition();
@@ -94,6 +97,18 @@ export function PositionsPage() {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <PageHeaderSkeleton showMetrics metricsCount={3} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+        <ErrorDisplay
+          title={t("positions.errorLoading", "Failed to load positions")}
+          message={t("positions.errorLoadingMessage", "Make sure the application is running correctly. If the problem persists, please restart.")}
+          onRetry={() => queryClient.invalidateQueries({ queryKey: ["positions"] })}
+        />
       </div>
     );
   }

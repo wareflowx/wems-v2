@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { MetricsSection } from "@/components/ui/metrics-section";
+import { ErrorDisplay } from "@/components/ui/error-display";
 import { useTranslation } from "react-i18next";
 import { useState, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Table,
   TableBody,
@@ -28,6 +30,7 @@ import { DeleteWorkLocationDialog } from "@/components/work-locations/DeleteWork
 
 export function WorkLocationsPage() {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -35,7 +38,7 @@ export function WorkLocationsPage() {
   const [deletingLocation, setDeletingLocation] = useState<any>(null);
 
   // Use TanStack Query hooks
-  const { data: workLocations = [], isLoading } = useWorkLocations();
+  const { data: workLocations = [], isLoading, error } = useWorkLocations();
   const createWorkLocation = useCreateWorkLocation();
   const updateWorkLocation = useUpdateWorkLocation();
   const deleteWorkLocation = useDeleteWorkLocation();
@@ -94,6 +97,18 @@ export function WorkLocationsPage() {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <PageHeaderSkeleton showMetrics metricsCount={3} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+        <ErrorDisplay
+          title={t("workLocations.errorLoading", "Failed to load work locations")}
+          message={t("workLocations.errorLoadingMessage", "Make sure the application is running correctly. If the problem persists, please restart.")}
+          onRetry={() => queryClient.invalidateQueries({ queryKey: ["work-locations"] })}
+        />
       </div>
     );
   }

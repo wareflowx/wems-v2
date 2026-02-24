@@ -7,10 +7,12 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { CreateEmployeeDialog, type CreateEmployeeData } from "@/components/employees/CreateEmployeeDialog";
 import { DeleteEmployeeDialog } from "@/components/employees/DeleteEmployeeDialog";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { MetricsSection } from "@/components/ui/metrics-section";
+import { ErrorDisplay } from "@/components/ui/error-display";
 import { EmployeesTable } from "@/components/employees/employees-table";
 import { useEmployees, useCreateEmployee, useDeleteEmployee, usePositions, useWorkLocations, useContracts } from "@/hooks";
 import { useToast } from "@/utils/toast";
@@ -18,6 +20,7 @@ import { useToast } from "@/utils/toast";
 export function EmployeesPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<{
@@ -26,12 +29,12 @@ export function EmployeesPage() {
   } | null>(null);
 
   // Use TanStack Query hooks
-  const { data: employees = [], isLoading } = useEmployees()
-  const { data: positions = [] } = usePositions()
-  const { data: workLocations = [] } = useWorkLocations()
-  const { data: contracts = [] } = useContracts()
-  const createEmployee = useCreateEmployee()
-  const deleteEmployee = useDeleteEmployee()
+  const { data: employees = [], isLoading, error } = useEmployees();
+  const { data: positions = [] } = usePositions();
+  const { data: workLocations = [] } = useWorkLocations();
+  const { data: contracts = [] } = useContracts();
+  const createEmployee = useCreateEmployee();
+  const deleteEmployee = useDeleteEmployee();
 
   // KPIs - calculated dynamically
   const kpis = useMemo(() => {
@@ -95,7 +98,24 @@ export function EmployeesPage() {
           </div>
         </div>
       </div>
-    )
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+        <PageHeaderCard
+          icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+          title={t("employees.title")}
+          description={t("employees.description")}
+        />
+        <ErrorDisplay
+          title={t("employees.errorLoading", "Failed to load employees")}
+          message={t("employees.errorLoadingMessage", "Make sure the application is running correctly. If the problem persists, please restart.")}
+          onRetry={() => queryClient.invalidateQueries({ queryKey: ["employees"] })}
+        />
+      </div>
+    );
   }
 
   return (

@@ -78,47 +78,60 @@ function checkForUpdates() {
 async function setupORPC() {
   const { rpcHandler } = await import("./ipc/handler");
 
-  console.log("[MAIN] setupORPC: listening for RENDERER_READY");
+  console.log("[MAIN] setupORPC: setting up handlers");
 
-  let orpcReadySent = false;
+  // 1. Direct window controls (always available, no ORPC dependency)
+  ipcMain.on("win:minimize", (event) => {
+    console.log("[MAIN] win:minimize received");
+    BrowserWindow.fromWebContents(event.sender)?.minimize();
+  });
 
-  // Listen for renderer ready signal
-  ipcMain.on(IPC_CHANNELS.RENDERER_READY, (_event) => {
-    // Only set up once - ignore subsequent messages
-    if (orpcReadySent) {
-      console.log("[MAIN] RENDERER_READY received but ORPC already set up, ignoring");
+  ipcMain.on("win:maximize", (event) => {
+    console.log("[MAIN] win:maximize received");
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win?.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win?.maximize();
+    }
+  });
+
+  ipcMain.on("win:close", (event) => {
+    console.log("[MAIN] win:close received");
+    BrowserWindow.fromWebContents(event.sender)?.close();
+  });
+
+  // 2. ORPC handshake - Main creates channel and sends port to preload
+  // This is the reliable pattern: main creates MessageChannel, sends port to preload
+  // Track configured state per webContents to handle page refresh (Ctrl+R)
+  const configuredWindows = new Set<Electron.WebContents>();
+
+  ipcMain.on(IPC_CHANNELS.START_ORPC_SERVER, (event) => {
+    // If already configured for this window, ignore duplicate requests
+    if (configuredWindows.has(event.sender)) {
+      console.log("[MAIN] START_ORPC_SERVER ignored (already configured for this window)");
       return;
     }
 
-    orpcReadySent = true;
-    console.log("[MAIN] RENDERER_READY received!");
+    configuredWindows.add(event.sender);
+    console.log("[MAIN] START_ORPC_SERVER received, creating MessageChannel...");
 
-    // Create the MessageChannel using MessageChannelMain for Electron
+    // Create MessageChannel - main process creates both ports
     const { port1: serverPort, port2: clientPort } = new MessageChannelMain();
 
-    // Start the server port
+    // Start server port in main
     serverPort.start();
 
-    // Set up the RPC handler
+    // Upgrade RPC handler with server port
     rpcHandler.upgrade(serverPort);
 
-    console.log("[MAIN] Sending ORPC_READY to renderer...");
-    console.log("[MAIN] clientPort type:", typeof clientPort);
-    console.log("[MAIN] clientPort constructor:", clientPort.constructor.name);
-    console.log("[MAIN] webContents URL:", mainWindow?.webContents.getURL());
+    console.log("[MAIN] Sending client port to preload via webContents.postMessage...");
 
-    // Send the port via webContents.postMessage
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      console.log("[MAIN] Window is valid, sending postMessage...");
-      try {
-        const result = mainWindow.webContents.postMessage(IPC_CHANNELS.ORPC_READY, null, [clientPort]);
-        console.log("[MAIN] ORPC_READY postMessage result:", result);
-      } catch (error) {
-        console.error("[MAIN] Error sending postMessage:", error);
-      }
-    } else {
-      console.error("[MAIN] Failed to send ORPC_READY: window is destroyed");
-    }
+    // IMPORTANT: Use postMessage (not send) for port transfer!
+    // postMessage allows transferring MessagePorts, send does not
+    event.sender.postMessage(IPC_CHANNELS.ORPC_READY, null, [clientPort]);
+
+    console.log("[MAIN] ORPC server ready, port sent to preload");
   });
 
   // Expose write mode status to renderer
@@ -127,6 +140,8 @@ async function setupORPC() {
     logger.debug('[DEBUG] getWriteMode called, result: ' + result, 'main');
     return result;
   });
+
+  // Database operations are handled via ORPC - no separate handlers needed
 }
 
 function setupSingleInstance(): void {

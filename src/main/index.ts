@@ -3,11 +3,11 @@ import { fileURLToPath } from "node:url";
 import { app, BrowserWindow } from "electron";
 import { ipcMain, MessageChannelMain } from "electron/main";
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
-import { ipcContext } from "@/ipc/context";
-import { IPC_CHANNELS } from "../constants";
-import { releaseWriteLock, isWriteMode, startLockWatcher, getDb } from "../db";
-import { Lock } from "@/lib/lock";
-import { logger, configure } from "@/lib/logger";
+import { ipcContext } from "@/core/ipc/context";
+import { IPC_CHANNELS } from "../core/constants";
+import { releaseWriteLock, isWriteMode, startLockWatcher, getDb } from "../core/db";
+import { Lock } from "@/core/lib/lock";
+import { logger, configure } from "@/core/lib/logger";
 
 const inDevelopment = process.env.NODE_ENV === 'development';
 
@@ -76,7 +76,7 @@ function checkForUpdates() {
 }
 
 async function setupORPC() {
-  const { rpcHandler } = await import("../ipc/handler");
+  const { rpcHandler } = await import("../core/ipc/handler");
 
   console.log("[MAIN] setupORPC: setting up handlers");
 

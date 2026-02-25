@@ -1,6 +1,6 @@
 import { os } from "@orpc/server";
-import { getDb } from "@/db";
-import { posts, positions, workLocations, employees, contracts } from "@/db/schema";
+import { getDb } from "@/core/db";
+import { posts, positions, workLocations, employees, contracts } from "@/core/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { createPostInputSchema, createPositionInputSchema, updatePositionInputSchema, deletePositionInputSchema, createWorkLocationInputSchema, updateWorkLocationInputSchema, deleteWorkLocationInputSchema, createEmployeeInputSchema, updateEmployeeInputSchema, deleteEmployeeInputSchema } from "./schemas";
 

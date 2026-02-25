@@ -2,9 +2,9 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { app } from 'electron';
-import { Result, isSuccess } from '@/lib/result';
-import { logger, configure } from '@/lib/logger';
-import { lockEvents, LOCK_EVENTS } from '@/lib/lock-events';
+import { Result, isSuccess } from '@/core/lib/result';
+import { logger, configure } from '@/core/lib/logger';
+import { lockEvents, LOCK_EVENTS } from '@/core/lib/lock-events';
 import {
   LockAlreadyExistsError,
   LockFileError,

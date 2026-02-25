@@ -1,15 +1,36 @@
-# WEMS
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="@images/icon.jpg">
+    <source media="(prefers-color-scheme: light)" srcset="@images/icon.jpg">
+    <img src="@images/icon.jpg" alt="wems" width="150" height="150" style="border-radius: 50%;">
+  </picture>
+</p>
 
-Workforce/Employee Management System - A desktop application for managing employees, contracts, documents, and more.
+<h1 align="center">WEMS</h1>
+
+<p align="center">
+  <a href="https://wems.vercel.app">
+    <img src="https://img.shields.io/website?down_color=lightgrey&down_message=offline&up_color=green&up_message=online&url=https%3A%2F%2Fwems.vercel.app" alt="Website">
+  </a>
+  <a href="https://github.com/wareflowx/wems-v2/releases">
+    <img src="https://img.shields.io/github/v/release/wareflowx/wems-v2" alt="Release">
+  </a>
+  <a href="https://github.com/wareflowx/wems-v2/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/wareflowx/wems-v2" alt="License">
+  </a>
+</p>
+
+> Modern desktop application for managing warehouse employees, certifications, and workplace safety.
 
 ## Features
 
-- Employee management with positions and work locations
-- Contract tracking
-- Document management
-- Medical visits tracking
-- CACES certification management
-- Alerts system
+- **Employee Management** - Track employees with positions and work locations
+- **Contract Tracking** - Manage employment contracts and their statuses
+- **Document Management** - Store and organize employee documents
+- **Medical Visits** - Schedule and track medical examinations
+- **CACES Certification** - Manage forklift and heavy equipment certifications
+- **Alerts System** - Get notified about expiring certifications and upcoming visits
+- **Dark/Light Theme** - Automatic theme based on system preferences
 
 ## Tech Stack
 
@@ -20,7 +41,7 @@ Workforce/Employee Management System - A desktop application for managing employ
 - SQLite with Drizzle ORM
 - TanStack Router
 
-## Development
+## Installation
 
 ```bash
 # Install dependencies
@@ -28,7 +49,11 @@ npm install
 
 # Run in development
 npm run dev
+```
 
+## Build
+
+```bash
 # Build for production
 npm run build
 
@@ -36,10 +61,16 @@ npm run build
 npm run package
 ```
 
-## Installation
+The packaged application will be in the `release/` folder. The database is stored in the `data/` folder next to the executable.
 
-Download the installer from the releases page and run it. The database will be stored in the `data/` folder next to the executable.
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Author
+
+- **WareflowX**
 
 ## License
 
-MIT
+MIT License - see the [LICENSE](LICENSE) file for details.

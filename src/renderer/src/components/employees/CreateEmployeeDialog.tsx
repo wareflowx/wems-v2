@@ -63,8 +63,11 @@ export function CreateEmployeeDialog({
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
 
-  const { data: positions = [] } = usePositions();
-  const { data: workLocations = [] } = useWorkLocations();
+  // temp disabled to debug freeze
+  // const { data: positions = [] } = usePositions();
+  // const { data: workLocations = [] } = useWorkLocations();
+  const positions: any[] = [];
+  const workLocations: any[] = [];
 
   // Form state - matches DB schema
   const [formData, setFormData] = useState<CreateEmployeeData>({

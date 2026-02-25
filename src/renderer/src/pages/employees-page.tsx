@@ -190,11 +190,11 @@ export function EmployeesPage() {
           />
         </div>
       </div>
-      <CreateEmployeeDialog
+      {/* <CreateEmployeeDialog
         onCreate={handleAddEmployee}
         onOpenChange={setIsCreateDialogOpen}
         open={isCreateDialogOpen}
-      />
+      /> */}
       <DeleteEmployeeDialog
         employeeId={employeeToDelete?.id}
         employeeName={employeeToDelete?.name}

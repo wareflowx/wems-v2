@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { usePositions, useWorkLocations } from "@/hooks";
+// import { usePositions, useWorkLocations } from "@/hooks";
 
 interface Department {
   id: number;

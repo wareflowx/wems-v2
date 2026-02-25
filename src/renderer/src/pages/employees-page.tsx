@@ -135,77 +135,73 @@ export function EmployeesPage() {
   }
 
   return (
-    <>
-      {/*<div className="flex flex-1 flex-col gap-4 bg-sidebar p-4 pt-6">
-        <div className="min-h-full space-y-3">
+    <div className="flex flex-1 flex-col gap-4 bg-sidebar p-4 pt-6">
+      <div className="min-h-full space-y-3">
+        <PageHeaderCard
+          description={t("employees.description")}
+          icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+          title={t("employees.title")}
+        />
 
-          <PageHeaderCard
-            description={t("employees.description")}
-            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
-            title={t("employees.title")}
-          />
+        <MetricsSection
+          kpis={[
+            {
+              title: t("dashboard.totalEmployees"),
+              value: kpis.totalEmployees,
+              description: `${kpis.activeEmployees} ${t("employees.active")}`,
+              icon: <Users className="h-4 w-4" />,
+            },
+            {
+              title: t("employees.active"),
+              value: kpis.activeEmployees,
+              description: `${(
+                (kpis.activeEmployees / kpis.totalEmployees) * 100
+              ).toFixed(0)}${t("common.ofTotal")}`,
+              icon: <Edit className="h-4 w-4" />,
+              iconColor: "text-green-500",
+            },
+            {
+              title: t("employees.onLeave"),
+              value: kpis.onLeaveEmployees,
+              description: `${(
+                (kpis.onLeaveEmployees / kpis.totalEmployees) * 100
+              ).toFixed(0)}${t("common.ofTotal")}`,
+              icon: <Filter className="h-4 w-4" />,
+              iconColor: "text-yellow-500",
+            },
+            {
+              title: t("dashboard.newHires"),
+              value: kpis.newHiresThisMonth,
+              description: t("dashboard.thisMonth"),
+              icon: <UserPlus className="h-4 w-4" />,
+              iconColor: "text-green-500",
+            },
+          ]}
+        />
 
-
-          <MetricsSection
-            kpis={[
-              {
-                title: t("dashboard.totalEmployees"),
-                value: kpis.totalEmployees,
-                description: `${kpis.activeEmployees} ${t("employees.active")}`,
-                icon: <Users className="h-4 w-4" />,
-              },
-              {
-                title: t("employees.active"),
-                value: kpis.activeEmployees,
-                description: `${(
-                  (kpis.activeEmployees / kpis.totalEmployees) * 100
-                ).toFixed(0)}${t("common.ofTotal")}`,
-                icon: <Edit className="h-4 w-4" />,
-                iconColor: "text-green-500",
-              },
-              {
-                title: t("employees.onLeave"),
-                value: kpis.onLeaveEmployees,
-                description: `${(
-                  (kpis.onLeaveEmployees / kpis.totalEmployees) * 100
-                ).toFixed(0)}${t("common.ofTotal")}`,
-                icon: <Filter className="h-4 w-4" />,
-                iconColor: "text-yellow-500",
-              },
-              {
-                title: t("dashboard.newHires"),
-                value: kpis.newHiresThisMonth,
-                description: t("dashboard.thisMonth"),
-                icon: <UserPlus className="h-4 w-4" />,
-                iconColor: "text-green-500",
-              },
-            ]}
-          />
-
-
-          <EmployeesTable
-            contracts={contracts}
-            employees={employees}
-            onAddClick={() => setIsCreateDialogOpen(true)}
-            onDeleteClick={handleDeleteClick}
-            onEditClick={handleEditClick}
-            positions={positions}
-            workLocations={workLocations}
-          />
-        </div>
+        <EmployeesTable
+          contracts={contracts}
+          employees={employees}
+          onAddClick={() => setIsCreateDialogOpen(true)}
+          onDeleteClick={handleDeleteClick}
+          onEditClick={handleEditClick}
+          positions={positions}
+          workLocations={workLocations}
+        />
       </div>
+
       <CreateEmployeeDialog
         onCreate={handleAddEmployee}
         onOpenChange={setIsCreateDialogOpen}
         open={isCreateDialogOpen}
-      /> 
+      />
       <DeleteEmployeeDialog
         employeeId={employeeToDelete?.id}
         employeeName={employeeToDelete?.name}
         onConfirm={handleDeleteEmployee}
         onOpenChange={setIsDeleteDialogOpen}
         open={isDeleteDialogOpen}
-      />*/}
-    </>
+      />
+    </div>
   );
 }

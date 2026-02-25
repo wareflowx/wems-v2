@@ -1,21 +1,33 @@
-import { contractTypes, departments, jobTitles } from "@@/mock-data/reference";
+import {
+  getDepartments,
+  createDepartment,
+  updateDepartment,
+  deleteDepartment,
+  getContractTypes,
+  createContractType,
+  updateContractType,
+  deleteContractType,
+} from "@/actions/database";
 
 // Types
 export type ReferenceDataType = "departments" | "jobTitles" | "contractTypes";
+
+// Helper to convert DB records to string arrays
+const toStringArray = <T extends { name: string }>(items: T[]): string[] =>
+  items.map((item) => item.name);
 
 // API functions for reference data
 export const referenceApi = {
   // Departments
   getDepartments: async (): Promise<string[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    return [...departments];
+    const departments = await getDepartments();
+    return toStringArray(departments);
   },
 
   addDepartment: async (name: string): Promise<string> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    if (!departments.includes(name)) {
-      departments.push(name);
-    }
+    // Generate code from name (uppercase, no spaces)
+    const code = name.toUpperCase().replace(/\s+/g, "_");
+    await createDepartment({ name, code, isActive: true });
     return name;
   },
 
@@ -23,71 +35,64 @@ export const referenceApi = {
     oldName: string,
     newName: string
   ): Promise<string> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    const index = departments.indexOf(oldName);
-    if (index === -1) {
+    // Get all departments to find the one to update
+    const departments = await getDepartments();
+    const dept = departments.find((d) => d.name === oldName);
+    if (!dept) {
       throw new Error(`Department "${oldName}" not found`);
     }
-    departments[index] = newName;
+    const code = newName.toUpperCase().replace(/\s+/g, "_");
+    await updateDepartment({
+      id: dept.id,
+      name: newName,
+      code,
+      isActive: dept.isActive,
+    });
     return newName;
   },
 
   deleteDepartment: async (name: string): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    const index = departments.indexOf(name);
-    if (index === -1) {
+    const departments = await getDepartments();
+    const dept = departments.find((d) => d.name === name);
+    if (!dept) {
       throw new Error(`Department "${name}" not found`);
     }
-    departments.splice(index, 1);
+    await deleteDepartment(dept.id);
   },
 
-  // Job Titles
+  // Job Titles - uses existing positions table
   getJobTitles: async (): Promise<string[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    return [...jobTitles];
+    // Job titles use the positions table - we'll add this later or use mock
+    const { getPositions } = await import("@/actions/database");
+    const positions = await getPositions();
+    return positions.map((p) => p.name);
   },
 
   addJobTitle: async (title: string): Promise<string> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    if (!jobTitles.includes(title)) {
-      jobTitles.push(title);
-    }
-    return title;
+    // Job titles use the positions table - we'll add this later or use mock
+    throw new Error("Job titles use positions table - not implemented yet");
   },
 
   updateJobTitle: async (
-    oldTitle: string,
-    newTitle: string
+    _oldTitle: string,
+    _newTitle: string
   ): Promise<string> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    const index = jobTitles.indexOf(oldTitle);
-    if (index === -1) {
-      throw new Error(`Job title "${oldTitle}" not found`);
-    }
-    jobTitles[index] = newTitle;
-    return newTitle;
+    throw new Error("Job titles use positions table - not implemented yet");
   },
 
-  deleteJobTitle: async (title: string): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    const index = jobTitles.indexOf(title);
-    if (index === -1) {
-      throw new Error(`Job title "${title}" not found`);
-    }
-    jobTitles.splice(index, 1);
+  deleteJobTitle: async (_title: string): Promise<void> => {
+    throw new Error("Job titles use positions table - not implemented yet");
   },
 
   // Contract Types
   getContractTypes: async (): Promise<string[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    return [...contractTypes];
+    const contractTypes = await getContractTypes();
+    return toStringArray(contractTypes);
   },
 
   addContractType: async (type: string): Promise<string> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    if (!contractTypes.includes(type)) {
-      contractTypes.push(type);
-    }
+    const code = type.toUpperCase().replace(/\s+/g, "_");
+    await createContractType({ name: type, code, isActive: true });
     return type;
   },
 
@@ -95,27 +100,27 @@ export const referenceApi = {
     oldType: string,
     newType: string
   ): Promise<string> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    const index = contractTypes.indexOf(oldType);
-    if (index === -1) {
+    const contractTypes = await getContractTypes();
+    const ct = contractTypes.find((c) => c.name === oldType);
+    if (!ct) {
       throw new Error(`Contract type "${oldType}" not found`);
     }
-    contractTypes[index] = newType;
+    const code = newType.toUpperCase().replace(/\s+/g, "_");
+    await updateContractType({
+      id: ct.id,
+      name: newType,
+      code,
+      isActive: ct.isActive,
+    });
     return newType;
   },
 
   deleteContractType: async (type: string): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    const index = contractTypes.indexOf(type);
-    if (index === -1) {
+    const contractTypes = await getContractTypes();
+    const ct = contractTypes.find((c) => c.name === type);
+    if (!ct) {
       throw new Error(`Contract type "${type}" not found`);
     }
-    contractTypes.splice(index, 1);
+    await deleteContractType(ct.id);
   },
-};
-
-export {
-  departments as mockDepartments,
-  jobTitles as mockJobTitles,
-  contractTypes as mockContractTypes,
 };

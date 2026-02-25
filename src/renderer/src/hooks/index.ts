@@ -8,3 +8,4 @@ export * from "./use-employees";
 export * from "./use-medical-visits";
 export * from "./use-positions-worklocations";
 export * from "./use-reference-data";
+export { useDepartments, useContractTypes } from "./use-positions-worklocations";

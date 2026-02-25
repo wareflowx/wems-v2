@@ -1,5 +1,5 @@
 import { os } from "@orpc/server";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "@/core/db";
 import {
   attachments,
@@ -20,13 +20,20 @@ import {
 } from "@/core/lib/file-storage";
 import { randomUUID } from "node:crypto";
 import {
+  createAttachmentInputSchema,
   createEmployeeInputSchema,
+  createMediaInputSchema,
   createPositionInputSchema,
   createPostInputSchema,
   createWorkLocationInputSchema,
+  deleteAttachmentInputSchema,
   deleteEmployeeInputSchema,
+  deleteMediaInputSchema,
   deletePositionInputSchema,
   deleteWorkLocationInputSchema,
+  getAttachmentInputSchema,
+  getAttachmentsInputSchema,
+  getMediaInputSchema,
   updateEmployeeInputSchema,
   updatePositionInputSchema,
   updateWorkLocationInputSchema,
@@ -435,11 +442,13 @@ export const getAllMedia = os.handler(async ({ input }) => {
 
 export const getMediaById = os.handler(async ({ input }) => {
   try {
+    // Validate input
+    const validatedData = getMediaInputSchema.parse(input);
     const db = await getDb();
     const [result] = await db
       .select()
       .from(media)
-      .where(eq(media.id, input.id));
+      .where(eq(media.id, validatedData.id));
     return result || null;
   } catch (error) {
     console.error("Error in getMediaById:", error);
@@ -449,40 +458,59 @@ export const getMediaById = os.handler(async ({ input }) => {
 
 export const createMedia = os.handler(async ({ input }) => {
   try {
+    // Validate input with schema
+    const validatedData = createMediaInputSchema.parse(input);
     const db = await getDb();
 
     // Generate UUID for the file
-    const id = input.id || randomUUID();
+    const id = validatedData.id || randomUUID();
 
     // If file data is provided (base64), save it
     let storedName: string | undefined;
     let filePath: string | undefined;
 
-    if (input.fileData && input.fileName) {
+    if (validatedData.fileData && validatedData.fileName) {
       // Decode base64 to buffer
-      const buffer = Buffer.from(input.fileData, "base64");
-      storedName = generateStoredFileName(id, input.fileName);
-      filePath = getMediaPath(input.type || "documents", storedName);
+      const buffer = Buffer.from(validatedData.fileData, "base64");
+      storedName = generateStoredFileName(id, validatedData.fileName);
+      filePath = getMediaPath(validatedData.type || "documents", storedName);
 
-      // Save file to disk
-      saveFile(buffer, filePath);
+      // Save file to disk first
+      try {
+        saveFile(buffer, filePath);
+      } catch (fileError) {
+        // DB not touched yet, just throw
+        throw new Error("Failed to save file to disk");
+      }
     }
 
     // Insert record to DB
-    const [newMedia] = await db
-      .insert(media)
-      .values({
-        id,
-        name: input.name,
-        type: input.type,
-        fileName: input.fileName,
-        mimeType: input.mimeType,
-        size: input.size,
-        filePath: filePath,
-      })
-      .returning();
+    try {
+      const [newMedia] = await db
+        .insert(media)
+        .values({
+          id,
+          name: validatedData.name,
+          type: validatedData.type,
+          fileName: validatedData.fileName,
+          mimeType: validatedData.mimeType,
+          size: validatedData.size,
+          filePath: filePath,
+        })
+        .returning();
 
-    return newMedia;
+      return newMedia;
+    } catch (dbError) {
+      // Rollback: delete the file if DB insert failed
+      if (filePath) {
+        try {
+          deleteFile(filePath);
+        } catch {
+          // Ignore cleanup error
+        }
+      }
+      throw dbError;
+    }
   } catch (error) {
     console.error("Error in createMedia:", error);
     throw error;
@@ -491,13 +519,15 @@ export const createMedia = os.handler(async ({ input }) => {
 
 export const deleteMedia = os.handler(async ({ input }) => {
   try {
+    // Validate input
+    const validatedData = deleteMediaInputSchema.parse(input);
     const db = await getDb();
 
     // First get the media to find the file path
     const [mediaRecord] = await db
       .select()
       .from(media)
-      .where(eq(media.id, input.id));
+      .where(eq(media.id, validatedData.id));
 
     if (mediaRecord?.filePath) {
       // Delete file from disk
@@ -505,7 +535,7 @@ export const deleteMedia = os.handler(async ({ input }) => {
     }
 
     // Delete record from DB
-    await db.delete(media).where(eq(media.id, input.id));
+    await db.delete(media).where(eq(media.id, validatedData.id));
 
     return { success: true };
   } catch (error) {
@@ -516,13 +546,15 @@ export const deleteMedia = os.handler(async ({ input }) => {
 
 export const downloadMedia = os.handler(async ({ input }) => {
   try {
+    // Validate input
+    const validatedData = getMediaInputSchema.parse(input);
     const db = await getDb();
 
     // Get the media record
     const [mediaRecord] = await db
       .select()
       .from(media)
-      .where(eq(media.id, input.id));
+      .where(eq(media.id, validatedData.id));
 
     if (!mediaRecord) {
       throw new Error("Media not found");
@@ -536,7 +568,7 @@ export const downloadMedia = os.handler(async ({ input }) => {
     const buffer = readFile(mediaRecord.filePath);
 
     if (!buffer) {
-      throw new Error("File not found on disk");
+      throw new Error("File is missing from storage");
     }
 
     // Return as base64
@@ -553,27 +585,31 @@ export const downloadMedia = os.handler(async ({ input }) => {
 // Attachment handlers
 export const getAttachments = os.handler(async ({ input }) => {
   try {
+    // Validate input
+    const validatedData = getAttachmentsInputSchema.parse(input || {});
     const db = await getDb();
     let query = db.select().from(attachments);
 
-    if (input?.employeeId && input?.entityType) {
+    if (validatedData?.employeeId && validatedData?.entityType) {
       return await query
         .where(
-          eq(attachments.employeeId, input.employeeId) &&
-            eq(attachments.entityType, input.entityType)
+          and(
+            eq(attachments.employeeId, validatedData.employeeId),
+            eq(attachments.entityType, validatedData.entityType)
+          )
         )
         .orderBy(desc(attachments.createdAt));
     }
 
-    if (input?.employeeId) {
+    if (validatedData?.employeeId) {
       return await query
-        .where(eq(attachments.employeeId, input.employeeId))
+        .where(eq(attachments.employeeId, validatedData.employeeId))
         .orderBy(desc(attachments.createdAt));
     }
 
-    if (input?.entityType) {
+    if (validatedData?.entityType) {
       return await query
-        .where(eq(attachments.entityType, input.entityType))
+        .where(eq(attachments.entityType, validatedData.entityType))
         .orderBy(desc(attachments.createdAt));
     }
 
@@ -586,11 +622,13 @@ export const getAttachments = os.handler(async ({ input }) => {
 
 export const getAttachmentById = os.handler(async ({ input }) => {
   try {
+    // Validate input
+    const validatedData = getAttachmentInputSchema.parse(input);
     const db = await getDb();
     const [result] = await db
       .select()
       .from(attachments)
-      .where(eq(attachments.id, input.id));
+      .where(eq(attachments.id, validatedData.id));
     return result || null;
   } catch (error) {
     console.error("Error in getAttachmentById:", error);
@@ -600,46 +638,65 @@ export const getAttachmentById = os.handler(async ({ input }) => {
 
 export const createAttachment = os.handler(async ({ input }) => {
   try {
+    // Validate input with schema
+    const validatedData = createAttachmentInputSchema.parse(input);
     const db = await getDb();
 
     // Generate UUID for the file
-    const id = input.id || randomUUID();
+    const id = validatedData.id || randomUUID();
 
     // If file data is provided (base64), save it
     let storedName: string | undefined;
     let filePath: string | undefined;
 
-    if (input.fileData && input.originalName && input.employeeId) {
+    if (validatedData.fileData && validatedData.originalName && validatedData.employeeId) {
       // Decode base64 to buffer
-      const buffer = Buffer.from(input.fileData, "base64");
-      storedName = generateStoredFileName(id, input.originalName);
+      const buffer = Buffer.from(validatedData.fileData, "base64");
+      storedName = generateStoredFileName(id, validatedData.originalName);
       filePath = getAttachmentPath(
-        input.entityType,
-        input.employeeId,
+        validatedData.entityType,
+        validatedData.employeeId,
         storedName
       );
 
-      // Save file to disk
-      saveFile(buffer, filePath);
+      // Save file to disk first
+      try {
+        saveFile(buffer, filePath);
+      } catch (fileError) {
+        // DB not touched yet, just throw
+        throw new Error("Failed to save file to disk");
+      }
     }
 
     // Insert record to DB
-    const [newAttachment] = await db
-      .insert(attachments)
-      .values({
-        id,
-        employeeId: input.employeeId,
-        entityType: input.entityType,
-        entityId: input.entityId,
-        originalName: input.originalName,
-        storedName,
-        mimeType: input.mimeType,
-        size: input.size,
-        filePath,
-      })
-      .returning();
+    try {
+      const [newAttachment] = await db
+        .insert(attachments)
+        .values({
+          id,
+          employeeId: validatedData.employeeId,
+          entityType: validatedData.entityType,
+          entityId: validatedData.entityId,
+          originalName: validatedData.originalName,
+          storedName,
+          mimeType: validatedData.mimeType,
+          size: validatedData.size,
+          filePath,
+        })
+        .returning();
 
-    return newAttachment;
+      return newAttachment;
+    } catch (dbError) {
+      // Rollback: delete the file if DB insert failed
+      if (filePath) {
+        try {
+          deleteFile(filePath);
+        } catch {
+          // Ignore cleanup error
+        }
+      }
+      throw dbError;
+    }
   } catch (error) {
     console.error("Error in createAttachment:", error);
     throw error;
@@ -648,13 +705,15 @@ export const createAttachment = os.handler(async ({ input }) => {
 
 export const deleteAttachment = os.handler(async ({ input }) => {
   try {
+    // Validate input
+    const validatedData = deleteAttachmentInputSchema.parse(input);
     const db = await getDb();
 
     // First get the attachment to find the file path
     const [attachmentRecord] = await db
       .select()
       .from(attachments)
-      .where(eq(attachments.id, input.id));
+      .where(eq(attachments.id, validatedData.id));
 
     if (attachmentRecord?.filePath) {
       // Delete file from disk
@@ -662,7 +721,7 @@ export const deleteAttachment = os.handler(async ({ input }) => {
     }
 
     // Delete record from DB
-    await db.delete(attachments).where(eq(attachments.id, input.id));
+    await db.delete(attachments).where(eq(attachments.id, validatedData.id));
 
     return { success: true };
   } catch (error) {
@@ -673,13 +732,15 @@ export const deleteAttachment = os.handler(async ({ input }) => {
 
 export const downloadAttachment = os.handler(async ({ input }) => {
   try {
+    // Validate input
+    const validatedData = getAttachmentInputSchema.parse(input);
     const db = await getDb();
 
     // Get the attachment record
     const [attachmentRecord] = await db
       .select()
       .from(attachments)
-      .where(eq(attachments.id, input.id));
+      .where(eq(attachments.id, validatedData.id));
 
     if (!attachmentRecord) {
       throw new Error("Attachment not found");
@@ -693,7 +754,7 @@ export const downloadAttachment = os.handler(async ({ input }) => {
     const buffer = readFile(attachmentRecord.filePath);
 
     if (!buffer) {
-      throw new Error("File not found on disk");
+      throw new Error("File is missing from storage");
     }
 
     // Return as base64

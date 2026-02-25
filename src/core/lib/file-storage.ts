@@ -24,10 +24,18 @@ export function ensureDir(dirPath: string): void {
  * @param buffer - The file buffer
  * @param relativePath - Path relative to files directory (e.g., "media/logos/logo.png")
  * @returns The full path where file was saved
+ * @throws Error if path traversal is detected
  */
 export function saveFile(buffer: Buffer, relativePath: string): string {
   const filesDir = getFilesDir();
   const fullPath = path.join(filesDir, relativePath);
+
+  // CRITICAL: Verify the resolved path is within filesDir (prevent path traversal)
+  const normalizedPath = path.normalize(fullPath);
+  const normalizedFilesDir = path.normalize(filesDir);
+  if (!normalizedPath.startsWith(normalizedFilesDir + path.sep) && normalizedPath !== normalizedFilesDir) {
+    throw new Error("Invalid file path: path traversal detected");
+  }
 
   // Ensure parent directory exists
   const parentDir = path.dirname(fullPath);
@@ -43,10 +51,18 @@ export function saveFile(buffer: Buffer, relativePath: string): string {
  * Delete a file from disk
  * @param relativePath - Path relative to files directory
  * @returns true if file was deleted, false if it didn't exist
+ * @throws Error if path traversal is detected
  */
 export function deleteFile(relativePath: string): boolean {
   const filesDir = getFilesDir();
   const fullPath = path.join(filesDir, relativePath);
+
+  // CRITICAL: Verify the resolved path is within filesDir (prevent path traversal)
+  const normalizedPath = path.normalize(fullPath);
+  const normalizedFilesDir = path.normalize(filesDir);
+  if (!normalizedPath.startsWith(normalizedFilesDir + path.sep) && normalizedPath !== normalizedFilesDir) {
+    throw new Error("Invalid file path: path traversal detected");
+  }
 
   if (fs.existsSync(fullPath)) {
     fs.unlinkSync(fullPath);
@@ -60,10 +76,18 @@ export function deleteFile(relativePath: string): boolean {
  * Read a file from disk
  * @param relativePath - Path relative to files directory
  * @returns The file buffer, or null if doesn't exist
+ * @throws Error if path traversal is detected
  */
 export function readFile(relativePath: string): Buffer | null {
   const filesDir = getFilesDir();
   const fullPath = path.join(filesDir, relativePath);
+
+  // CRITICAL: Verify the resolved path is within filesDir (prevent path traversal)
+  const normalizedPath = path.normalize(fullPath);
+  const normalizedFilesDir = path.normalize(filesDir);
+  if (!normalizedPath.startsWith(normalizedFilesDir + path.sep) && normalizedPath !== normalizedFilesDir) {
+    throw new Error("Invalid file path: path traversal detected");
+  }
 
   if (fs.existsSync(fullPath)) {
     return fs.readFileSync(fullPath);

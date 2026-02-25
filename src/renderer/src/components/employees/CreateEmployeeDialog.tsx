@@ -184,6 +184,10 @@ export function CreateEmployeeDialog({
   };
 
   return (
+    <div>Dialog disabled for debug</div>
+  );
+  /*
+  return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
@@ -578,4 +582,5 @@ export function CreateEmployeeDialog({
       </DialogContent>
     </Dialog>
   );
+  */
 }

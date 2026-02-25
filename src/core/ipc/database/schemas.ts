@@ -88,3 +88,51 @@ export const updateEmployeeInputSchema = z.object({
 export const deleteEmployeeInputSchema = z.object({
   id: z.number(),
 });
+
+// Media schemas
+export const createMediaInputSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, "Name is required"),
+  type: z.enum(["logo", "template", "document", "other"]),
+  fileName: z.string().optional(),
+  mimeType: z.string().optional(),
+  size: z.number().optional(),
+  fileData: z.string().optional(), // base64 encoded file
+});
+
+export const deleteMediaInputSchema = z.object({
+  id: z.string(),
+});
+
+export const getMediaInputSchema = z.object({
+  id: z.string(),
+});
+
+export const getAllMediaInputSchema = z.object({
+  type: z.enum(["logo", "template", "document", "other"]).optional(),
+});
+
+// Attachment schemas
+export const createAttachmentInputSchema = z.object({
+  id: z.string().optional(),
+  employeeId: z.number(),
+  entityType: z.enum(["contract", "caces", "document", "medical_visit"]),
+  entityId: z.number().optional(),
+  originalName: z.string(),
+  mimeType: z.string().optional(),
+  size: z.number().optional(),
+  fileData: z.string(), // base64 encoded file
+});
+
+export const deleteAttachmentInputSchema = z.object({
+  id: z.string(),
+});
+
+export const getAttachmentInputSchema = z.object({
+  id: z.string(),
+});
+
+export const getAttachmentsInputSchema = z.object({
+  employeeId: z.number().optional(),
+  entityType: z.enum(["contract", "caces", "document", "medical_visit"]).optional(),
+});

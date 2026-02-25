@@ -88,3 +88,39 @@ export const updateEmployeeInputSchema = z.object({
 export const deleteEmployeeInputSchema = z.object({
   id: z.number(),
 });
+
+// Department schemas
+export const createDepartmentInputSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  code: z.string().min(1, "Code is required"),
+  isActive: z.boolean().default(true),
+});
+
+export const updateDepartmentInputSchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, "Name is required"),
+  code: z.string().min(1, "Code is required"),
+  isActive: z.boolean(),
+});
+
+export const deleteDepartmentInputSchema = z.object({
+  id: z.number(),
+});
+
+// Contract Type schemas
+export const createContractTypeInputSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  code: z.string().min(1, "Code is required"),
+  isActive: z.boolean().default(true),
+});
+
+export const updateContractTypeInputSchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, "Name is required"),
+  code: z.string().min(1, "Code is required"),
+  isActive: z.boolean(),
+});
+
+export const deleteContractTypeInputSchema = z.object({
+  id: z.number(),
+});

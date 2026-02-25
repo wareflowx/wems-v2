@@ -3,19 +3,27 @@ import { desc, eq } from "drizzle-orm";
 import { getDb } from "@/core/db";
 import {
   contracts,
+  contractTypes,
+  departments,
   employees,
   positions,
   posts,
   workLocations,
 } from "@/core/db/schema";
 import {
+  createContractTypeInputSchema,
+  createDepartmentInputSchema,
   createEmployeeInputSchema,
   createPositionInputSchema,
   createPostInputSchema,
   createWorkLocationInputSchema,
+  deleteContractTypeInputSchema,
+  deleteDepartmentInputSchema,
   deleteEmployeeInputSchema,
   deletePositionInputSchema,
   deleteWorkLocationInputSchema,
+  updateContractTypeInputSchema,
+  updateDepartmentInputSchema,
   updateEmployeeInputSchema,
   updatePositionInputSchema,
   updateWorkLocationInputSchema,
@@ -400,6 +408,122 @@ export const deleteContract = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in deleteContract:", error);
+    throw error;
+  }
+});
+
+// Departments handlers
+export const getDepartments = os.handler(async () => {
+  try {
+    const db = await getDb();
+    return await db.select().from(departments).orderBy(departments.name);
+  } catch (error) {
+    console.error("Error in getDepartments:", error);
+    throw error;
+  }
+});
+
+export const createDepartment = os.handler(async ({ input }) => {
+  try {
+    const validatedData = createDepartmentInputSchema.parse(input);
+    const db = await getDb();
+    const [newDepartment] = await db
+      .insert(departments)
+      .values(validatedData)
+      .returning();
+    return newDepartment;
+  } catch (error) {
+    console.error("Error in createDepartment:", error);
+    throw error;
+  }
+});
+
+export const updateDepartment = os.handler(async ({ input }) => {
+  try {
+    const validatedData = updateDepartmentInputSchema.parse(input);
+    const db = await getDb();
+    const [updated] = await db
+      .update(departments)
+      .set({
+        name: validatedData.name,
+        code: validatedData.code,
+        isActive: validatedData.isActive,
+      })
+      .where(eq(departments.id, validatedData.id))
+      .returning();
+    return updated;
+  } catch (error) {
+    console.error("Error in updateDepartment:", error);
+    throw error;
+  }
+});
+
+export const deleteDepartment = os.handler(async ({ input }) => {
+  try {
+    const validatedData = deleteDepartmentInputSchema.parse(input);
+    const db = await getDb();
+    await db.delete(departments).where(eq(departments.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteDepartment:", error);
+    throw error;
+  }
+});
+
+// Contract Types handlers
+export const getContractTypes = os.handler(async () => {
+  try {
+    const db = await getDb();
+    return await db.select().from(contractTypes).orderBy(contractTypes.name);
+  } catch (error) {
+    console.error("Error in getContractTypes:", error);
+    throw error;
+  }
+});
+
+export const createContractType = os.handler(async ({ input }) => {
+  try {
+    const validatedData = createContractTypeInputSchema.parse(input);
+    const db = await getDb();
+    const [newContractType] = await db
+      .insert(contractTypes)
+      .values(validatedData)
+      .returning();
+    return newContractType;
+  } catch (error) {
+    console.error("Error in createContractType:", error);
+    throw error;
+  }
+});
+
+export const updateContractType = os.handler(async ({ input }) => {
+  try {
+    const validatedData = updateContractTypeInputSchema.parse(input);
+    const db = await getDb();
+    const [updated] = await db
+      .update(contractTypes)
+      .set({
+        name: validatedData.name,
+        code: validatedData.code,
+        isActive: validatedData.isActive,
+      })
+      .where(eq(contractTypes.id, validatedData.id))
+      .returning();
+    return updated;
+  } catch (error) {
+    console.error("Error in updateContractType:", error);
+    throw error;
+  }
+});
+
+export const deleteContractType = os.handler(async ({ input }) => {
+  try {
+    const validatedData = deleteContractTypeInputSchema.parse(input);
+    const db = await getDb();
+    await db.delete(contractTypes).where(eq(contractTypes.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteContractType:", error);
     throw error;
   }
 });

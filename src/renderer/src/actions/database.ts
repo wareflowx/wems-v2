@@ -212,3 +212,69 @@ export async function deleteContract(id: number) {
   }
   return client.database.deleteContract({ id });
 }
+
+// Departments
+export async function getDepartments() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getDepartments();
+}
+
+export async function createDepartment(data: { name: string; code: string; isActive?: boolean }) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.createDepartment(data);
+}
+
+export async function updateDepartment(data: { id: number; name: string; code: string; isActive: boolean }) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.updateDepartment(data);
+}
+
+export async function deleteDepartment(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.deleteDepartment({ id });
+}
+
+// Contract Types
+export async function getContractTypes() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getContractTypes();
+}
+
+export async function createContractType(data: { name: string; code: string; isActive?: boolean }) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.createContractType(data);
+}
+
+export async function updateContractType(data: { id: number; name: string; code: string; isActive: boolean }) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.updateContractType(data);
+}
+
+export async function deleteContractType(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.deleteContractType({ id });
+}

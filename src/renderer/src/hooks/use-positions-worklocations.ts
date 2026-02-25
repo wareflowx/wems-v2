@@ -4,6 +4,254 @@ import * as db from "@/actions/database";
 import { useToast } from "@/utils/toast";
 import { useORPCReady } from "./use-orpc-ready";
 
+// Departments
+export function useDepartments() {
+  const orpcReady = useORPCReady();
+
+  return useQuery({
+    queryKey: queryKeys.departments.lists(),
+    queryFn: () => db.getDepartments(),
+    enabled: orpcReady,
+  });
+}
+
+export function useCreateDepartment() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (data: { name: string; code: string; isActive?: boolean }) =>
+      db.createDepartment(data),
+
+    onMutate: async (newDepartment) => {
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.departments.lists(),
+      });
+
+      const previousDepartments = queryClient.getQueryData(
+        queryKeys.departments.lists()
+      );
+
+      queryClient.setQueryData(
+        queryKeys.departments.lists(),
+        (old: db.Department[] = []) => [
+          ...old,
+          {
+            ...newDepartment,
+            id: Date.now(),
+            isActive: newDepartment.isActive ?? true,
+          },
+        ]
+      );
+
+      return { previousDepartments };
+    },
+
+    onError: (err, _variables, context) => {
+      if (context?.previousDepartments) {
+        queryClient.setQueryData(
+          queryKeys.departments.lists(),
+          context.previousDepartments
+        );
+      }
+      toast({
+        title: "Failed to create department",
+        description: err instanceof Error ? err.message : "An error occurred",
+        variant: "destructive",
+      });
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.departments.lists(),
+      });
+    },
+  });
+}
+
+export function useUpdateDepartment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: {
+      id: number;
+      name: string;
+      code: string;
+      isActive: boolean;
+    }) => db.updateDepartment(data),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.departments.lists(),
+      });
+    },
+  });
+}
+
+export function useDeleteDepartment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { id: number }) => db.deleteDepartment(data.id),
+
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.departments.lists(),
+      });
+
+      const previousDepartments = queryClient.getQueryData(
+        queryKeys.departments.lists()
+      );
+
+      queryClient.setQueryData(
+        queryKeys.departments.lists(),
+        (old: db.Department[] = []) => old.filter((d) => d.id !== data.id)
+      );
+
+      return { previousDepartments };
+    },
+
+    onError: (_err, _variables, context) => {
+      if (context?.previousDepartments) {
+        queryClient.setQueryData(
+          queryKeys.departments.lists(),
+          context.previousDepartments
+        );
+      }
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.departments.lists(),
+      });
+    },
+  });
+}
+
+// Contract Types
+export function useContractTypes() {
+  const orpcReady = useORPCReady();
+
+  return useQuery({
+    queryKey: queryKeys.contractTypes.lists(),
+    queryFn: () => db.getContractTypes(),
+    enabled: orpcReady,
+  });
+}
+
+export function useCreateContractType() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (data: { name: string; code: string; isActive?: boolean }) =>
+      db.createContractType(data),
+
+    onMutate: async (newContractType) => {
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.contractTypes.lists(),
+      });
+
+      const previousContractTypes = queryClient.getQueryData(
+        queryKeys.contractTypes.lists()
+      );
+
+      queryClient.setQueryData(
+        queryKeys.contractTypes.lists(),
+        (old: db.ContractType[] = []) => [
+          ...old,
+          {
+            ...newContractType,
+            id: Date.now(),
+            isActive: newContractType.isActive ?? true,
+          },
+        ]
+      );
+
+      return { previousContractTypes };
+    },
+
+    onError: (err, _variables, context) => {
+      if (context?.previousContractTypes) {
+        queryClient.setQueryData(
+          queryKeys.contractTypes.lists(),
+          context.previousContractTypes
+        );
+      }
+      toast({
+        title: "Failed to create contract type",
+        description: err instanceof Error ? err.message : "An error occurred",
+        variant: "destructive",
+      });
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.contractTypes.lists(),
+      });
+    },
+  });
+}
+
+export function useUpdateContractType() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: {
+      id: number;
+      name: string;
+      code: string;
+      isActive: boolean;
+    }) => db.updateContractType(data),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.contractTypes.lists(),
+      });
+    },
+  });
+}
+
+export function useDeleteContractType() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { id: number }) => db.deleteContractType(data.id),
+
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.contractTypes.lists(),
+      });
+
+      const previousContractTypes = queryClient.getQueryData(
+        queryKeys.contractTypes.lists()
+      );
+
+      queryClient.setQueryData(
+        queryKeys.contractTypes.lists(),
+        (old: db.ContractType[] = []) => old.filter((c) => c.id !== data.id)
+      );
+
+      return { previousContractTypes };
+    },
+
+    onError: (_err, _variables, context) => {
+      if (context?.previousContractTypes) {
+        queryClient.setQueryData(
+          queryKeys.contractTypes.lists(),
+          context.previousContractTypes
+        );
+      }
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.contractTypes.lists(),
+      });
+    },
+  });
+}
+
 // Positions
 export function usePositions() {
   const orpcReady = useORPCReady();

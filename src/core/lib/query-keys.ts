@@ -84,4 +84,22 @@ export const queryKeys = {
     details: () => ["work-locations", "detail"] as const,
     detail: (id: number) => ["work-locations", "detail", id] as const,
   },
+
+  // Departments
+  departments: {
+    all: ["departments"] as const,
+    lists: () => ["departments", "list"] as const,
+    list: (filters: string) => ["departments", "list", filters] as const,
+    details: () => ["departments", "detail"] as const,
+    detail: (id: number) => ["departments", "detail", id] as const,
+  },
+
+  // Contract Types
+  contractTypes: {
+    all: ["contract-types"] as const,
+    lists: () => ["contract-types", "list"] as const,
+    list: (filters: string) => ["contract-types", "list", filters] as const,
+    details: () => ["contract-types", "detail"] as const,
+    detail: (id: number) => ["contract-types", "detail", id] as const,
+  },
 } as const;

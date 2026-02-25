@@ -35,7 +35,7 @@ export function EmployeesPage() {
 
   // Use TanStack Query hooks
   const { data: employees = [], isLoading, error } = useEmployees();
-  const { data: departments = [] } = useDepartments();
+  const departments: any[] = [];
   const { data: positions = [] } = usePositions();
   const { data: workLocations = [] } = useWorkLocations();
   const { data: contracts = [] } = useContracts();
@@ -189,7 +189,6 @@ export function EmployeesPage() {
       </div>
 
       <CreateEmployeeDialog
-        departments={departments}
         onCreate={handleAddEmployee}
         onOpenChange={setIsCreateDialogOpen}
         open={isCreateDialogOpen}

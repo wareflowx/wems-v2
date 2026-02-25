@@ -1,21 +1,39 @@
 import { os } from "@orpc/server";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "@/core/db";
 import {
+  attachments,
   contracts,
   employees,
+  media,
   positions,
   posts,
   workLocations,
 } from "@/core/db/schema";
 import {
+  saveFile,
+  deleteFile,
+  readFile,
+  generateStoredFileName,
+  getMediaPath,
+  getAttachmentPath,
+} from "@/core/lib/file-storage";
+import { randomUUID } from "node:crypto";
+import {
+  createAttachmentInputSchema,
   createEmployeeInputSchema,
+  createMediaInputSchema,
   createPositionInputSchema,
   createPostInputSchema,
   createWorkLocationInputSchema,
+  deleteAttachmentInputSchema,
   deleteEmployeeInputSchema,
+  deleteMediaInputSchema,
   deletePositionInputSchema,
   deleteWorkLocationInputSchema,
+  getAttachmentInputSchema,
+  getAttachmentsInputSchema,
+  getMediaInputSchema,
   updateEmployeeInputSchema,
   updatePositionInputSchema,
   updateWorkLocationInputSchema,
@@ -400,6 +418,352 @@ export const deleteContract = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in deleteContract:", error);
+    throw error;
+  }
+});
+
+// Media handlers
+export const getAllMedia = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    if (input?.type) {
+      return await db
+        .select()
+        .from(media)
+        .where(eq(media.type, input.type))
+        .orderBy(desc(media.createdAt));
+    }
+    return await db.select().from(media).orderBy(desc(media.createdAt));
+  } catch (error) {
+    console.error("Error in getAllMedia:", error);
+    throw error;
+  }
+});
+
+export const getMediaById = os.handler(async ({ input }) => {
+  try {
+    // Validate input
+    const validatedData = getMediaInputSchema.parse(input);
+    const db = await getDb();
+    const [result] = await db
+      .select()
+      .from(media)
+      .where(eq(media.id, validatedData.id));
+    return result || null;
+  } catch (error) {
+    console.error("Error in getMediaById:", error);
+    throw error;
+  }
+});
+
+export const createMedia = os.handler(async ({ input }) => {
+  try {
+    // Validate input with schema
+    const validatedData = createMediaInputSchema.parse(input);
+    const db = await getDb();
+
+    // Generate UUID for the file
+    const id = validatedData.id || randomUUID();
+
+    // If file data is provided (base64), save it
+    let storedName: string | undefined;
+    let filePath: string | undefined;
+
+    if (validatedData.fileData && validatedData.fileName) {
+      // Decode base64 to buffer
+      const buffer = Buffer.from(validatedData.fileData, "base64");
+      storedName = generateStoredFileName(id, validatedData.fileName);
+      filePath = getMediaPath(validatedData.type || "documents", storedName);
+
+      // Save file to disk first
+      try {
+        saveFile(buffer, filePath);
+      } catch (fileError) {
+        // DB not touched yet, just throw
+        throw new Error("Failed to save file to disk");
+      }
+    }
+
+    // Insert record to DB
+    try {
+      const [newMedia] = await db
+        .insert(media)
+        .values({
+          id,
+          name: validatedData.name,
+          type: validatedData.type,
+          fileName: validatedData.fileName,
+          mimeType: validatedData.mimeType,
+          size: validatedData.size,
+          filePath: filePath,
+        })
+        .returning();
+
+      return newMedia;
+    } catch (dbError) {
+      // Rollback: delete the file if DB insert failed
+      if (filePath) {
+        try {
+          deleteFile(filePath);
+        } catch {
+          // Ignore cleanup error
+        }
+      }
+      throw dbError;
+    }
+  } catch (error) {
+    console.error("Error in createMedia:", error);
+    throw error;
+  }
+});
+
+export const deleteMedia = os.handler(async ({ input }) => {
+  try {
+    // Validate input
+    const validatedData = deleteMediaInputSchema.parse(input);
+    const db = await getDb();
+
+    // First get the media to find the file path
+    const [mediaRecord] = await db
+      .select()
+      .from(media)
+      .where(eq(media.id, validatedData.id));
+
+    if (mediaRecord?.filePath) {
+      // Delete file from disk
+      deleteFile(mediaRecord.filePath);
+    }
+
+    // Delete record from DB
+    await db.delete(media).where(eq(media.id, validatedData.id));
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteMedia:", error);
+    throw error;
+  }
+});
+
+export const downloadMedia = os.handler(async ({ input }) => {
+  try {
+    // Validate input
+    const validatedData = getMediaInputSchema.parse(input);
+    const db = await getDb();
+
+    // Get the media record
+    const [mediaRecord] = await db
+      .select()
+      .from(media)
+      .where(eq(media.id, validatedData.id));
+
+    if (!mediaRecord) {
+      throw new Error("Media not found");
+    }
+
+    if (!mediaRecord.filePath) {
+      throw new Error("No file associated with this media");
+    }
+
+    // Read file from disk
+    const buffer = readFile(mediaRecord.filePath);
+
+    if (!buffer) {
+      throw new Error("File is missing from storage");
+    }
+
+    // Return as base64
+    return {
+      ...mediaRecord,
+      fileData: buffer.toString("base64"),
+    };
+  } catch (error) {
+    console.error("Error in downloadMedia:", error);
+    throw error;
+  }
+});
+
+// Attachment handlers
+export const getAttachments = os.handler(async ({ input }) => {
+  try {
+    // Validate input
+    const validatedData = getAttachmentsInputSchema.parse(input || {});
+    const db = await getDb();
+    let query = db.select().from(attachments);
+
+    if (validatedData?.employeeId && validatedData?.entityType) {
+      return await query
+        .where(
+          and(
+            eq(attachments.employeeId, validatedData.employeeId),
+            eq(attachments.entityType, validatedData.entityType)
+          )
+        )
+        .orderBy(desc(attachments.createdAt));
+    }
+
+    if (validatedData?.employeeId) {
+      return await query
+        .where(eq(attachments.employeeId, validatedData.employeeId))
+        .orderBy(desc(attachments.createdAt));
+    }
+
+    if (validatedData?.entityType) {
+      return await query
+        .where(eq(attachments.entityType, validatedData.entityType))
+        .orderBy(desc(attachments.createdAt));
+    }
+
+    return await query.orderBy(desc(attachments.createdAt));
+  } catch (error) {
+    console.error("Error in getAttachments:", error);
+    throw error;
+  }
+});
+
+export const getAttachmentById = os.handler(async ({ input }) => {
+  try {
+    // Validate input
+    const validatedData = getAttachmentInputSchema.parse(input);
+    const db = await getDb();
+    const [result] = await db
+      .select()
+      .from(attachments)
+      .where(eq(attachments.id, validatedData.id));
+    return result || null;
+  } catch (error) {
+    console.error("Error in getAttachmentById:", error);
+    throw error;
+  }
+});
+
+export const createAttachment = os.handler(async ({ input }) => {
+  try {
+    // Validate input with schema
+    const validatedData = createAttachmentInputSchema.parse(input);
+    const db = await getDb();
+
+    // Generate UUID for the file
+    const id = validatedData.id || randomUUID();
+
+    // If file data is provided (base64), save it
+    let storedName: string | undefined;
+    let filePath: string | undefined;
+
+    if (validatedData.fileData && validatedData.originalName && validatedData.employeeId) {
+      // Decode base64 to buffer
+      const buffer = Buffer.from(validatedData.fileData, "base64");
+      storedName = generateStoredFileName(id, validatedData.originalName);
+      filePath = getAttachmentPath(
+        validatedData.entityType,
+        validatedData.employeeId,
+        storedName
+      );
+
+      // Save file to disk first
+      try {
+        saveFile(buffer, filePath);
+      } catch (fileError) {
+        // DB not touched yet, just throw
+        throw new Error("Failed to save file to disk");
+      }
+    }
+
+    // Insert record to DB
+    try {
+      const [newAttachment] = await db
+        .insert(attachments)
+        .values({
+          id,
+          employeeId: validatedData.employeeId,
+          entityType: validatedData.entityType,
+          entityId: validatedData.entityId,
+          originalName: validatedData.originalName,
+          storedName,
+          mimeType: validatedData.mimeType,
+          size: validatedData.size,
+          filePath,
+        })
+        .returning();
+
+      return newAttachment;
+    } catch (dbError) {
+      // Rollback: delete the file if DB insert failed
+      if (filePath) {
+        try {
+          deleteFile(filePath);
+        } catch {
+          // Ignore cleanup error
+        }
+      }
+      throw dbError;
+    }
+  } catch (error) {
+    console.error("Error in createAttachment:", error);
+    throw error;
+  }
+});
+
+export const deleteAttachment = os.handler(async ({ input }) => {
+  try {
+    // Validate input
+    const validatedData = deleteAttachmentInputSchema.parse(input);
+    const db = await getDb();
+
+    // First get the attachment to find the file path
+    const [attachmentRecord] = await db
+      .select()
+      .from(attachments)
+      .where(eq(attachments.id, validatedData.id));
+
+    if (attachmentRecord?.filePath) {
+      // Delete file from disk
+      deleteFile(attachmentRecord.filePath);
+    }
+
+    // Delete record from DB
+    await db.delete(attachments).where(eq(attachments.id, validatedData.id));
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteAttachment:", error);
+    throw error;
+  }
+});
+
+export const downloadAttachment = os.handler(async ({ input }) => {
+  try {
+    // Validate input
+    const validatedData = getAttachmentInputSchema.parse(input);
+    const db = await getDb();
+
+    // Get the attachment record
+    const [attachmentRecord] = await db
+      .select()
+      .from(attachments)
+      .where(eq(attachments.id, validatedData.id));
+
+    if (!attachmentRecord) {
+      throw new Error("Attachment not found");
+    }
+
+    if (!attachmentRecord.filePath) {
+      throw new Error("No file associated with this attachment");
+    }
+
+    // Read file from disk
+    const buffer = readFile(attachmentRecord.filePath);
+
+    if (!buffer) {
+      throw new Error("File is missing from storage");
+    }
+
+    // Return as base64
+    return {
+      ...attachmentRecord,
+      fileData: buffer.toString("base64"),
+    };
+  } catch (error) {
+    console.error("Error in downloadAttachment:", error);
     throw error;
   }
 });

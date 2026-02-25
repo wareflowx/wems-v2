@@ -1,5 +1,30 @@
 import { z } from "zod";
 
+// Constants for validation
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+] as const;
+
+const ALLOWED_ATTACHMENT_MIME_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "image/jpeg",
+  "image/png",
+] as const;
+
 export const createPostInputSchema = z.object({
   title: z.string().min(1, "Title is required"),
   content: z.string().min(1, "Content is required"),
@@ -87,4 +112,52 @@ export const updateEmployeeInputSchema = z.object({
 
 export const deleteEmployeeInputSchema = z.object({
   id: z.number(),
+});
+
+// Media schemas
+export const createMediaInputSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, "Name is required"),
+  type: z.enum(["logo", "template", "document", "other"]),
+  fileName: z.string().optional(),
+  mimeType: z.enum(ALLOWED_MIME_TYPES).optional(),
+  size: z.number().max(MAX_FILE_SIZE, "File size exceeds maximum allowed size of 50MB").optional(),
+  fileData: z.string().optional(), // base64 encoded file
+});
+
+export const deleteMediaInputSchema = z.object({
+  id: z.string(),
+});
+
+export const getMediaInputSchema = z.object({
+  id: z.string(),
+});
+
+export const getAllMediaInputSchema = z.object({
+  type: z.enum(["logo", "template", "document", "other"]).optional(),
+});
+
+// Attachment schemas
+export const createAttachmentInputSchema = z.object({
+  id: z.string().optional(),
+  employeeId: z.number(),
+  entityType: z.enum(["contract", "caces", "document", "medical_visit"]),
+  entityId: z.number().optional(),
+  originalName: z.string(),
+  mimeType: z.enum(ALLOWED_ATTACHMENT_MIME_TYPES).optional(),
+  size: z.number().max(MAX_FILE_SIZE, "File size exceeds maximum allowed size of 50MB").optional(),
+  fileData: z.string(), // base64 encoded file
+});
+
+export const deleteAttachmentInputSchema = z.object({
+  id: z.string(),
+});
+
+export const getAttachmentInputSchema = z.object({
+  id: z.string(),
+});
+
+export const getAttachmentsInputSchema = z.object({
+  employeeId: z.number().optional(),
+  entityType: z.enum(["contract", "caces", "document", "medical_visit"]).optional(),
 });

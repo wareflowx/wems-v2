@@ -60,9 +60,7 @@ export function CreateEmployeeDialog({
   onCreate,
   departments = [],
 }: CreateEmployeeDialogProps) {
-  // DEBUG: comment out hooks to test freeze
-  // const { t } = useTranslation();
-  const t = (key: string) => key;
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
 
   // temp disabled to debug freeze
@@ -186,14 +184,10 @@ export function CreateEmployeeDialog({
   };
 
   return (
-    <div>Dialog disabled for debug</div>
-  );
-  /*
-  return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t("")employees.addEmployee")}</DialogTitle>
+          <DialogTitle>{t("employees.addEmployee")}</DialogTitle>
           <DialogDescription>
             Step {currentStep} of {steps.length}: {steps[currentStep - 1].title}
           </DialogDescription>
@@ -248,12 +242,12 @@ export function CreateEmployeeDialog({
           {currentStep === 1 && (
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">
-                {t("")employeeDetail.identity")}
+                {t("employeeDetail.identity")}
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">
-                    {t("")employeeDetail.firstName")} *
+                    {t("employeeDetail.firstName")} *
                   </Label>
                   <Input
                     id="firstName"
@@ -266,7 +260,7 @@ export function CreateEmployeeDialog({
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">
-                    {t("")employeeDetail.lastName")} *
+                    {t("employeeDetail.lastName")} *
                   </Label>
                   <Input
                     id="lastName"
@@ -276,7 +270,7 @@ export function CreateEmployeeDialog({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">{t("")employeeDetail.email")} *</Label>
+                  <Label htmlFor="email">{t("employeeDetail.email")} *</Label>
                   <Input
                     id="email"
                     onChange={(e) => updateFormData("email", e.target.value)}
@@ -286,7 +280,7 @@ export function CreateEmployeeDialog({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">{t("")employeeDetail.phone")}</Label>
+                  <Label htmlFor="phone">{t("employeeDetail.phone")}</Label>
                   <Input
                     id="phone"
                     onChange={(e) => updateFormData("phone", e.target.value)}
@@ -303,12 +297,12 @@ export function CreateEmployeeDialog({
           {currentStep === 2 && (
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">
-                {t("")employeeDetail.jobAndContract")}
+                {t("employeeDetail.jobAndContract")}
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="department">
-                    {t("")employees.department")} *
+                    {t("employees.department")} *
                   </Label>
                   <Select
                     onValueChange={(value) =>
@@ -317,7 +311,7 @@ export function CreateEmployeeDialog({
                     value={formData.department}
                   >
                     <SelectTrigger id="department">
-                      <SelectValue placeholder={t("")employees.department")} />
+                      <SelectValue placeholder={t("employees.department")} />
                     </SelectTrigger>
                     <SelectContent>
                       {departments.map((dept) => (
@@ -330,7 +324,7 @@ export function CreateEmployeeDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="position">{t("")employees.position")} *</Label>
+                  <Label htmlFor="position">{t("employees.position")} *</Label>
                   <Select
                     onValueChange={(value) =>
                       updateFormData(
@@ -341,7 +335,7 @@ export function CreateEmployeeDialog({
                     value={formData.positionId?.toString() || ""}
                   >
                     <SelectTrigger id="position">
-                      <SelectValue placeholder={t("")employees.position")} />
+                      <SelectValue placeholder={t("employees.position")} />
                     </SelectTrigger>
                     <SelectContent>
                       {positions.map((position) => (
@@ -358,7 +352,7 @@ export function CreateEmployeeDialog({
 
                 <div className="space-y-2">
                   <Label htmlFor="workLocation">
-                    {t("")employees.workLocation")}
+                    {t("employees.workLocation")}
                   </Label>
                   <Select
                     onValueChange={(value) =>
@@ -370,7 +364,7 @@ export function CreateEmployeeDialog({
                     value={formData.workLocationId?.toString() || ""}
                   >
                     <SelectTrigger id="workLocation">
-                      <SelectValue placeholder={t("")employees.workLocation")} />
+                      <SelectValue placeholder={t("employees.workLocation")} />
                     </SelectTrigger>
                     <SelectContent>
                       {workLocations.map((location) => (
@@ -387,7 +381,7 @@ export function CreateEmployeeDialog({
 
                 <div className="space-y-2">
                   <Label htmlFor="contract">
-                    {t("")employeeDetail.contractType")} *
+                    {t("employeeDetail.contractType")} *
                   </Label>
                   <Select
                     onValueChange={(value) =>
@@ -397,7 +391,7 @@ export function CreateEmployeeDialog({
                   >
                     <SelectTrigger id="contract">
                       <SelectValue
-                        placeholder={t("")employeeDetail.contractType")}
+                        placeholder={t("employeeDetail.contractType")}
                       />
                     </SelectTrigger>
                     <SelectContent>
@@ -411,7 +405,7 @@ export function CreateEmployeeDialog({
 
                 <div className="space-y-2">
                   <Label htmlFor="hireDate">
-                    {t("")employeeDetail.startDate")} *
+                    {t("employeeDetail.startDate")} *
                   </Label>
                   <Input
                     id="hireDate"
@@ -427,7 +421,7 @@ export function CreateEmployeeDialog({
                 ) && (
                   <div className="space-y-2">
                     <Label htmlFor="contractEndDate">
-                      {t("")contracts.endDate")}
+                      {t("contracts.endDate")}
                     </Label>
                     <Input
                       id="contractEndDate"
@@ -438,7 +432,7 @@ export function CreateEmployeeDialog({
                       value={formData.contractEndDate}
                     />
                     <p className="text-muted-foreground text-xs">
-                      {t("")contracts.endDateHint")}
+                      {t("contracts.endDateHint")}
                     </p>
                   </div>
                 )}
@@ -449,7 +443,7 @@ export function CreateEmployeeDialog({
           {/* Step 3: Review */}
           {currentStep === 3 && (
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg">{t("")common.confirm")}</h3>
+              <h3 className="font-semibold text-lg">{t("common.confirm")}</h3>
 
               <div className="grid grid-cols-2 gap-4">
                 {/* Personal Info Summary */}
@@ -460,7 +454,7 @@ export function CreateEmployeeDialog({
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
-                        {t("")employeeDetail.fullName")}:
+                        {t("employeeDetail.fullName")}:
                       </span>
                       <span className="font-medium">
                         {formData.firstName} {formData.lastName}
@@ -468,13 +462,13 @@ export function CreateEmployeeDialog({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
-                        {t("")employeeDetail.email")}:
+                        {t("employeeDetail.email")}:
                       </span>
                       <span className="font-medium">{formData.email}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
-                        {t("")employeeDetail.phone")}:
+                        {t("employeeDetail.phone")}:
                       </span>
                       <span className="font-medium">
                         {formData.phone || "-"}
@@ -486,12 +480,12 @@ export function CreateEmployeeDialog({
                 {/* Professional Info Summary */}
                 <div className="space-y-3">
                   <h4 className="font-medium text-muted-foreground text-sm">
-                    {t("")employeeDetail.jobAndContract")}
+                    {t("employeeDetail.jobAndContract")}
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
-                        {t("")employees.department")}:
+                        {t("employees.department")}:
                       </span>
                       <span className="font-medium">
                         {formData.department || "-"}
@@ -499,7 +493,7 @@ export function CreateEmployeeDialog({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
-                        {t("")employees.position")}:
+                        {t("employees.position")}:
                       </span>
                       <span className="font-medium">
                         {getPositionName(formData.positionId)}
@@ -507,7 +501,7 @@ export function CreateEmployeeDialog({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
-                        {t("")employees.workLocation")}:
+                        {t("employees.workLocation")}:
                       </span>
                       <span className="font-medium">
                         {getWorkLocationName(formData.workLocationId)}
@@ -515,7 +509,7 @@ export function CreateEmployeeDialog({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
-                        {t("")employeeDetail.contractType")}:
+                        {t("employeeDetail.contractType")}:
                       </span>
                       <span className="font-medium">
                         {getContractDisplay(formData.contractType)}
@@ -523,7 +517,7 @@ export function CreateEmployeeDialog({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
-                        {t("")employeeDetail.startDate")}:
+                        {t("employeeDetail.startDate")}:
                       </span>
                       <span className="font-medium">
                         {formData.hireDate || "-"}
@@ -532,7 +526,7 @@ export function CreateEmployeeDialog({
                     {formData.contractEndDate && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">
-                          {t("")contracts.endDate")}:
+                          {t("contracts.endDate")}:
                         </span>
                         <span className="font-medium">
                           {formData.contractEndDate}
@@ -553,7 +547,7 @@ export function CreateEmployeeDialog({
               type="button"
               variant="outline"
             >
-              {t("")common.cancel")}
+              {t("common.cancel")}
             </Button>
             <div className="flex gap-2">
               {currentStep > 1 && (
@@ -562,7 +556,7 @@ export function CreateEmployeeDialog({
                   type="button"
                   variant="outline"
                 >
-                  {t("")common.previous")}
+                  {t("common.previous")}
                 </Button>
               )}
               {currentStep < steps.length ? (
@@ -571,11 +565,11 @@ export function CreateEmployeeDialog({
                   onClick={handleNext}
                   type="button"
                 >
-                  {t("")common.next")}
+                  {t("common.next")}
                 </Button>
               ) : (
                 <Button onClick={handleSubmit} type="button">
-                  {t("")common.confirm")}
+                  {t("common.confirm")}
                 </Button>
               )}
             </div>
@@ -584,5 +578,4 @@ export function CreateEmployeeDialog({
       </DialogContent>
     </Dialog>
   );
-  */
 }

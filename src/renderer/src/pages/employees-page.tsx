@@ -15,6 +15,7 @@ import {
   useContracts,
   useCreateEmployee,
   useDeleteEmployee,
+  useDepartments,
   useEmployees,
   usePositions,
   useWorkLocations,
@@ -34,13 +35,10 @@ export function EmployeesPage() {
 
   // Use TanStack Query hooks
   const { data: employees = [], isLoading, error } = useEmployees();
-  // temp disabled to debug
-  // const { data: positions = [] } = usePositions();
-  // const { data: workLocations = [] } = useWorkLocations();
-  // const { data: contracts = [] } = useContracts();
-  const positions: any[] = [];
-  const workLocations: any[] = [];
-  const contracts: any[] = [];
+  const { data: departments = [] } = useDepartments();
+  const { data: positions = [] } = usePositions();
+  const { data: workLocations = [] } = useWorkLocations();
+  const { data: contracts = [] } = useContracts();
   const createEmployee = useCreateEmployee();
   const deleteEmployee = useDeleteEmployee();
 
@@ -191,6 +189,7 @@ export function EmployeesPage() {
       </div>
 
       <CreateEmployeeDialog
+        departments={departments}
         onCreate={handleAddEmployee}
         onOpenChange={setIsCreateDialogOpen}
         open={isCreateDialogOpen}

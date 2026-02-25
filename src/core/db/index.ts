@@ -10,7 +10,7 @@ let db: ReturnType<typeof drizzle> | null = null;
 
 const inDevelopment = process.env.NODE_ENV === "development";
 
-function getDataDir(): string {
+export function getDataDir(): string {
   // Use userData directory for data storage
   // This is the proper location for app data (writable, per-user)
   // In development: use project root for easier debugging
@@ -19,7 +19,7 @@ function getDataDir(): string {
   return path.join(baseDir, "data");
 }
 
-function ensureDataDir(): void {
+export function ensureDataDir(): void {
   const dataDir = getDataDir();
   if (!require("node:fs").existsSync(dataDir)) {
     try {

@@ -12,6 +12,8 @@ import {
   deleteMedia,
   deletePosition,
   deleteWorkLocation,
+  downloadAttachment,
+  downloadMedia,
   getActiveContractByEmployee,
   getAllMedia,
   getAttachments,
@@ -57,9 +59,11 @@ export const database = {
   getMediaById,
   createMedia,
   deleteMedia,
+  downloadMedia,
   // Attachments
   getAttachments,
   getAttachmentById,
   createAttachment,
   deleteAttachment,
+  downloadAttachment,
 };

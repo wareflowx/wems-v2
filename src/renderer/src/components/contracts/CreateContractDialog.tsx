@@ -19,12 +19,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const CONTRACT_TYPES = ["CDI", "CDD", "Intérim", "Alternance"];
-
 interface Employee {
   id: number;
   firstName: string;
   lastName: string;
+}
+
+interface ContractType {
+  id: number;
+  name: string;
+  code: string;
 }
 
 export interface CreateContractDialogProps {
@@ -37,6 +41,7 @@ export interface CreateContractDialogProps {
     endDate?: string | null;
   }) => void;
   employees: Employee[];
+  contractTypes: ContractType[];
 }
 
 export function CreateContractDialog({
@@ -44,6 +49,7 @@ export function CreateContractDialog({
   onOpenChange,
   onCreate,
   employees,
+  contractTypes,
 }: CreateContractDialogProps) {
   const { t } = useTranslation();
   const [employeeId, setEmployeeId] = useState<string>("");
@@ -115,9 +121,9 @@ export function CreateContractDialog({
                   <SelectValue placeholder={t("contracts.selectType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {CONTRACT_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
+                  {contractTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.name}>
+                      {type.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

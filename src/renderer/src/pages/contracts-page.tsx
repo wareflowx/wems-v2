@@ -13,6 +13,7 @@ import { ErrorDisplay } from "@/components/ui/error-display";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import {
+  useContractTypes,
   useContracts,
   useCreateContract,
   useDeleteContract,
@@ -101,6 +102,7 @@ export function ContractsPage() {
   // Use TanStack Query hooks
   const { data: dbContracts = [], isLoading, error } = useContracts();
   const { data: employees = [] } = useEmployees();
+  const { data: contractTypes = [] } = useContractTypes();
   const createContract = useCreateContract();
   const updateContract = useUpdateContract();
   const deleteContract = useDeleteContract();
@@ -343,6 +345,7 @@ export function ContractsPage() {
 
       {/* Dialogs */}
       <CreateContractDialog
+        contractTypes={contractTypes}
         employees={employees}
         onCreate={handleCreateContract}
         onOpenChange={setCreateDialogOpen}
@@ -350,6 +353,7 @@ export function ContractsPage() {
       />
       <EditContractDialog
         contract={dbContractForEdit}
+        contractTypes={contractTypes}
         onOpenChange={setEditDialogOpen}
         onUpdate={handleUpdateContract}
         open={editDialogOpen}

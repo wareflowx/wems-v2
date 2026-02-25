@@ -21,10 +21,17 @@ import {
 } from "@/components/ui/select";
 import { usePositions, useWorkLocations } from "@/hooks";
 
+interface Department {
+  id: number;
+  name: string;
+  code: string;
+}
+
 interface CreateEmployeeDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onCreate?: (data: CreateEmployeeData) => void;
+  departments?: Department[];
 }
 
 export interface CreateEmployeeData {
@@ -51,6 +58,7 @@ export function CreateEmployeeDialog({
   open,
   onOpenChange,
   onCreate,
+  departments = [],
 }: CreateEmployeeDialogProps) {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
@@ -303,15 +311,11 @@ export function CreateEmployeeDialog({
                       <SelectValue placeholder={t("employees.department")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Production">Production</SelectItem>
-                      <SelectItem value="Administration">
-                        Administration
-                      </SelectItem>
-                      <SelectItem value="RH">RH</SelectItem>
-                      <SelectItem value="IT">IT</SelectItem>
-                      <SelectItem value="Logistics">Logistics</SelectItem>
-                      <SelectItem value="Maintenance">Maintenance</SelectItem>
-                      <SelectItem value="Quality">Quality</SelectItem>
+                      {departments.map((dept) => (
+                        <SelectItem key={dept.id} value={dept.name}>
+                          {dept.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

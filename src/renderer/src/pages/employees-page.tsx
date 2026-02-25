@@ -34,9 +34,13 @@ export function EmployeesPage() {
 
   // Use TanStack Query hooks
   const { data: employees = [], isLoading, error } = useEmployees();
-  const { data: positions = [] } = usePositions();
-  const { data: workLocations = [] } = useWorkLocations();
-  const { data: contracts = [] } = useContracts();
+  // temp disabled to debug
+  // const { data: positions = [] } = usePositions();
+  // const { data: workLocations = [] } = useWorkLocations();
+  // const { data: contracts = [] } = useContracts();
+  const positions: any[] = [];
+  const workLocations: any[] = [];
+  const contracts: any[] = [];
   const createEmployee = useCreateEmployee();
   const deleteEmployee = useDeleteEmployee();
 
@@ -132,16 +136,16 @@ export function EmployeesPage() {
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-4 bg-sidebar p-4 pt-6">
+      {/*<div className="flex flex-1 flex-col gap-4 bg-sidebar p-4 pt-6">
         <div className="min-h-full space-y-3">
-          {/* Header */}
+
           <PageHeaderCard
             description={t("employees.description")}
             icon={<Sparkles className="h-4 w-4 text-gray-600" />}
             title={t("employees.title")}
           />
 
-          {/* Key Metrics */}
+
           <MetricsSection
             kpis={[
               {
@@ -178,7 +182,7 @@ export function EmployeesPage() {
             ]}
           />
 
-          {/* Employees Table */}
+
           <EmployeesTable
             contracts={contracts}
             employees={employees}
@@ -190,18 +194,18 @@ export function EmployeesPage() {
           />
         </div>
       </div>
-      {/* <CreateEmployeeDialog
+      <CreateEmployeeDialog
         onCreate={handleAddEmployee}
         onOpenChange={setIsCreateDialogOpen}
         open={isCreateDialogOpen}
-      /> */}
+      /> 
       <DeleteEmployeeDialog
         employeeId={employeeToDelete?.id}
         employeeName={employeeToDelete?.name}
         onConfirm={handleDeleteEmployee}
         onOpenChange={setIsDeleteDialogOpen}
         open={isDeleteDialogOpen}
-      />
+      />*/}
     </>
   );
 }

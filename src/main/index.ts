@@ -24,7 +24,7 @@ let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
   // electron-vite 5.0: preload is in out/preload/, main is in out/main/
-  const preload = path.join(__dirname, "../preload/preload.js");
+  const preload = path.join(__dirname, "../preload/index.js");
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,

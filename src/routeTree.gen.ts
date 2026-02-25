@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsAlertsRouteImport } from './routes/settings/alerts'
 import { Route as SettingsBackupRouteImport } from './routes/settings/backup'
-import { Route as SettingsReferenceRouteImport } from './routes/settings/reference'
 import { Route as SettingsSystemRouteImport } from './routes/settings/system'
 import { Route as EmployeesRouteImport } from './routes/employees'
 import { Route as DocumentsRouteImport } from './routes/documents'
@@ -32,11 +31,6 @@ const SettingsAlertsRoute = SettingsAlertsRouteImport.update({
 const SettingsBackupRoute = SettingsBackupRouteImport.update({
   id: '/settings/backup',
   path: '/settings/backup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsReferenceRoute = SettingsReferenceRouteImport.update({
-  id: '/settings/reference-data',
-  path: '/settings/reference-data',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsSystemRoute = SettingsSystemRouteImport.update({
@@ -108,7 +102,6 @@ export interface FileRoutesByFullPath {
   '/work-locations': typeof WorkLocationsRoute
   '/settings/alerts': typeof SettingsAlertsRoute
   '/settings/backup': typeof SettingsBackupRoute
-  '/settings/reference-data': typeof SettingsReferenceRoute
   '/settings/system': typeof SettingsSystemRoute
 }
 export interface FileRoutesByTo {
@@ -124,7 +117,6 @@ export interface FileRoutesByTo {
   '/work-locations': typeof WorkLocationsRoute
   '/settings/alerts': typeof SettingsAlertsRoute
   '/settings/backup': typeof SettingsBackupRoute
-  '/settings/reference-data': typeof SettingsReferenceRoute
   '/settings/system': typeof SettingsSystemRoute
 }
 export interface FileRoutesById {
@@ -141,15 +133,14 @@ export interface FileRoutesById {
   '/work-locations': typeof WorkLocationsRoute
   '/settings/alerts': typeof SettingsAlertsRoute
   '/settings/backup': typeof SettingsBackupRoute
-  '/settings/reference-data': typeof SettingsReferenceRoute
   '/settings/system': typeof SettingsSystemRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
+  fullPaths: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/settings/alerts' | '/settings/backup' | '/settings/system'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
-  id: '__root__' | '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/settings/alerts' | '/settings/backup' | '/settings/reference-data' | '/settings/system'
+  to: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/settings/alerts' | '/settings/backup' | '/settings/system'
+  id: '__root__' | '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/settings/alerts' | '/settings/backup' | '/settings/system'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -165,7 +156,6 @@ export interface RootRouteChildren {
   WorkLocationsRoute: typeof WorkLocationsRoute
   SettingsAlertsRoute: typeof SettingsAlertsRoute
   SettingsBackupRoute: typeof SettingsBackupRoute
-  SettingsReferenceRoute: typeof SettingsReferenceRoute
   SettingsSystemRoute: typeof SettingsSystemRoute
 }
 
@@ -183,13 +173,6 @@ declare module '@tanstack/react-router' {
       path: '/settings/backup'
       fullPath: '/settings/backup'
       preLoaderRoute: typeof SettingsBackupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/reference-data': {
-      id: '/settings/reference-data'
-      path: '/settings/reference-data'
-      fullPath: '/settings/reference-data'
-      preLoaderRoute: typeof SettingsReferenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings/system': {
@@ -285,7 +268,6 @@ const rootRouteChildren: RootRouteChildren = {
   WorkLocationsRoute: WorkLocationsRoute,
   SettingsAlertsRoute: SettingsAlertsRoute,
   SettingsBackupRoute: SettingsBackupRoute,
-  SettingsReferenceRoute: SettingsReferenceRoute,
   SettingsSystemRoute: SettingsSystemRoute,
 }
 export const routeTree = rootRouteImport

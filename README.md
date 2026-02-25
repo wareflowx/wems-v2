@@ -1,8 +1,8 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="@images/icon.jpg">
-    <source media="(prefers-color-scheme: light)" srcset="@images/icon.jpg">
-    <img src="@images/icon.jpg" alt="wems" width="150" height="150" style="border-radius: 50%;">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/wareflowx/wems-v2/main/images/icon.jpg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/wareflowx/wems-v2/main/images/icon.jpg">
+    <img src="https://raw.githubusercontent.com/wareflowx/wems-v2/main/images/icon.jpg" alt="wems" width="150" height="150" style="border-radius: 50%;">
   </picture>
 </p>
 

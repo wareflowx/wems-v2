@@ -2,8 +2,10 @@ import { os } from "@orpc/server";
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "@/core/db";
 import {
+  attachments,
   contracts,
   employees,
+  media,
   positions,
   posts,
   workLocations,
@@ -400,6 +402,133 @@ export const deleteContract = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in deleteContract:", error);
+    throw error;
+  }
+});
+
+// Media handlers
+export const getAllMedia = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    if (input?.type) {
+      return await db
+        .select()
+        .from(media)
+        .where(eq(media.type, input.type))
+        .orderBy(desc(media.createdAt));
+    }
+    return await db.select().from(media).orderBy(desc(media.createdAt));
+  } catch (error) {
+    console.error("Error in getAllMedia:", error);
+    throw error;
+  }
+});
+
+export const getMediaById = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const [result] = await db
+      .select()
+      .from(media)
+      .where(eq(media.id, input.id));
+    return result || null;
+  } catch (error) {
+    console.error("Error in getMediaById:", error);
+    throw error;
+  }
+});
+
+export const createMedia = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const [newMedia] = await db.insert(media).values(input).returning();
+    return newMedia;
+  } catch (error) {
+    console.error("Error in createMedia:", error);
+    throw error;
+  }
+});
+
+export const deleteMedia = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    await db.delete(media).where(eq(media.id, input.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteMedia:", error);
+    throw error;
+  }
+});
+
+// Attachment handlers
+export const getAttachments = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    let query = db.select().from(attachments);
+
+    if (input?.employeeId && input?.entityType) {
+      return await query
+        .where(
+          eq(attachments.employeeId, input.employeeId) &&
+            eq(attachments.entityType, input.entityType)
+        )
+        .orderBy(desc(attachments.createdAt));
+    }
+
+    if (input?.employeeId) {
+      return await query
+        .where(eq(attachments.employeeId, input.employeeId))
+        .orderBy(desc(attachments.createdAt));
+    }
+
+    if (input?.entityType) {
+      return await query
+        .where(eq(attachments.entityType, input.entityType))
+        .orderBy(desc(attachments.createdAt));
+    }
+
+    return await query.orderBy(desc(attachments.createdAt));
+  } catch (error) {
+    console.error("Error in getAttachments:", error);
+    throw error;
+  }
+});
+
+export const getAttachmentById = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const [result] = await db
+      .select()
+      .from(attachments)
+      .where(eq(attachments.id, input.id));
+    return result || null;
+  } catch (error) {
+    console.error("Error in getAttachmentById:", error);
+    throw error;
+  }
+});
+
+export const createAttachment = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const [newAttachment] = await db
+      .insert(attachments)
+      .values(input)
+      .returning();
+    return newAttachment;
+  } catch (error) {
+    console.error("Error in createAttachment:", error);
+    throw error;
+  }
+});
+
+export const deleteAttachment = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    await db.delete(attachments).where(eq(attachments.id, input.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteAttachment:", error);
     throw error;
   }
 });

@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { IPC_CHANNELS } from "./constants";
+import { IPC_CHANNELS } from "../constants";
 
 // ============================================
 // MINIMAL BRIDGE - Only expose necessary APIs

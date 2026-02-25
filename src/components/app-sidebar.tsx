@@ -20,7 +20,8 @@ import {
   Trash2,
   MessageCircleQuestion,
   Lock,
-  Pen
+  Pen,
+  Search,
 } from "lucide-react";
 import {
   Sidebar,
@@ -36,7 +37,9 @@ import {
   SidebarMenuButton,
   SidebarRail,
   SidebarTrigger,
+  SidebarInput,
 } from "@/components/ui/sidebar";
+import { Label } from "@/components/ui/label";
 import { Link } from "@tanstack/react-router";
 
 import { NavMain } from "@/components/nav-main";
@@ -84,7 +87,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     getAppVersion().then(setAppVersion);
 
     // Initial check for write mode
-    window.getWriteMode?.().then(setCanWrite).catch(() => setCanWrite(true));
+    window
+      .getWriteMode?.()
+      .then(setCanWrite)
+      .catch(() => setCanWrite(true));
 
     // Listen for real-time lock status changes
     window.onLockStatusChanged?.((writeMode) => {
@@ -98,19 +104,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       collapsible="icon"
       {...props}
     >
-      <SidebarHeader className="border-b bg-card">
-        <SidebarMenu>
-          <SidebarMenuItem className="flex gap-2 p-1">
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-1.5 rounded-lg">
-              <Users className="h-4 w-4 text-white" />
-            </div>
-            <h1 className="text-lg font-semibold text-gray-900 group-data-[collapsible=icon]:hidden">
-              {t("app.name")}
-            </h1>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
       <SidebarContent className="bg-card">
+        <SidebarGroup className="pt-4">
+          <SidebarGroupContent className="relative">
+            <Label htmlFor="search" className="sr-only">
+              Search
+            </Label>
+            <SidebarInput
+              id="search"
+              placeholder="Search the docs..."
+              className="pl-8"
+            />
+            <Search className="pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2 opacity-50 select-none" />
+          </SidebarGroupContent>
+        </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.overview")}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -143,7 +150,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
 
         <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.management")}</SidebarGroupLabel>
@@ -187,7 +193,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-
         <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.referenceData")}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -212,10 +217,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <div
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded-md ${
+                    canWrite
+                      ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                      : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                  }`}
+                >
+                  {canWrite ? (
+                    <Pen className="h-4 w-4" />
+                  ) : (
+                    <Lock className="h-4 w-4" />
+                  )}
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    {canWrite ? "Write mode" : "Read only"}
+                  </span>
+                </div>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={t("sidebar.settings")}>
                   <Link to="/settings">
@@ -232,14 +254,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.help")}>
-                  <Link to="/help">
-                    <MessageCircleQuestion />
-                    <span>{t("sidebar.help")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -247,27 +261,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter className="bg-card border-t">
         <SidebarMenu>
           <SidebarMenuItem>
-            <div
-              className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-sm ${
-                canWrite
-                  ? "bg-green-100 text-green-800"
-                  : "bg-amber-100 text-amber-800"
-              }`}
-            >
-              {canWrite ? (
-                <Pen className="h-4 w-4" />
-              ) : (
-                <Lock className="h-4 w-4" />
-              )}
-              <span className="group-data-[collapsible=icon]:hidden">
-                {canWrite ? "Write mode" : "Read only"}
-              </span>
-            </div>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
               <div className="w-full flex items-center cursor-pointer">
-                <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">{t("sidebar.toggle")}</span>
+                <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
+                  {t("sidebar.toggle")}
+                </span>
                 <SidebarTrigger className="ml-auto size-4" />
               </div>
             </SidebarMenuButton>

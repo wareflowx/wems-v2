@@ -95,7 +95,7 @@ export function WorkLocationsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6 bg-sidebar">
         <PageHeaderSkeleton showMetrics metricsCount={3} />
       </div>
     );
@@ -103,7 +103,7 @@ export function WorkLocationsPage() {
 
   if (error) {
     return (
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6 bg-sidebar">
         <ErrorDisplay
           title={t("workLocations.errorLoading", "Failed to load work locations")}
           message={t("workLocations.errorLoadingMessage", "Make sure the application is running correctly. If the problem persists, please restart.")}
@@ -115,7 +115,7 @@ export function WorkLocationsPage() {
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6 bg-sidebar">
         <div className="min-h-full space-y-3">
           {/* Header */}
           <PageHeaderCard

@@ -149,7 +149,7 @@ export function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-4 p-4 py-6">
+      <div className="flex flex-1 flex-col gap-4 p-4 py-6 bg-sidebar">
         <div className="min-h-full space-y-3">
           <Card className="p-3 bg-background shadow-sm rounded-md">
             <div className="flex items-start gap-3">

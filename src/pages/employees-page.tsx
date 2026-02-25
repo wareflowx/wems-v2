@@ -86,7 +86,7 @@ export function EmployeesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6 bg-sidebar">
         <div className="min-h-full space-y-3">
           <PageHeaderCard
             icon={<Sparkles className="h-4 w-4 text-gray-600" />}
@@ -103,7 +103,7 @@ export function EmployeesPage() {
 
   if (error) {
     return (
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6 bg-sidebar">
         <PageHeaderCard
           icon={<Sparkles className="h-4 w-4 text-gray-600" />}
           title={t("employees.title")}

@@ -4,6 +4,8 @@ import { Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
   Briefcase,
+  Building2,
+  ClipboardList,
   FileText,
   Home,
   Lock,
@@ -199,6 +201,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link to="/work-locations">
                     <MapPin />
                     <span>{t("workLocations.title")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("departments.title")}>
+                  <Link to="/departments">
+                    <Building2 />
+                    <span>{t("departments.title")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("contractTypes.title")}>
+                  <Link to="/contract-types">
+                    <ClipboardList />
+                    <span>{t("contractTypes.title")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

@@ -166,11 +166,15 @@
     }
   },
   "departments": {
+    "title": "Départements",
     "production": "Production",
     "administration": "Administration",
     "rh": "RH",
     "it": "IT",
     "logistics": "Logistique"
+  },
+  "contractTypes": {
+    "title": "Types de contrat"
   },
   "documentTypes": {
     "contract": "Contrat",

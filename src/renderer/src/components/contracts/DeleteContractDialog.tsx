@@ -1,5 +1,5 @@
-import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
 import { useTranslation } from "react-i18next";
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
 
 interface Contract {
   id: number;
@@ -25,11 +25,11 @@ export function DeleteContractDialog({
 
   return (
     <DeleteConfirmDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      onConfirm={onConfirm}
-      title={t("contracts.deleteContract") || "Supprimer le contrat"}
       description={`Êtes-vous sûr de vouloir supprimer le contrat ${contract?.type} de ${contract?.employee} (${contract?.startDate}) ? Cette action est irréversible.`}
+      onConfirm={onConfirm}
+      onOpenChange={onOpenChange}
+      open={open}
+      title={t("contracts.deleteContract") || "Supprimer le contrat"}
     />
   );
 }

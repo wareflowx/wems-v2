@@ -22,11 +22,11 @@ export function ErrorDisplay({
   return (
     <Card className={className}>
       <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-        <AlertTriangle className="h-10 w-10 text-destructive mb-4" />
-        <h3 className="text-lg font-semibold mb-2">{title}</h3>
-        <p className="text-muted-foreground mb-4 max-w-md">{message}</p>
+        <AlertTriangle className="mb-4 h-10 w-10 text-destructive" />
+        <h3 className="mb-2 font-semibold text-lg">{title}</h3>
+        <p className="mb-4 max-w-md text-muted-foreground">{message}</p>
         {onRetry && (
-          <Button variant="outline" size="sm" onClick={onRetry}>
+          <Button onClick={onRetry} size="sm" variant="outline">
             <RotateCcw className="mr-2 h-4 w-4" />
             Try Again
           </Button>

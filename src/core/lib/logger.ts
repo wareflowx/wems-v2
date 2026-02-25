@@ -2,20 +2,24 @@
  * Professional logging module with context support and configurable log levels
  */
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
-export type LogEntry = {
+export interface LogEntry {
   level: LogLevel;
   message: string;
   timestamp: number;
   context?: string;
   error?: Error;
-};
+}
 
 export type LoggerConfig = Partial<Record<string, LogLevel>>;
 
 type LogMethod = (message: string, context?: string) => void;
-type ErrorLogMethod = (message: string, error?: Error, context?: string) => void;
+type ErrorLogMethod = (
+  message: string,
+  error?: Error,
+  context?: string
+) => void;
 
 // Log level priority (lower = more verbose)
 const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
@@ -27,13 +31,13 @@ const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
 
 // Default configuration
 let globalConfig: LoggerConfig = {
-  default: 'info',
+  default: "info",
 };
 
 // Get the effective log level for a context
 function getLogLevel(context?: string): LogLevel {
   const level = context ? globalConfig[context] : globalConfig.default;
-  return level ?? 'info';
+  return level ?? "info";
 }
 
 // Check if a message should be logged
@@ -50,17 +54,19 @@ function formatTimestamp(timestamp: number): string {
 // Output to console
 function output(entry: LogEntry): void {
   const timestamp = formatTimestamp(entry.timestamp);
-  const context = entry.context ? `[${entry.context}]` : '';
-  const errorInfo = entry.error ? `\n${entry.error.stack ?? '(no stack trace available)'}` : '';
+  const context = entry.context ? `[${entry.context}]` : "";
+  const errorInfo = entry.error
+    ? `\n${entry.error.stack ?? "(no stack trace available)"}`
+    : "";
 
   const message = `${timestamp} ${context} ${entry.message}${errorInfo}`;
 
   // Map log levels to console methods
-  const logMethods: Record<LogLevel, 'debug' | 'info' | 'warn' | 'error'> = {
-    debug: 'debug',
-    info: 'info',
-    warn: 'warn',
-    error: 'error',
+  const logMethods: Record<LogLevel, "debug" | "info" | "warn" | "error"> = {
+    debug: "debug",
+    info: "info",
+    warn: "warn",
+    error: "error",
   };
 
   console[logMethods[entry.level]](message);
@@ -97,26 +103,26 @@ export function configure(config: LoggerConfig): {
 
   return {
     debug: (message: string, context?: string) => {
-      if (shouldLog('debug', context)) {
-        output(createEntry('debug', message, context));
+      if (shouldLog("debug", context)) {
+        output(createEntry("debug", message, context));
       }
     },
 
     info: (message: string, context?: string) => {
-      if (shouldLog('info', context)) {
-        output(createEntry('info', message, context));
+      if (shouldLog("info", context)) {
+        output(createEntry("info", message, context));
       }
     },
 
     warn: (message: string, context?: string) => {
-      if (shouldLog('warn', context)) {
-        output(createEntry('warn', message, context));
+      if (shouldLog("warn", context)) {
+        output(createEntry("warn", message, context));
       }
     },
 
     error: (message: string, error?: Error, context?: string) => {
-      if (shouldLog('error', context)) {
-        output(createEntry('error', message, context, error));
+      if (shouldLog("error", context)) {
+        output(createEntry("error", message, context, error));
       }
     },
   };
@@ -133,10 +139,10 @@ export function getConfig(): LoggerConfig {
  * Reset configuration to defaults
  */
 export function reset(): void {
-  globalConfig = { default: 'info' };
+  globalConfig = { default: "info" };
 }
 
 // Pre-configured default logger
 export const logger = configure({
-  default: 'info',
+  default: "info",
 });

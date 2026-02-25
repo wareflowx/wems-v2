@@ -8,7 +8,7 @@ import { IPC_CHANNELS } from "../core/constants";
 // ============================================
 
 // Store for lock status
-let lockCallbacks: ((writeMode: boolean) => void)[] = [];
+const lockCallbacks: ((writeMode: boolean) => void)[] = [];
 let lastWriteMode: boolean | null = null;
 
 // ============================================
@@ -45,10 +45,13 @@ contextBridge.exposeInMainWorld("electron", {
 });
 
 // Listen for lock status changes from main
-ipcRenderer.on(IPC_CHANNELS.LOCK_STATUS_CHANGED, (_event, writeMode: boolean) => {
-  lastWriteMode = writeMode;
-  lockCallbacks.forEach((cb) => cb(writeMode));
-});
+ipcRenderer.on(
+  IPC_CHANNELS.LOCK_STATUS_CHANGED,
+  (_event, writeMode: boolean) => {
+    lastWriteMode = writeMode;
+    lockCallbacks.forEach((cb) => cb(writeMode));
+  }
+);
 
 // Listen for MAIN_READY and forward to renderer via postMessage
 // This ensures renderer initializes IPC only after preload is ready
@@ -72,7 +75,9 @@ ipcRenderer.on(IPC_CHANNELS.ORPC_READY, (_event) => {
   const ports = (_event as unknown as { ports?: MessagePort[] }).ports;
   if (ports && ports.length > 0) {
     const port = ports[0];
-    console.log("[PRELOAD] ORPC port received, forwarding to renderer via postMessage");
+    console.log(
+      "[PRELOAD] ORPC port received, forwarding to renderer via postMessage"
+    );
 
     // Forward to renderer via window.postMessage (NOT through contextBridge!)
     // This is the only reliable way to transfer MessagePort
@@ -80,4 +85,6 @@ ipcRenderer.on(IPC_CHANNELS.ORPC_READY, (_event) => {
   }
 });
 
-console.log("[PRELOAD] Minimal bridge initialized: sys + rpc tunnel + lockStatus");
+console.log(
+  "[PRELOAD] Minimal bridge initialized: sys + rpc tunnel + lockStatus"
+);

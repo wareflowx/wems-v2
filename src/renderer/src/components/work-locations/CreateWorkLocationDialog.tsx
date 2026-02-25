@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,11 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useTranslation } from "react-i18next";
-import { useState } from "react";
 import { useCreateWorkLocation } from "@/hooks/use-positions-worklocations";
 
 const COLORS = [
@@ -32,11 +32,14 @@ export interface CreateWorkLocationDialogProps {
 }
 
 function generateCode(name: string): string {
-  return "SITE_" + name
-    .toUpperCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Z0-9]/g, "_");
+  return (
+    "SITE_" +
+    name
+      .toUpperCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^A-Z0-9]/g, "_")
+  );
 }
 
 export function CreateWorkLocationDialog({
@@ -50,7 +53,9 @@ export function CreateWorkLocationDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      return;
+    }
 
     createWorkLocation.mutate(
       {
@@ -69,7 +74,7 @@ export function CreateWorkLocationDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("sidebar.addWorkLocation")}</DialogTitle>
@@ -81,17 +86,19 @@ export function CreateWorkLocationDialog({
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="location-name">{t("settings.locationName")}</Label>
-                <span className="text-xs text-muted-foreground">
+                <Label htmlFor="location-name">
+                  {t("settings.locationName")}
+                </Label>
+                <span className="text-muted-foreground text-xs">
                   {name.length}/30
                 </span>
               </div>
               <Input
                 id="location-name"
-                value={name}
+                maxLength={30}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("settings.locationNamePlaceholder")}
-                maxLength={30}
+                value={name}
               />
             </div>
             <div className="grid gap-2">
@@ -99,15 +106,15 @@ export function CreateWorkLocationDialog({
               <div className="flex flex-wrap gap-2">
                 {COLORS.map((color) => (
                   <button
-                    key={color.value}
-                    type="button"
-                    onClick={() => setSelectedColor(color.value)}
-                    className={`w-8 h-8 rounded-md ${color.value} ${
+                    className={`h-8 w-8 rounded-md ${color.value} ${
                       selectedColor === color.value
-                        ? "ring-2 ring-offset-2 ring-gray-900"
+                        ? "ring-2 ring-gray-900 ring-offset-2"
                         : ""
                     } transition-all hover:scale-110`}
+                    key={color.value}
+                    onClick={() => setSelectedColor(color.value)}
                     title={color.name}
+                    type="button"
                   />
                 ))}
               </div>
@@ -115,13 +122,13 @@ export function CreateWorkLocationDialog({
           </div>
           <DialogFooter>
             <Button
+              onClick={() => onOpenChange(false)}
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
             >
               {t("common.cancel")}
             </Button>
-            <Button type="submit" disabled={!name.trim()}>
+            <Button disabled={!name.trim()} type="submit">
               {t("common.create")}
             </Button>
           </DialogFooter>

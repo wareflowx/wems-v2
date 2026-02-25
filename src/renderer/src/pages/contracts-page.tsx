@@ -1,68 +1,66 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, CheckCircle2, FileText, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { CreateContractDialog } from "@/components/contracts/CreateContractDialog";
 import {
-  FileText,
-  CheckCircle2,
-  AlertTriangle,
-  Sparkles,
-} from 'lucide-react'
-import { PageHeaderCard } from '@/components/ui/page-header-card'
-import { MetricsSection } from '@/components/ui/metrics-section'
-import { ErrorDisplay } from '@/components/ui/error-display'
-import { useTranslation } from 'react-i18next'
-import { useState, useEffect, useMemo } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { ContractTable, type Contract } from '@/components/contracts/contract-table'
+  type Contract,
+  ContractTable,
+} from "@/components/contracts/contract-table";
+import { DeleteContractDialog } from "@/components/contracts/DeleteContractDialog";
+import { EditContractDialog } from "@/components/contracts/EditContractDialog";
+import { ErrorDisplay } from "@/components/ui/error-display";
+import { MetricsSection } from "@/components/ui/metrics-section";
+import { PageHeaderCard } from "@/components/ui/page-header-card";
 import {
   useContracts,
   useCreateContract,
-  useUpdateContract,
   useDeleteContract,
-} from '@/hooks'
-import { useEmployees } from '@/hooks/use-employees'
-import { CreateContractDialog } from '@/components/contracts/CreateContractDialog'
-import { EditContractDialog } from '@/components/contracts/EditContractDialog'
-import { DeleteContractDialog } from '@/components/contracts/DeleteContractDialog'
+  useUpdateContract,
+} from "@/hooks";
+import { useEmployees } from "@/hooks/use-employees";
 
 // Transform database contract to table contract
 function transformContract(
   dbContract: {
-    id: number
-    employeeId: number
-    contractType: string
-    startDate: string
-    endDate: string | null
-    isActive: boolean
+    id: number;
+    employeeId: number;
+    contractType: string;
+    startDate: string;
+    endDate: string | null;
+    isActive: boolean;
   },
   employeeName: string
 ): Contract {
-  const now = new Date()
-  const start = new Date(dbContract.startDate)
-  const end = dbContract.endDate ? new Date(dbContract.endDate) : null
+  const now = new Date();
+  const start = new Date(dbContract.startDate);
+  const end = dbContract.endDate ? new Date(dbContract.endDate) : null;
 
   // Calculate duration in months
-  let duration = 0
+  let duration = 0;
   if (end) {
     duration = Math.floor(
       (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30)
-    )
+    );
   }
 
   // Determine status
-  let status: string
+  let status: string;
   if (!dbContract.isActive) {
-    status = 'completed'
+    status = "completed";
   } else if (end) {
     const daysUntilEnd = Math.ceil(
       (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-    )
+    );
     if (daysUntilEnd < 0) {
-      status = 'completed'
+      status = "completed";
     } else if (daysUntilEnd <= 30) {
-      status = 'ending_soon'
+      status = "ending_soon";
     } else {
-      status = 'active'
+      status = "active";
     }
   } else {
-    status = 'active'
+    status = "active";
   }
 
   return {
@@ -74,113 +72,121 @@ function transformContract(
     endDate: dbContract.endDate,
     status,
     duration,
-    renewable: dbContract.contractType === 'CDD' || dbContract.contractType === 'Intérim',
+    renewable:
+      dbContract.contractType === "CDD" ||
+      dbContract.contractType === "Intérim",
     renewalCount: 0,
     salary: 0,
-    department: '',
-  }
+    department: "",
+  };
 }
 
 export function ContractsPage() {
-  const { t } = useTranslation()
-  const queryClient = useQueryClient()
-  const [search, setSearch] = useState('')
-  const [typeFilter, setTypeFilter] = useState<string>('all')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Dialog state
-  const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [selectedContract, setSelectedContract] = useState<Contract | null>(null)
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(
+    null
+  );
 
   // Use TanStack Query hooks
-  const { data: dbContracts = [], isLoading, error } = useContracts()
-  const { data: employees = [] } = useEmployees()
-  const createContract = useCreateContract()
-  const updateContract = useUpdateContract()
-  const deleteContract = useDeleteContract()
+  const { data: dbContracts = [], isLoading, error } = useContracts();
+  const { data: employees = [] } = useEmployees();
+  const createContract = useCreateContract();
+  const updateContract = useUpdateContract();
+  const deleteContract = useDeleteContract();
 
   // Create employee lookup map
   const employeeMap = useMemo(() => {
-    const map = new Map<number, string>()
+    const map = new Map<number, string>();
     employees.forEach((emp) => {
-      map.set(emp.id, `${emp.firstName} ${emp.lastName}`)
-    })
-    return map
-  }, [employees])
+      map.set(emp.id, `${emp.firstName} ${emp.lastName}`);
+    });
+    return map;
+  }, [employees]);
 
   // Transform database contracts to table format
   const contracts: Contract[] = useMemo(() => {
     return dbContracts.map((c) =>
-      transformContract(c, employeeMap.get(c.employeeId) || 'Unknown')
-    )
-  }, [dbContracts, employeeMap])
+      transformContract(c, employeeMap.get(c.employeeId) || "Unknown")
+    );
+  }, [dbContracts, employeeMap]);
 
   // KPIs - calculated dynamically
   const kpis = useMemo(() => {
-    const now = new Date()
-    const eighteenMonthsAgo = new Date()
-    eighteenMonthsAgo.setMonth(eighteenMonthsAgo.getMonth() - 18)
+    const _now = new Date();
+    const eighteenMonthsAgo = new Date();
+    eighteenMonthsAgo.setMonth(eighteenMonthsAgo.getMonth() - 18);
 
     // CDD/Intérim contracts active for more than 18 months
-    const cddsOver18Months = contracts.filter(c => {
-      if (c.type !== 'CDD' && c.type !== 'Intérim') return false
-      if (c.status === 'completed') return false
-      const startDate = new Date(c.startDate)
-      return startDate <= eighteenMonthsAgo
-    }).length
+    const cddsOver18Months = contracts.filter((c) => {
+      if (c.type !== "CDD" && c.type !== "Intérim") {
+        return false;
+      }
+      if (c.status === "completed") {
+        return false;
+      }
+      const startDate = new Date(c.startDate);
+      return startDate <= eighteenMonthsAgo;
+    }).length;
 
     return {
       totalContracts: contracts.length,
-      activeContracts: contracts.filter(c => c.status === 'active').length,
-      endingSoon: contracts.filter(c => c.status === 'ending_soon').length,
-      completed: contracts.filter(c => c.status === 'completed').length,
-      cdi: contracts.filter(c => c.type === 'CDI').length,
-      cdd: contracts.filter(c => c.type === 'CDD').length,
-      interim: contracts.filter(c => c.type === 'Intérim').length,
+      activeContracts: contracts.filter((c) => c.status === "active").length,
+      endingSoon: contracts.filter((c) => c.status === "ending_soon").length,
+      completed: contracts.filter((c) => c.status === "completed").length,
+      cdi: contracts.filter((c) => c.type === "CDI").length,
+      cdd: contracts.filter((c) => c.type === "CDD").length,
+      interim: contracts.filter((c) => c.type === "Intérim").length,
       cddsOver18Months,
-    }
-  }, [contracts])
+    };
+  }, [contracts]);
 
   // Reset page when filters change
   useEffect(() => {
-    setCurrentPage(1)
-  }, [search, typeFilter, statusFilter])
+    setCurrentPage(1);
+  }, []);
 
   const handleAddContract = () => {
-    setCreateDialogOpen(true)
-  }
+    setCreateDialogOpen(true);
+  };
 
   const handleEditContract = (contract: Contract) => {
-    setSelectedContract(contract)
-    setEditDialogOpen(true)
-  }
+    setSelectedContract(contract);
+    setEditDialogOpen(true);
+  };
 
   const handleViewContract = (contract: Contract) => {
     // For now, open edit dialog in view mode
-    setSelectedContract(contract)
-    setEditDialogOpen(true)
-  }
+    setSelectedContract(contract);
+    setEditDialogOpen(true);
+  };
 
   const handleRenewContract = (contract: Contract) => {
     // For renewal, open edit dialog with pre-filled data
-    setSelectedContract(contract)
-    setEditDialogOpen(true)
-  }
+    setSelectedContract(contract);
+    setEditDialogOpen(true);
+  };
 
-  const handleDeleteContract = (contract: Contract) => {
-    setSelectedContract(contract)
-    setDeleteDialogOpen(true)
-  }
+  const _handleDeleteContract = (contract: Contract) => {
+    setSelectedContract(contract);
+    setDeleteDialogOpen(true);
+  };
 
   const handleCreateContract = (data: {
-    employeeId: number
-    contractType: string
-    startDate: string
-    endDate?: string | null
+    employeeId: number;
+    contractType: string;
+    startDate: string;
+    endDate?: string | null;
   }) => {
     createContract.mutate({
       employeeId: data.employeeId,
@@ -188,16 +194,16 @@ export function ContractsPage() {
       startDate: data.startDate,
       endDate: data.endDate,
       isActive: true,
-    })
-    setCreateDialogOpen(false)
-  }
+    });
+    setCreateDialogOpen(false);
+  };
 
   const handleUpdateContract = (data: {
-    id: number
-    contractType: string
-    startDate: string
-    endDate: string | null
-    isActive: boolean
+    id: number;
+    contractType: string;
+    startDate: string;
+    endDate: string | null;
+    isActive: boolean;
   }) => {
     updateContract.mutate({
       id: data.id,
@@ -205,65 +211,72 @@ export function ContractsPage() {
       startDate: data.startDate,
       endDate: data.endDate,
       isActive: data.isActive,
-    })
-    setEditDialogOpen(false)
-    setSelectedContract(null)
-  }
+    });
+    setEditDialogOpen(false);
+    setSelectedContract(null);
+  };
 
   const handleConfirmDelete = () => {
     if (selectedContract) {
-      deleteContract.mutate(selectedContract.id)
-      setDeleteDialogOpen(false)
-      setSelectedContract(null)
+      deleteContract.mutate(selectedContract.id);
+      setDeleteDialogOpen(false);
+      setSelectedContract(null);
     }
-  }
+  };
 
   // Get selected employee name for create dialog
-  const selectedEmployeeName = useMemo(() => {
+  const _selectedEmployeeName = useMemo(() => {
     if (selectedContract) {
-      return selectedContract.employee
+      return selectedContract.employee;
     }
-    return ''
-  }, [selectedContract])
+    return "";
+  }, [selectedContract]);
 
   // Get the database contract for edit dialog
   const dbContractForEdit = useMemo(() => {
-    if (!selectedContract) return null
-    return dbContracts.find((c) => c.id === selectedContract.id) || null
-  }, [selectedContract, dbContracts])
+    if (!selectedContract) {
+      return null;
+    }
+    return dbContracts.find((c) => c.id === selectedContract.id) || null;
+  }, [selectedContract, dbContracts]);
 
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <div className="min-h-full space-y-3">
           <PageHeaderCard
+            description={t("contracts.description")}
             icon={<Sparkles className="h-4 w-4 text-gray-600" />}
-            title={t('contracts.title')}
-            description={t('contracts.description')}
+            title={t("contracts.title")}
           />
           <div className="flex items-center justify-center p-8">
             <p className="text-muted-foreground">Loading...</p>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <PageHeaderCard
+          description={t("contracts.description")}
           icon={<Sparkles className="h-4 w-4 text-gray-600" />}
-          title={t('contracts.title')}
-          description={t('contracts.description')}
+          title={t("contracts.title")}
         />
         <ErrorDisplay
+          message={t(
+            "contracts.errorLoadingMessage",
+            "Make sure the application is running correctly. If the problem persists, please restart."
+          )}
+          onRetry={() =>
+            queryClient.invalidateQueries({ queryKey: ["contracts"] })
+          }
           title={t("contracts.errorLoading", "Failed to load contracts")}
-          message={t("contracts.errorLoadingMessage", "Make sure the application is running correctly. If the problem persists, please restart.")}
-          onRetry={() => queryClient.invalidateQueries({ queryKey: ["contracts"] })}
         />
       </div>
-    )
+    );
   }
 
   return (
@@ -271,40 +284,40 @@ export function ContractsPage() {
       <div className="min-h-full space-y-3">
         {/* Header */}
         <PageHeaderCard
+          description={t("contracts.description")}
           icon={<Sparkles className="h-4 w-4 text-gray-600" />}
-          title={t('contracts.title')}
-          description={t('contracts.description')}
+          title={t("contracts.title")}
         />
 
         {/* Key Metrics */}
         <MetricsSection
           kpis={[
             {
-              title: t('contracts.total'),
+              title: t("contracts.total"),
               value: kpis.totalContracts,
               description: `${kpis.cdi} CDI, ${kpis.cdd} CDD, ${kpis.interim} Intérim`,
               icon: <FileText className="h-4 w-4" />,
             },
             {
-              title: t('contracts.active'),
+              title: t("contracts.active"),
               value: kpis.activeContracts,
               description: `${kpis.cdi} CDI, ${kpis.cdd} CDD, ${kpis.interim} Intérim`,
               icon: <CheckCircle2 className="h-4 w-4" />,
-              iconColor: 'text-green-500',
+              iconColor: "text-green-500",
             },
             {
-              title: t('contracts.endingSoon'),
+              title: t("contracts.endingSoon"),
               value: kpis.endingSoon,
-              description: 'Contrats se terminant dans 30 jours',
+              description: "Contrats se terminant dans 30 jours",
               icon: <AlertTriangle className="h-4 w-4" />,
-              iconColor: 'text-yellow-500',
+              iconColor: "text-yellow-500",
             },
             {
-              title: 'CDD/Intérim > 18 mois',
+              title: "CDD/Intérim > 18 mois",
               value: kpis.cddsOver18Months,
-              description: 'À surveiller',
+              description: "À surveiller",
               icon: <AlertTriangle className="h-4 w-4" />,
-              iconColor: 'text-red-500',
+              iconColor: "text-red-500",
             },
           ]}
         />
@@ -312,41 +325,41 @@ export function ContractsPage() {
         {/* Contracts Table */}
         <ContractTable
           contracts={contracts}
-          search={search}
-          onSearchChange={setSearch}
-          typeFilter={typeFilter}
-          onTypeFilterChange={setTypeFilter}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
           currentPage={currentPage}
-          onPageChange={setCurrentPage}
           itemsPerPage={itemsPerPage}
           onAddContract={handleAddContract}
           onEdit={handleEditContract}
-          onView={handleViewContract}
+          onPageChange={setCurrentPage}
           onRenew={handleRenewContract}
+          onSearchChange={setSearch}
+          onStatusFilterChange={setStatusFilter}
+          onTypeFilterChange={setTypeFilter}
+          onView={handleViewContract}
+          search={search}
+          statusFilter={statusFilter}
+          typeFilter={typeFilter}
         />
       </div>
 
       {/* Dialogs */}
       <CreateContractDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        onCreate={handleCreateContract}
         employees={employees}
+        onCreate={handleCreateContract}
+        onOpenChange={setCreateDialogOpen}
+        open={createDialogOpen}
       />
       <EditContractDialog
-        open={editDialogOpen}
+        contract={dbContractForEdit}
         onOpenChange={setEditDialogOpen}
         onUpdate={handleUpdateContract}
-        contract={dbContractForEdit}
+        open={editDialogOpen}
       />
       <DeleteContractDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
         contract={selectedContract}
         onConfirm={handleConfirmDelete}
+        onOpenChange={setDeleteDialogOpen}
+        open={deleteDialogOpen}
       />
     </div>
-  )
+  );
 }

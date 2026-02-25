@@ -1,27 +1,25 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
+import {
+  AlertTriangle,
+  Briefcase,
+  FileText,
+  Home,
+  Lock,
+  MapPin,
+  MessageCircleQuestion,
+  Pen,
+  Settings2,
+  ShieldAlert,
+  SquareTerminal,
+  Stethoscope,
+  Trash2,
+  Users,
+} from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { getAppVersion } from "@/actions/app";
-import { SiElectron, SiReact, SiVite } from "@icons-pack/react-simple-icons";
-import {
-  AlertTriangle,
-  Calendar,
-  CheckCircle2,
-  FileText,
-  Home,
-  ShieldAlert,
-  Stethoscope,
-  Users,
-  Briefcase,
-  MapPin,
-  SquareTerminal,
-  Settings2,
-  Trash2,
-  MessageCircleQuestion,
-  Lock,
-  Pen
-} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -32,18 +30,13 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
-  SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Link } from "@tanstack/react-router";
 
-import { NavMain } from "@/components/nav-main";
-import { NavSecondary } from "@/components/nav-secondary";
-import { NavUser } from "@/components/nav-user";
-
-const data = {
+const _data = {
   user: {
     name: "User",
     email: "user@example.com",
@@ -77,14 +70,17 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
-  const [appVersion, setAppVersion] = React.useState("0.0.0");
+  const [_appVersion, setAppVersion] = React.useState("0.0.0");
   const [canWrite, setCanWrite] = React.useState(true);
 
   React.useEffect(() => {
     getAppVersion().then(setAppVersion);
 
     // Initial check for write mode
-    window.getWriteMode?.().then(setCanWrite).catch(() => setCanWrite(true));
+    window
+      .getWriteMode?.()
+      .then(setCanWrite)
+      .catch(() => setCanWrite(true));
 
     // Listen for real-time lock status changes
     window.onLockStatusChanged?.((writeMode) => {
@@ -101,10 +97,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader className="border-b bg-card">
         <SidebarMenu>
           <SidebarMenuItem className="flex gap-2 p-1">
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-1.5 rounded-lg">
+            <div className="rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 p-1.5">
               <Users className="h-4 w-4 text-white" />
             </div>
-            <h1 className="text-lg font-semibold text-gray-900 group-data-[collapsible=icon]:hidden">
+            <h1 className="font-semibold text-gray-900 text-lg group-data-[collapsible=icon]:hidden">
               {t("app.name")}
             </h1>
           </SidebarMenuItem>
@@ -143,7 +139,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
 
         <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.management")}</SidebarGroupLabel>
@@ -187,7 +182,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-
         <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.referenceData")}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -211,7 +205,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
 
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
@@ -244,11 +237,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="bg-card border-t">
+      <SidebarFooter className="border-t bg-card">
         <SidebarMenu>
           <SidebarMenuItem>
             <div
-              className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-sm ${
+              className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm ${
                 canWrite
                   ? "bg-green-100 text-green-800"
                   : "bg-amber-100 text-amber-800"
@@ -266,8 +259,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
-              <div className="w-full flex items-center cursor-pointer">
-                <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">{t("sidebar.toggle")}</span>
+              <div className="flex w-full cursor-pointer items-center">
+                <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
+                  {t("sidebar.toggle")}
+                </span>
                 <SidebarTrigger className="ml-auto size-4" />
               </div>
             </SidebarMenuButton>

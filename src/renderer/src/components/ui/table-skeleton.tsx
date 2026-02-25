@@ -1,13 +1,17 @@
-import { Skeleton } from './skeleton'
-import { Card } from './card'
+import { Card } from "./card";
+import { Skeleton } from "./skeleton";
 
 interface TableSkeletonProps {
-  rows?: number
-  columns?: number
-  showHeader?: boolean
+  rows?: number;
+  columns?: number;
+  showHeader?: boolean;
 }
 
-export function TableSkeleton({ rows = 5, columns = 4, showHeader = true }: TableSkeletonProps) {
+export function TableSkeleton({
+  rows = 5,
+  columns = 4,
+  showHeader = true,
+}: TableSkeletonProps) {
   return (
     <Card className="w-full">
       <div className="w-full overflow-auto">
@@ -16,7 +20,10 @@ export function TableSkeleton({ rows = 5, columns = 4, showHeader = true }: Tabl
             <thead className="[&_tr]:border-b">
               <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                 {Array.from({ length: columns }).map((_, i) => (
-                  <th key={i} className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  <th
+                    className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                    key={i}
+                  >
                     <Skeleton className="h-4 w-24" />
                   </th>
                 ))}
@@ -25,9 +32,12 @@ export function TableSkeleton({ rows = 5, columns = 4, showHeader = true }: Tabl
           )}
           <tbody className="[&_tr:last-child]:border-0">
             {Array.from({ length: rows }).map((_, i) => (
-              <tr key={i} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+              <tr
+                className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                key={i}
+              >
                 {Array.from({ length: columns }).map((_, j) => (
-                  <td key={j} className="p-4 align-middle">
+                  <td className="p-4 align-middle" key={j}>
                     <Skeleton className="h-4 w-full max-w-[200px]" />
                   </td>
                 ))}
@@ -37,19 +47,22 @@ export function TableSkeleton({ rows = 5, columns = 4, showHeader = true }: Tabl
         </table>
       </div>
     </Card>
-  )
+  );
 }
 
 interface PageHeaderSkeletonProps {
-  showMetrics?: boolean
-  metricsCount?: number
+  showMetrics?: boolean;
+  metricsCount?: number;
 }
 
-export function PageHeaderSkeleton({ showMetrics = true, metricsCount = 4 }: PageHeaderSkeletonProps) {
+export function PageHeaderSkeleton({
+  showMetrics = true,
+  metricsCount = 4,
+}: PageHeaderSkeletonProps) {
   return (
     <div className="min-h-full space-y-3">
       {/* Header Card */}
-      <div className="p-4 bg-background shadow-sm rounded-md border">
+      <div className="rounded-md border bg-background p-4 shadow-sm">
         <div className="flex items-start gap-3">
           <Skeleton className="h-4 w-4 rounded" />
           <div className="flex-1 space-y-2">
@@ -63,13 +76,16 @@ export function PageHeaderSkeleton({ showMetrics = true, metricsCount = 4 }: Pag
       {showMetrics && (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: metricsCount }).map((_, i) => (
-            <div key={i} className="p-4 bg-background shadow-sm rounded-md border">
+            <div
+              className="rounded-md border bg-background p-4 shadow-sm"
+              key={i}
+            >
               <div className="flex items-center justify-between space-y-0 pb-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-4 rounded" />
               </div>
               <Skeleton className="h-8 w-16" />
-              <Skeleton className="h-3 w-32 mt-2" />
+              <Skeleton className="mt-2 h-3 w-32" />
             </div>
           ))}
         </div>
@@ -77,7 +93,7 @@ export function PageHeaderSkeleton({ showMetrics = true, metricsCount = 4 }: Pag
 
       {/* Filters Section */}
       <div className="flex flex-wrap gap-2">
-        <Skeleton className="h-10 flex-1 min-w-[200px]" />
+        <Skeleton className="h-10 min-w-[200px] flex-1" />
         <Skeleton className="h-10 w-[180px]" />
         <Skeleton className="h-10 w-[180px]" />
       </div>
@@ -85,5 +101,5 @@ export function PageHeaderSkeleton({ showMetrics = true, metricsCount = 4 }: Pag
       {/* Table */}
       <TableSkeleton />
     </div>
-  )
+  );
 }

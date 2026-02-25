@@ -23,11 +23,11 @@ export function DeletePositionDialog({
 }: DeletePositionDialogProps) {
   return (
     <DeleteConfirmDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      onConfirm={onConfirm}
-      title="Supprimer le poste"
       description={`Êtes-vous sûr de vouloir supprimer le poste "${position?.name}" ? Cette action est irréversible.`}
+      onConfirm={onConfirm}
+      onOpenChange={onOpenChange}
+      open={open}
+      title="Supprimer le poste"
     />
   );
 }

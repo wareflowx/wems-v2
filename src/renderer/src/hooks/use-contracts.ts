@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import * as db from "@/actions/database";
 import { queryKeys } from "@@/lib/query-keys";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import * as db from "@/actions/database";
 import { useToast } from "@/utils/toast";
 import { useORPCReady } from "./use-orpc-ready";
 
@@ -49,10 +49,16 @@ export function useCreateContract() {
     }) => db.createContract(data),
 
     onMutate: async (newContract) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.contracts.lists() });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.contracts.lists(),
+      });
 
-      const previousContracts = queryClient.getQueryData(queryKeys.contracts.lists());
-      const previousByEmployee = queryClient.getQueryData(queryKeys.contracts.byEmployee(newContract.employeeId));
+      const previousContracts = queryClient.getQueryData(
+        queryKeys.contracts.lists()
+      );
+      const previousByEmployee = queryClient.getQueryData(
+        queryKeys.contracts.byEmployee(newContract.employeeId)
+      );
 
       queryClient.setQueryData(
         queryKeys.contracts.lists(),
@@ -71,7 +77,11 @@ export function useCreateContract() {
           queryKeys.contracts.byEmployee(newContract.employeeId),
           (old: db.Contract[] = []) => [
             ...old,
-            { ...newContract, id: Date.now(), isActive: newContract.isActive ?? true },
+            {
+              ...newContract,
+              id: Date.now(),
+              isActive: newContract.isActive ?? true,
+            },
           ]
         );
       }
@@ -81,10 +91,16 @@ export function useCreateContract() {
 
     onError: (err, variables, context) => {
       if (context?.previousContracts) {
-        queryClient.setQueryData(queryKeys.contracts.lists(), context.previousContracts);
+        queryClient.setQueryData(
+          queryKeys.contracts.lists(),
+          context.previousContracts
+        );
       }
       if (context?.previousByEmployee && variables.employeeId) {
-        queryClient.setQueryData(queryKeys.contracts.byEmployee(variables.employeeId), context.previousByEmployee);
+        queryClient.setQueryData(
+          queryKeys.contracts.byEmployee(variables.employeeId),
+          context.previousByEmployee
+        );
       }
       toast({
         title: "Failed to create contract",
@@ -117,9 +133,13 @@ export function useUpdateContract() {
     }) => db.updateContract(data),
 
     onMutate: async (updatedContract) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.contracts.lists() });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.contracts.lists(),
+      });
 
-      const previousContracts = queryClient.getQueryData(queryKeys.contracts.lists());
+      const previousContracts = queryClient.getQueryData(
+        queryKeys.contracts.lists()
+      );
 
       queryClient.setQueryData(
         queryKeys.contracts.lists(),
@@ -132,9 +152,12 @@ export function useUpdateContract() {
       return { previousContracts };
     },
 
-    onError: (err, variables, context) => {
+    onError: (err, _variables, context) => {
       if (context?.previousContracts) {
-        queryClient.setQueryData(queryKeys.contracts.lists(), context.previousContracts);
+        queryClient.setQueryData(
+          queryKeys.contracts.lists(),
+          context.previousContracts
+        );
       }
       toast({
         title: "Failed to update contract",
@@ -161,9 +184,13 @@ export function useDeleteContract() {
     mutationFn: (id: number) => db.deleteContract(id),
 
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.contracts.lists() });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.contracts.lists(),
+      });
 
-      const previousContracts = queryClient.getQueryData(queryKeys.contracts.lists());
+      const previousContracts = queryClient.getQueryData(
+        queryKeys.contracts.lists()
+      );
 
       queryClient.setQueryData(
         queryKeys.contracts.lists(),
@@ -173,9 +200,12 @@ export function useDeleteContract() {
       return { previousContracts };
     },
 
-    onError: (err, variables, context) => {
+    onError: (err, _variables, context) => {
       if (context?.previousContracts) {
-        queryClient.setQueryData(queryKeys.contracts.lists(), context.previousContracts);
+        queryClient.setQueryData(
+          queryKeys.contracts.lists(),
+          context.previousContracts
+        );
       }
       toast({
         title: "Failed to delete contract",

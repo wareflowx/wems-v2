@@ -1,12 +1,19 @@
-import { Search, Plus, Sparkles, SearchX, Edit, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { PageHeaderCard } from "@/components/ui/page-header-card";
-import { MetricsSection } from "@/components/ui/metrics-section";
-import { ErrorDisplay } from "@/components/ui/error-display";
-import { useTranslation } from "react-i18next";
-import { useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Edit, Plus, Search, SearchX, Sparkles, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import { ErrorDisplay } from "@/components/ui/error-display";
+import { Input } from "@/components/ui/input";
+import { MetricsSection } from "@/components/ui/metrics-section";
+import { PageHeaderCard } from "@/components/ui/page-header-card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -15,18 +22,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useWorkLocations, useCreateWorkLocation, useUpdateWorkLocation, useDeleteWorkLocation } from "@/hooks";
 import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
 import { CreateWorkLocationDialog } from "@/components/work-locations/CreateWorkLocationDialog";
-import { EditWorkLocationDialog } from "@/components/work-locations/EditWorkLocationDialog";
 import { DeleteWorkLocationDialog } from "@/components/work-locations/DeleteWorkLocationDialog";
+import { EditWorkLocationDialog } from "@/components/work-locations/EditWorkLocationDialog";
+import {
+  useCreateWorkLocation,
+  useDeleteWorkLocation,
+  useUpdateWorkLocation,
+  useWorkLocations,
+} from "@/hooks";
 
 export function WorkLocationsPage() {
   const { t } = useTranslation();
@@ -44,11 +49,14 @@ export function WorkLocationsPage() {
   const deleteWorkLocation = useDeleteWorkLocation();
 
   // KPIs - calculated dynamically
-  const kpis = useMemo(() => ({
-    totalLocations: workLocations.length,
-    activeLocations: workLocations.filter((l) => l.isActive).length,
-    inactiveLocations: workLocations.filter((l) => !l.isActive).length,
-  }), [workLocations]);
+  const kpis = useMemo(
+    () => ({
+      totalLocations: workLocations.length,
+      activeLocations: workLocations.filter((l) => l.isActive).length,
+      inactiveLocations: workLocations.filter((l) => !l.isActive).length,
+    }),
+    [workLocations]
+  );
 
   // Filter work locations
   const filteredLocations = useMemo(() => {
@@ -67,7 +75,7 @@ export function WorkLocationsPage() {
     });
   }, [workLocations, search, statusFilter]);
 
-  const handleCreateLocation = (data: any) => {
+  const _handleCreateLocation = (data: any) => {
     createWorkLocation.mutate(data, {
       onSuccess: () => {
         setIsCreateDialogOpen(false);
@@ -76,27 +84,33 @@ export function WorkLocationsPage() {
   };
 
   const handleUpdateLocation = (data: any) => {
-    updateWorkLocation.mutate({ id: editingLocation.id, ...data }, {
-      onSuccess: () => {
-        setEditingLocation(null);
-      },
-    });
+    updateWorkLocation.mutate(
+      { id: editingLocation.id, ...data },
+      {
+        onSuccess: () => {
+          setEditingLocation(null);
+        },
+      }
+    );
   };
 
   const handleDeleteLocation = () => {
     if (deletingLocation) {
-      deleteWorkLocation.mutate({ id: deletingLocation.id }, {
-        onSuccess: () => {
-          setDeletingLocation(null);
-        },
-      });
+      deleteWorkLocation.mutate(
+        { id: deletingLocation.id },
+        {
+          onSuccess: () => {
+            setDeletingLocation(null);
+          },
+        }
+      );
     }
   };
 
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-        <PageHeaderSkeleton showMetrics metricsCount={3} />
+        <PageHeaderSkeleton metricsCount={3} showMetrics />
       </div>
     );
   }
@@ -105,9 +119,17 @@ export function WorkLocationsPage() {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <ErrorDisplay
-          title={t("workLocations.errorLoading", "Failed to load work locations")}
-          message={t("workLocations.errorLoadingMessage", "Make sure the application is running correctly. If the problem persists, please restart.")}
-          onRetry={() => queryClient.invalidateQueries({ queryKey: ["work-locations"] })}
+          message={t(
+            "workLocations.errorLoadingMessage",
+            "Make sure the application is running correctly. If the problem persists, please restart."
+          )}
+          onRetry={() =>
+            queryClient.invalidateQueries({ queryKey: ["work-locations"] })
+          }
+          title={t(
+            "workLocations.errorLoading",
+            "Failed to load work locations"
+          )}
         />
       </div>
     );
@@ -119,9 +141,9 @@ export function WorkLocationsPage() {
         <div className="min-h-full space-y-3">
           {/* Header */}
           <PageHeaderCard
+            description={t("workLocations.description")}
             icon={<Sparkles className="h-4 w-4 text-gray-600" />}
             title={t("workLocations.title")}
-            description={t("workLocations.description")}
           />
 
           {/* Key Metrics */}
@@ -150,30 +172,36 @@ export function WorkLocationsPage() {
             ]}
           />
 
-          <div className="flex gap-2 flex-col">
+          <div className="flex flex-col gap-2">
             {/* Search and Filters */}
             <div className="flex flex-wrap gap-2">
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <div className="relative min-w-[200px] flex-1">
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
+                  className="pl-9"
+                  onChange={(e) => setSearch(e.target.value)}
                   placeholder={t("workLocations.search")}
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select onValueChange={setStatusFilter} value={statusFilter}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder={t("workLocations.status")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t("workLocations.allStatuses")}</SelectItem>
-                  <SelectItem value="active">{t("workLocations.active")}</SelectItem>
-                  <SelectItem value="inactive">{t("workLocations.inactive")}</SelectItem>
+                  <SelectItem value="all">
+                    {t("workLocations.allStatuses")}
+                  </SelectItem>
+                  <SelectItem value="active">
+                    {t("workLocations.active")}
+                  </SelectItem>
+                  <SelectItem value="inactive">
+                    {t("workLocations.inactive")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <Button
-                className="gap-2 ml-auto"
+                className="ml-auto gap-2"
                 onClick={() => setIsCreateDialogOpen(true)}
               >
                 <Plus className="h-4 w-4" />
@@ -182,26 +210,36 @@ export function WorkLocationsPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-lg border bg-card overflow-x-auto">
+            <div className="overflow-x-auto rounded-lg border bg-card">
               <Table className="w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="px-4">{t("workLocations.code")}</TableHead>
-                    <TableHead className="px-4">{t("workLocations.name")}</TableHead>
-                    <TableHead className="px-4">{t("workLocations.status")}</TableHead>
-                    <TableHead className="px-4 text-right">{t("workLocations.actions")}</TableHead>
+                    <TableHead className="px-4">
+                      {t("workLocations.code")}
+                    </TableHead>
+                    <TableHead className="px-4">
+                      {t("workLocations.name")}
+                    </TableHead>
+                    <TableHead className="px-4">
+                      {t("workLocations.status")}
+                    </TableHead>
+                    <TableHead className="px-4 text-right">
+                      {t("workLocations.actions")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredLocations.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-64">
-                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
-                          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                      <TableCell className="h-64" colSpan={4}>
+                        <div className="flex h-full flex-col items-center justify-center p-8 text-muted-foreground">
+                          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                             <SearchX className="h-8 w-8 opacity-50" />
                           </div>
-                          <p className="text-lg font-medium">{t("common.noData")}</p>
-                          <p className="text-sm mt-2 max-w-md text-center">
+                          <p className="font-medium text-lg">
+                            {t("common.noData")}
+                          </p>
+                          <p className="mt-2 max-w-md text-center text-sm">
                             {t("dashboard.noDataFound")}
                           </p>
                         </div>
@@ -209,21 +247,25 @@ export function WorkLocationsPage() {
                     </TableRow>
                   ) : (
                     filteredLocations.map((location) => (
-                      <TableRow key={location.id} className="hover:bg-muted/50">
+                      <TableRow className="hover:bg-muted/50" key={location.id}>
                         <TableCell className="px-4">
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border border-border">
-                            <span className={`w-1.5 h-1.5 rounded-full ${location.color}`}></span>
+                          <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${location.color}`}
+                            />
                             {location.code}
                           </span>
                         </TableCell>
-                        <TableCell className="px-4 font-medium truncate max-w-[300px]">{location.name}</TableCell>
+                        <TableCell className="max-w-[300px] truncate px-4 font-medium">
+                          {location.name}
+                        </TableCell>
                         <TableCell className="px-4">
                           {location.isActive ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-green-500/15 border border-green-500/25 text-green-600">
+                            <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-2 py-0.5 font-medium text-green-600 text-xs">
                               {t("workLocations.active")}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-500/15 border border-gray-500/25 text-gray-600">
+                            <span className="inline-flex items-center rounded-md border border-gray-500/25 bg-gray-500/15 px-2 py-0.5 font-medium text-gray-600 text-xs">
                               {t("workLocations.inactive")}
                             </span>
                           )}
@@ -231,16 +273,16 @@ export function WorkLocationsPage() {
                         <TableCell className="px-4">
                           <div className="flex items-center justify-end gap-2">
                             <Button
-                              variant="ghost"
-                              size="icon"
                               onClick={() => setEditingLocation(location)}
+                              size="icon"
+                              variant="ghost"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant="ghost"
-                              size="icon"
                               onClick={() => setDeletingLocation(location)}
+                              size="icon"
+                              variant="ghost"
                             >
                               <Trash2 className="h-4 w-4 text-red-600" />
                             </Button>
@@ -257,22 +299,22 @@ export function WorkLocationsPage() {
       </div>
 
       <CreateWorkLocationDialog
-        open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
+        open={isCreateDialogOpen}
       />
 
       <EditWorkLocationDialog
-        open={editingLocation !== null}
-        onOpenChange={(open) => !open && setEditingLocation(null)}
         location={editingLocation}
+        onOpenChange={(open) => !open && setEditingLocation(null)}
         onUpdate={handleUpdateLocation}
+        open={editingLocation !== null}
       />
 
       <DeleteWorkLocationDialog
-        open={deletingLocation !== null}
-        onOpenChange={(open) => !open && setDeletingLocation(null)}
         location={deletingLocation}
         onConfirm={handleDeleteLocation}
+        onOpenChange={(open) => !open && setDeletingLocation(null)}
+        open={deletingLocation !== null}
       />
     </>
   );

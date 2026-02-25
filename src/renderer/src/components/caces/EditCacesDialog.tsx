@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,34 +8,38 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { useTranslation } from 'react-i18next'
-import { CacesFileUpload } from './CacesFileUpload'
+} from "@/components/ui/select";
+import { CacesFileUpload } from "./CacesFileUpload";
 
 interface Caces {
-  id: number
-  employee: string
-  category: string
-  dateObtained: string
-  expirationDate: string
-  document?: string
+  id: number;
+  employee: string;
+  category: string;
+  dateObtained: string;
+  expirationDate: string;
+  document?: string;
 }
 
 interface EditCacesDialogProps {
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  onUpdate?: (data: { employee: string; category: string; issueDate: string; expiryDate: string; document: string }) => void
-  caces?: Caces
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onUpdate?: (data: {
+    employee: string;
+    category: string;
+    issueDate: string;
+    expiryDate: string;
+    document: string;
+  }) => void;
+  caces?: Caces;
 }
 
 export function EditCacesDialog({
@@ -42,58 +48,58 @@ export function EditCacesDialog({
   onUpdate,
   caces,
 }: EditCacesDialogProps) {
-  const { t } = useTranslation()
-  const [employee, setEmployee] = useState<string>('')
-  const [category, setCategory] = useState<string>('')
-  const [issueDate, setIssueDate] = useState<string>('')
-  const [expiryDate, setExpiryDate] = useState<string>('')
-  const [document, setDocument] = useState<string>('')
+  const { t } = useTranslation();
+  const [employee, setEmployee] = useState<string>("");
+  const [category, setCategory] = useState<string>("");
+  const [issueDate, setIssueDate] = useState<string>("");
+  const [expiryDate, setExpiryDate] = useState<string>("");
+  const [document, setDocument] = useState<string>("");
 
   // Populate form when caces data changes
   useEffect(() => {
     if (caces) {
-      setEmployee(caces.employee)
-      setCategory(caces.category)
-      setIssueDate(caces.dateObtained)
-      setExpiryDate(caces.expirationDate)
-      setDocument(caces.document || '')
+      setEmployee(caces.employee);
+      setCategory(caces.category);
+      setIssueDate(caces.dateObtained);
+      setExpiryDate(caces.expirationDate);
+      setDocument(caces.document || "");
     }
-  }, [caces])
+  }, [caces]);
 
   const handleSubmit = () => {
-    onUpdate?.({ employee, category, issueDate, expiryDate, document })
-  }
+    onUpdate?.({ employee, category, issueDate, expiryDate, document });
+  };
 
-  const isFormValid = employee && category && issueDate && expiryDate
+  const isFormValid = employee && category && issueDate && expiryDate;
 
   const employees = [
-    { id: 1, name: 'Jean Dupont' },
-    { id: 2, name: 'Marie Martin' },
-    { id: 3, name: 'Pierre Bernard' },
-    { id: 4, name: 'Sophie Petit' },
-    { id: 5, name: 'Luc Dubois' },
-  ]
+    { id: 1, name: "Jean Dupont" },
+    { id: 2, name: "Marie Martin" },
+    { id: 3, name: "Pierre Bernard" },
+    { id: 4, name: "Sophie Petit" },
+    { id: 5, name: "Luc Dubois" },
+  ];
 
-  const categories = ['1A', '1B', '3', '5', '7']
+  const categories = ["1A", "1B", "3", "5", "7"];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{t('caces.editCaces')}</DialogTitle>
+          <DialogTitle>{t("caces.editCaces")}</DialogTitle>
           <DialogDescription>
-            {t('caces.editCacesDescription')}
+            {t("caces.editCacesDescription")}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-2 space-y-3">
+        <div className="space-y-3 py-2">
           <div className="space-y-2">
-            <Label htmlFor="employee" className="text-sm font-medium">
-              {t('caces.employee')}
+            <Label className="font-medium text-sm" htmlFor="employee">
+              {t("caces.employee")}
             </Label>
-            <Select value={employee} onValueChange={setEmployee}>
+            <Select onValueChange={setEmployee} value={employee}>
               <SelectTrigger id="employee">
-                <SelectValue placeholder={t('caces.selectEmployee')} />
+                <SelectValue placeholder={t("caces.selectEmployee")} />
               </SelectTrigger>
               <SelectContent>
                 {employees.map((emp) => (
@@ -106,12 +112,12 @@ export function EditCacesDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category" className="text-sm font-medium">
-              {t('caces.category')}
+            <Label className="font-medium text-sm" htmlFor="category">
+              {t("caces.category")}
             </Label>
-            <Select value={category} onValueChange={setCategory}>
+            <Select onValueChange={setCategory} value={category}>
               <SelectTrigger id="category">
-                <SelectValue placeholder={t('caces.selectCategory')} />
+                <SelectValue placeholder={t("caces.selectCategory")} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
@@ -125,58 +131,58 @@ export function EditCacesDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="issueDate" className="text-sm font-medium">
-                {t('caces.issueDate')}
+              <Label className="font-medium text-sm" htmlFor="issueDate">
+                {t("caces.issueDate")}
               </Label>
               <Input
+                className="w-full"
                 id="issueDate"
+                onChange={(e) => setIssueDate(e.target.value)}
                 type="date"
                 value={issueDate}
-                onChange={(e) => setIssueDate(e.target.value)}
-                className="w-full"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="expiryDate" className="text-sm font-medium">
-                {t('caces.expiryDate')}
+              <Label className="font-medium text-sm" htmlFor="expiryDate">
+                {t("caces.expiryDate")}
               </Label>
               <Input
+                className="w-full"
                 id="expiryDate"
+                onChange={(e) => setExpiryDate(e.target.value)}
                 type="date"
                 value={expiryDate}
-                onChange={(e) => setExpiryDate(e.target.value)}
-                className="w-full"
               />
             </div>
           </div>
 
           <CacesFileUpload
-            value={document}
+            label={t("caces.document")}
             onChange={setDocument}
-            label={t('caces.document')}
+            value={document}
           />
         </div>
 
         <DialogFooter className="gap-2">
           <Button
+            className="flex-1"
+            onClick={() => onOpenChange?.(false)}
             type="button"
             variant="outline"
-            onClick={() => onOpenChange?.(false)}
-            className="flex-1"
           >
-            {t('common.cancel')}
+            {t("common.cancel")}
           </Button>
           <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!isFormValid}
             className="flex-1"
+            disabled={!isFormValid}
+            onClick={handleSubmit}
+            type="button"
           >
-            {t('common.save')}
+            {t("common.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

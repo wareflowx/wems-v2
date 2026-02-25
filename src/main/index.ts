@@ -4,17 +4,22 @@ import { app, BrowserWindow } from "electron";
 import { ipcMain, MessageChannelMain } from "electron/main";
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/core/ipc/context";
-import { IPC_CHANNELS } from "../core/constants";
-import { releaseWriteLock, isWriteMode, startLockWatcher, getDb } from "../core/db";
 import { Lock } from "@/core/lib/lock";
-import { logger, configure } from "@/core/lib/logger";
+import { configure, logger } from "@/core/lib/logger";
+import { IPC_CHANNELS } from "../core/constants";
+import {
+  getDb,
+  isWriteMode,
+  releaseWriteLock,
+  startLockWatcher,
+} from "../core/db";
 
-const inDevelopment = process.env.NODE_ENV === 'development';
+const inDevelopment = process.env.NODE_ENV === "development";
 
 // Configure logger
 configure({
-  default: inDevelopment ? 'debug' : 'info',
-  lock: 'debug',
+  default: inDevelopment ? "debug" : "info",
+  lock: "debug",
 });
 
 const __filename = fileURLToPath(import.meta.url);
@@ -45,17 +50,17 @@ function createWindow() {
   // Development: load from dev server
   // Production: load from built files
   if (inDevelopment) {
-    mainWindow.loadURL('http://127.0.0.1:5173/');
+    mainWindow.loadURL("http://127.0.0.1:5173/");
   } else {
     // In production, load from the built renderer files
     // The main process is in out/main/, renderer in out/renderer/
-    const rendererPath = path.join(__dirname, '../renderer/index.html');
+    const rendererPath = path.join(__dirname, "../renderer/index.html");
     const rendererUrl = `file://${rendererPath}`;
     mainWindow.loadURL(rendererUrl);
   }
 
   // Handle window closed
-  mainWindow.on('closed', () => {
+  mainWindow.on("closed", () => {
     mainWindow = null;
   });
 }
@@ -119,7 +124,9 @@ async function setupORPC() {
     // Upgrade RPC handler with server port
     rpcHandler.upgrade(serverPort);
 
-    console.log("[MAIN] Sending client port to preload via webContents.postMessage...");
+    console.log(
+      "[MAIN] Sending client port to preload via webContents.postMessage..."
+    );
 
     // IMPORTANT: Use postMessage (not send) for port transfer!
     // postMessage allows transferring MessagePorts, send does not
@@ -131,7 +138,7 @@ async function setupORPC() {
   // Expose write mode status to renderer
   ipcMain.handle(IPC_CHANNELS.GET_WRITE_MODE, () => {
     const result = isWriteMode();
-    logger.debug('[DEBUG] getWriteMode called, result: ' + result, 'main');
+    logger.debug(`[DEBUG] getWriteMode called, result: ${result}`, "main");
     return result;
   });
 
@@ -141,13 +148,9 @@ async function setupORPC() {
 function setupSingleInstance(): void {
   const gotTheLock = app.requestSingleInstanceLock();
 
-  if (!gotTheLock) {
-    // Another instance is already running, quit this one
-    logger.warn('Another instance is already running, quitting...', 'main');
-    app.quit();
-  } else {
+  if (gotTheLock) {
     // Handle second instance - focus existing window
-    app.on('second-instance', () => {
+    app.on("second-instance", () => {
       if (mainWindow) {
         if (mainWindow.isMinimized()) {
           mainWindow.restore();
@@ -155,6 +158,10 @@ function setupSingleInstance(): void {
         mainWindow.focus();
       }
     });
+  } else {
+    // Another instance is already running, quit this one
+    logger.warn("Another instance is already running, quitting...", "main");
+    app.quit();
   }
 }
 
@@ -164,31 +171,38 @@ setupSingleInstance();
 app.whenReady().then(async () => {
   try {
     console.log("[MAIN] app.whenReady fired!");
-    logger.info('App starting...', 'main');
+    logger.info("App starting...", "main");
 
     // 1. Acquire lock first (doesn't need window)
-    logger.info('Acquiring lock...', 'main');
+    logger.info("Acquiring lock...", "main");
     const lockResult = Lock.acquire();
-    const canWrite = lockResult._tag === 'Success' && lockResult.value;
-    if (lockResult._tag === 'Failure') {
-      logger.error('Failed to acquire lock: ' + lockResult.error.message, lockResult.error, 'main');
+    const canWrite = lockResult._tag === "Success" && lockResult.value;
+    if (lockResult._tag === "Failure") {
+      logger.error(
+        `Failed to acquire lock: ${lockResult.error.message}`,
+        lockResult.error,
+        "main"
+      );
     } else {
-      logger.info(canWrite ? 'Write mode enabled' : 'Read-only mode enabled', 'main');
+      logger.info(
+        canWrite ? "Write mode enabled" : "Read-only mode enabled",
+        "main"
+      );
     }
 
     // 2. Initialize database with lock status
-    logger.info('Initializing database...', 'main');
+    logger.info("Initializing database...", "main");
     await getDb(canWrite);
-    logger.info('Database initialized', 'main');
+    logger.info("Database initialized", "main");
 
     // 3. Create window FIRST (so window exists for ORPC context)
-    logger.info('Creating window...', 'main');
+    logger.info("Creating window...", "main");
     createWindow();
-    logger.info('Window created', 'main');
+    logger.info("Window created", "main");
 
     // 4. Setup ORPC AFTER window exists (handlers need window context)
     console.log("[MAIN] About to call setupORPC...");
-    logger.info('Setting up ORPC...', 'main');
+    logger.info("Setting up ORPC...", "main");
     try {
       await setupORPC();
       console.log("[MAIN] setupORPC completed successfully");
@@ -196,7 +210,7 @@ app.whenReady().then(async () => {
       console.error("[MAIN] setupORPC FAILED:", error);
       throw error;
     }
-    logger.info('ORPC setup complete', 'main');
+    logger.info("ORPC setup complete", "main");
 
     // Notify renderer that main is ready to receive ORPC requests
     console.log("[MAIN] Sending MAIN_READY to renderer...");
@@ -204,46 +218,46 @@ app.whenReady().then(async () => {
     console.log("[MAIN] MAIN_READY sent");
 
     // 5. Start lock watcher
-    logger.info('Starting lock watcher...', 'main');
+    logger.info("Starting lock watcher...", "main");
     startLockWatcher((writeMode) => {
       mainWindow?.webContents.send(IPC_CHANNELS.LOCK_STATUS_CHANGED, writeMode);
     }, 2000);
-    logger.info('Lock watcher started', 'main');
+    logger.info("Lock watcher started", "main");
 
     await installExtensions();
-    logger.info('Extensions installed', 'main');
+    logger.info("Extensions installed", "main");
 
     checkForUpdates();
-    logger.info('Update check complete', 'main');
+    logger.info("Update check complete", "main");
 
-    logger.info('App initialization complete', 'main');
+    logger.info("App initialization complete", "main");
   } catch (error) {
-    logger.error('Error during app initialization', error as Error, 'main');
+    logger.error("Error during app initialization", error as Error, "main");
     console.error("Error during app initialization:", error);
   }
 });
 
 // Handle before-quit to release lock
-app.on('before-quit', () => {
-  logger.info('App before-quit, releasing lock...', 'main');
+app.on("before-quit", () => {
+  logger.info("App before-quit, releasing lock...", "main");
   releaseWriteLock();
 });
 
 // Handle will-quit as backup
-app.on('will-quit', () => {
-  logger.info('App will-quit', 'main');
+app.on("will-quit", () => {
+  logger.info("App will-quit", "main");
   releaseWriteLock();
 });
 
 // Catch unhandled errors
-process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception', error, 'main');
-  console.error('Uncaught Exception:', error);
+process.on("uncaughtException", (error) => {
+  logger.error("Uncaught Exception", error, "main");
+  console.error("Uncaught Exception:", error);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at ' + promise, reason as Error, 'main');
-  console.error('Unhandled Rejection:', reason);
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error(`Unhandled Rejection at ${promise}`, reason as Error, "main");
+  console.error("Unhandled Rejection:", reason);
 });
 
 // macOS only

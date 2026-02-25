@@ -1,112 +1,121 @@
-import {
-  departments,
-  jobTitles,
-  contractTypes,
-} from '@@/mock-data/reference'
+import { contractTypes, departments, jobTitles } from "@@/mock-data/reference";
 
 // Types
-export type ReferenceDataType = 'departments' | 'jobTitles' | 'contractTypes'
+export type ReferenceDataType = "departments" | "jobTitles" | "contractTypes";
 
 // API functions for reference data
 export const referenceApi = {
   // Departments
   getDepartments: async (): Promise<string[]> => {
-    await new Promise(resolve => setTimeout(resolve, 200))
-    return [...departments]
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    return [...departments];
   },
 
   addDepartment: async (name: string): Promise<string> => {
-    await new Promise(resolve => setTimeout(resolve, 300))
+    await new Promise((resolve) => setTimeout(resolve, 300));
     if (!departments.includes(name)) {
-      departments.push(name)
+      departments.push(name);
     }
-    return name
+    return name;
   },
 
-  updateDepartment: async (oldName: string, newName: string): Promise<string> => {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    const index = departments.findIndex(d => d === oldName)
+  updateDepartment: async (
+    oldName: string,
+    newName: string
+  ): Promise<string> => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const index = departments.indexOf(oldName);
     if (index === -1) {
-      throw new Error(`Department "${oldName}" not found`)
+      throw new Error(`Department "${oldName}" not found`);
     }
-    departments[index] = newName
-    return newName
+    departments[index] = newName;
+    return newName;
   },
 
   deleteDepartment: async (name: string): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 200))
-    const index = departments.findIndex(d => d === name)
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    const index = departments.indexOf(name);
     if (index === -1) {
-      throw new Error(`Department "${name}" not found`)
+      throw new Error(`Department "${name}" not found`);
     }
-    departments.splice(index, 1)
+    departments.splice(index, 1);
   },
 
   // Job Titles
   getJobTitles: async (): Promise<string[]> => {
-    await new Promise(resolve => setTimeout(resolve, 200))
-    return [...jobTitles]
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    return [...jobTitles];
   },
 
   addJobTitle: async (title: string): Promise<string> => {
-    await new Promise(resolve => setTimeout(resolve, 300))
+    await new Promise((resolve) => setTimeout(resolve, 300));
     if (!jobTitles.includes(title)) {
-      jobTitles.push(title)
+      jobTitles.push(title);
     }
-    return title
+    return title;
   },
 
-  updateJobTitle: async (oldTitle: string, newTitle: string): Promise<string> => {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    const index = jobTitles.findIndex(j => j === oldTitle)
+  updateJobTitle: async (
+    oldTitle: string,
+    newTitle: string
+  ): Promise<string> => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const index = jobTitles.indexOf(oldTitle);
     if (index === -1) {
-      throw new Error(`Job title "${oldTitle}" not found`)
+      throw new Error(`Job title "${oldTitle}" not found`);
     }
-    jobTitles[index] = newTitle
-    return newTitle
+    jobTitles[index] = newTitle;
+    return newTitle;
   },
 
   deleteJobTitle: async (title: string): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 200))
-    const index = jobTitles.findIndex(j => j === title)
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    const index = jobTitles.indexOf(title);
     if (index === -1) {
-      throw new Error(`Job title "${title}" not found`)
+      throw new Error(`Job title "${title}" not found`);
     }
-    jobTitles.splice(index, 1)
+    jobTitles.splice(index, 1);
   },
 
   // Contract Types
   getContractTypes: async (): Promise<string[]> => {
-    await new Promise(resolve => setTimeout(resolve, 200))
-    return [...contractTypes]
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    return [...contractTypes];
   },
 
   addContractType: async (type: string): Promise<string> => {
-    await new Promise(resolve => setTimeout(resolve, 300))
+    await new Promise((resolve) => setTimeout(resolve, 300));
     if (!contractTypes.includes(type)) {
-      contractTypes.push(type)
+      contractTypes.push(type);
     }
-    return type
+    return type;
   },
 
-  updateContractType: async (oldType: string, newType: string): Promise<string> => {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    const index = contractTypes.findIndex(c => c === oldType)
+  updateContractType: async (
+    oldType: string,
+    newType: string
+  ): Promise<string> => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const index = contractTypes.indexOf(oldType);
     if (index === -1) {
-      throw new Error(`Contract type "${oldType}" not found`)
+      throw new Error(`Contract type "${oldType}" not found`);
     }
-    contractTypes[index] = newType
-    return newType
+    contractTypes[index] = newType;
+    return newType;
   },
 
   deleteContractType: async (type: string): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 200))
-    const index = contractTypes.findIndex(c => c === type)
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    const index = contractTypes.indexOf(type);
     if (index === -1) {
-      throw new Error(`Contract type "${type}" not found`)
+      throw new Error(`Contract type "${type}" not found`);
     }
-    contractTypes.splice(index, 1)
+    contractTypes.splice(index, 1);
   },
-}
+};
 
-export { departments as mockDepartments, jobTitles as mockJobTitles, contractTypes as mockContractTypes }
+export {
+  departments as mockDepartments,
+  jobTitles as mockJobTitles,
+  contractTypes as mockContractTypes,
+};

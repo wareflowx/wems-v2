@@ -1,5 +1,7 @@
-import { useState } from 'react'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,18 +9,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useTranslation } from 'react-i18next'
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface DeleteEmployeeDialogProps {
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  onConfirm?: () => void
-  employeeName?: string
-  employeeId?: number
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onConfirm?: () => void;
+  employeeName?: string;
+  employeeId?: number;
 }
 
 export function DeleteEmployeeDialog({
@@ -28,82 +28,82 @@ export function DeleteEmployeeDialog({
   employeeName,
   employeeId,
 }: DeleteEmployeeDialogProps) {
-  const { t } = useTranslation()
-  const [confirmationName, setConfirmationName] = useState('')
+  const { t } = useTranslation();
+  const [confirmationName, setConfirmationName] = useState("");
 
   const handleDelete = () => {
     // TODO: Implement backend logic
-    console.log(`Deleting employee: ${employeeId} - ${employeeName}`)
-    onConfirm?.()
-    onOpenChange?.(false)
-    setConfirmationName('')
-  }
+    console.log(`Deleting employee: ${employeeId} - ${employeeName}`);
+    onConfirm?.();
+    onOpenChange?.(false);
+    setConfirmationName("");
+  };
 
-  const isConfirmed = confirmationName === employeeName
+  const isConfirmed = confirmationName === employeeName;
 
   // Reset confirmation when dialog opens/closes
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      setConfirmationName('')
+      setConfirmationName("");
     }
-    onOpenChange?.(open)
-  }
+    onOpenChange?.(open);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent className="max-w-md">
         <DialogHeader className="gap-1">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-red-100 border border-red-200 flex items-center justify-center flex-shrink-0">
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-red-200 bg-red-100">
               <AlertTriangle className="h-6 w-6 text-red-600" />
             </div>
             <div className="flex-1">
-              <DialogTitle>{t('employees.deleteEmployee')}</DialogTitle>
+              <DialogTitle>{t("employees.deleteEmployee")}</DialogTitle>
             </div>
           </div>
           <DialogDescription className="pl-[60px]">
-            {t('employees.deleteEmployeeWarning')}
+            {t("employees.deleteEmployeeWarning")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-4">
           <div className="space-y-2">
-            <Label htmlFor="confirmationName" className="text-sm font-medium">
-              {t('employees.typeToDelete')}
+            <Label className="font-medium text-sm" htmlFor="confirmationName">
+              {t("employees.typeToDelete")}
             </Label>
             <Input
+              className="w-full"
               id="confirmationName"
-              value={confirmationName}
               onChange={(e) => setConfirmationName(e.target.value)}
               placeholder={employeeName}
-              className="w-full"
+              value={confirmationName}
             />
-            <p className="text-xs text-muted-foreground">
-              {t('employees.typeToDeleteDescription')}
+            <p className="text-muted-foreground text-xs">
+              {t("employees.typeToDeleteDescription")}
             </p>
           </div>
         </div>
 
         <DialogFooter className="gap-2">
           <Button
+            className="flex-1"
+            onClick={() => handleOpenChange(false)}
             type="button"
             variant="outline"
-            onClick={() => handleOpenChange(false)}
-            className="flex-1"
           >
-            {t('common.cancel')}
+            {t("common.cancel")}
           </Button>
           <Button
+            className="flex-1"
+            disabled={!isConfirmed}
+            onClick={handleDelete}
             type="button"
             variant="destructive"
-            onClick={handleDelete}
-            disabled={!isConfirmed}
-            className="flex-1"
           >
-            {t('common.delete')}
+            {t("common.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

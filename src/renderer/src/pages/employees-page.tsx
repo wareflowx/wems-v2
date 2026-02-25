@@ -1,20 +1,24 @@
-import {
-  Filter,
-  Edit,
-  UserPlus,
-  Users,
-  Sparkles,
-} from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CreateEmployeeDialog, type CreateEmployeeData } from "@/components/employees/CreateEmployeeDialog";
+import { Edit, Filter, Sparkles, UserPlus, Users } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  type CreateEmployeeData,
+  CreateEmployeeDialog,
+} from "@/components/employees/CreateEmployeeDialog";
 import { DeleteEmployeeDialog } from "@/components/employees/DeleteEmployeeDialog";
-import { PageHeaderCard } from "@/components/ui/page-header-card";
-import { MetricsSection } from "@/components/ui/metrics-section";
-import { ErrorDisplay } from "@/components/ui/error-display";
 import { EmployeesTable } from "@/components/employees/employees-table";
-import { useEmployees, useCreateEmployee, useDeleteEmployee, usePositions, useWorkLocations, useContracts } from "@/hooks";
+import { ErrorDisplay } from "@/components/ui/error-display";
+import { MetricsSection } from "@/components/ui/metrics-section";
+import { PageHeaderCard } from "@/components/ui/page-header-card";
+import {
+  useContracts,
+  useCreateEmployee,
+  useDeleteEmployee,
+  useEmployees,
+  usePositions,
+  useWorkLocations,
+} from "@/hooks";
 import { useToast } from "@/utils/toast";
 
 export function EmployeesPage() {
@@ -39,59 +43,62 @@ export function EmployeesPage() {
   // KPIs - calculated dynamically
   const kpis = useMemo(() => {
     // Calculate new hires this month
-    const now = new Date()
+    const now = new Date();
     const newHiresThisMonth = employees.filter((e) => {
-      const hireDate = new Date(e.hireDate)
-      return hireDate.getMonth() === now.getMonth() && hireDate.getFullYear() === now.getFullYear()
-    }).length
+      const hireDate = new Date(e.hireDate);
+      return (
+        hireDate.getMonth() === now.getMonth() &&
+        hireDate.getFullYear() === now.getFullYear()
+      );
+    }).length;
 
     return {
       totalEmployees: employees.length,
       activeEmployees: employees.filter((e) => e.status === "active").length,
       onLeaveEmployees: employees.filter((e) => e.status === "on_leave").length,
       newHiresThisMonth,
-    }
-  }, [employees])
+    };
+  }, [employees]);
 
   const handleAddEmployee = (data: CreateEmployeeData) => {
     createEmployee.mutate(data, {
       onSuccess: () => {
-        setIsCreateDialogOpen(false)
-      }
-    })
-  }
+        setIsCreateDialogOpen(false);
+      },
+    });
+  };
 
   const handleDeleteEmployee = () => {
     if (employeeToDelete) {
       deleteEmployee.mutate(employeeToDelete.id, {
         onSuccess: () => {
-          setIsDeleteDialogOpen(false)
-          setEmployeeToDelete(null)
-        }
-      })
+          setIsDeleteDialogOpen(false);
+          setEmployeeToDelete(null);
+        },
+      });
     }
-  }
+  };
 
   const handleDeleteClick = (employee: { id: number; name: string }) => {
-    setEmployeeToDelete(employee)
-    setIsDeleteDialogOpen(true)
-  }
+    setEmployeeToDelete(employee);
+    setIsDeleteDialogOpen(true);
+  };
 
   const handleEditClick = () => {
     toast({
       title: "Edit employee",
       description: "Employee editing coming soon",
-    })
-  }
+    });
+  };
 
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <div className="min-h-full space-y-3">
           <PageHeaderCard
+            description={t("employees.description")}
             icon={<Sparkles className="h-4 w-4 text-gray-600" />}
             title={t("employees.title")}
-            description={t("employees.description")}
           />
           <div className="flex items-center justify-center p-8">
             <p className="text-muted-foreground">Loading...</p>
@@ -105,14 +112,19 @@ export function EmployeesPage() {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <PageHeaderCard
+          description={t("employees.description")}
           icon={<Sparkles className="h-4 w-4 text-gray-600" />}
           title={t("employees.title")}
-          description={t("employees.description")}
         />
         <ErrorDisplay
+          message={t(
+            "employees.errorLoadingMessage",
+            "Make sure the application is running correctly. If the problem persists, please restart."
+          )}
+          onRetry={() =>
+            queryClient.invalidateQueries({ queryKey: ["employees"] })
+          }
           title={t("employees.errorLoading", "Failed to load employees")}
-          message={t("employees.errorLoadingMessage", "Make sure the application is running correctly. If the problem persists, please restart.")}
-          onRetry={() => queryClient.invalidateQueries({ queryKey: ["employees"] })}
         />
       </div>
     );
@@ -120,13 +132,13 @@ export function EmployeesPage() {
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6 bg-sidebar">
+      <div className="flex flex-1 flex-col gap-4 bg-sidebar p-4 pt-6">
         <div className="min-h-full space-y-3">
           {/* Header */}
           <PageHeaderCard
+            description={t("employees.description")}
             icon={<Sparkles className="h-4 w-4 text-gray-600" />}
             title={t("employees.title")}
-            description={t("employees.description")}
           />
 
           {/* Key Metrics */}
@@ -142,8 +154,7 @@ export function EmployeesPage() {
                 title: t("employees.active"),
                 value: kpis.activeEmployees,
                 description: `${(
-                  (kpis.activeEmployees / kpis.totalEmployees) *
-                  100
+                  (kpis.activeEmployees / kpis.totalEmployees) * 100
                 ).toFixed(0)}${t("common.ofTotal")}`,
                 icon: <Edit className="h-4 w-4" />,
                 iconColor: "text-green-500",
@@ -152,8 +163,7 @@ export function EmployeesPage() {
                 title: t("employees.onLeave"),
                 value: kpis.onLeaveEmployees,
                 description: `${(
-                  (kpis.onLeaveEmployees / kpis.totalEmployees) *
-                  100
+                  (kpis.onLeaveEmployees / kpis.totalEmployees) * 100
                 ).toFixed(0)}${t("common.ofTotal")}`,
                 icon: <Filter className="h-4 w-4" />,
                 iconColor: "text-yellow-500",
@@ -170,27 +180,27 @@ export function EmployeesPage() {
 
           {/* Employees Table */}
           <EmployeesTable
+            contracts={contracts}
             employees={employees}
+            onAddClick={() => setIsCreateDialogOpen(true)}
+            onDeleteClick={handleDeleteClick}
+            onEditClick={handleEditClick}
             positions={positions}
             workLocations={workLocations}
-            contracts={contracts}
-            onDeleteClick={handleDeleteClick}
-            onAddClick={() => setIsCreateDialogOpen(true)}
-            onEditClick={handleEditClick}
           />
         </div>
       </div>
       <CreateEmployeeDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
         onCreate={handleAddEmployee}
+        onOpenChange={setIsCreateDialogOpen}
+        open={isCreateDialogOpen}
       />
       <DeleteEmployeeDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        onConfirm={handleDeleteEmployee}
         employeeId={employeeToDelete?.id}
         employeeName={employeeToDelete?.name}
+        onConfirm={handleDeleteEmployee}
+        onOpenChange={setIsDeleteDialogOpen}
+        open={isDeleteDialogOpen}
       />
     </>
   );

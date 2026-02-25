@@ -1,5 +1,5 @@
-import type { i18n } from "i18next";
 import { LOCAL_STORAGE_KEYS } from "@@/constants";
+import type { i18n } from "i18next";
 
 export function setAppLanguage(lang: string, i18n: i18n) {
   localStorage.setItem(LOCAL_STORAGE_KEYS.LANGUAGE, lang);

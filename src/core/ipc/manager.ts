@@ -24,7 +24,9 @@ class IPCManager {
    * Best Practice: Event-driven approach - renderer gets port directly via postMessage
    */
   init(): void {
-    if (this._initialized) return;
+    if (this._initialized) {
+      return;
+    }
     this._initialized = true;
 
     console.log("[IPC] Initializing ORPC...");
@@ -69,7 +71,9 @@ class IPCManager {
     const pollInterval = 100;
 
     const checkReady = () => {
-      if (this._client) return; // Already ready
+      if (this._client) {
+        return; // Already ready
+      }
 
       attempts++;
       if (attempts >= maxAttempts) {
@@ -94,7 +98,10 @@ class IPCManager {
   private _handlePort(port: MessagePort) {
     console.log("[IPC] Creating ORPC client with port...");
     console.log("[IPC] port.constructor:", port.constructor?.name);
-    console.log("[IPC] typeof port.addEventListener:", typeof port.addEventListener);
+    console.log(
+      "[IPC] typeof port.addEventListener:",
+      typeof port.addEventListener
+    );
 
     try {
       // Best Practice: Add client-side error interceptors
@@ -130,7 +137,7 @@ class IPCManager {
     if (!this._client) {
       throw new Error(
         "ORPC client not initialized. " +
-        "Call ipc.init() first in your app initialization."
+          "Call ipc.init() first in your app initialization."
       );
     }
     return this._client;
@@ -141,7 +148,9 @@ class IPCManager {
    */
   async waitForReady(): Promise<void> {
     // If already ready, return immediately
-    if (this._client) return;
+    if (this._client) {
+      return;
+    }
 
     // If there's a pending promise, wait for it
     if (this._readyPromise) {
@@ -173,7 +182,9 @@ class IPCManager {
     }
     this._readyListeners.push(callback);
     return () => {
-      this._readyListeners = this._readyListeners.filter((cb) => cb !== callback);
+      this._readyListeners = this._readyListeners.filter(
+        (cb) => cb !== callback
+      );
     };
   }
 }

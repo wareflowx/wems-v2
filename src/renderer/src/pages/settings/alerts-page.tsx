@@ -1,12 +1,12 @@
-import { Save, Bell, Sparkles } from "lucide-react";
+import { Save, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { DetailBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { useTranslation } from "react-i18next";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
-import { DetailBadge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 
 export function SettingsAlertsPage() {
   const { t } = useTranslation();
@@ -15,49 +15,51 @@ export function SettingsAlertsPage() {
       <div className="min-h-full space-y-3">
         {/* Header */}
         <PageHeaderCard
+          description={t("settingsAlerts.description")}
           icon={<Sparkles className="h-4 w-4 text-gray-600" />}
           title={t("settingsAlerts.title")}
-          description={t("settingsAlerts.description")}
         />
 
-        <div className="flex gap-2 flex-col">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card className="bg-card">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>
-                    {t("settingsAlerts.cacesExpiryAlerts")}
-                  </CardTitle>
+                  <CardTitle>{t("settingsAlerts.cacesExpiryAlerts")}</CardTitle>
                   <DetailBadge color="purple">Certification</DetailBadge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between py-2">
                   <div className="flex-1">
-                    <Label htmlFor="caces-critical">{t("settingsAlerts.criticalAlert")}</Label>
-                    <p className="text-sm text-muted-foreground">
+                    <Label htmlFor="caces-critical">
+                      {t("settingsAlerts.criticalAlert")}
+                    </Label>
+                    <p className="text-muted-foreground text-sm">
                       {t("settingsAlerts.daysBeforeExpiryLabel")}
                     </p>
                   </div>
                   <Input
+                    className="w-20"
+                    defaultValue={30}
                     id="caces-critical"
                     type="number"
-                    defaultValue={30}
-                    className="w-20"
                   />
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <div className="flex-1">
-                    <Label htmlFor="caces-warning">{t("settingsAlerts.warningAlert")}</Label>
-                    <p className="text-sm text-muted-foreground">
+                    <Label htmlFor="caces-warning">
+                      {t("settingsAlerts.warningAlert")}
+                    </Label>
+                    <p className="text-muted-foreground text-sm">
                       {t("settingsAlerts.daysBeforeExpiryLabel")}
                     </p>
                   </div>
                   <Input
+                    className="w-20"
+                    defaultValue={90}
                     id="caces-warning"
                     type="number"
-                    defaultValue={90}
-                    className="w-20"
                   />
                 </div>
                 <div className="flex items-center justify-between py-2">
@@ -66,7 +68,7 @@ export function SettingsAlertsPage() {
                       {t("settingsAlerts.enableNotifications")}
                     </Label>
                   </div>
-                  <Switch id="caces-enabled" defaultChecked />
+                  <Switch defaultChecked id="caces-enabled" />
                 </div>
               </CardContent>
             </Card>
@@ -83,28 +85,34 @@ export function SettingsAlertsPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between py-2">
                   <div className="flex-1">
-                    <Label htmlFor="visit-critical">{t("settingsAlerts.criticalAlert")}</Label>
-                    <p className="text-sm text-muted-foreground">
+                    <Label htmlFor="visit-critical">
+                      {t("settingsAlerts.criticalAlert")}
+                    </Label>
+                    <p className="text-muted-foreground text-sm">
                       {t("settingsAlerts.daysBeforeVisit")}
                     </p>
                   </div>
                   <Input
+                    className="w-20"
+                    defaultValue={7}
                     id="visit-critical"
                     type="number"
-                    defaultValue={7}
-                    className="w-20"
                   />
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <div className="flex-1">
-                    <Label htmlFor="visit-warning">{t("settingsAlerts.recallFrequency")}</Label>
-                    <p className="text-sm text-muted-foreground">{t("settingsAlerts.recallFrequencyLabel")}</p>
+                    <Label htmlFor="visit-warning">
+                      {t("settingsAlerts.recallFrequency")}
+                    </Label>
+                    <p className="text-muted-foreground text-sm">
+                      {t("settingsAlerts.recallFrequencyLabel")}
+                    </p>
                   </div>
                   <Input
+                    className="w-20"
+                    defaultValue={24}
                     id="visit-warning"
                     type="number"
-                    defaultValue={24}
-                    className="w-20"
                   />
                 </div>
               </CardContent>

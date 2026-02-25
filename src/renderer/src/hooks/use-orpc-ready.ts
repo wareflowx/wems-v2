@@ -1,5 +1,5 @@
-import { useSyncExternalStore } from "react";
 import { ipc } from "@@/ipc/manager";
+import { useSyncExternalStore } from "react";
 
 // Store for external sync - holds the current ready state
 let currentReady = false;

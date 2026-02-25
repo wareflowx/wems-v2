@@ -23,11 +23,11 @@ export function DeleteWorkLocationDialog({
 }: DeleteWorkLocationDialogProps) {
   return (
     <DeleteConfirmDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      onConfirm={onConfirm}
-      title="Supprimer le lieu de travail"
       description={`Êtes-vous sûr de vouloir supprimer le lieu de travail "${location?.name}" ? Cette action est irréversible.`}
+      onConfirm={onConfirm}
+      onOpenChange={onOpenChange}
+      open={open}
+      title="Supprimer le lieu de travail"
     />
   );
 }

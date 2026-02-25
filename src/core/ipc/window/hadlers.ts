@@ -4,7 +4,10 @@ import { ipcContext } from "../context";
 export const minimizeWindow = os
   .use(ipcContext.mainWindowContext)
   .handler(({ context }) => {
-    console.log("[MAIN] minimizeWindow handler called, context.window:", context.window);
+    console.log(
+      "[MAIN] minimizeWindow handler called, context.window:",
+      context.window
+    );
     const { window } = context;
 
     if (!window) {
@@ -20,7 +23,10 @@ export const minimizeWindow = os
 export const maximizeWindow = os
   .use(ipcContext.mainWindowContext)
   .handler(({ context }) => {
-    console.log("[MAIN] maximizeWindow handler called, context.window:", context.window);
+    console.log(
+      "[MAIN] maximizeWindow handler called, context.window:",
+      context.window
+    );
     const { window } = context;
 
     if (!window) {
@@ -41,7 +47,10 @@ export const maximizeWindow = os
 export const closeWindow = os
   .use(ipcContext.mainWindowContext)
   .handler(({ context }) => {
-    console.log("[MAIN] closeWindow handler called, context.window:", context.window);
+    console.log(
+      "[MAIN] closeWindow handler called, context.window:",
+      context.window
+    );
     const { window } = context;
 
     if (!window) {

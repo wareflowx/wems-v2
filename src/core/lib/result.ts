@@ -8,15 +8,15 @@
  * exhaustiveness checking and better IDE support.
  */
 
-export type Success<T> = {
-  readonly _tag: 'Success';
+export interface Success<T> {
+  readonly _tag: "Success";
   readonly value: T;
-};
+}
 
-export type Failure<E> = {
-  readonly _tag: 'Failure';
+export interface Failure<E> {
+  readonly _tag: "Failure";
   readonly error: E;
-};
+}
 
 export type ResultType<T, E = Error> = Success<T> | Failure<E>;
 
@@ -24,16 +24,20 @@ export type ResultType<T, E = Error> = Success<T> | Failure<E>;
  * Type guard for narrowing ResultType to Success.
  * Returns true if result is Success, enabling TypeScript narrowing.
  */
-export function isSuccess<T, E>(result: ResultType<T, E>): result is Success<T> {
-  return result._tag === 'Success';
+export function isSuccess<T, E>(
+  result: ResultType<T, E>
+): result is Success<T> {
+  return result._tag === "Success";
 }
 
 /**
  * Type guard for narrowing ResultType to Failure.
  * Returns true if result is Failure, enabling TypeScript narrowing.
  */
-export function isFailure<T, E>(result: ResultType<T, E>): result is Failure<E> {
-  return result._tag === 'Failure';
+export function isFailure<T, E>(
+  result: ResultType<T, E>
+): result is Failure<E> {
+  return result._tag === "Failure";
 }
 
 /**
@@ -44,9 +48,9 @@ export function map<T, E, U>(
   fn: (value: T) => U
 ): ResultType<U, E> {
   switch (result._tag) {
-    case 'Success':
-      return { _tag: 'Success', value: fn(result.value) };
-    case 'Failure':
+    case "Success":
+      return { _tag: "Success", value: fn(result.value) };
+    case "Failure":
       return result;
   }
 }
@@ -59,10 +63,10 @@ export function mapError<T, E, F>(
   fn: (error: E) => F
 ): ResultType<T, F> {
   switch (result._tag) {
-    case 'Success':
+    case "Success":
       return result;
-    case 'Failure':
-      return { _tag: 'Failure', error: fn(result.error) };
+    case "Failure":
+      return { _tag: "Failure", error: fn(result.error) };
   }
 }
 
@@ -71,9 +75,9 @@ export function mapError<T, E, F>(
  */
 export function unwrapOr<T, E>(result: ResultType<T, E>, defaultValue: T): T {
   switch (result._tag) {
-    case 'Success':
+    case "Success":
       return result.value;
-    case 'Failure':
+    case "Failure":
       return defaultValue;
   }
 }
@@ -86,9 +90,9 @@ export async function mapAsync<T, E, U>(
   fn: (value: T) => Promise<U> | U
 ): Promise<ResultType<U, E>> {
   switch (result._tag) {
-    case 'Success':
-      return { _tag: 'Success', value: await fn(result.value) };
-    case 'Failure':
+    case "Success":
+      return { _tag: "Success", value: await fn(result.value) };
+    case "Failure":
       return result;
   }
 }
@@ -101,10 +105,10 @@ export async function mapErrorAsync<T, E, F>(
   fn: (error: E) => Promise<F> | F
 ): Promise<ResultType<T, F>> {
   switch (result._tag) {
-    case 'Success':
+    case "Success":
       return result;
-    case 'Failure':
-      return { _tag: 'Failure', error: await fn(result.error) };
+    case "Failure":
+      return { _tag: "Failure", error: await fn(result.error) };
   }
 }
 
@@ -116,9 +120,9 @@ export async function flatMapAsync<T, E, U>(
   fn: (value: T) => Promise<ResultType<U, E>> | ResultType<U, E>
 ): Promise<ResultType<U, E>> {
   switch (result._tag) {
-    case 'Success':
+    case "Success":
       return fn(result.value);
-    case 'Failure':
+    case "Failure":
       return result;
   }
 }
@@ -131,7 +135,7 @@ export const Result = {
    * Create a success result
    */
   success: <T, E = Error>(value: T): ResultType<T, E> => ({
-    _tag: 'Success',
+    _tag: "Success",
     value,
   }),
 
@@ -139,7 +143,7 @@ export const Result = {
    * Create a failure result
    */
   failure: <T, E = Error>(error: E): ResultType<T, E> => ({
-    _tag: 'Failure',
+    _tag: "Failure",
     error,
   }),
 
@@ -155,9 +159,9 @@ export const Result = {
     }
   ): R => {
     switch (result._tag) {
-      case 'Success':
+      case "Success":
         return config.onSuccess(result.value);
-      case 'Failure':
+      case "Failure":
         return config.onFailure(result.error);
       default: {
         // Exhaustiveness check - TypeScript will error if a case is not handled
@@ -178,9 +182,9 @@ export const Result = {
     }
   ): R | undefined => {
     switch (result._tag) {
-      case 'Success':
+      case "Success":
         return config?.onSuccess?.(result.value);
-      case 'Failure':
+      case "Failure":
         return config?.onFailure?.(result.error);
       default: {
         const _exhaustive: never = result;

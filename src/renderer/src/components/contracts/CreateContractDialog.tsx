@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTranslation } from "react-i18next";
 
 const CONTRACT_TYPES = ["CDI", "CDD", "Intérim", "Alternance"];
 
@@ -59,7 +59,9 @@ export function CreateContractDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!employeeId || !contractType || !startDate) return;
+    if (!(employeeId && contractType && startDate)) {
+      return;
+    }
 
     onCreate({
       employeeId: Number(employeeId),
@@ -79,7 +81,7 @@ export function CreateContractDialog({
   const isFormValid = employeeId && contractType && startDate;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("contracts.addContract")}</DialogTitle>
@@ -93,7 +95,7 @@ export function CreateContractDialog({
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="employee">{t("documents.employee")}</Label>
-              <Select value={employeeId} onValueChange={setEmployeeId}>
+              <Select onValueChange={setEmployeeId} value={employeeId}>
                 <SelectTrigger id="employee">
                   <SelectValue placeholder={t("documents.selectEmployee")} />
                 </SelectTrigger>
@@ -108,7 +110,7 @@ export function CreateContractDialog({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="contract-type">{t("contracts.type")}</Label>
-              <Select value={contractType} onValueChange={setContractType}>
+              <Select onValueChange={setContractType} value={contractType}>
                 <SelectTrigger id="contract-type">
                   <SelectValue placeholder={t("contracts.selectType")} />
                 </SelectTrigger>
@@ -125,33 +127,33 @@ export function CreateContractDialog({
               <Label htmlFor="start-date">{t("contracts.startDate")}</Label>
               <Input
                 id="start-date"
+                onChange={(e) => setStartDate(e.target.value)}
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="end-date">{t("contracts.endDate")}</Label>
               <Input
                 id="end-date"
+                onChange={(e) => setEndDate(e.target.value)}
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {t("contracts.endDateHint")}
               </p>
             </div>
           </div>
           <DialogFooter>
             <Button
+              onClick={() => onOpenChange(false)}
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
             >
               {t("common.cancel")}
             </Button>
-            <Button type="submit" disabled={!isFormValid}>
+            <Button disabled={!isFormValid} type="submit">
               {t("common.create")}
             </Button>
           </DialogFooter>

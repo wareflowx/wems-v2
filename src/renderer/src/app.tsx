@@ -1,16 +1,15 @@
+import { ipc } from "@@/ipc/manager";
+import { queryClient } from "@@/lib/query-client";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { RouterProvider } from "@tanstack/react-router";
 import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { useTranslation } from "react-i18next";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { updateAppLanguage } from "@/actions/language";
 import { syncWithLocalTheme } from "@/actions/theme";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { router } from "./utils/routes";
-import { queryClient } from "@@/lib/query-client";
-import { ipc } from "@@/ipc/manager";
-import { IPC_CHANNELS } from "@@/constants";
 import "./localization/i18n";
 
 // Initialize ORPC after receiving MAIN_READY from main

@@ -1,12 +1,22 @@
-import { Search, Plus, Sparkles, SearchX, Edit, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { PageHeaderCard } from "@/components/ui/page-header-card";
-import { MetricsSection } from "@/components/ui/metrics-section";
-import { ErrorDisplay } from "@/components/ui/error-display";
-import { useTranslation } from "react-i18next";
-import { useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Edit, Plus, Search, SearchX, Sparkles, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { CreatePositionDialog } from "@/components/positions/CreatePositionDialog";
+import { DeletePositionDialog } from "@/components/positions/DeletePositionDialog";
+import { EditPositionDialog } from "@/components/positions/EditPositionDialog";
+import { Button } from "@/components/ui/button";
+import { ErrorDisplay } from "@/components/ui/error-display";
+import { Input } from "@/components/ui/input";
+import { MetricsSection } from "@/components/ui/metrics-section";
+import { PageHeaderCard } from "@/components/ui/page-header-card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -15,18 +25,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { usePositions, useCreatePosition, useUpdatePosition, useDeletePosition } from "@/hooks";
 import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
-import { CreatePositionDialog } from "@/components/positions/CreatePositionDialog";
-import { EditPositionDialog } from "@/components/positions/EditPositionDialog";
-import { DeletePositionDialog } from "@/components/positions/DeletePositionDialog";
+import {
+  useCreatePosition,
+  useDeletePosition,
+  usePositions,
+  useUpdatePosition,
+} from "@/hooks";
 
 export function PositionsPage() {
   const { t } = useTranslation();
@@ -44,11 +49,14 @@ export function PositionsPage() {
   const deletePosition = useDeletePosition();
 
   // KPIs - calculated dynamically
-  const kpis = useMemo(() => ({
-    totalPositions: positions.length,
-    activePositions: positions.filter((p) => p.isActive).length,
-    inactivePositions: positions.filter((p) => !p.isActive).length,
-  }), [positions]);
+  const kpis = useMemo(
+    () => ({
+      totalPositions: positions.length,
+      activePositions: positions.filter((p) => p.isActive).length,
+      inactivePositions: positions.filter((p) => !p.isActive).length,
+    }),
+    [positions]
+  );
 
   // Filter positions
   const filteredPositions = useMemo(() => {
@@ -67,7 +75,7 @@ export function PositionsPage() {
     });
   }, [positions, search, statusFilter]);
 
-  const handleCreatePosition = (data: any) => {
+  const _handleCreatePosition = (data: any) => {
     createPosition.mutate(data, {
       onSuccess: () => {
         setIsCreateDialogOpen(false);
@@ -76,27 +84,33 @@ export function PositionsPage() {
   };
 
   const handleUpdatePosition = (data: any) => {
-    updatePosition.mutate({ id: editingPosition.id, ...data }, {
-      onSuccess: () => {
-        setEditingPosition(null);
-      },
-    });
+    updatePosition.mutate(
+      { id: editingPosition.id, ...data },
+      {
+        onSuccess: () => {
+          setEditingPosition(null);
+        },
+      }
+    );
   };
 
   const handleDeletePosition = () => {
     if (deletingPosition) {
-      deletePosition.mutate({ id: deletingPosition.id }, {
-        onSuccess: () => {
-          setDeletingPosition(null);
-        },
-      });
+      deletePosition.mutate(
+        { id: deletingPosition.id },
+        {
+          onSuccess: () => {
+            setDeletingPosition(null);
+          },
+        }
+      );
     }
   };
 
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-        <PageHeaderSkeleton showMetrics metricsCount={3} />
+        <PageHeaderSkeleton metricsCount={3} showMetrics />
       </div>
     );
   }
@@ -105,9 +119,14 @@ export function PositionsPage() {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <ErrorDisplay
+          message={t(
+            "positions.errorLoadingMessage",
+            "Make sure the application is running correctly. If the problem persists, please restart."
+          )}
+          onRetry={() =>
+            queryClient.invalidateQueries({ queryKey: ["positions"] })
+          }
           title={t("positions.errorLoading", "Failed to load positions")}
-          message={t("positions.errorLoadingMessage", "Make sure the application is running correctly. If the problem persists, please restart.")}
-          onRetry={() => queryClient.invalidateQueries({ queryKey: ["positions"] })}
         />
       </div>
     );
@@ -119,9 +138,9 @@ export function PositionsPage() {
         <div className="min-h-full space-y-3">
           {/* Header */}
           <PageHeaderCard
+            description={t("positions.description")}
             icon={<Sparkles className="h-4 w-4 text-gray-600" />}
             title={t("positions.title")}
-            description={t("positions.description")}
           />
 
           {/* Key Metrics */}
@@ -150,30 +169,36 @@ export function PositionsPage() {
             ]}
           />
 
-          <div className="flex gap-2 flex-col">
+          <div className="flex flex-col gap-2">
             {/* Search and Filters */}
             <div className="flex flex-wrap gap-2">
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <div className="relative min-w-[200px] flex-1">
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
+                  className="pl-9"
+                  onChange={(e) => setSearch(e.target.value)}
                   placeholder={t("positions.search")}
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select onValueChange={setStatusFilter} value={statusFilter}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder={t("positions.status")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t("positions.allStatuses")}</SelectItem>
-                  <SelectItem value="active">{t("positions.active")}</SelectItem>
-                  <SelectItem value="inactive">{t("positions.inactive")}</SelectItem>
+                  <SelectItem value="all">
+                    {t("positions.allStatuses")}
+                  </SelectItem>
+                  <SelectItem value="active">
+                    {t("positions.active")}
+                  </SelectItem>
+                  <SelectItem value="inactive">
+                    {t("positions.inactive")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <Button
-                className="gap-2 ml-auto"
+                className="ml-auto gap-2"
                 onClick={() => setIsCreateDialogOpen(true)}
               >
                 <Plus className="h-4 w-4" />
@@ -182,26 +207,36 @@ export function PositionsPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-lg border bg-card overflow-x-auto">
+            <div className="overflow-x-auto rounded-lg border bg-card">
               <Table className="w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="px-4">{t("positions.code")}</TableHead>
-                    <TableHead className="px-4">{t("positions.name")}</TableHead>
-                    <TableHead className="px-4">{t("positions.status")}</TableHead>
-                    <TableHead className="px-4 text-right">{t("positions.actions")}</TableHead>
+                    <TableHead className="px-4">
+                      {t("positions.code")}
+                    </TableHead>
+                    <TableHead className="px-4">
+                      {t("positions.name")}
+                    </TableHead>
+                    <TableHead className="px-4">
+                      {t("positions.status")}
+                    </TableHead>
+                    <TableHead className="px-4 text-right">
+                      {t("positions.actions")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredPositions.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-64">
-                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
-                          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                      <TableCell className="h-64" colSpan={4}>
+                        <div className="flex h-full flex-col items-center justify-center p-8 text-muted-foreground">
+                          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                             <SearchX className="h-8 w-8 opacity-50" />
                           </div>
-                          <p className="text-lg font-medium">{t("common.noData")}</p>
-                          <p className="text-sm mt-2 max-w-md text-center">
+                          <p className="font-medium text-lg">
+                            {t("common.noData")}
+                          </p>
+                          <p className="mt-2 max-w-md text-center text-sm">
                             {t("dashboard.noDataFound")}
                           </p>
                         </div>
@@ -209,21 +244,25 @@ export function PositionsPage() {
                     </TableRow>
                   ) : (
                     filteredPositions.map((position) => (
-                      <TableRow key={position.id} className="hover:bg-muted/50">
+                      <TableRow className="hover:bg-muted/50" key={position.id}>
                         <TableCell className="px-4">
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border border-border">
-                            <span className={`w-1.5 h-1.5 rounded-full ${position.color}`}></span>
+                          <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${position.color}`}
+                            />
                             {position.code}
                           </span>
                         </TableCell>
-                        <TableCell className="px-4 font-medium truncate max-w-[300px]">{position.name}</TableCell>
+                        <TableCell className="max-w-[300px] truncate px-4 font-medium">
+                          {position.name}
+                        </TableCell>
                         <TableCell className="px-4">
                           {position.isActive ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-green-500/15 border border-green-500/25 text-green-600">
+                            <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-2 py-0.5 font-medium text-green-600 text-xs">
                               {t("positions.active")}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-500/15 border border-gray-500/25 text-gray-600">
+                            <span className="inline-flex items-center rounded-md border border-gray-500/25 bg-gray-500/15 px-2 py-0.5 font-medium text-gray-600 text-xs">
                               {t("positions.inactive")}
                             </span>
                           )}
@@ -231,16 +270,16 @@ export function PositionsPage() {
                         <TableCell className="px-4">
                           <div className="flex items-center justify-end gap-2">
                             <Button
-                              variant="ghost"
-                              size="icon"
                               onClick={() => setEditingPosition(position)}
+                              size="icon"
+                              variant="ghost"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant="ghost"
-                              size="icon"
                               onClick={() => setDeletingPosition(position)}
+                              size="icon"
+                              variant="ghost"
                             >
                               <Trash2 className="h-4 w-4 text-red-600" />
                             </Button>
@@ -257,22 +296,22 @@ export function PositionsPage() {
       </div>
 
       <CreatePositionDialog
-        open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
+        open={isCreateDialogOpen}
       />
 
       <EditPositionDialog
-        open={editingPosition !== null}
         onOpenChange={(open) => !open && setEditingPosition(null)}
-        position={editingPosition}
         onUpdate={handleUpdatePosition}
+        open={editingPosition !== null}
+        position={editingPosition}
       />
 
       <DeletePositionDialog
-        open={deletingPosition !== null}
-        onOpenChange={(open) => !open && setDeletingPosition(null)}
-        position={deletingPosition}
         onConfirm={handleDeletePosition}
+        onOpenChange={(open) => !open && setDeletingPosition(null)}
+        open={deletingPosition !== null}
+        position={deletingPosition}
       />
     </>
   );

@@ -1,5 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
+import { Card } from "@/components/ui/card";
 
 interface PageHeaderCardProps {
   icon: ReactNode;
@@ -14,7 +14,7 @@ export function PageHeaderCard({
 }: PageHeaderCardProps) {
   return (
     <div className="mb-2">
-      <Card className="p-3 bg-card shadow-sm rounded-md">
+      <Card className="rounded-md bg-card p-3 shadow-sm">
         <div className="flex items-start gap-3">
           <div className="mt-0.5">{icon}</div>
           <div className="flex-1">

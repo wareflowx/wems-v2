@@ -1,24 +1,36 @@
+import type { Contract } from "@@/db/schema/contracts";
+import type { Employee } from "@@/db/schema/employees";
+import type { Position } from "@@/db/schema/positions";
+import type { WorkLocation } from "@@/db/schema/work-locations";
+import { Link } from "@tanstack/react-router";
 import {
-  Search,
-  SearchX,
-  Trash2,
-  Edit,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-} from "lucide-react";
-import {
-  useReactTable,
+  type ColumnDef,
+  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
-  flexRender,
-  type ColumnDef,
+  useReactTable,
 } from "@tanstack/react-table";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Plus,
+  Search,
+  SearchX,
+  Trash2,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -27,18 +39,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Link } from "@tanstack/react-router";
-import type { Employee } from "@@/db/schema/employees";
-import type { Position } from "@@/db/schema/positions";
-import type { WorkLocation } from "@@/db/schema/work-locations";
-import type { Contract } from "@@/db/schema/contracts";
 
 interface EmployeesTableProps {
   employees: Employee[];
@@ -66,14 +66,18 @@ export function EmployeesTable({
 
   // Get contract for an employee
   const getEmployeeContract = (employeeId: number): Contract | undefined => {
-    const now = new Date()
+    const now = new Date();
     return contracts.find((c) => {
-      if (c.employeeId !== employeeId || !c.isActive) return false
+      if (c.employeeId !== employeeId || !c.isActive) {
+        return false;
+      }
       // Check if contract has ended
-      if (c.endDate && new Date(c.endDate) < now) return false
-      return true
-    })
-  }
+      if (c.endDate && new Date(c.endDate) < now) {
+        return false;
+      }
+      return true;
+    });
+  };
 
   // Get unique contracts and statuses
   const uniqueContracts = useMemo(() => {
@@ -91,12 +95,13 @@ export function EmployeesTable({
     return employees.filter((employee) => {
       const employeeContract = getEmployeeContract(employee.id);
       const matchesContract =
-        contractFilter === "all" || employeeContract?.contractType === contractFilter;
+        contractFilter === "all" ||
+        employeeContract?.contractType === contractFilter;
       const matchesStatus =
         statusFilter === "all" || employee.status === statusFilter;
       return matchesContract && matchesStatus;
     });
-  }, [employees, contracts, contractFilter, statusFilter]);
+  }, [employees, contractFilter, statusFilter, getEmployeeContract]);
 
   const columns: ColumnDef<Employee>[] = useMemo(
     () => [
@@ -108,12 +113,12 @@ export function EmployeesTable({
           return (
             <>
               <Link
+                className="text-gray-700 underline transition-opacity hover:opacity-80"
                 to={`/employees/${employee.id}`}
-                className="text-gray-700 underline hover:opacity-80 transition-opacity"
               >
                 {employee.firstName} {employee.lastName}
               </Link>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="mt-0.5 text-gray-500 text-sm">
                 {t("common.employeeId")}
                 {employee.id.toString().padStart(4, "0")}
               </p>
@@ -132,14 +137,15 @@ export function EmployeesTable({
             CDI: "bg-blue-500/15 border border-blue-500/25 text-blue-600",
             CDD: "bg-orange-500/15 border border-orange-500/25 text-orange-600",
             Intérim: "bg-teal-500/15 border border-teal-500/25 text-teal-600",
-            Alternance: "bg-purple-500/15 border border-purple-500/25 text-purple-600",
+            Alternance:
+              "bg-purple-500/15 border border-purple-500/25 text-purple-600",
           };
           const colors =
             contractColors[contractType] ||
             "bg-gray-500/15 border border-gray-500/25 text-gray-600";
           return (
             <span
-              className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${colors}`}
+              className={`inline-flex items-center rounded-md px-2 py-0.5 font-medium text-xs ${colors}`}
             >
               {contractType}
             </span>
@@ -153,17 +159,16 @@ export function EmployeesTable({
           const positionId = getValue() as number | null;
           if (!positionId) {
             return (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border border-border">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
-                -
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-gray-500" />-
               </span>
             );
           }
           const position = positions.find((p) => p.id === positionId);
           const dotColor = position?.color || "bg-gray-500";
           return (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border border-border">
-              <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></span>
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+              <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
               {position?.name || "-"}
             </span>
           );
@@ -176,17 +181,16 @@ export function EmployeesTable({
           const workLocationId = getValue() as number | null;
           if (!workLocationId) {
             return (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border border-border">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
-                -
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-gray-500" />-
               </span>
             );
           }
           const location = workLocations.find((w) => w.id === workLocationId);
           const dotColor = location?.color || "bg-gray-500";
           return (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border border-border">
-              <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></span>
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+              <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
               {location?.name || "-"}
             </span>
           );
@@ -200,19 +204,19 @@ export function EmployeesTable({
           switch (status) {
             case "active":
               return (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-green-500/15 border border-green-500/25 text-green-600">
+                <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-2 py-0.5 font-medium text-green-600 text-xs">
                   {t("employees.active")}
                 </span>
               );
             case "on_leave":
               return (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-yellow-500/15 border border-yellow-500/25 text-yellow-600">
+                <span className="inline-flex items-center rounded-md border border-yellow-500/25 bg-yellow-500/15 px-2 py-0.5 font-medium text-xs text-yellow-600">
                   {t("employees.onLeave")}
                 </span>
               );
             default:
               return (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-500/15 border border-gray-500/25 text-gray-600">
+                <span className="inline-flex items-center rounded-md border border-gray-500/25 bg-gray-500/15 px-2 py-0.5 font-medium text-gray-600 text-xs">
                   {status}
                 </span>
               );
@@ -234,19 +238,23 @@ export function EmployeesTable({
           return (
             <div className="flex items-center justify-end gap-2">
               {onEditClick && (
-                <Button variant="ghost" size="icon" onClick={() => onEditClick(employee)}>
+                <Button
+                  onClick={() => onEditClick(employee)}
+                  size="icon"
+                  variant="ghost"
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
               )}
               <Button
-                variant="ghost"
-                size="icon"
                 onClick={() => {
                   onDeleteClick({
                     id: employee.id,
                     name: `${employee.firstName} ${employee.lastName}`,
                   });
                 }}
+                size="icon"
+                variant="ghost"
               >
                 <Trash2 className="h-4 w-4 text-red-600" />
               </Button>
@@ -255,7 +263,14 @@ export function EmployeesTable({
         },
       },
     ],
-    [t, positions, workLocations, contracts, onDeleteClick]
+    [
+      t,
+      positions,
+      workLocations,
+      onDeleteClick,
+      getEmployeeContract,
+      onEditClick,
+    ]
   );
 
   const table = useReactTable({
@@ -276,22 +291,22 @@ export function EmployeesTable({
   });
 
   const currentPage = table.getState().pagination.pageIndex + 1;
-  const totalPages = table.getPageCount();
+  const _totalPages = table.getPageCount();
 
   return (
-    <div className="flex gap-2 flex-col">
+    <div className="flex flex-col gap-2">
       {/* Search and Filters */}
       <div className="flex flex-wrap gap-2">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative min-w-[200px] flex-1">
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            className="pl-9"
+            onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder={t("employees.search")}
             value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="pl-9"
           />
         </div>
-        <Select value={contractFilter} onValueChange={setContractFilter}>
+        <Select onValueChange={setContractFilter} value={contractFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder={t("employees.currentContract")} />
           </SelectTrigger>
@@ -304,7 +319,7 @@ export function EmployeesTable({
             ))}
           </SelectContent>
         </Select>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select onValueChange={setStatusFilter} value={statusFilter}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder={t("employeeDetail.status")} />
           </SelectTrigger>
@@ -322,7 +337,7 @@ export function EmployeesTable({
           </SelectContent>
         </Select>
         {onAddClick && (
-          <Button className="gap-2 ml-auto" onClick={onAddClick}>
+          <Button className="ml-auto gap-2" onClick={onAddClick}>
             <Plus className="h-4 w-4" />
             {t("employees.addEmployee")}
           </Button>
@@ -330,13 +345,13 @@ export function EmployeesTable({
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border bg-card overflow-x-auto">
+      <div className="overflow-x-auto rounded-lg border bg-card">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="px-4">
+                  <TableHead className="px-4" key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -351,13 +366,13 @@ export function EmployeesTable({
           <TableBody>
             {table.getRowModel().rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-64">
-                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
-                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                <TableCell className="h-64" colSpan={7}>
+                  <div className="flex h-full flex-col items-center justify-center p-8 text-muted-foreground">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                       <SearchX className="h-8 w-8 opacity-50" />
                     </div>
-                    <p className="text-lg font-medium">{t("common.noData")}</p>
-                    <p className="text-sm mt-2 max-w-md text-center">
+                    <p className="font-medium text-lg">{t("common.noData")}</p>
+                    <p className="mt-2 max-w-md text-center text-sm">
                       {t("dashboard.noDataFound")}
                     </p>
                   </div>
@@ -365,9 +380,9 @@ export function EmployeesTable({
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/50">
+                <TableRow className="hover:bg-muted/50" key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-4">
+                    <TableCell className="px-4" key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -383,25 +398,26 @@ export function EmployeesTable({
 
       {/* Pagination */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {t("common.view")} de {table.getRowModel().rows.length > 0 ? (currentPage - 1) * 10 + 1 : 0} à{" "}
-          {Math.min(currentPage * 10, filteredData.length)} sur{" "}
+        <p className="text-muted-foreground text-sm">
+          {t("common.view")} de{" "}
+          {table.getRowModel().rows.length > 0 ? (currentPage - 1) * 10 + 1 : 0}{" "}
+          à {Math.min(currentPage * 10, filteredData.length)} sur{" "}
           {filteredData.length} {t("common.employees")}
         </p>
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            onClick={() => table.previousPage()}
+            size="icon"
+            variant="outline"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            onClick={() => table.nextPage()}
+            size="icon"
+            variant="outline"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

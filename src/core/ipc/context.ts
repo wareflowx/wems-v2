@@ -14,7 +14,9 @@ class IPCContext {
     // Return a no-op middleware if window isn't set yet
     // Handlers should handle the case where context.window is undefined
     if (!window) {
-      return os.middleware(({ next }) => next({ context: { window: undefined } }));
+      return os.middleware(({ next }) =>
+        next({ context: { window: undefined } })
+      );
     }
 
     return os.middleware(({ next }) =>

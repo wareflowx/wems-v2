@@ -1,8 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { PostsPage } from '@/pages/posts-page'
+import { createFileRoute } from "@tanstack/react-router";
+import { PostsPage } from "@/pages/posts-page";
 
 export interface Route {
-  path: '/posts'
+  path: "/posts";
 }
 
 export const Route = createFileRoute("/posts")({

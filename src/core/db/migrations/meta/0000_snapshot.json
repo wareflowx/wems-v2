@@ -94,9 +94,7 @@
       "indexes": {
         "positions_code_unique": {
           "name": "positions_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -164,9 +162,7 @@
       "indexes": {
         "work_locations_code_unique": {
           "name": "work_locations_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -276,9 +272,7 @@
       "indexes": {
         "employees_email_unique": {
           "name": "employees_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -287,12 +281,8 @@
           "name": "employees_position_id_positions_id_fk",
           "tableFrom": "employees",
           "tableTo": "positions",
-          "columnsFrom": [
-            "position_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["position_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -300,12 +290,8 @@
           "name": "employees_work_location_id_work_locations_id_fk",
           "tableFrom": "employees",
           "tableTo": "work_locations",
-          "columnsFrom": [
-            "work_location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["work_location_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -383,12 +369,8 @@
           "name": "contracts_employee_id_employees_id_fk",
           "tableFrom": "contracts",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

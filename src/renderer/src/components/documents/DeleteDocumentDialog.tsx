@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react'
+import { AlertTriangle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,28 +9,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useTranslation } from 'react-i18next'
-import { AlertTriangle } from 'lucide-react'
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Document {
-  id: number
-  name: string
-  type: string
-  employee: string
-  uploadDate: string
-  size: string
-  category: string
+  id: number;
+  name: string;
+  type: string;
+  employee: string;
+  uploadDate: string;
+  size: string;
+  category: string;
 }
 
 interface DeleteDocumentDialogProps {
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  onConfirm?: () => void
-  document?: Document
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onConfirm?: () => void;
+  document?: Document;
 }
 
 export function DeleteDocumentDialog({
@@ -36,48 +36,48 @@ export function DeleteDocumentDialog({
   onConfirm,
   document,
 }: DeleteDocumentDialogProps) {
-  const { t } = useTranslation()
-  const [confirmationText, setConfirmationText] = useState<string>('')
+  const { t } = useTranslation();
+  const [confirmationText, setConfirmationText] = useState<string>("");
 
   // Reset confirmation text when dialog opens/closes
   useEffect(() => {
     if (open) {
-      setConfirmationText('')
+      setConfirmationText("");
     }
-  }, [open])
+  }, [open]);
 
   const handleSubmit = () => {
     // TODO: Implement backend logic
-    console.log('Deleting document:', { id: document?.id })
-    onConfirm?.()
-    onOpenChange?.(false)
-  }
+    console.log("Deleting document:", { id: document?.id });
+    onConfirm?.();
+    onOpenChange?.(false);
+  };
 
-  const isFormValid = document && confirmationText === document.name
+  const isFormValid = document && confirmationText === document.name;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-red-600" />
-            {t('documents.deleteDocument')}
+            {t("documents.deleteDocument")}
           </DialogTitle>
           <DialogDescription>
-            {t('documents.deleteDocumentWarning')}
+            {t("documents.deleteDocumentWarning")}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4 space-y-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="space-y-4 py-4">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-red-900">
-                  {t('documents.typeToDelete')}
+                <p className="font-medium text-red-900 text-sm">
+                  {t("documents.typeToDelete")}
                 </p>
-                <p className="text-sm text-red-700 mt-1">
-                  {t('documents.typeToDeleteDescription')}
+                <p className="mt-1 text-red-700 text-sm">
+                  {t("documents.typeToDeleteDescription")}
                 </p>
               </div>
             </div>
@@ -85,12 +85,12 @@ export function DeleteDocumentDialog({
 
           {document && (
             <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">
-                {t('documents.documentToDelete')}:
+              <div className="text-muted-foreground text-sm">
+                {t("documents.documentToDelete")}:
               </div>
-              <div className="p-3 bg-muted rounded-lg">
+              <div className="rounded-lg bg-muted p-3">
                 <p className="font-medium">{document.name}</p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="mt-1 text-muted-foreground text-xs">
                   {document.type} • {document.employee} • {document.size}
                 </p>
               </div>
@@ -98,42 +98,43 @@ export function DeleteDocumentDialog({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="confirmation" className="text-sm font-medium">
-              {t('documents.confirmDeletion')}
+            <Label className="font-medium text-sm" htmlFor="confirmation">
+              {t("documents.confirmDeletion")}
             </Label>
             <Input
-              id="confirmation"
-              placeholder={document?.name || ''}
-              value={confirmationText}
-              onChange={(e) => setConfirmationText(e.target.value)}
               className="w-full"
+              id="confirmation"
+              onChange={(e) => setConfirmationText(e.target.value)}
+              placeholder={document?.name || ""}
+              value={confirmationText}
             />
-            <p className="text-xs text-muted-foreground">
-              {t('documents.typeDocumentName')} <strong>{document?.name}</strong> {t('documents.toConfirm')}
+            <p className="text-muted-foreground text-xs">
+              {t("documents.typeDocumentName")}{" "}
+              <strong>{document?.name}</strong> {t("documents.toConfirm")}
             </p>
           </div>
         </div>
 
         <DialogFooter className="gap-2">
           <Button
+            className="flex-1"
+            onClick={() => onOpenChange?.(false)}
             type="button"
             variant="outline"
-            onClick={() => onOpenChange?.(false)}
-            className="flex-1"
           >
-            {t('common.cancel')}
+            {t("common.cancel")}
           </Button>
           <Button
+            className="flex-1"
+            disabled={!isFormValid}
+            onClick={handleSubmit}
             type="button"
             variant="destructive"
-            onClick={handleSubmit}
-            disabled={!isFormValid}
-            className="flex-1"
           >
-            {t('documents.deleteDocument')}
+            {t("documents.deleteDocument")}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

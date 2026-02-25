@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTranslation } from "react-i18next";
 
 const CONTRACT_TYPES = ["CDI", "CDD", "Intérim", "Alternance"];
 
@@ -66,7 +66,9 @@ export function EditContractDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!contractType || !startDate || !contract) return;
+    if (!(contractType && startDate && contract)) {
+      return;
+    }
 
     onUpdate({
       id: contract.id,
@@ -80,7 +82,7 @@ export function EditContractDialog({
   const isFormValid = contractType && startDate;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("contracts.editContract")}</DialogTitle>
@@ -92,7 +94,7 @@ export function EditContractDialog({
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="contract-type">{t("contracts.type")}</Label>
-              <Select value={contractType} onValueChange={setContractType}>
+              <Select onValueChange={setContractType} value={contractType}>
                 <SelectTrigger id="contract-type">
                   <SelectValue placeholder={t("contracts.selectType")} />
                 </SelectTrigger>
@@ -109,43 +111,43 @@ export function EditContractDialog({
               <Label htmlFor="start-date">{t("contracts.startDate")}</Label>
               <Input
                 id="start-date"
+                onChange={(e) => setStartDate(e.target.value)}
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="end-date">{t("contracts.endDate")}</Label>
               <Input
                 id="end-date"
+                onChange={(e) => setEndDate(e.target.value)}
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {t("contracts.endDateHint")}
               </p>
             </div>
             <div className="grid gap-2">
               <Label>{t("contracts.status")}</Label>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2">
                   <input
-                    type="radio"
-                    name="isActive"
                     checked={isActive === true}
-                    onChange={() => setIsActive(true)}
                     className="accent-green-600"
+                    name="isActive"
+                    onChange={() => setIsActive(true)}
+                    type="radio"
                   />
                   <span className="text-sm">{t("contracts.active")}</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2">
                   <input
-                    type="radio"
-                    name="isActive"
                     checked={isActive === false}
-                    onChange={() => setIsActive(false)}
                     className="accent-gray-600"
+                    name="isActive"
+                    onChange={() => setIsActive(false)}
+                    type="radio"
                   />
                   <span className="text-sm">{t("contracts.inactive")}</span>
                 </label>
@@ -154,13 +156,13 @@ export function EditContractDialog({
           </div>
           <DialogFooter>
             <Button
+              onClick={() => onOpenChange(false)}
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
             >
               {t("common.cancel")}
             </Button>
-            <Button type="submit" disabled={!isFormValid}>
+            <Button disabled={!isFormValid} type="submit">
               {t("common.save")}
             </Button>
           </DialogFooter>

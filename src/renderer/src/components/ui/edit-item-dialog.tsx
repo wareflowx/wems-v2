@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'
+import { Save } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,90 +8,86 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Save } from 'lucide-react'
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface EditItemDialogProps {
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  onUpdate?: (value: string) => void
-  title?: string
-  description?: string
-  label?: string
-  placeholder?: string
-  initialValue?: string
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onUpdate?: (value: string) => void;
+  title?: string;
+  description?: string;
+  label?: string;
+  placeholder?: string;
+  initialValue?: string;
 }
 
 export function EditItemDialog({
   open,
   onOpenChange,
   onUpdate,
-  title = 'Modifier',
+  title = "Modifier",
   description,
   label,
   placeholder,
   initialValue,
 }: EditItemDialogProps) {
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState("");
 
   useEffect(() => {
-    setValue(initialValue || '')
-  }, [initialValue, open])
+    setValue(initialValue || "");
+  }, [initialValue]);
 
   const handleUpdate = () => {
     if (value.trim()) {
-      onUpdate?.(value.trim())
-      onOpenChange?.(false)
+      onUpdate?.(value.trim());
+      onOpenChange?.(false);
     }
-  }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            {description}
-          </DialogDescription>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <div className="py-4 space-y-3">
+        <div className="space-y-3 py-4">
           <div className="space-y-2">
             <Label htmlFor="edit-item">{label}</Label>
             <Input
+              className="w-full"
               id="edit-item"
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleUpdate()}
               placeholder={placeholder}
               value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleUpdate()}
-              className="w-full"
             />
           </div>
         </div>
 
         <DialogFooter className="gap-2">
           <Button
+            className="flex-1"
+            onClick={() => onOpenChange?.(false)}
             type="button"
             variant="outline"
-            onClick={() => onOpenChange?.(false)}
-            className="flex-1"
           >
             Annuler
           </Button>
           <Button
-            type="button"
-            onClick={handleUpdate}
-            disabled={!value.trim()}
             className="flex-1"
+            disabled={!value.trim()}
+            onClick={handleUpdate}
+            type="button"
           >
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="mr-2 h-4 w-4" />
             Enregistrer
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

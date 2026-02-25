@@ -1,8 +1,8 @@
 import { app } from "./app";
+import { database } from "./database";
 import { shell } from "./shell";
 import { theme } from "./theme";
 import { window } from "./window";
-import { database } from "./database";
 
 export const router = {
   theme,

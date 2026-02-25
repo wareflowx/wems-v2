@@ -1,20 +1,22 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-import { timestamps } from './columns.helpers';
-import { employees } from './employees';
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { timestamps } from "./columns.helpers";
+import { employees } from "./employees";
 
-export const contracts = sqliteTable('contracts', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+export const contracts = sqliteTable("contracts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
 
   // Employee reference (FK)
-  employeeId: integer('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  employeeId: integer("employee_id")
+    .notNull()
+    .references(() => employees.id, { onDelete: "cascade" }),
 
   // Contract details
-  contractType: text('contract_type').notNull(), // "CDI", "CDD", "Intérim", "Alternance"
-  startDate: text('start_date').notNull(),
-  endDate: text('end_date'), // null for CDI
+  contractType: text("contract_type").notNull(), // "CDI", "CDD", "Intérim", "Alternance"
+  startDate: text("start_date").notNull(),
+  endDate: text("end_date"), // null for CDI
 
   // Status
-  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
 
   // Reusable timestamp columns
   ...timestamps,

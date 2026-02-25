@@ -1,60 +1,63 @@
 import {
-  Plus,
-  Trash2,
-  Save,
-  Database,
-  Sparkles,
-  Building,
   Briefcase,
-  FileText,
+  Building,
   Edit,
+  FileText,
+  Save,
+  Sparkles,
+  Trash2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AddItemDialog } from "@/components/ui/add-item-dialog";
+import { Button } from "@/components/ui/button";
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
+import { EditItemDialog } from "@/components/ui/edit-item-dialog";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import {
   SettingsListCard,
-  SettingsListCardHeader,
-  SettingsListCardTitle,
-  SettingsListCardCount,
+  SettingsListCardAddButton,
   SettingsListCardBadge,
   SettingsListCardContent,
-  SettingsListCardItemList,
+  SettingsListCardCount,
+  SettingsListCardFooter,
+  SettingsListCardHeader,
   SettingsListCardItem,
+  SettingsListCardItemActions,
   SettingsListCardItemIcon,
   SettingsListCardItemLabel,
-  SettingsListCardItemActions,
-  SettingsListCardFooter,
-  SettingsListCardAddButton,
+  SettingsListCardItemList,
+  SettingsListCardTitle,
 } from "@/components/ui/settings-list-card";
-import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
-import { AddItemDialog } from "@/components/ui/add-item-dialog";
-import { EditItemDialog } from "@/components/ui/edit-item-dialog";
-import { useState } from "react";
 import {
-  useDepartments,
-  useJobTitles,
-  useContractTypes,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  useAddContractType,
   useAddDepartment,
   useAddJobTitle,
-  useAddContractType,
-  useUpdateDepartment,
-  useUpdateJobTitle,
-  useUpdateContractType,
+  useContractTypes,
+  useDeleteContractType,
   useDeleteDepartment,
   useDeleteJobTitle,
-  useDeleteContractType,
+  useDepartments,
+  useJobTitles,
+  useUpdateContractType,
+  useUpdateDepartment,
+  useUpdateJobTitle,
 } from "@/hooks";
 
 export function SettingsReferencePage() {
   const { t } = useTranslation();
 
-  const { data: departments = [], isLoading: isLoadingDepartments } = useDepartments();
+  const { data: departments = [], isLoading: isLoadingDepartments } =
+    useDepartments();
   const { data: jobTitles = [], isLoading: isLoadingJobs } = useJobTitles();
-  const { data: contractTypes = [], isLoading: isLoadingContracts } = useContractTypes();
+  const { data: contractTypes = [], isLoading: isLoadingContracts } =
+    useContractTypes();
 
   const addDepartment = useAddDepartment();
   const addJobTitle = useAddJobTitle();
@@ -98,7 +101,11 @@ export function SettingsReferencePage() {
     value: "",
   });
 
-  const handleDelete = (type: "department" | "job" | "contract", value: string, index: number) => {
+  const handleDelete = (
+    type: "department" | "job" | "contract",
+    value: string,
+    index: number
+  ) => {
     setDeleteDialog({ open: true, type, value, index });
   };
 
@@ -110,21 +117,21 @@ export function SettingsReferencePage() {
         deleteDepartment.mutate(value, {
           onSuccess: () => {
             setDeleteDialog({ ...deleteDialog, open: false });
-          }
+          },
         });
         break;
       case "job":
         deleteJobTitle.mutate(value, {
           onSuccess: () => {
             setDeleteDialog({ ...deleteDialog, open: false });
-          }
+          },
         });
         break;
       case "contract":
         deleteContractType.mutate(value, {
           onSuccess: () => {
             setDeleteDialog({ ...deleteDialog, open: false });
-          }
+          },
         });
         break;
     }
@@ -142,21 +149,21 @@ export function SettingsReferencePage() {
         addDepartment.mutate(value, {
           onSuccess: () => {
             setAddDialog({ ...addDialog, open: false });
-          }
+          },
         });
         break;
       case "job":
         addJobTitle.mutate(value, {
           onSuccess: () => {
             setAddDialog({ ...addDialog, open: false });
-          }
+          },
         });
         break;
       case "contract":
         addContractType.mutate(value, {
           onSuccess: () => {
             setAddDialog({ ...addDialog, open: false });
-          }
+          },
         });
         break;
     }
@@ -206,7 +213,11 @@ export function SettingsReferencePage() {
     }
   };
 
-  const handleEdit = (type: "department" | "job" | "contract", value: string, index: number) => {
+  const handleEdit = (
+    type: "department" | "job" | "contract",
+    value: string,
+    index: number
+  ) => {
     setEditDialog({ open: true, type, index, value });
   };
 
@@ -220,7 +231,7 @@ export function SettingsReferencePage() {
           {
             onSuccess: () => {
               setEditDialog({ ...editDialog, open: false });
-            }
+            },
           }
         );
         break;
@@ -230,7 +241,7 @@ export function SettingsReferencePage() {
           {
             onSuccess: () => {
               setEditDialog({ ...editDialog, open: false });
-            }
+            },
           }
         );
         break;
@@ -240,7 +251,7 @@ export function SettingsReferencePage() {
           {
             onSuccess: () => {
               setEditDialog({ ...editDialog, open: false });
-            }
+            },
           }
         );
         break;
@@ -303,7 +314,9 @@ export function SettingsReferencePage() {
   };
 
   const getDeleteDescription = () => {
-    return t("settingsReferenceData.deleteWarning", { value: deleteDialog.value });
+    return t("settingsReferenceData.deleteWarning", {
+      value: deleteDialog.value,
+    });
   };
 
   if (isLoadingDepartments || isLoadingJobs || isLoadingContracts) {
@@ -311,9 +324,9 @@ export function SettingsReferencePage() {
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <div className="min-h-full space-y-3">
           <PageHeaderCard
+            description={t("settingsReferenceData.description")}
             icon={<Sparkles className="h-4 w-4 text-gray-600" />}
             title={t("settingsReferenceData.title")}
-            description={t("settingsReferenceData.description")}
           />
           <div className="flex items-center justify-center p-8">
             <p className="text-muted-foreground">Loading...</p>
@@ -329,13 +342,13 @@ export function SettingsReferencePage() {
         <div className="min-h-full space-y-3">
           {/* Header */}
           <PageHeaderCard
+            description={t("settingsReferenceData.description")}
             icon={<Sparkles className="h-4 w-4 text-gray-600" />}
             title={t("settingsReferenceData.title")}
-            description={t("settingsReferenceData.description")}
           />
 
-          <div className="flex gap-2 flex-col">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <SettingsListCard>
                 <SettingsListCardHeader>
                   <div className="flex items-center gap-2">
@@ -354,17 +367,24 @@ export function SettingsReferencePage() {
                   <SettingsListCardItemList>
                     {departments.map((dept, idx) => (
                       <SettingsListCardItem key={idx}>
-                        <SettingsListCardItemIcon icon={Building} color="blue" />
-                        <SettingsListCardItemLabel>{dept}</SettingsListCardItemLabel>
+                        <SettingsListCardItemIcon
+                          color="blue"
+                          icon={Building}
+                        />
+                        <SettingsListCardItemLabel>
+                          {dept}
+                        </SettingsListCardItemLabel>
                         <SettingsListCardItemActions>
                           <div className="flex -space-x-px">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  variant="ghost"
-                                  size="icon"
                                   className="h-7 w-7 rounded-r-none"
-                                  onClick={() => handleEdit("department", dept, idx)}
+                                  onClick={() =>
+                                    handleEdit("department", dept, idx)
+                                  }
+                                  size="icon"
+                                  variant="ghost"
                                 >
                                   <Edit className="h-3.5 w-3.5" />
                                 </Button>
@@ -376,10 +396,12 @@ export function SettingsReferencePage() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  variant="ghost"
-                                  size="icon"
                                   className="h-7 w-7 rounded-l-none"
-                                  onClick={() => handleDelete("department", dept, idx)}
+                                  onClick={() =>
+                                    handleDelete("department", dept, idx)
+                                  }
+                                  size="icon"
+                                  variant="ghost"
                                 >
                                   <Trash2 className="h-3.5 w-3.5 text-red-600" />
                                 </Button>
@@ -394,7 +416,9 @@ export function SettingsReferencePage() {
                     ))}
                   </SettingsListCardItemList>
                   <SettingsListCardFooter>
-                    <SettingsListCardAddButton onClick={() => handleAdd("department")}>
+                    <SettingsListCardAddButton
+                      onClick={() => handleAdd("department")}
+                    >
                       {t("settingsReferenceData.addDepartment")}
                     </SettingsListCardAddButton>
                   </SettingsListCardFooter>
@@ -419,17 +443,22 @@ export function SettingsReferencePage() {
                   <SettingsListCardItemList>
                     {jobTitles.map((job, idx) => (
                       <SettingsListCardItem key={idx}>
-                        <SettingsListCardItemIcon icon={Briefcase} color="purple" />
-                        <SettingsListCardItemLabel>{job}</SettingsListCardItemLabel>
+                        <SettingsListCardItemIcon
+                          color="purple"
+                          icon={Briefcase}
+                        />
+                        <SettingsListCardItemLabel>
+                          {job}
+                        </SettingsListCardItemLabel>
                         <SettingsListCardItemActions>
                           <div className="flex -space-x-px">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  variant="ghost"
-                                  size="icon"
                                   className="h-7 w-7 rounded-r-none"
                                   onClick={() => handleEdit("job", job, idx)}
+                                  size="icon"
+                                  variant="ghost"
                                 >
                                   <Edit className="h-3.5 w-3.5" />
                                 </Button>
@@ -441,10 +470,10 @@ export function SettingsReferencePage() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  variant="ghost"
-                                  size="icon"
                                   className="h-7 w-7 rounded-l-none"
                                   onClick={() => handleDelete("job", job, idx)}
+                                  size="icon"
+                                  variant="ghost"
                                 >
                                   <Trash2 className="h-3.5 w-3.5 text-red-600" />
                                 </Button>
@@ -484,17 +513,24 @@ export function SettingsReferencePage() {
                   <SettingsListCardItemList>
                     {contractTypes.map((type, idx) => (
                       <SettingsListCardItem key={idx}>
-                        <SettingsListCardItemIcon icon={FileText} color="orange" />
-                        <SettingsListCardItemLabel>{type}</SettingsListCardItemLabel>
+                        <SettingsListCardItemIcon
+                          color="orange"
+                          icon={FileText}
+                        />
+                        <SettingsListCardItemLabel>
+                          {type}
+                        </SettingsListCardItemLabel>
                         <SettingsListCardItemActions>
                           <div className="flex -space-x-px">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  variant="ghost"
-                                  size="icon"
                                   className="h-7 w-7 rounded-r-none"
-                                  onClick={() => handleEdit("contract", type, idx)}
+                                  onClick={() =>
+                                    handleEdit("contract", type, idx)
+                                  }
+                                  size="icon"
+                                  variant="ghost"
                                 >
                                   <Edit className="h-3.5 w-3.5" />
                                 </Button>
@@ -506,10 +542,12 @@ export function SettingsReferencePage() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  variant="ghost"
-                                  size="icon"
                                   className="h-7 w-7 rounded-l-none"
-                                  onClick={() => handleDelete("contract", type, idx)}
+                                  onClick={() =>
+                                    handleDelete("contract", type, idx)
+                                  }
+                                  size="icon"
+                                  variant="ghost"
                                 >
                                   <Trash2 className="h-3.5 w-3.5 text-red-600" />
                                 </Button>
@@ -524,7 +562,9 @@ export function SettingsReferencePage() {
                     ))}
                   </SettingsListCardItemList>
                   <SettingsListCardFooter>
-                    <SettingsListCardAddButton onClick={() => handleAdd("contract")}>
+                    <SettingsListCardAddButton
+                      onClick={() => handleAdd("contract")}
+                    >
                       {t("settingsReferenceData.addContractType")}
                     </SettingsListCardAddButton>
                   </SettingsListCardFooter>
@@ -543,32 +583,32 @@ export function SettingsReferencePage() {
       </div>
 
       <DeleteConfirmDialog
-        open={deleteDialog.open}
-        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
-        onConfirm={confirmDelete}
-        title={getDeleteTitle()}
         description={getDeleteDescription()}
+        onConfirm={confirmDelete}
+        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+        open={deleteDialog.open}
+        title={getDeleteTitle()}
       />
 
       <AddItemDialog
-        open={addDialog.open}
-        onOpenChange={(open) => setAddDialog({ ...addDialog, open })}
-        onAdd={confirmAdd}
-        title={getAddDialogTitle()}
         description={getAddDialogDescription()}
         label={getAddDialogLabel()}
+        onAdd={confirmAdd}
+        onOpenChange={(open) => setAddDialog({ ...addDialog, open })}
+        open={addDialog.open}
         placeholder={getAddDialogPlaceholder()}
+        title={getAddDialogTitle()}
       />
 
       <EditItemDialog
-        open={editDialog.open}
+        description={getEditDialogDescription()}
+        initialValue={editDialog.value}
+        label={getEditDialogLabel()}
         onOpenChange={(open) => setEditDialog({ ...editDialog, open })}
         onUpdate={confirmEdit}
-        title={getEditDialogTitle()}
-        description={getEditDialogDescription()}
-        label={getEditDialogLabel()}
+        open={editDialog.open}
         placeholder={getEditDialogPlaceholder()}
-        initialValue={editDialog.value}
+        title={getEditDialogTitle()}
       />
     </TooltipProvider>
   );

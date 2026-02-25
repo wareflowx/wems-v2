@@ -1,120 +1,124 @@
-import { useEffect, useState } from 'react'
-import { getPosts, createPost } from '@/actions/database'
-import type { Post } from '@@/db/schema'
+import type { Post } from "@@/db/schema";
+import { useEffect, useState } from "react";
+import { createPost, getPosts } from "@/actions/database";
 
 export function PostsPage() {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    loadPosts()
-  }, [])
+    loadPosts();
+  }, [loadPosts]);
 
   const loadPosts = async () => {
     try {
-      const data = await getPosts()
-      setPosts(data)
+      const data = await getPosts();
+      setPosts(data);
     } catch (error) {
-      console.error('Failed to load posts:', error)
+      console.error("Failed to load posts:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const form = e.currentTarget
-    setIsSubmitting(true)
+    e.preventDefault();
+    const form = e.currentTarget;
+    setIsSubmitting(true);
 
     try {
-      const formData = new FormData(form)
-      const title = formData.get('title') as string
-      const content = formData.get('content') as string
+      const formData = new FormData(form);
+      const title = formData.get("title") as string;
+      const content = formData.get("content") as string;
 
-      const newPost = await createPost({ title, content })
+      const newPost = await createPost({ title, content });
 
       // Clear form
-      form.reset()
+      form.reset();
 
       // Optimistically update the list
-      setPosts(prev => [...prev, newPost])
+      setPosts((prev) => [...prev, newPost]);
     } catch (error) {
-      console.error('Failed to create post:', error)
+      console.error("Failed to create post:", error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Posts</h1>
+      <h1 className="mb-6 font-bold text-3xl">Posts</h1>
 
       {/* Create Post Form */}
-      <div className="mb-8 p-4 border rounded-lg bg-card">
-        <h2 className="text-xl font-semibold mb-4">Create New Post</h2>
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4"
-        >
+      <div className="mb-8 rounded-lg border bg-card p-4">
+        <h2 className="mb-4 font-semibold text-xl">Create New Post</h2>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-1">
+            <label className="mb-1 block font-medium text-sm" htmlFor="title">
               Title
             </label>
             <input
-              type="text"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 disabled:opacity-50"
+              disabled={isSubmitting}
               id="title"
               name="title"
-              required
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-input bg-background rounded-md disabled:opacity-50"
               placeholder="Enter post title..."
+              required
+              type="text"
             />
           </div>
 
           <div>
-            <label htmlFor="content" className="block text-sm font-medium mb-1">
+            <label className="mb-1 block font-medium text-sm" htmlFor="content">
               Content
             </label>
             <textarea
+              className="w-full rounded-md border border-input bg-background px-3 py-2 disabled:opacity-50"
+              disabled={isSubmitting}
               id="content"
               name="content"
+              placeholder="Enter post content..."
               required
               rows={5}
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-input bg-background rounded-md disabled:opacity-50"
-              placeholder="Enter post content..."
             />
           </div>
 
           <button
-            type="submit"
+            className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             disabled={isSubmitting}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50"
+            type="submit"
           >
-            {isSubmitting ? 'Creating...' : 'Create Post'}
+            {isSubmitting ? "Creating..." : "Create Post"}
           </button>
         </form>
       </div>
 
       {/* Posts List */}
-      <div className="p-4 border rounded-lg bg-card">
-        <h2 className="text-xl font-semibold mb-4">All Posts</h2>
+      <div className="rounded-lg border bg-card p-4">
+        <h2 className="mb-4 font-semibold text-xl">All Posts</h2>
         {isLoading ? (
-          <div className="text-sm text-muted-foreground">Loading posts...</div>
+          <div className="text-muted-foreground text-sm">Loading posts...</div>
         ) : posts.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No posts yet. Create your first post above!</div>
+          <div className="text-muted-foreground text-sm">
+            No posts yet. Create your first post above!
+          </div>
         ) : (
           <div className="space-y-4">
             {posts.map((post) => (
-              <div key={post.id} className="p-4 border rounded-lg bg-background">
-                <h3 className="font-semibold text-lg mb-2">{post.title}</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{post.content}</p>
+              <div
+                className="rounded-lg border bg-background p-4"
+                key={post.id}
+              >
+                <h3 className="mb-2 font-semibold text-lg">{post.title}</h3>
+                <p className="whitespace-pre-wrap text-muted-foreground">
+                  {post.content}
+                </p>
               </div>
             ))}
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

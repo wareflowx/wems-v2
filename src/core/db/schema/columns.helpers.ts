@@ -1,13 +1,13 @@
-import { sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { sql } from 'drizzle-orm';
+import { sql } from "drizzle-orm";
+import { text } from "drizzle-orm/sqlite-core";
 
 /**
  * Reusable timestamp columns for all tables
  * Includes created_at and updated_at
  */
 export const timestamps = {
-  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 };
 
 /**
@@ -16,5 +16,5 @@ export const timestamps = {
  */
 export const timestampsWithSoftDelete = {
   ...timestamps,
-  deletedAt: text('deleted_at'), // Nullable, for soft deletes
+  deletedAt: text("deleted_at"), // Nullable, for soft deletes
 };

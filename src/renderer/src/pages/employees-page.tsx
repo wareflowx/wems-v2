@@ -35,7 +35,9 @@ export function EmployeesPage() {
 
   // Use TanStack Query hooks
   const { data: employees = [], isLoading, error } = useEmployees();
-  const { data: departments = [] } = useDepartments();
+  // TODO: temporarily disabled to debug freeze
+  // const { data: departments = [] } = useDepartments();
+  const departments: any[] = [];
   const { data: positions = [] } = usePositions();
   const { data: workLocations = [] } = useWorkLocations();
   const { data: contracts = [] } = useContracts();

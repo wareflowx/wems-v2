@@ -12,41 +12,14 @@ export interface EmployeeFilters {
 }
 
 // Hook for fetching employees list
-export function useEmployees(filters?: EmployeeFilters) {
+export function useEmployees(_filters?: EmployeeFilters) {
   const orpcReady = useORPCReady();
 
   return useQuery({
     queryKey: queryKeys.employees.lists(),
     queryFn: () => db.getEmployees(),
     enabled: orpcReady, // Wait for ORPC to be ready
-    select: (data: db.Employee[]) => {
-      // Client-side filtering using select to avoid multiple cache entries
-      let filtered = [...data];
-
-      if (filters?.search) {
-        const searchLower = filters.search.toLowerCase();
-        filtered = filtered.filter(
-          (emp) =>
-            emp.firstName.toLowerCase().includes(searchLower) ||
-            emp.lastName.toLowerCase().includes(searchLower) ||
-            `${emp.firstName} ${emp.lastName}`
-              .toLowerCase()
-              .includes(searchLower)
-        );
-      }
-
-      if (filters?.department && filters.department !== "all") {
-        filtered = filtered.filter(
-          (emp) => emp.department === filters.department
-        );
-      }
-
-      if (filters?.status && filters.status !== "all") {
-        filtered = filtered.filter((emp) => emp.status === filters.status);
-      }
-
-      return filtered;
-    },
+    // select disabled temporarily to debug freeze
   });
 }
 

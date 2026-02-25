@@ -12,14 +12,14 @@ export interface EmployeeFilters {
 }
 
 // Hook for fetching employees list
-export function useEmployees(_filters?: EmployeeFilters) {
+// Note: Filtering is done in the component using useMemo for better performance
+export function useEmployees() {
   const orpcReady = useORPCReady();
 
   return useQuery({
     queryKey: queryKeys.employees.lists(),
     queryFn: () => db.getEmployees(),
     enabled: orpcReady, // Wait for ORPC to be ready
-    // select disabled temporarily to debug freeze
   });
 }
 

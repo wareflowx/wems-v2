@@ -449,7 +449,7 @@ export function CreateEmployeeDialog({
                 {/* Personal Info Summary */}
                 <div className="space-y-3">
                   <h4 className="font-medium text-muted-foreground text-sm">
-                    {t("")employeeDetail.identity")}
+                    {t("employeeDetail.identity")}
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">

@@ -11,10 +11,7 @@ export default defineConfig({
       }
     },
     build: {
-      rollupOptions: {
-        input: resolve(__dirname, 'src/main/index.ts'),
-        external: ['better-sqlite3', '@electron/rebuild']
-      }
+      external: ['better-sqlite3', '@electron/rebuild']
     }
   },
 
@@ -26,10 +23,7 @@ export default defineConfig({
       }
     },
     build: {
-      rollupOptions: {
-        input: resolve(__dirname, 'src/preload/index.ts'),
-        external: ['better-sqlite3']
-      }
+      external: ['better-sqlite3']
     }
   },
 
@@ -44,9 +38,6 @@ export default defineConfig({
       tailwindcss()
     ],
     build: {
-      rollupOptions: {
-        input: resolve(__dirname, 'src/renderer/index.html'),
-      },
       target: 'chrome108' // Electron 40+ equivalent
     },
     resolve: {

@@ -222,14 +222,14 @@ export const createEmployee = os.handler(async ({ input }) => {
       ...employeeData
     } = validatedData;
 
-    // Use transaction to ensure atomicity
-    const result = await db.transaction(async (tx) => {
-      const [newEmployee] = await tx
+    // Use transaction to ensure atomicity (sync function, not async)
+    const result = db.transaction((tx) => {
+      const [newEmployee] = tx
         .insert(employees)
         .values(employeeData)
         .returning();
 
-      await tx.insert(contracts).values({
+      tx.insert(contracts).values({
         employeeId: newEmployee.id,
         contractType,
         startDate: contractStartDate || employeeData.hireDate,

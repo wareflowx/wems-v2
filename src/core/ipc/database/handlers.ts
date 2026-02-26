@@ -939,6 +939,18 @@ export const deleteCace = os.handler(async ({ input }) => {
   }
 });
 
+// Attachment by entity handler
+export const getAttachmentsByEntity = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const entityAttachments = await db.select().from(attachments).where(and(eq(attachments.entityType, input.entityType), eq(attachments.entityId, input.entityId)));
+    return entityAttachments;
+  } catch (error) {
+    console.error("Error in getAttachmentsByEntity:", error);
+    throw error;
+  }
+});
+
 // Attachment by type handler
 export const getAttachmentsByType = os.handler(async ({ input }) => {
   try {

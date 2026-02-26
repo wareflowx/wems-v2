@@ -33,6 +33,10 @@ import {
   useUpdatePosition,
 } from "@/hooks";
 
+const getColorName = (color: string) => {
+  return color.replace("bg-", "").replace("-500", "").toUpperCase();
+};
+
 export function PositionsPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -257,7 +261,10 @@ export function PositionsPage() {
                           {position.name}
                         </TableCell>
                         <TableCell className="px-4">
-                          <span className={`h-3 w-3 rounded-full ${position.color}`} />
+                          <span className="inline-flex items-center rounded-md border border-border bg-muted/50 px-2 py-0.5 font-medium text-xs">
+                            <span className={`mr-1.5 h-2 w-2 rounded-full ${position.color}`} />
+                            {getColorName(position.color)}
+                          </span>
                         </TableCell>
                         <TableCell className="px-4">
                           {position.isActive ? (

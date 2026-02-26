@@ -22,6 +22,9 @@ import {
 } from "@/hooks";
 import { useToast } from "@/utils/toast";
 
+// Stable empty arrays to prevent infinite re-render loops
+const EMPTY_ARRAY: any[] = [];
+
 export function EmployeesPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -35,16 +38,16 @@ export function EmployeesPage() {
 
   // Use TanStack Query hooks
   // const { data: employees = [], isLoading, error } = useEmployees();
-  const employees: any[] = [];
+  const employees = EMPTY_ARRAY;
   const isLoading = false;
   const error = null;
-  const departments: any[] = [];
+  const departments = EMPTY_ARRAY;
   // const { data: positions = [] } = usePositions();
   // const { data: workLocations = [] } = useWorkLocations();
   // const { data: contracts = [] } = useContracts();
-  const positions: any[] = [];
-  const workLocations: any[] = [];
-  const contracts: any[] = [];
+  const positions = EMPTY_ARRAY;
+  const workLocations = EMPTY_ARRAY;
+  const contracts = EMPTY_ARRAY;
   const createEmployee = useCreateEmployee();
   const deleteEmployee = useDeleteEmployee();
 

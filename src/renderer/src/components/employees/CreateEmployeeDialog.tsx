@@ -185,7 +185,10 @@ export function CreateEmployeeDialog({
 
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+      <DialogContent
+        className="max-h-[90vh] max-w-2xl overflow-y-auto"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>{t("employees.addEmployee")}</DialogTitle>
           <DialogDescription>
@@ -313,7 +316,7 @@ export function CreateEmployeeDialog({
                     <SelectTrigger id="department">
                       <SelectValue placeholder={t("employees.department")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       {departments.map((dept) => (
                         <SelectItem key={dept.id} value={dept.name}>
                           {dept.name}
@@ -337,7 +340,7 @@ export function CreateEmployeeDialog({
                     <SelectTrigger id="position">
                       <SelectValue placeholder={t("employees.position")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       {positions.map((position) => (
                         <SelectItem
                           key={position.id}
@@ -366,7 +369,7 @@ export function CreateEmployeeDialog({
                     <SelectTrigger id="workLocation">
                       <SelectValue placeholder={t("employees.workLocation")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       {workLocations.map((location) => (
                         <SelectItem
                           key={location.id}
@@ -394,7 +397,7 @@ export function CreateEmployeeDialog({
                         placeholder={t("employeeDetail.contractType")}
                       />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       <SelectItem value="CDI">CDI</SelectItem>
                       <SelectItem value="CDD">CDD</SelectItem>
                       <SelectItem value="Intérim">Intérim</SelectItem>

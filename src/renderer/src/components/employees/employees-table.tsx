@@ -20,7 +20,7 @@ import {
   SearchX,
   Trash2,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,20 +64,23 @@ export function EmployeesTable({
   const [contractFilter, setContractFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // Get contract for an employee
-  const getEmployeeContract = (employeeId: number): Contract | undefined => {
-    const now = new Date();
-    return contracts.find((c) => {
-      if (c.employeeId !== employeeId || !c.isActive) {
-        return false;
-      }
-      // Check if contract has ended
-      if (c.endDate && new Date(c.endDate) < now) {
-        return false;
-      }
-      return true;
-    });
-  };
+  // Get contract for an employee - stabilized with useCallback to prevent infinite re-renders
+  const getEmployeeContract = useCallback(
+    (employeeId: number): Contract | undefined => {
+      const now = new Date();
+      return contracts.find((c) => {
+        if (c.employeeId !== employeeId || !c.isActive) {
+          return false;
+        }
+        // Check if contract has ended
+        if (c.endDate && new Date(c.endDate) < now) {
+          return false;
+        }
+        return true;
+      });
+    },
+    [contracts]
+  );
 
   // Get unique contracts and statuses
   const uniqueContracts = useMemo(() => {
@@ -310,7 +313,7 @@ export function EmployeesTable({
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder={t("employees.currentContract")} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
             <SelectItem value="all">{t("common.allContracts")}</SelectItem>
             {uniqueContracts.map((contract) => (
               <SelectItem key={contract} value={contract}>
@@ -323,7 +326,7 @@ export function EmployeesTable({
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder={t("employeeDetail.status")} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
             <SelectItem value="all">{t("common.allStatuses")}</SelectItem>
             {uniqueStatuses.map((status) => (
               <SelectItem key={status} value={status}>

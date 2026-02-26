@@ -398,13 +398,7 @@ export async function getCacesByEmployee(employeeId: number) {
   return client.database.getCacesByEmployee({ employeeId });
 }
 
-export async function createCace(data: {
-  employeeId: number;
-  category: string;
-  dateObtained: string;
-  expirationDate: string;
-  attachmentId?: string;
-}) {
+export async function createCace(data: { employeeId: number; category: string; dateObtained: string; expirationDate: string; attachmentId?: string }) {
   const client = getClient();
   if (!client) {
     return null;
@@ -412,13 +406,7 @@ export async function createCace(data: {
   return client.database.createCace(data);
 }
 
-export async function updateCace(data: {
-  id: number;
-  category?: string;
-  dateObtained?: string;
-  expirationDate?: string;
-  attachmentId?: string | null;
-}) {
+export async function updateCace(data: { id: number; category?: string; dateObtained?: string; expirationDate?: string; attachmentId?: string | null }) {
   const client = getClient();
   if (!client) {
     return null;
@@ -435,10 +423,7 @@ export async function deleteCace(id: number) {
 }
 
 // Attachment by entity actions
-export async function getAttachmentsByEntity(
-  entityType: "contract" | "caces" | "document" | "medical_visit",
-  entityId: number
-) {
+export async function getAttachmentsByEntity(entityType: "contract" | "caces" | "document" | "medical_visit", entityId: number) {
   const client = getClient();
   if (!client) {
     return [];
@@ -446,9 +431,7 @@ export async function getAttachmentsByEntity(
   return client.database.getAttachmentsByEntity({ entityType, entityId });
 }
 
-export async function getAttachmentsByType(
-  entityType: "contract" | "caces" | "document" | "medical_visit"
-) {
+export async function getAttachmentsByType(entityType: "contract" | "caces" | "document" | "medical_visit") {
   const client = getClient();
   if (!client) {
     return [];
@@ -481,15 +464,7 @@ export async function getMedicalVisitsByEmployee(employeeId: number) {
   return client.database.getMedicalVisitsByEmployee({ employeeId });
 }
 
-export async function createMedicalVisit(data: {
-  employeeId: number;
-  type: "periodique" | "reprise" | "initiale" | "embauche";
-  scheduledDate: string;
-  actualDate?: string;
-  status?: "scheduled" | "completed" | "overdue" | "cancelled";
-  fitnessStatus?: "Apt" | "Apt partiel" | "Inapte";
-  attachmentId?: string;
-}) {
+export async function createMedicalVisit(data: { employeeId: number; type: "periodique" | "reprise" | "initiale" | "embauche"; scheduledDate: string; actualDate?: string; status?: "scheduled" | "completed" | "overdue" | "cancelled"; fitnessStatus?: "Apt" | "Apt partiel" | "Inapte"; attachmentId?: string }) {
   const client = getClient();
   if (!client) {
     return null;
@@ -497,15 +472,7 @@ export async function createMedicalVisit(data: {
   return client.database.createMedicalVisit(data);
 }
 
-export async function updateMedicalVisit(data: {
-  id: number;
-  type?: "periodique" | "reprise" | "initiale" | "embauche";
-  scheduledDate?: string;
-  actualDate?: string | null;
-  status?: "scheduled" | "completed" | "overdue" | "cancelled";
-  fitnessStatus?: "Apt" | "Apt partiel" | "Inapte" | null;
-  attachmentId?: string | null;
-}) {
+export async function updateMedicalVisit(data: { id: number; type?: "periodique" | "reprise" | "initiale" | "embauche"; scheduledDate?: string; actualDate?: string | null; status?: "scheduled" | "completed" | "overdue" | "cancelled"; fitnessStatus?: "Apt" | "Apt partiel" | "Inapte" | null; attachmentId?: string | null }) {
   const client = getClient();
   if (!client) {
     return null;

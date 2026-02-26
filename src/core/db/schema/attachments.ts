@@ -2,6 +2,10 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { timestamps } from "./columns.helpers";
 import { employees } from "./employees";
 
+/**
+ * Attachments table - Employee-specific documents
+ * Use for: contracts, CACES certificates, medical visits, personal documents
+ */
 export const attachments = sqliteTable("attachments", {
   id: text("id").primaryKey(), // UUID
 
@@ -21,7 +25,6 @@ export const attachments = sqliteTable("attachments", {
   size: integer("size").notNull(), // Size in bytes
   filePath: text("file_path").notNull(), // Relative path from data/files/{entityType}/
 
-  // Reusable timestamp columns
   ...timestamps,
 });
 

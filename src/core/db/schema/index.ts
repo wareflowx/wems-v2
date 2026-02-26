@@ -2,13 +2,13 @@
 
 // Re-export schema types for convenience
 export * from "drizzle-orm/sqlite-core";
-export * from "./attachments.ts";
-export * from "./caces.ts";
-export * from "./contracts.ts";
-export * from "./contract-types.ts";
-export * from "./departments.ts";
-export * from "./employees.ts";
-export * from "./medical-visits.ts";
-export * from "./positions.ts";
-export * from "./posts.ts";
-export * from "./work-locations.ts";
+export * from "./attachments";
+export * from "./caces";
+export * from "./contracts";
+export * from "./contract-types";
+export * from "./departments";
+export * from "./employees";
+export * from "./medical-visits";
+export * from "./positions";
+export * from "./posts";
+export * from "./work-locations";

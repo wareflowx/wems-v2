@@ -788,11 +788,7 @@ export const downloadAttachment = os.handler(async ({ input }) => {
 export const getDepartments = os.handler(async () => {
   try {
     const db = await getDb();
-    const allDepartments = await db
-      .select()
-      .from(departments)
-      .where(eq(departments.isActive, 1))
-      .orderBy(departments.name);
+    const allDepartments = await db.select().from(departments).where(eq(departments.isActive, 1)).orderBy(departments.name);
     return allDepartments;
   } catch (error) {
     console.error("Error in getDepartments:", error);
@@ -804,10 +800,7 @@ export const createDepartment = os.handler(async ({ input }) => {
   try {
     const validatedData = createDepartmentInputSchema.parse(input);
     const db = await getDb();
-    const [newDepartment] = await db
-      .insert(departments)
-      .values(validatedData)
-      .returning();
+    const [newDepartment] = await db.insert(departments).values(validatedData).returning();
     return newDepartment;
   } catch (error) {
     console.error("Error in createDepartment:", error);
@@ -819,15 +812,7 @@ export const updateDepartment = os.handler(async ({ input }) => {
   try {
     const validatedData = updateDepartmentInputSchema.parse(input);
     const db = await getDb();
-    const [updated] = await db
-      .update(departments)
-      .set({
-        name: validatedData.name,
-        code: validatedData.code,
-        isActive: validatedData.isActive,
-      })
-      .where(eq(departments.id, validatedData.id))
-      .returning();
+    const [updated] = await db.update(departments).set({ name: validatedData.name, code: validatedData.code, isActive: validatedData.isActive }).where(eq(departments.id, validatedData.id)).returning();
     return updated;
   } catch (error) {
     console.error("Error in updateDepartment:", error);
@@ -851,11 +836,7 @@ export const deleteDepartment = os.handler(async ({ input }) => {
 export const getContractTypes = os.handler(async () => {
   try {
     const db = await getDb();
-    const allTypes = await db
-      .select()
-      .from(contractTypes)
-      .where(eq(contractTypes.isActive, 1))
-      .orderBy(contractTypes.name);
+    const allTypes = await db.select().from(contractTypes).where(eq(contractTypes.isActive, 1)).orderBy(contractTypes.name);
     return allTypes;
   } catch (error) {
     console.error("Error in getContractTypes:", error);
@@ -867,10 +848,7 @@ export const createContractType = os.handler(async ({ input }) => {
   try {
     const validatedData = createContractTypeInputSchema.parse(input);
     const db = await getDb();
-    const [newType] = await db
-      .insert(contractTypes)
-      .values(validatedData)
-      .returning();
+    const [newType] = await db.insert(contractTypes).values(validatedData).returning();
     return newType;
   } catch (error) {
     console.error("Error in createContractType:", error);
@@ -882,15 +860,7 @@ export const updateContractType = os.handler(async ({ input }) => {
   try {
     const validatedData = updateContractTypeInputSchema.parse(input);
     const db = await getDb();
-    const [updated] = await db
-      .update(contractTypes)
-      .set({
-        name: validatedData.name,
-        code: validatedData.code,
-        isActive: validatedData.isActive,
-      })
-      .where(eq(contractTypes.id, validatedData.id))
-      .returning();
+    const [updated] = await db.update(contractTypes).set({ name: validatedData.name, code: validatedData.code, isActive: validatedData.isActive }).where(eq(contractTypes.id, validatedData.id)).returning();
     return updated;
   } catch (error) {
     console.error("Error in updateContractType:", error);
@@ -902,9 +872,7 @@ export const deleteContractType = os.handler(async ({ input }) => {
   try {
     const validatedData = deleteContractTypeInputSchema.parse(input);
     const db = await getDb();
-    await db
-      .delete(contractTypes)
-      .where(eq(contractTypes.id, validatedData.id));
+    await db.delete(contractTypes).where(eq(contractTypes.id, validatedData.id));
     return { success: true };
   } catch (error) {
     console.error("Error in deleteContractType:", error);
@@ -916,10 +884,7 @@ export const deleteContractType = os.handler(async ({ input }) => {
 export const getCaces = os.handler(async () => {
   try {
     const db = await getDb();
-    const allCaces = await db
-      .select()
-      .from(caces)
-      .orderBy(desc(caces.expirationDate));
+    const allCaces = await db.select().from(caces).orderBy(desc(caces.expirationDate));
     return allCaces;
   } catch (error) {
     console.error("Error in getCaces:", error);
@@ -930,11 +895,7 @@ export const getCaces = os.handler(async () => {
 export const getCacesByEmployee = os.handler(async ({ input }) => {
   try {
     const db = await getDb();
-    const employeeCaces = await db
-      .select()
-      .from(caces)
-      .where(eq(caces.employeeId, input.employeeId))
-      .orderBy(desc(caces.expirationDate));
+    const employeeCaces = await db.select().from(caces).where(eq(caces.employeeId, input.employeeId)).orderBy(desc(caces.expirationDate));
     return employeeCaces;
   } catch (error) {
     console.error("Error in getCacesByEmployee:", error);
@@ -958,16 +919,7 @@ export const updateCace = os.handler(async ({ input }) => {
   try {
     const validatedData = updateCaceInputSchema.parse(input);
     const db = await getDb();
-    const [updated] = await db
-      .update(caces)
-      .set({
-        category: validatedData.category,
-        dateObtained: validatedData.dateObtained,
-        expirationDate: validatedData.expirationDate,
-        attachmentId: validatedData.attachmentId,
-      })
-      .where(eq(caces.id, validatedData.id))
-      .returning();
+    const [updated] = await db.update(caces).set({ category: validatedData.category, dateObtained: validatedData.dateObtained, expirationDate: validatedData.expirationDate, attachmentId: validatedData.attachmentId }).where(eq(caces.id, validatedData.id)).returning();
     return updated;
   } catch (error) {
     console.error("Error in updateCace:", error);
@@ -987,15 +939,11 @@ export const deleteCace = os.handler(async ({ input }) => {
   }
 });
 
-// Attachment by type handler (for standalone documents)
+// Attachment by type handler
 export const getAttachmentsByType = os.handler(async ({ input }) => {
   try {
     const db = await getDb();
-    const entityAttachments = await db
-      .select()
-      .from(attachments)
-      .where(eq(attachments.entityType, input.entityType))
-      .orderBy(desc(attachments.createdAt));
+    const entityAttachments = await db.select().from(attachments).where(eq(attachments.entityType, input.entityType)).orderBy(desc(attachments.createdAt));
     return entityAttachments;
   } catch (error) {
     console.error("Error in getAttachmentsByType:", error);
@@ -1007,10 +955,7 @@ export const getAttachmentsByType = os.handler(async ({ input }) => {
 export const getMedicalVisits = os.handler(async () => {
   try {
     const db = await getDb();
-    const allVisits = await db
-      .select()
-      .from(medicalVisits)
-      .orderBy(desc(medicalVisits.scheduledDate));
+    const allVisits = await db.select().from(medicalVisits).orderBy(desc(medicalVisits.scheduledDate));
     return allVisits;
   } catch (error) {
     console.error("Error in getMedicalVisits:", error);
@@ -1021,11 +966,7 @@ export const getMedicalVisits = os.handler(async () => {
 export const getMedicalVisitsByEmployee = os.handler(async ({ input }) => {
   try {
     const db = await getDb();
-    const employeeVisits = await db
-      .select()
-      .from(medicalVisits)
-      .where(eq(medicalVisits.employeeId, input.employeeId))
-      .orderBy(desc(medicalVisits.scheduledDate));
+    const employeeVisits = await db.select().from(medicalVisits).where(eq(medicalVisits.employeeId, input.employeeId)).orderBy(desc(medicalVisits.scheduledDate));
     return employeeVisits;
   } catch (error) {
     console.error("Error in getMedicalVisitsByEmployee:", error);
@@ -1037,10 +978,7 @@ export const createMedicalVisit = os.handler(async ({ input }) => {
   try {
     const validatedData = createMedicalVisitInputSchema.parse(input);
     const db = await getDb();
-    const [newVisit] = await db
-      .insert(medicalVisits)
-      .values(validatedData)
-      .returning();
+    const [newVisit] = await db.insert(medicalVisits).values(validatedData).returning();
     return newVisit;
   } catch (error) {
     console.error("Error in createMedicalVisit:", error);
@@ -1052,18 +990,7 @@ export const updateMedicalVisit = os.handler(async ({ input }) => {
   try {
     const validatedData = updateMedicalVisitInputSchema.parse(input);
     const db = await getDb();
-    const [updated] = await db
-      .update(medicalVisits)
-      .set({
-        type: validatedData.type,
-        scheduledDate: validatedData.scheduledDate,
-        actualDate: validatedData.actualDate,
-        status: validatedData.status,
-        fitnessStatus: validatedData.fitnessStatus,
-        attachmentId: validatedData.attachmentId,
-      })
-      .where(eq(medicalVisits.id, validatedData.id))
-      .returning();
+    const [updated] = await db.update(medicalVisits).set({ type: validatedData.type, scheduledDate: validatedData.scheduledDate, actualDate: validatedData.actualDate, status: validatedData.status, fitnessStatus: validatedData.fitnessStatus, attachmentId: validatedData.attachmentId }).where(eq(medicalVisits.id, validatedData.id)).returning();
     return updated;
   } catch (error) {
     console.error("Error in updateMedicalVisit:", error);
@@ -1075,9 +1002,7 @@ export const deleteMedicalVisit = os.handler(async ({ input }) => {
   try {
     const validatedData = deleteMedicalVisitInputSchema.parse(input);
     const db = await getDb();
-    await db
-      .delete(medicalVisits)
-      .where(eq(medicalVisits.id, validatedData.id));
+    await db.delete(medicalVisits).where(eq(medicalVisits.id, validatedData.id));
     return { success: true };
   } catch (error) {
     console.error("Error in deleteMedicalVisit:", error);

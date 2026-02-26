@@ -78,9 +78,19 @@ export function useCreateEmployee() {
         });
       }
 
+      // Check for UNIQUE constraint error (email already exists)
+      const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      const isDuplicateEmail =
+        errorMessage.includes("UNIQUE constraint failed") &&
+        errorMessage.includes("email");
+
       toast({
-        title: "Failed to create employee",
-        description: err instanceof Error ? err.message : "An error occurred",
+        title: isDuplicateEmail
+          ? "Un employee avec cet email existe déjà"
+          : "Échec de la création de l'employé",
+        description: isDuplicateEmail
+          ? "Veuillez utiliser une adresse email différente"
+          : errorMessage,
         variant: "destructive",
       });
     },

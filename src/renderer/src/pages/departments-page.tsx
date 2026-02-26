@@ -244,6 +244,7 @@ export function DepartmentsPage() {
                       <TableRow className="hover:bg-muted/50" key={department.id}>
                         <TableCell className="px-4">
                           <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+                            <span className={`h-1.5 w-1.5 rounded-full ${department.color}`} />
                             {department.code}
                           </span>
                         </TableCell>
@@ -328,16 +329,36 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
+const COLORS = [
+  { name: "Emerald", value: "bg-emerald-500", hex: "#10b981" },
+  { name: "Amber", value: "bg-amber-500", hex: "#f59e0b" },
+  { name: "Indigo", value: "bg-indigo-500", hex: "#6366f1" },
+  { name: "Rose", value: "bg-rose-500", hex: "#f43f5e" },
+  { name: "Cyan", value: "bg-cyan-500", hex: "#06b6d4" },
+  { name: "Violet", value: "bg-violet-500", hex: "#8b5cf6" },
+  { name: "Blue", value: "bg-blue-500", hex: "#3b82f6" },
+  { name: "Green", value: "bg-green-500", hex: "#22c55e" },
+  { name: "Red", value: "bg-red-500", hex: "#ef4444" },
+  { name: "Orange", value: "bg-orange-500", hex: "#f97316" },
+];
+
+function generateCode(name: string): string {
+  return name
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z0-9]/g, "_");
+}
+
 function CreateDepartmentDialog({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const createDepartment = useCreateDepartment();
   const [name, setName] = useState("");
-  const [code, setCode] = useState("");
-  const [isActive, setIsActive] = useState(true);
+  const [selectedColor, setSelectedColor] = useState(COLORS[0].value);
 
   const handleSubmit = () => {
     createDepartment.mutate(
-      { name, code, isActive },
+      { name, code: generateCode(name), color: selectedColor, isActive: true },
       { onSuccess: onClose }
     );
   };
@@ -362,20 +383,29 @@ function CreateDepartmentDialog({ onClose }: { onClose: () => void }) {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="code">{t("departments.code")}</Label>
-            <Input
-              id="code"
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="PRODUCTION"
-            />
+            <Label>Color</Label>
+            <div className="flex flex-wrap gap-2">
+              {COLORS.map((color) => (
+                <button
+                  className={`h-8 w-8 rounded-md ${color.value} ${
+                    selectedColor === color.value
+                      ? "ring-2 ring-gray-900 ring-offset-2"
+                      : ""
+                  } transition-all hover:scale-110`}
+                  key={color.value}
+                  onClick={() => setSelectedColor(color.value)}
+                  title={color.name}
+                  type="button"
+                />
+              ))}
+            </div>
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!name || !code}>
+          <Button onClick={handleSubmit} disabled={!name}>
             {t("common.create")}
           </Button>
         </DialogFooter>
@@ -396,11 +426,11 @@ function EditDepartmentDialog({
   const { t } = useTranslation();
   const updateDepartment = useUpdateDepartment();
   const [name, setName] = useState(department.name);
-  const [code, setCode] = useState(department.code);
+  const [selectedColor, setSelectedColor] = useState(department.color || COLORS[0].value);
   const [isActive, setIsActive] = useState(department.isActive);
 
   const handleSubmit = () => {
-    onSave({ name, code, isActive });
+    onSave({ name, code: generateCode(name), color: selectedColor, isActive });
   };
 
   return (
@@ -419,12 +449,22 @@ function EditDepartmentDialog({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="edit-code">{t("departments.code")}</Label>
-            <Input
-              id="edit-code"
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-            />
+            <Label>Color</Label>
+            <div className="flex flex-wrap gap-2">
+              {COLORS.map((color) => (
+                <button
+                  className={`h-8 w-8 rounded-md ${color.value} ${
+                    selectedColor === color.value
+                      ? "ring-2 ring-gray-900 ring-offset-2"
+                      : ""
+                  } transition-all hover:scale-110`}
+                  key={color.value}
+                  onClick={() => setSelectedColor(color.value)}
+                  title={color.name}
+                  type="button"
+                />
+              ))}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -440,7 +480,7 @@ function EditDepartmentDialog({
           <Button variant="outline" onClick={onClose}>
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!name || !code}>
+          <Button onClick={handleSubmit} disabled={!name}>
             {t("common.save")}
           </Button>
         </DialogFooter>

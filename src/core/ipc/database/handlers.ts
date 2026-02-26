@@ -812,7 +812,7 @@ export const updateDepartment = os.handler(async ({ input }) => {
   try {
     const validatedData = updateDepartmentInputSchema.parse(input);
     const db = await getDb();
-    const [updated] = await db.update(departments).set({ name: validatedData.name, code: validatedData.code, isActive: validatedData.isActive }).where(eq(departments.id, validatedData.id)).returning();
+    const [updated] = await db.update(departments).set({ name: validatedData.name, code: validatedData.code, color: validatedData.color, isActive: validatedData.isActive }).where(eq(departments.id, validatedData.id)).returning();
     return updated;
   } catch (error) {
     console.error("Error in updateDepartment:", error);
@@ -860,7 +860,7 @@ export const updateContractType = os.handler(async ({ input }) => {
   try {
     const validatedData = updateContractTypeInputSchema.parse(input);
     const db = await getDb();
-    const [updated] = await db.update(contractTypes).set({ name: validatedData.name, code: validatedData.code, isActive: validatedData.isActive }).where(eq(contractTypes.id, validatedData.id)).returning();
+    const [updated] = await db.update(contractTypes).set({ name: validatedData.name, code: validatedData.code, color: validatedData.color, isActive: validatedData.isActive }).where(eq(contractTypes.id, validatedData.id)).returning();
     return updated;
   } catch (error) {
     console.error("Error in updateContractType:", error);
@@ -959,6 +959,17 @@ export const getAttachmentsByType = os.handler(async ({ input }) => {
     return entityAttachments;
   } catch (error) {
     console.error("Error in getAttachmentsByType:", error);
+    throw error;
+  }
+});
+
+export const getAttachmentsByEmployee = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const employeeAttachments = await db.select().from(attachments).where(eq(attachments.employeeId, input.employeeId)).orderBy(desc(attachments.createdAt));
+    return employeeAttachments;
+  } catch (error) {
+    console.error("Error in getAttachmentsByEmployee:", error);
     throw error;
   }
 });

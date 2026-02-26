@@ -9,6 +9,7 @@ export const departments = sqliteTable("departments", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   code: text("code").notNull().unique(),
+  color: text("color").notNull(), // ex: "bg-emerald-500", "bg-amber-500"
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   ...timestamps,
 });

@@ -166,6 +166,7 @@ export const getAttachmentsInputSchema = z.object({
 export const createDepartmentInputSchema = z.object({
   name: z.string().min(1, "Name is required"),
   code: z.string().min(1, "Code is required"),
+  color: z.string().min(1, "Color is required"),
   isActive: z.boolean().default(true),
 });
 
@@ -173,6 +174,7 @@ export const updateDepartmentInputSchema = z.object({
   id: z.number(),
   name: z.string().min(1, "Name is required"),
   code: z.string().min(1, "Code is required"),
+  color: z.string().min(1, "Color is required"),
   isActive: z.boolean(),
 });
 
@@ -184,6 +186,7 @@ export const deleteDepartmentInputSchema = z.object({
 export const createContractTypeInputSchema = z.object({
   name: z.string().min(1, "Name is required"),
   code: z.string().min(1, "Code is required"),
+  color: z.string().min(1, "Color is required"),
   isActive: z.boolean().default(true),
 });
 
@@ -191,6 +194,7 @@ export const updateContractTypeInputSchema = z.object({
   id: z.number(),
   name: z.string().min(1, "Name is required"),
   code: z.string().min(1, "Code is required"),
+  color: z.string().min(1, "Color is required"),
   isActive: z.boolean(),
 });
 

@@ -39,6 +39,8 @@ export const queryKeys = {
     list: (filters: string) => ["caces", "list", filters] as const,
     details: () => ["caces", "detail"] as const,
     detail: (id: number) => ["caces", "detail", id] as const,
+    byEmployee: (employeeId: number) =>
+      ["caces", "byEmployee", employeeId] as const,
   },
 
   // Medical Visits

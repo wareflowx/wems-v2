@@ -20,40 +20,54 @@ import {
 } from "@/components/ui/select";
 import { CacesFileUpload } from "./CacesFileUpload";
 
+interface Employee {
+  id: number;
+  firstName: string;
+  lastName: string;
+}
+
 interface AddCacesDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onAdd?: (data: {
-    employee: string;
+    employeeId: number;
     category: string;
-    issueDate: string;
-    expiryDate: string;
+    dateObtained: string;
+    expirationDate: string;
     document: string;
   }) => void;
+  employees?: Employee[];
 }
 
 export function AddCacesDialog({
   open,
   onOpenChange,
   onAdd,
+  employees = [],
 }: AddCacesDialogProps) {
   const { t } = useTranslation();
-  const [employee, setEmployee] = useState<string>("");
+  const [employeeId, setEmployeeId] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [issueDate, setIssueDate] = useState<string>("");
   const [expiryDate, setExpiryDate] = useState<string>("");
   const [document, setDocument] = useState<string>("");
 
   const handleSubmit = () => {
-    onAdd?.({ employee, category, issueDate, expiryDate, document });
+    onAdd?.({
+      employeeId: parseInt(employeeId, 10),
+      category,
+      dateObtained: issueDate,
+      expirationDate: expiryDate,
+      document,
+    });
   };
 
-  const isFormValid = employee && category && issueDate && expiryDate;
+  const isFormValid = employeeId && category && issueDate && expiryDate;
 
   // Reset form when dialog closes
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      setEmployee("");
+      setEmployeeId("");
       setCategory("");
       setIssueDate("");
       setExpiryDate("");
@@ -62,15 +76,7 @@ export function AddCacesDialog({
     onOpenChange?.(open);
   };
 
-  const employees = [
-    { id: 1, name: "Jean Dupont" },
-    { id: 2, name: "Marie Martin" },
-    { id: 3, name: "Pierre Bernard" },
-    { id: 4, name: "Sophie Petit" },
-    { id: 5, name: "Luc Dubois" },
-  ];
-
-  const categories = ["1A", "1B", "3", "5", "7"];
+  const categories = ["1A", "1B", "2", "3", "4", "5", "6", "7", "8", "9"];
 
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
@@ -87,14 +93,14 @@ export function AddCacesDialog({
             <Label className="font-medium text-sm" htmlFor="employee">
               {t("caces.employee")}
             </Label>
-            <Select onValueChange={setEmployee} value={employee}>
+            <Select onValueChange={setEmployeeId} value={employeeId}>
               <SelectTrigger id="employee">
                 <SelectValue placeholder={t("caces.selectEmployee")} />
               </SelectTrigger>
               <SelectContent>
                 {employees.map((emp) => (
-                  <SelectItem key={emp.id} value={emp.name}>
-                    {emp.name}
+                  <SelectItem key={emp.id} value={emp.id.toString()}>
+                    {emp.firstName} {emp.lastName}
                   </SelectItem>
                 ))}
               </SelectContent>

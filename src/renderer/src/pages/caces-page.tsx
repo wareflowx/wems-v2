@@ -48,6 +48,7 @@ import {
   useCaces,
   useCreateCaces,
   useDeleteCaces,
+  useEmployees,
   useUpdateCaces,
 } from "@/hooks";
 
@@ -66,6 +67,7 @@ export function CacesPage() {
 
   // Use TanStack Query hooks
   const { data: caces = [], isLoading } = useCaces();
+  const { data: employees = [] } = useEmployees();
   const createCaces = useCreateCaces();
   const updateCaces = useUpdateCaces();
   const deleteCaces = useDeleteCaces();
@@ -93,16 +95,23 @@ export function CacesPage() {
   }, [caces]);
 
   const uniqueEmployees = useMemo(() => {
-    const employees = new Set(caces.map((c) => c.employee));
-    return Array.from(employees);
+    const employees = new Map<number, string>();
+    caces.forEach((c) => {
+      if (c.employee) {
+        employees.set(c.employee.id, `${c.employee.firstName} ${c.employee.lastName}`);
+      }
+    });
+    return Array.from(employees.entries()).map(([id, name]) => ({ id, name }));
   }, [caces]);
 
   // Filter CACES
   const filteredCaces = useMemo(() => {
     return caces.filter((cace) => {
+      const employeeName = cace.employee ? `${cace.employee.firstName} ${cace.employee.lastName}` : "";
+
       const matchesSearch =
         search === "" ||
-        cace.employee.toLowerCase().includes(search.toLowerCase()) ||
+        employeeName.toLowerCase().includes(search.toLowerCase()) ||
         cace.category.toLowerCase().includes(search.toLowerCase());
 
       const matchesCategory =
@@ -110,7 +119,7 @@ export function CacesPage() {
       const matchesStatus =
         statusFilter === "all" || cace.status === statusFilter;
       const matchesEmployee =
-        employeeFilter === "all" || cace.employee === employeeFilter;
+        employeeFilter === "all" || employeeName === employeeFilter;
 
       return (
         matchesSearch && matchesCategory && matchesStatus && matchesEmployee
@@ -414,8 +423,8 @@ export function CacesPage() {
                     {t("dashboard.allEmployees")}
                   </SelectItem>
                   {uniqueEmployees.map((employee) => (
-                    <SelectItem key={employee} value={employee}>
-                      {employee}
+                    <SelectItem key={employee.id} value={employee.name}>
+                      {employee.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -545,7 +554,7 @@ export function CacesPage() {
                             className="text-gray-700 underline transition-opacity hover:opacity-80"
                             to={`/employees_/${cacesItem.employeeId}`}
                           >
-                            {cacesItem.employee}
+                            {cacesItem.employee ? `${cacesItem.employee.firstName} ${cacesItem.employee.lastName}` : "-"}
                           </Link>
                         </TableCell>
                         <TableCell className="px-4">
@@ -667,6 +676,7 @@ export function CacesPage() {
         </div>
       </div>
       <AddCacesDialog
+        employees={employees}
         onAdd={handleAddCaces}
         onOpenChange={setIsAddDialogOpen}
         open={isAddDialogOpen}

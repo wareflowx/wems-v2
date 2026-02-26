@@ -16,10 +16,15 @@ interface CaceFromDB {
   updatedAt: string;
 }
 
-// Extended type with calculated fields
+// Extended type with calculated fields and employee info
 export interface Cace extends CaceFromDB {
   daysLeft: number;
   status: "valid" | "warning" | "expired";
+  employee?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  };
 }
 
 // Calculate daysLeft and status from expirationDate
@@ -45,11 +50,15 @@ function calculateCaceStatus(expirationDate: string): { daysLeft: number; status
 }
 
 // Add calculated fields to CACES data
-function enrichCacesWithStatus(caces: CaceFromDB[]): Cace[] {
-  return caces.map((cace) => ({
-    ...cace,
-    ...calculateCaceStatus(cace.expirationDate),
-  }));
+function enrichCacesWithStatus(caces: CaceFromDB[], employees?: { id: number; firstName: string; lastName: string }[]): Cace[] {
+  return caces.map((cace) => {
+    const employee = employees?.find((e) => e.id === cace.employeeId);
+    return {
+      ...cace,
+      ...calculateCaceStatus(cace.expirationDate),
+      employee: employee ? { id: employee.id, firstName: employee.firstName, lastName: employee.lastName } : undefined,
+    };
+  });
 }
 
 // Hook for fetching CACES certifications list
@@ -59,8 +68,11 @@ export function useCaces() {
   return useQuery({
     queryKey: queryKeys.caces.lists(),
     queryFn: async () => {
-      const data = await db.getCaces();
-      return enrichCacesWithStatus(data);
+      const [cacesData, employeesData] = await Promise.all([
+        db.getCaces(),
+        db.getEmployees(),
+      ]);
+      return enrichCacesWithStatus(cacesData, employeesData);
     },
     enabled: orpcReady,
   });

@@ -384,3 +384,60 @@ export async function deleteAttachment(id: string) {
   }
   return client.database.deleteAttachment({ id });
 }
+
+// Medical Visit actions
+export async function getMedicalVisits() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getMedicalVisits();
+}
+
+export async function getMedicalVisitsByEmployee(employeeId: number) {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getMedicalVisitsByEmployee({ employeeId });
+}
+
+export async function createMedicalVisit(data: {
+  employeeId: number;
+  type: "periodique" | "reprise" | "initiale" | "embauche";
+  scheduledDate: string;
+  actualDate?: string;
+  status?: "scheduled" | "completed" | "overdue" | "cancelled";
+  fitnessStatus?: "Apt" | "Apt partiel" | "Inapte";
+  attachmentId?: string;
+}) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.createMedicalVisit(data);
+}
+
+export async function updateMedicalVisit(data: {
+  id: number;
+  type?: "periodique" | "reprise" | "initiale" | "embauche";
+  scheduledDate?: string;
+  actualDate?: string | null;
+  status?: "scheduled" | "completed" | "overdue" | "cancelled";
+  fitnessStatus?: "Apt" | "Apt partiel" | "Inapte" | null;
+  attachmentId?: string | null;
+}) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.updateMedicalVisit(data);
+}
+
+export async function deleteMedicalVisit(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.deleteMedicalVisit({ id });
+}

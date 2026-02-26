@@ -8,6 +8,7 @@ import {
   contractTypes,
   departments,
   employees,
+  medicalVisits,
   positions,
   posts,
   workLocations,
@@ -18,6 +19,7 @@ import {
   createContractTypeInputSchema,
   createDepartmentInputSchema,
   createEmployeeInputSchema,
+  createMedicalVisitInputSchema,
   createPositionInputSchema,
   createPostInputSchema,
   createWorkLocationInputSchema,
@@ -26,12 +28,14 @@ import {
   deleteContractTypeInputSchema,
   deleteDepartmentInputSchema,
   deleteEmployeeInputSchema,
+  deleteMedicalVisitInputSchema,
   deletePositionInputSchema,
   deleteWorkLocationInputSchema,
   updateCaceInputSchema,
   updateContractTypeInputSchema,
   updateDepartmentInputSchema,
   updateEmployeeInputSchema,
+  updateMedicalVisitInputSchema,
   updatePositionInputSchema,
   updateWorkLocationInputSchema,
 } from "./schemas";
@@ -682,6 +686,88 @@ export const deleteAttachment = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in deleteAttachment:", error);
+    throw error;
+  }
+});
+
+// Medical Visit handlers
+export const getMedicalVisits = os.handler(async () => {
+  try {
+    const db = await getDb();
+    const allVisits = await db
+      .select()
+      .from(medicalVisits)
+      .orderBy(desc(medicalVisits.scheduledDate));
+    return allVisits;
+  } catch (error) {
+    console.error("Error in getMedicalVisits:", error);
+    throw error;
+  }
+});
+
+export const getMedicalVisitsByEmployee = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const employeeVisits = await db
+      .select()
+      .from(medicalVisits)
+      .where(eq(medicalVisits.employeeId, input.employeeId))
+      .orderBy(desc(medicalVisits.scheduledDate));
+    return employeeVisits;
+  } catch (error) {
+    console.error("Error in getMedicalVisitsByEmployee:", error);
+    throw error;
+  }
+});
+
+export const createMedicalVisit = os.handler(async ({ input }) => {
+  try {
+    const validatedData = createMedicalVisitInputSchema.parse(input);
+    const db = await getDb();
+    const [newVisit] = await db
+      .insert(medicalVisits)
+      .values(validatedData)
+      .returning();
+    return newVisit;
+  } catch (error) {
+    console.error("Error in createMedicalVisit:", error);
+    throw error;
+  }
+});
+
+export const updateMedicalVisit = os.handler(async ({ input }) => {
+  try {
+    const validatedData = updateMedicalVisitInputSchema.parse(input);
+    const db = await getDb();
+    const [updated] = await db
+      .update(medicalVisits)
+      .set({
+        type: validatedData.type,
+        scheduledDate: validatedData.scheduledDate,
+        actualDate: validatedData.actualDate,
+        status: validatedData.status,
+        fitnessStatus: validatedData.fitnessStatus,
+        attachmentId: validatedData.attachmentId,
+      })
+      .where(eq(medicalVisits.id, validatedData.id))
+      .returning();
+    return updated;
+  } catch (error) {
+    console.error("Error in updateMedicalVisit:", error);
+    throw error;
+  }
+});
+
+export const deleteMedicalVisit = os.handler(async ({ input }) => {
+  try {
+    const validatedData = deleteMedicalVisitInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .delete(medicalVisits)
+      .where(eq(medicalVisits.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteMedicalVisit:", error);
     throw error;
   }
 });

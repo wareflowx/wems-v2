@@ -161,3 +161,28 @@ export const createAttachmentInputSchema = z.object({
 export const deleteAttachmentInputSchema = z.object({
   id: z.string(),
 });
+
+// Medical Visit schemas
+export const createMedicalVisitInputSchema = z.object({
+  employeeId: z.number().min(1, "Employee is required"),
+  type: z.enum(["periodique", "reprise", "initiale", "embauche"]),
+  scheduledDate: z.string().min(1, "Scheduled date is required"),
+  actualDate: z.string().optional(),
+  status: z.enum(["scheduled", "completed", "overdue", "cancelled"]).default("scheduled"),
+  fitnessStatus: z.enum(["Apt", "Apt partiel", "Inapte"]).optional(),
+  attachmentId: z.string().optional(),
+});
+
+export const updateMedicalVisitInputSchema = z.object({
+  id: z.number(),
+  type: z.enum(["periodique", "reprise", "initiale", "embauche"]).optional(),
+  scheduledDate: z.string().min(1, "Scheduled date is required").optional(),
+  actualDate: z.string().optional().nullable(),
+  status: z.enum(["scheduled", "completed", "overdue", "cancelled"]).optional(),
+  fitnessStatus: z.enum(["Apt", "Apt partiel", "Inapte"]).optional().nullable(),
+  attachmentId: z.string().optional().nullable(),
+});
+
+export const deleteMedicalVisitInputSchema = z.object({
+  id: z.number(),
+});

@@ -5,6 +5,7 @@ import {
   createContractType,
   createDepartment,
   createEmployee,
+  createMedicalVisit,
   createPosition,
   createPost,
   createWorkLocation,
@@ -14,6 +15,7 @@ import {
   deleteContractType,
   deleteDepartment,
   deleteEmployee,
+  deleteMedicalVisit,
   deletePosition,
   deleteWorkLocation,
   getAttachments,
@@ -28,6 +30,8 @@ import {
   getDepartments,
   getEmployeeById,
   getEmployees,
+  getMedicalVisits,
+  getMedicalVisitsByEmployee,
   getPositions,
   getPosts,
   getWorkLocations,
@@ -36,6 +40,7 @@ import {
   updateContractType,
   updateDepartment,
   updateEmployee,
+  updateMedicalVisit,
   updatePosition,
   updateWorkLocation,
 } from "./handlers";
@@ -83,4 +88,10 @@ export const database = {
   getAttachmentsByEmployee,
   createAttachment,
   deleteAttachment,
+  // Medical Visits
+  getMedicalVisits,
+  getMedicalVisitsByEmployee,
+  createMedicalVisit,
+  updateMedicalVisit,
+  deleteMedicalVisit,
 };

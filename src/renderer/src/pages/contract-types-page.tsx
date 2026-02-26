@@ -196,6 +196,9 @@ export function ContractTypesPage() {
                       {t("contractTypes.name")}
                     </TableHead>
                     <TableHead className="px-4">
+                      Color
+                    </TableHead>
+                    <TableHead className="px-4">
                       {t("contractTypes.status")}
                     </TableHead>
                     <TableHead className="px-4 text-right">
@@ -206,7 +209,7 @@ export function ContractTypesPage() {
                 <TableBody>
                   {filteredContractTypes.length === 0 ? (
                     <TableRow>
-                      <TableCell className="h-64" colSpan={4}>
+                      <TableCell className="h-64" colSpan={5}>
                         <div className="flex h-full flex-col items-center justify-center p-8 text-muted-foreground">
                           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                             <SearchX className="h-8 w-8 opacity-50" />
@@ -225,12 +228,14 @@ export function ContractTypesPage() {
                       <TableRow className="hover:bg-muted/50" key={contractType.id}>
                         <TableCell className="px-4">
                           <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
-                            <span className={`h-1.5 w-1.5 rounded-full ${contractType.color}`} />
                             {contractType.code}
                           </span>
                         </TableCell>
                         <TableCell className="max-w-[300px] truncate px-4 font-medium">
                           {contractType.name}
+                        </TableCell>
+                        <TableCell className="px-4">
+                          <span className={`h-3 w-3 rounded-full ${contractType.color}`} />
                         </TableCell>
                         <TableCell className="px-4">
                           {contractType.isActive ? (

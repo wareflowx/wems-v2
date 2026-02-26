@@ -213,6 +213,108 @@ export async function deleteContract(id: number) {
   return client.database.deleteContract({ id });
 }
 
+// Media
+export async function getAllMedia(type?: "logo" | "template" | "document" | "other") {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getAllMedia({ type });
+}
+
+export async function getMediaById(id: string) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.getMediaById({ id });
+}
+
+export async function createMedia(data: {
+  id?: string;
+  name: string;
+  type: "logo" | "template" | "document" | "other";
+  fileName?: string;
+  mimeType?: string;
+  size?: number;
+  fileData?: string;
+}) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.createMedia(data);
+}
+
+export async function deleteMedia(id: string) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.deleteMedia({ id });
+}
+
+export async function downloadMedia(id: string) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.downloadMedia({ id });
+}
+
+// Attachments
+export async function getAttachments(
+  employeeId?: number,
+  entityType?: "contract" | "caces" | "document" | "medical_visit"
+) {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getAttachments({ employeeId, entityType });
+}
+
+export async function getAttachmentById(id: string) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.getAttachmentById({ id });
+}
+
+export async function createAttachment(data: {
+  id?: string;
+  employeeId: number;
+  entityType: "contract" | "caces" | "document" | "medical_visit";
+  entityId?: number;
+  originalName: string;
+  mimeType?: string;
+  size?: number;
+  fileData: string;
+}) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.createAttachment(data);
+}
+
+export async function deleteAttachment(id: string) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.deleteAttachment({ id });
+}
+
+export async function downloadAttachment(id: string) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.downloadAttachment({ id });
+}
+
 // Departments
 export async function getDepartments() {
   const client = getClient();
@@ -332,15 +434,7 @@ export async function deleteCace(id: number) {
   return client.database.deleteCace({ id });
 }
 
-// Attachment actions
-export async function getAttachments() {
-  const client = getClient();
-  if (!client) {
-    return [];
-  }
-  return client.database.getAttachments();
-}
-
+// Attachment by entity actions
 export async function getAttachmentsByEntity(
   entityType: "contract" | "caces" | "document" | "medical_visit",
   entityId: number
@@ -352,37 +446,22 @@ export async function getAttachmentsByEntity(
   return client.database.getAttachmentsByEntity({ entityType, entityId });
 }
 
+export async function getAttachmentsByType(
+  entityType: "contract" | "caces" | "document" | "medical_visit"
+) {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getAttachmentsByType({ entityType });
+}
+
 export async function getAttachmentsByEmployee(employeeId: number) {
   const client = getClient();
   if (!client) {
     return [];
   }
   return client.database.getAttachmentsByEmployee({ employeeId });
-}
-
-export async function createAttachment(data: {
-  employeeId: number;
-  entityType: "contract" | "caces" | "document" | "medical_visit";
-  entityId?: number;
-  originalName: string;
-  storedName: string;
-  mimeType: string;
-  size: number;
-  filePath: string;
-}) {
-  const client = getClient();
-  if (!client) {
-    return null;
-  }
-  return client.database.createAttachment(data);
-}
-
-export async function deleteAttachment(id: string) {
-  const client = getClient();
-  if (!client) {
-    return null;
-  }
-  return client.database.deleteAttachment({ id });
 }
 
 // Medical Visit actions

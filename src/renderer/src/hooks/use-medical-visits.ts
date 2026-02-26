@@ -1,28 +1,126 @@
 import { queryKeys } from "@@/lib/query-keys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  type CreateMedicalVisitInput,
-  type MedicalVisit,
-  type MedicalVisitFilters,
-  medicalVisitsApi,
-  type UpdateMedicalVisitInput,
-} from "@/api/medical-visits";
+import * as db from "@/actions/database";
 import { useToast } from "@/utils/toast";
+import { useORPCReady } from "./use-orpc-ready";
+
+// Medical Visit type from DB (without calculated fields)
+interface MedicalVisitFromDB {
+  id: number;
+  employeeId: number;
+  type: "periodique" | "reprise" | "initiale" | "embauche";
+  scheduledDate: string;
+  actualDate: string | null;
+  status: "scheduled" | "completed" | "overdue" | "cancelled";
+  fitnessStatus: "Apt" | "Apt partiel" | "Inapte" | null;
+  attachmentId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Extended type with calculated fields
+export interface MedicalVisit extends MedicalVisitFromDB {
+  daysUntil: number;
+  employee?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  };
+}
+
+// Calculate daysUntil and auto-update status based on scheduledDate
+function calculateVisitStatus(scheduledDate: string, currentStatus: string): { daysUntil: number; status: "scheduled" | "completed" | "overdue" | "cancelled" } {
+  if (currentStatus === "completed" || currentStatus === "cancelled") {
+    return { daysUntil: 0, status: currentStatus };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const scheduled = new Date(scheduledDate);
+  scheduled.setHours(0, 0, 0, 0);
+
+  const diffTime = scheduled.getTime() - today.getTime();
+  const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  let status: "scheduled" | "overdue";
+  if (daysUntil < 0) {
+    status = "overdue";
+  } else {
+    status = "scheduled";
+  }
+
+  return { daysUntil, status };
+}
+
+// Add calculated fields to visits data
+function enrichVisitsWithStatus(
+  visits: MedicalVisitFromDB[],
+  employees?: { id: number; firstName: string; lastName: string }[]
+): MedicalVisit[] {
+  return visits.map((visit) => {
+    const employee = employees?.find((e) => e.id === visit.employeeId);
+    const { daysUntil, status } = calculateVisitStatus(visit.scheduledDate, visit.status);
+    return {
+      ...visit,
+      daysUntil,
+      status: visit.status === "completed" || visit.status === "cancelled" ? visit.status : status,
+      employee: employee
+        ? { id: employee.id, firstName: employee.firstName, lastName: employee.lastName }
+        : undefined,
+    };
+  });
+}
 
 // Hook for fetching medical visits list
-export function useMedicalVisits(filters?: MedicalVisitFilters) {
+export function useMedicalVisits() {
+  const orpcReady = useORPCReady();
+
   return useQuery({
-    queryKey: queryKeys.medicalVisits.list(JSON.stringify(filters)),
-    queryFn: () => medicalVisitsApi.getAll(filters),
+    queryKey: queryKeys.medicalVisits.lists(),
+    queryFn: async () => {
+      const [visitsData, employeesData] = await Promise.all([
+        db.getMedicalVisits(),
+        db.getEmployees(),
+      ]);
+      return enrichVisitsWithStatus(visitsData, employeesData);
+    },
+    enabled: orpcReady,
+  });
+}
+
+// Hook for fetching medical visits by employee
+export function useMedicalVisitsByEmployee(employeeId: number) {
+  const orpcReady = useORPCReady();
+
+  return useQuery({
+    queryKey: queryKeys.medicalVisits.byEmployee(employeeId),
+    queryFn: async () => {
+      const [visitsData, employeesData] = await Promise.all([
+        db.getMedicalVisitsByEmployee(employeeId),
+        db.getEmployees(),
+      ]);
+      return enrichVisitsWithStatus(visitsData, employeesData);
+    },
+    enabled: orpcReady && !!employeeId,
   });
 }
 
 // Hook for fetching single medical visit
 export function useMedicalVisit(id: number) {
+  const orpcReady = useORPCReady();
+
   return useQuery({
     queryKey: queryKeys.medicalVisits.detail(id),
-    queryFn: () => medicalVisitsApi.getById(id),
-    enabled: !!id,
+    queryFn: async () => {
+      const [visitsData, employeesData] = await Promise.all([
+        db.getMedicalVisits(),
+        db.getEmployees(),
+      ]);
+      const visit = visitsData.find((v) => v.id === id);
+      if (!visit) return null;
+      return enrichVisitsWithStatus([visit], employeesData)[0];
+    },
+    enabled: orpcReady && !!id,
   });
 }
 
@@ -32,8 +130,15 @@ export function useCreateMedicalVisit() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (input: CreateMedicalVisitInput) =>
-      medicalVisitsApi.create(input),
+    mutationFn: (input: {
+      employeeId: number;
+      type: "periodique" | "reprise" | "initiale" | "embauche";
+      scheduledDate: string;
+      actualDate?: string;
+      status?: "scheduled" | "completed" | "overdue" | "cancelled";
+      fitnessStatus?: "Apt" | "Apt partiel" | "Inapte";
+      attachmentId?: string;
+    }) => db.createMedicalVisit(input),
 
     onMutate: async (newVisit) => {
       await queryClient.cancelQueries({
@@ -47,17 +152,23 @@ export function useCreateMedicalVisit() {
           previousQueries.set(JSON.stringify(key), data as MedicalVisit[]);
         });
 
+      const optimisticVisit: MedicalVisit = {
+        id: Date.now(),
+        employeeId: newVisit.employeeId,
+        type: newVisit.type,
+        scheduledDate: newVisit.scheduledDate,
+        actualDate: newVisit.actualDate || null,
+        status: newVisit.status || "scheduled",
+        fitnessStatus: newVisit.fitnessStatus || null,
+        attachmentId: newVisit.attachmentId || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        daysUntil: 0,
+      };
+
       queryClient.setQueriesData(
         { queryKey: queryKeys.medicalVisits.lists() },
-        (old: MedicalVisit[] = []) => [
-          ...old,
-          {
-            ...newVisit,
-            id: Date.now(),
-            daysUntil: 0,
-            status: "scheduled",
-          },
-        ]
+        (old: MedicalVisit[] = []) => [...old, optimisticVisit]
       );
 
       return { previousQueries };
@@ -93,10 +204,17 @@ export function useUpdateMedicalVisit() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (input: UpdateMedicalVisitInput) =>
-      medicalVisitsApi.update(input),
+    mutationFn: (input: {
+      id: number;
+      type?: "periodique" | "reprise" | "initiale" | "embauche";
+      scheduledDate?: string;
+      actualDate?: string | null;
+      status?: "scheduled" | "completed" | "overdue" | "cancelled";
+      fitnessStatus?: "Apt" | "Apt partiel" | "Inapte" | null;
+      attachmentId?: string | null;
+    }) => db.updateMedicalVisit(input),
 
-    onMutate: async ({ id, updates }) => {
+    onMutate: async (updatedVisit) => {
       await queryClient.cancelQueries({
         queryKey: queryKeys.medicalVisits.lists(),
       });
@@ -111,9 +229,19 @@ export function useUpdateMedicalVisit() {
       queryClient.setQueriesData(
         { queryKey: queryKeys.medicalVisits.lists() },
         (old: MedicalVisit[] = []) =>
-          old.map((visit) =>
-            visit.id === id ? { ...visit, ...updates } : visit
-          )
+          old.map((visit) => {
+            if (visit.id !== updatedVisit.id) return visit;
+            const updated = { ...visit, ...updatedVisit };
+            // Recalculate status if scheduledDate changed
+            if (updatedVisit.scheduledDate) {
+              const { daysUntil, status } = calculateVisitStatus(
+                updated.scheduledDate,
+                updated.status
+              );
+              return { ...updated, daysUntil, status };
+            }
+            return updated;
+          })
       );
 
       return { previousQueries };
@@ -152,7 +280,7 @@ export function useDeleteMedicalVisit() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (id: number) => medicalVisitsApi.delete(id),
+    mutationFn: (id: number) => db.deleteMedicalVisit(id),
 
     onMutate: async (id) => {
       await queryClient.cancelQueries({

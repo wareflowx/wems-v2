@@ -70,10 +70,12 @@ export function DocumentsPage() {
   const deleteDocument = useDeleteDocument();
 
   const handleAddDocument = (data: {
-    employee: string;
-    type: string;
-    name: string;
-    document: string;
+    employeeId: number;
+    originalName: string;
+    storedName: string;
+    mimeType: string;
+    size: number;
+    filePath: string;
   }) => {
     createDocument.mutate(data, {
       onSuccess: () => {

@@ -20,15 +20,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useEmployees } from "@/hooks";
 
 interface AddDocumentDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onAdd?: (data: {
-    employee: string;
-    type: string;
-    name: string;
-    document: string;
+    employeeId: number;
+    originalName: string;
+    storedName: string;
+    mimeType: string;
+    size: number;
+    filePath: string;
   }) => void;
 }
 
@@ -38,42 +41,40 @@ export function AddDocumentDialog({
   onAdd,
 }: AddDocumentDialogProps) {
   const { t } = useTranslation();
-  const [employee, setEmployee] = useState<string>("");
-  const [type, setType] = useState<string>("");
+  const { data: employees = [] } = useEmployees();
+  const [employeeId, setEmployeeId] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [document, setDocument] = useState<string>("");
 
   const handleSubmit = () => {
-    onAdd?.({ employee, type, name, document });
+    if (!employeeId || !name || !document) return;
+
+    // Use the user-provided name, fallback to filename if not provided
+    const finalName = name || document;
+
+    // For now, use placeholder values for file metadata
+    // In a real implementation, the file upload would provide these
+    onAdd?.({
+      employeeId: parseInt(employeeId),
+      originalName: finalName,
+      storedName: `${Date.now()}-${document}`,
+      mimeType: "application/pdf",
+      size: 0,
+      filePath: `/files/documents/${document}`,
+    });
   };
 
-  const isFormValid = employee && type && name && document;
+  const isFormValid = employeeId && name && document;
 
   // Reset form when dialog closes
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      setEmployee("");
-      setType("");
+      setEmployeeId("");
       setName("");
       setDocument("");
     }
     onOpenChange(open);
   };
-
-  const employees = [
-    { id: 1, name: "Jean Dupont" },
-    { id: 2, name: "Marie Martin" },
-    { id: 3, name: "Pierre Bernard" },
-    { id: 4, name: "Sophie Petit" },
-    { id: 5, name: "Luc Dubois" },
-  ];
-
-  const documentTypes = [
-    "Contrat",
-    "CACES",
-    "Visite médicale",
-    "Identification",
-  ];
 
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
@@ -90,32 +91,14 @@ export function AddDocumentDialog({
             <Label className="font-medium text-sm" htmlFor="employee">
               {t("documents.employee")}
             </Label>
-            <Select onValueChange={setEmployee} value={employee}>
+            <Select onValueChange={setEmployeeId} value={employeeId}>
               <SelectTrigger id="employee">
                 <SelectValue placeholder={t("documents.selectEmployee")} />
               </SelectTrigger>
               <SelectContent>
                 {employees.map((emp) => (
-                  <SelectItem key={emp.id} value={emp.name}>
-                    {emp.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="font-medium text-sm" htmlFor="type">
-              {t("documents.type")}
-            </Label>
-            <Select onValueChange={setType} value={type}>
-              <SelectTrigger id="type">
-                <SelectValue placeholder={t("documents.selectType")} />
-              </SelectTrigger>
-              <SelectContent>
-                {documentTypes.map((docType) => (
-                  <SelectItem key={docType} value={docType}>
-                    {docType}
+                  <SelectItem key={emp.id} value={emp.id.toString()}>
+                    {emp.firstName} {emp.lastName}
                   </SelectItem>
                 ))}
               </SelectContent>

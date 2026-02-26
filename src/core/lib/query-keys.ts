@@ -29,7 +29,7 @@ export const queryKeys = {
     lists: () => ["documents", "list"] as const,
     list: (filters: string) => ["documents", "list", filters] as const,
     details: () => ["documents", "detail"] as const,
-    detail: (id: number) => ["documents", "detail", id] as const,
+    detail: (id: string) => ["documents", "detail", id] as const,
   },
 
   // CACES Certifications

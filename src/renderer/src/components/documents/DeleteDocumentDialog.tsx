@@ -14,10 +14,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface Document {
-  id: number;
+  id: string;
   name: string;
   type: string;
   employee: string;
+  employeeId: number;
   uploadDate: string;
   size: string;
   category: string;

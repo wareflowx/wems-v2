@@ -2,6 +2,8 @@ import { os } from "@orpc/server";
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "@/core/db";
 import {
+  attachments,
+  caces,
   contracts,
   contractTypes,
   departments,
@@ -11,17 +13,22 @@ import {
   workLocations,
 } from "@/core/db/schema";
 import {
+  createAttachmentInputSchema,
+  createCaceInputSchema,
   createContractTypeInputSchema,
   createDepartmentInputSchema,
   createEmployeeInputSchema,
   createPositionInputSchema,
   createPostInputSchema,
   createWorkLocationInputSchema,
+  deleteAttachmentInputSchema,
+  deleteCaceInputSchema,
   deleteContractTypeInputSchema,
   deleteDepartmentInputSchema,
   deleteEmployeeInputSchema,
   deletePositionInputSchema,
   deleteWorkLocationInputSchema,
+  updateCaceInputSchema,
   updateContractTypeInputSchema,
   updateDepartmentInputSchema,
   updateEmployeeInputSchema,
@@ -524,6 +531,157 @@ export const deleteContractType = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in deleteContractType:", error);
+    throw error;
+  }
+});
+
+// CACES handlers
+export const getCaces = os.handler(async () => {
+  try {
+    const db = await getDb();
+    const allCaces = await db.select().from(caces).orderBy(desc(caces.id));
+    return allCaces;
+  } catch (error) {
+    console.error("Error in getCaces:", error);
+    throw error;
+  }
+});
+
+export const getCacesByEmployee = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const employeeCaces = await db
+      .select()
+      .from(caces)
+      .where(eq(caces.employeeId, input.employeeId))
+      .orderBy(desc(caces.expirationDate));
+    return employeeCaces;
+  } catch (error) {
+    console.error("Error in getCacesByEmployee:", error);
+    throw error;
+  }
+});
+
+export const createCace = os.handler(async ({ input }) => {
+  try {
+    const validatedData = createCaceInputSchema.parse(input);
+    const db = await getDb();
+    const [newCace] = await db.insert(caces).values(validatedData).returning();
+    return newCace;
+  } catch (error) {
+    console.error("Error in createCace:", error);
+    throw error;
+  }
+});
+
+export const updateCace = os.handler(async ({ input }) => {
+  try {
+    const validatedData = updateCaceInputSchema.parse(input);
+    const db = await getDb();
+    const [updated] = await db
+      .update(caces)
+      .set({
+        category: validatedData.category,
+        dateObtained: validatedData.dateObtained,
+        expirationDate: validatedData.expirationDate,
+        attachmentId: validatedData.attachmentId,
+      })
+      .where(eq(caces.id, validatedData.id))
+      .returning();
+    return updated;
+  } catch (error) {
+    console.error("Error in updateCace:", error);
+    throw error;
+  }
+});
+
+export const deleteCace = os.handler(async ({ input }) => {
+  try {
+    const validatedData = deleteCaceInputSchema.parse(input);
+    const db = await getDb();
+    await db.delete(caces).where(eq(caces.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteCace:", error);
+    throw error;
+  }
+});
+
+// Attachment handlers
+export const getAttachments = os.handler(async () => {
+  try {
+    const db = await getDb();
+    const allAttachments = await db
+      .select()
+      .from(attachments)
+      .orderBy(desc(attachments.createdAt));
+    return allAttachments;
+  } catch (error) {
+    console.error("Error in getAttachments:", error);
+    throw error;
+  }
+});
+
+export const getAttachmentsByEntity = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const entityAttachments = await db
+      .select()
+      .from(attachments)
+      .where(
+        eq(attachments.entityType, input.entityType) &&
+          eq(attachments.entityId, input.entityId)
+      );
+    return entityAttachments;
+  } catch (error) {
+    console.error("Error in getAttachmentsByEntity:", error);
+    throw error;
+  }
+});
+
+export const getAttachmentsByEmployee = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const employeeAttachments = await db
+      .select()
+      .from(attachments)
+      .where(eq(attachments.employeeId, input.employeeId))
+      .orderBy(desc(attachments.createdAt));
+    return employeeAttachments;
+  } catch (error) {
+    console.error("Error in getAttachmentsByEmployee:", error);
+    throw error;
+  }
+});
+
+export const createAttachment = os.handler(async ({ input }) => {
+  try {
+    const validatedData = createAttachmentInputSchema.parse(input);
+    const db = await getDb();
+    const [newAttachment] = await db
+      .insert(attachments)
+      .values({
+        ...validatedData,
+        id: crypto.randomUUID(),
+      })
+      .returning();
+    return newAttachment;
+  } catch (error) {
+    console.error("Error in createAttachment:", error);
+    throw error;
+  }
+});
+
+export const deleteAttachment = os.handler(async ({ input }) => {
+  try {
+    const validatedData = deleteAttachmentInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .delete(attachments)
+      .where(eq(attachments.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteAttachment:", error);
     throw error;
   }
 });

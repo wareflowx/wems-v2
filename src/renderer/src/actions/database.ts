@@ -278,3 +278,109 @@ export async function deleteContractType(id: number) {
   }
   return client.database.deleteContractType({ id });
 }
+
+// CACES actions
+export async function getCaces() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getCaces();
+}
+
+export async function getCacesByEmployee(employeeId: number) {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getCacesByEmployee({ employeeId });
+}
+
+export async function createCace(data: {
+  employeeId: number;
+  category: string;
+  dateObtained: string;
+  expirationDate: string;
+  attachmentId?: string;
+}) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.createCace(data);
+}
+
+export async function updateCace(data: {
+  id: number;
+  category?: string;
+  dateObtained?: string;
+  expirationDate?: string;
+  attachmentId?: string | null;
+}) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.updateCace(data);
+}
+
+export async function deleteCace(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.deleteCace({ id });
+}
+
+// Attachment actions
+export async function getAttachments() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getAttachments();
+}
+
+export async function getAttachmentsByEntity(
+  entityType: "contract" | "caces" | "document" | "medical_visit",
+  entityId: number
+) {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getAttachmentsByEntity({ entityType, entityId });
+}
+
+export async function getAttachmentsByEmployee(employeeId: number) {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getAttachmentsByEmployee({ employeeId });
+}
+
+export async function createAttachment(data: {
+  employeeId: number;
+  entityType: "contract" | "caces" | "document" | "medical_visit";
+  entityId?: number;
+  originalName: string;
+  storedName: string;
+  mimeType: string;
+  size: number;
+  filePath: string;
+}) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.createAttachment(data);
+}
+
+export async function deleteAttachment(id: string) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.deleteAttachment({ id });
+}

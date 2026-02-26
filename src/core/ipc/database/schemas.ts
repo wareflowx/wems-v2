@@ -124,3 +124,40 @@ export const updateContractTypeInputSchema = z.object({
 export const deleteContractTypeInputSchema = z.object({
   id: z.number(),
 });
+
+// CACES schemas
+export const createCaceInputSchema = z.object({
+  employeeId: z.number().min(1, "Employee is required"),
+  category: z.string().min(1, "Category is required"),
+  dateObtained: z.string().min(1, "Date obtained is required"),
+  expirationDate: z.string().min(1, "Expiration date is required"),
+  attachmentId: z.string().optional(),
+});
+
+export const updateCaceInputSchema = z.object({
+  id: z.number(),
+  category: z.string().min(1, "Category is required").optional(),
+  dateObtained: z.string().min(1, "Date obtained is required").optional(),
+  expirationDate: z.string().min(1, "Expiration date is required").optional(),
+  attachmentId: z.string().optional().nullable(),
+});
+
+export const deleteCaceInputSchema = z.object({
+  id: z.number(),
+});
+
+// Attachment schemas
+export const createAttachmentInputSchema = z.object({
+  employeeId: z.number().min(1, "Employee is required"),
+  entityType: z.enum(["contract", "caces", "document", "medical_visit"]),
+  entityId: z.number().optional(),
+  originalName: z.string().min(1, "Original name is required"),
+  storedName: z.string().min(1, "Stored name is required"),
+  mimeType: z.string().min(1, "Mime type is required"),
+  size: z.number().min(1, "Size is required"),
+  filePath: z.string().min(1, "File path is required"),
+});
+
+export const deleteAttachmentInputSchema = z.object({
+  id: z.string(),
+});

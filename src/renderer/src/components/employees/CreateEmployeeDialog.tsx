@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-// import { usePositions, useWorkLocations } from "@/hooks";
 
 interface Department {
   id: number;
@@ -27,11 +26,25 @@ interface Department {
   code: string;
 }
 
+interface Position {
+  id: number;
+  name: string;
+  color?: string;
+}
+
+interface WorkLocation {
+  id: number;
+  name: string;
+  color?: string;
+}
+
 interface CreateEmployeeDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onCreate?: (data: CreateEmployeeData) => void;
   departments?: Department[];
+  positions?: Position[];
+  workLocations?: WorkLocation[];
 }
 
 export interface CreateEmployeeData {
@@ -59,15 +72,11 @@ export function CreateEmployeeDialog({
   onOpenChange,
   onCreate,
   departments = [],
+  positions = [],
+  workLocations = [],
 }: CreateEmployeeDialogProps) {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
-
-  // temp disabled to debug freeze
-  // const { data: positions = [] } = usePositions();
-  // const { data: workLocations = [] } = useWorkLocations();
-  const positions: any[] = [];
-  const workLocations: any[] = [];
 
   // Form state - matches DB schema
   const [formData, setFormData] = useState<CreateEmployeeData>({

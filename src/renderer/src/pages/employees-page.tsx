@@ -22,8 +22,8 @@ import {
 } from "@/hooks";
 import { useToast } from "@/utils/toast";
 
-// Stable empty arrays to prevent infinite re-render loops
-const EMPTY_ARRAY: any[] = [];
+// Stable empty arrays to prevent infinite re-render loops when data is loading
+const EMPTY_ARRAY: never[] = [];
 
 export function EmployeesPage() {
   const { t } = useTranslation();
@@ -37,17 +37,11 @@ export function EmployeesPage() {
   } | null>(null);
 
   // Use TanStack Query hooks
-  // const { data: employees = [], isLoading, error } = useEmployees();
-  const employees = EMPTY_ARRAY;
-  const isLoading = false;
-  const error = null;
-  const departments = EMPTY_ARRAY;
-  // const { data: positions = [] } = usePositions();
-  // const { data: workLocations = [] } = useWorkLocations();
-  // const { data: contracts = [] } = useContracts();
-  const positions = EMPTY_ARRAY;
-  const workLocations = EMPTY_ARRAY;
-  const contracts = EMPTY_ARRAY;
+  const { data: employees = [], isLoading, error } = useEmployees();
+  const { data: positions = [] } = usePositions();
+  const { data: workLocations = [] } = useWorkLocations();
+  const { data: contracts = [] } = useContracts();
+  const { data: departments = [] } = useDepartments();
   const createEmployee = useCreateEmployee();
   const deleteEmployee = useDeleteEmployee();
 
@@ -198,9 +192,12 @@ export function EmployeesPage() {
       </div>
 
       <CreateEmployeeDialog
+        departments={departments}
         onCreate={handleAddEmployee}
         onOpenChange={setIsCreateDialogOpen}
         open={isCreateDialogOpen}
+        positions={positions}
+        workLocations={workLocations}
       />
       <DeleteEmployeeDialog
         employeeId={employeeToDelete?.id}

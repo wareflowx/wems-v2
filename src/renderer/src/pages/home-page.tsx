@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useAlerts } from "@/hooks";
+import { useAlerts, useEmployees } from "@/hooks";
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -45,6 +45,9 @@ export function HomePage() {
     severity: severityFilter,
     type: typeFilter === "all" ? undefined : typeFilter,
   });
+
+  // Use TanStack Query hook for employees
+  const { data: employees = [] } = useEmployees();
 
   // Client-side filtering for employee and detail filters only
   // (search, severity, and type are already filtered by API)
@@ -92,14 +95,14 @@ export function HomePage() {
     const infoAlerts = allAlerts.filter((a) => a.severity === "info").length;
 
     return {
-      totalEmployees: 42, // This would come from employees API in future
-      activeEmployees: 38, // This would come from employees API in future
+      totalEmployees: employees.length,
+      activeEmployees: employees.filter((e) => e.status === "active").length,
       criticalAlerts,
       warningAlerts,
       infoAlerts,
       totalAlerts: allAlerts.length,
     };
-  }, [allAlerts]);
+  }, [allAlerts, employees]);
 
   const getAlertBadge = (severity: string, _daysLeft?: number) => {
     if (severity === "critical") {

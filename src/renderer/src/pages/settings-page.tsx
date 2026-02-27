@@ -5,8 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { cn } from "@/utils/tailwind";
 
 type TabValue = "backup" | "alerts" | "system";
 
@@ -20,6 +26,13 @@ export function SettingsPage() {
   const [cacesAlerts, setCacesAlerts] = useState(true);
   const [medicalAlerts, setMedicalAlerts] = useState(true);
   const [contractAlerts, setContractAlerts] = useState(false);
+
+  // Appearance settings
+  const [theme, setTheme] = useState("system");
+  const [language, setLanguage] = useState("fr");
+
+  // Network settings
+  const [readOnlyMode, setReadOnlyMode] = useState(false);
 
   return (
     <div className="flex flex-1 flex-col gap-4 ">
@@ -201,6 +214,63 @@ export function SettingsPage() {
                   <span className="text-sm">--</span>
                 </div>
               </CardContent>
+            </Card>
+
+            {/* Appearance */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Appearance</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Theme</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Choose your preferred theme
+                    </p>
+                  </div>
+                  <Select value={theme} onValueChange={setTheme}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="dark">Dark</SelectItem>
+                      <SelectItem value="system">System</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Language</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Select application language
+                    </p>
+                  </div>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fr">Français</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Network */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div>
+                  <CardTitle>Read-only mode</CardTitle>
+                  <CardDescription>Disable all database write operations</CardDescription>
+                </div>
+                <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
+                  <Switch checked={readOnlyMode} onCheckedChange={setReadOnlyMode} />
+                </div>
+              </CardHeader>
             </Card>
 
             {/* Cache */}

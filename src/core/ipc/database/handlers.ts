@@ -255,13 +255,20 @@ export const createEmployee = os.handler(async ({ input }) => {
       .returning();
 
     // Then insert contract with the employee's ID
-    await db.insert(contracts).values({
-      employeeId: newEmployee.id,
-      contractType,
-      startDate: contractStartDate || employeeData.hireDate,
-      endDate: contractEndDate || null,
-      isActive: true,
-    });
+    // Use try-catch with manual rollback to ensure atomicity
+    try {
+      await db.insert(contracts).values({
+        employeeId: newEmployee.id,
+        contractType,
+        startDate: contractStartDate || employeeData.hireDate,
+        endDate: contractEndDate || null,
+        isActive: true,
+      });
+    } catch (contractError) {
+      // Rollback: delete the employee if contract creation fails
+      await db.delete(employees).where(eq(employees.id, newEmployee.id));
+      throw contractError;
+    }
 
     return newEmployee;
   } catch (error) {

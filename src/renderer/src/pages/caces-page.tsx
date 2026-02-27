@@ -19,6 +19,8 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AddCacesDialog } from "@/components/caces/AddCacesDialog";
 import { EditCacesDialog } from "@/components/caces/EditCacesDialog";
+import * as db from "@/actions/database";
+import { useToast } from "@/utils/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MetricsSection } from "@/components/ui/metrics-section";
@@ -54,6 +56,7 @@ import {
 
 export function CacesPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -295,12 +298,58 @@ export function CacesPage() {
     );
   };
 
-  const handleAddCaces = (data: any) => {
-    createCaces.mutate(data, {
-      onSuccess: () => {
-        setIsAddDialogOpen(false);
+  const handleAddCaces = async (data: {
+    employeeId: number;
+    category: string;
+    dateObtained: string;
+    expirationDate: string;
+    document: {
+      name: string;
+      data: string;
+      mimeType: string;
+      size: number;
+    } | null;
+  }) => {
+    let attachmentId: string | undefined;
+
+    // If there's a document, create the attachment first
+    if (data.document) {
+      try {
+        const attachment = await db.createAttachment({
+          employeeId: data.employeeId,
+          entityType: "caces",
+          originalName: data.document.name,
+          mimeType: data.document.mimeType,
+          size: data.document.size,
+          fileData: data.document.data,
+        });
+        attachmentId = attachment?.id;
+      } catch (error) {
+        console.error("Failed to create attachment:", error);
+        toast({
+          title: "Failed to upload document",
+          description: "The document could not be uploaded. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Then create the cace with the attachmentId
+    createCaces.mutate(
+      {
+        employeeId: data.employeeId,
+        category: data.category,
+        dateObtained: data.dateObtained,
+        expirationDate: data.expirationDate,
+        attachmentId,
       },
-    });
+      {
+        onSuccess: () => {
+          setIsAddDialogOpen(false);
+        },
+      }
+    );
   };
 
   const handleEditCaces = (data: any) => {

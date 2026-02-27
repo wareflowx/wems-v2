@@ -142,7 +142,7 @@ export function EditEmployeeDialog({
         contractIsActive: contract?.isActive ?? true,
       });
     }
-  });
+  }, [employee, contract]);
 
   const updateFormData = <K extends keyof EditEmployeeData>(
     field: K,

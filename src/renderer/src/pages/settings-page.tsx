@@ -10,15 +10,17 @@ export function SettingsPage() {
       <div className="min-h-full space-y-3">
         <div className="flex h-13 items-center border-b px-4">
           <span className="text-sm font-medium">Settings</span>
+
+          <Tabs className="ml-6" defaultValue="backup">
+            <TabsList className="h-full justify-start gap-1 bg-transparent p-0">
+              <TabsTrigger value="backup">Backup</TabsTrigger>
+              <TabsTrigger value="alerts">Alerts</TabsTrigger>
+              <TabsTrigger value="system">System</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <Tabs defaultValue="backup">
-          <TabsList className="w-full justify-start gap-1 bg-transparent">
-            <TabsTrigger value="backup">Backup</TabsTrigger>
-            <TabsTrigger value="alerts">Alerts</TabsTrigger>
-            <TabsTrigger value="system">System</TabsTrigger>
-          </TabsList>
-
           <TabsContent value="backup">
             <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
               Backup settings coming soon...

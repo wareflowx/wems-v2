@@ -8,7 +8,7 @@
   "files": ["out/**/*", "package.json"],
   "extraResources": [
     {
-      "from": "src/db/migrations",
+      "from": "src/core/db/migrations",
       "to": "migrations"
     }
   ],

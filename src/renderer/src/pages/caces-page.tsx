@@ -315,8 +315,15 @@ export function CacesPage() {
     // If there's a document, create the attachment first
     if (data.document) {
       try {
+        // Get employee name for the folder path
+        const employee = employees.find((e) => e.id === data.employeeId);
+        const employeeName = employee
+          ? `${employee.firstName} ${employee.lastName}`
+          : undefined;
+
         const attachment = await db.createAttachment({
           employeeId: data.employeeId,
+          employeeName,
           entityType: "caces",
           originalName: data.document.name,
           mimeType: data.document.mimeType,

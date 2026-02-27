@@ -249,13 +249,14 @@ export const createEmployee = os.handler(async ({ input }) => {
     } = validatedData;
 
     // Use transaction to ensure atomicity
-    const result = await db.transaction(async (tx) => {
-      const [newEmployee] = await tx
+    // Note: better-sqlite3 does not support async transaction functions
+    const result = db.transaction((tx) => {
+      const [newEmployee] = tx
         .insert(employees)
         .values(employeeData)
         .returning();
 
-      await tx.insert(contracts).values({
+      tx.insert(contracts).values({
         employeeId: newEmployee.id,
         contractType,
         startDate: contractStartDate || employeeData.hireDate,

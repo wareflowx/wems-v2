@@ -1057,6 +1057,8 @@ export const updateSettings = os.handler(async ({ input }) => {
     const validatedData = updateSettingsInputSchema.parse(input);
     const db = await getDb();
 
+    console.log("Updating settings with:", validatedData);
+
     // Check if settings exist
     const [existing] = await db.select().from(settings).where(eq(settings.id, 1));
 

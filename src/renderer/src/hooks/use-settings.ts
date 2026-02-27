@@ -32,9 +32,10 @@ export function useUpdateSettings() {
     }) => db.updateSettings(data),
 
     onError: (err) => {
+      console.error("Error updating settings:", err);
       toast({
         title: "Failed to update settings",
-        description: err instanceof Error ? err.message : "An error occurred",
+        description: err instanceof Error ? err.message : String(err),
         variant: "destructive",
       });
     },

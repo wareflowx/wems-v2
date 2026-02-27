@@ -266,3 +266,10 @@ export const updateSettingsInputSchema = z.object({
   language: z.enum(["fr", "en"]).optional(),
   readOnlyMode: z.boolean().optional(),
 });
+
+// Alert filters schema
+export const getAlertsInputSchema = z.object({
+  search: z.string().optional(),
+  severity: z.string().optional(),
+  type: z.string().optional(),
+});

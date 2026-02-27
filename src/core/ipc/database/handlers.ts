@@ -1083,3 +1083,186 @@ export const updateSettings = os.handler(async ({ input }) => {
     throw error;
   }
 });
+
+// Alert types
+interface Alert {
+  id: number;
+  type: string;
+  employee: string;
+  employeeId: number;
+  category?: string;
+  visitType?: string;
+  daysLeft?: number;
+  severity: string;
+  date: string;
+}
+
+interface AlertFilters {
+  search?: string;
+  severity?: string;
+  type?: string;
+}
+
+// Get alerts from real database data
+export const getAlerts = os.handler(async ({ input }: { input?: AlertFilters }) => {
+  try {
+    const db = await getDb();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Get settings for alert thresholds
+    const [appSettings] = await db.select().from(settings).where(eq(settings.id, 1));
+    const cacesDays = appSettings?.cacesDays ?? 30;
+    const medicalDays = appSettings?.medicalDays ?? 7;
+
+    const alerts: Alert[] = [];
+
+    // Get all employees for name lookup
+    const allEmployees = await db.select({
+      id: employees.id,
+      firstName: employees.firstName,
+      lastName: employees.lastName,
+    }).from(employees);
+
+    const employeeMap = new Map(allEmployees.map(e => [e.id, `${e.firstName} ${e.lastName}`]));
+
+    // Get all CACES
+    if (appSettings?.cacesAlerts !== false) {
+      const allCaces = await db.select().from(caces);
+
+      for (const cace of allCaces) {
+        const expirationDate = new Date(cace.expirationDate);
+        expirationDate.setHours(0, 0, 0, 0);
+
+        const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (daysUntilExpiration < 0) {
+          // CACES expired - critical
+          alerts.push({
+            id: `caces-expired-${cace.id}`,
+            type: "CACES expiré",
+            employee: employeeMap.get(cace.employeeId) || "Unknown",
+            employeeId: cace.employeeId,
+            category: cace.category,
+            severity: "critical",
+            date: cace.expirationDate,
+          });
+        } else if (daysUntilExpiration <= cacesDays) {
+          // CACES expiring soon - warning
+          alerts.push({
+            id: `caces-warning-${cace.id}`,
+            type: "CACES expiration proche",
+            employee: employeeMap.get(cace.employeeId) || "Unknown",
+            employeeId: cace.employeeId,
+            category: cace.category,
+            daysLeft: daysUntilExpiration,
+            severity: daysUntilExpiration <= 7 ? "critical" : "warning",
+            date: cace.expirationDate,
+          });
+        }
+      }
+    }
+
+    // Get all Medical Visits
+    if (appSettings?.medicalAlerts !== false) {
+      const allVisits = await db.select().from(medicalVisits);
+
+      for (const visit of allVisits) {
+        const scheduledDate = new Date(visit.scheduledDate);
+        scheduledDate.setHours(0, 0, 0, 0);
+
+        const daysUntilVisit = Math.ceil((scheduledDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (visit.status === "overdue" || (visit.status === "scheduled" && daysUntilVisit < 0)) {
+          // Visit overdue - critical
+          alerts.push({
+            id: `visit-overdue-${visit.id}`,
+            type: "Visite en retard",
+            employee: employeeMap.get(visit.employeeId) || "Unknown",
+            employeeId: visit.employeeId,
+            visitType: visit.type,
+            severity: "critical",
+            date: visit.scheduledDate,
+          });
+        } else if (visit.status === "scheduled" && daysUntilVisit <= medicalDays) {
+          // Visit coming up - info or warning
+          alerts.push({
+            id: `visit-scheduled-${visit.id}`,
+            type: "Visite planifiée",
+            employee: employeeMap.get(visit.employeeId) || "Unknown",
+            employeeId: visit.employeeId,
+            visitType: visit.type,
+            daysLeft: daysUntilVisit,
+            severity: daysUntilVisit <= 3 ? "warning" : "info",
+            date: visit.scheduledDate,
+          });
+        }
+      }
+    }
+
+    // Get all Contracts (only if contract alerts enabled)
+    if (appSettings?.contractAlerts) {
+      const allContracts = await db.select().from(contracts).where(eq(contracts.isActive, true));
+
+      for (const contract of allContracts) {
+        if (!contract.endDate) continue;
+
+        const endDate = new Date(contract.endDate);
+        endDate.setHours(0, 0, 0, 0);
+
+        const daysUntilEnd = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (daysUntilEnd < 0) {
+          // Contract expired - critical
+          alerts.push({
+            id: `contract-expired-${contract.id}`,
+            type: "Contrat expiré",
+            employee: employeeMap.get(contract.employeeId) || "Unknown",
+            employeeId: contract.employeeId,
+            severity: "critical",
+            date: contract.endDate,
+          });
+        } else if (daysUntilEnd <= 30) {
+          // Contract expiring soon - warning
+          alerts.push({
+            id: `contract-warning-${contract.id}`,
+            type: "Contrat expiration proche",
+            employee: employeeMap.get(contract.employeeId) || "Unknown",
+            employeeId: contract.employeeId,
+            daysLeft: daysUntilEnd,
+            severity: daysUntilEnd <= 7 ? "critical" : "warning",
+            date: contract.endDate,
+          });
+        }
+      }
+    }
+
+    // Apply filters
+    let filteredAlerts = [...alerts];
+
+    if (input?.search) {
+      const searchLower = input.search.toLowerCase();
+      filteredAlerts = filteredAlerts.filter(
+        (alert) =>
+          alert.employee.toLowerCase().includes(searchLower) ||
+          alert.type.toLowerCase().includes(searchLower)
+      );
+    }
+
+    if (input?.severity && input.severity !== "all") {
+      filteredAlerts = filteredAlerts.filter((alert) => alert.severity === input.severity);
+    }
+
+    if (input?.type && input.type !== "all") {
+      filteredAlerts = filteredAlerts.filter((alert) => alert.type === input.type);
+    }
+
+    // Sort by date descending
+    filteredAlerts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return filteredAlerts;
+  } catch (error) {
+    console.error("Error in getAlerts:", error);
+    throw error;
+  }
+});

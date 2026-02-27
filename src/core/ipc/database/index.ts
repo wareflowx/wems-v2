@@ -23,6 +23,7 @@ import {
   downloadAttachment,
   downloadMedia,
   getActiveContractByEmployee,
+  getAlerts,
   getAllMedia,
   getAttachments,
   getAttachmentsByEmployee,
@@ -117,4 +118,6 @@ export const database = {
   // Settings
   getSettings,
   updateSettings,
+  // Alerts
+  getAlerts,
 };

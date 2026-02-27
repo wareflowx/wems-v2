@@ -15,9 +15,9 @@ export function SettingsPage() {
           title={t("settings.title")}
         />
 
-        {/* Placeholder - Tabs will be added here */}
-        <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
-          Settings page with tabs coming soon...
+        {/* Settings Header with h-14 */}
+        <div className="flex h-14 items-center border-b bg-card px-4">
+          <span className="text-sm font-medium">Settings tabs coming soon...</span>
         </div>
       </div>
     </div>

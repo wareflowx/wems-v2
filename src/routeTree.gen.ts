@@ -9,9 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SettingsAlertsRouteImport } from './routes/settings/alerts'
-import { Route as SettingsBackupRouteImport } from './routes/settings/backup'
-import { Route as SettingsSystemRouteImport } from './routes/settings/system'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as EmployeesRouteImport } from './routes/employees'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as CacesRouteImport } from './routes/caces'
@@ -25,19 +23,9 @@ import { Route as WorkLocationsRouteImport } from './routes/work-locations'
 import { Route as DepartmentsRouteImport } from './routes/departments'
 import { Route as ContractTypesRouteImport } from './routes/contract-types'
 
-const SettingsAlertsRoute = SettingsAlertsRouteImport.update({
-  id: '/settings/alerts',
-  path: '/settings/alerts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsBackupRoute = SettingsBackupRouteImport.update({
-  id: '/settings/backup',
-  path: '/settings/backup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsSystemRoute = SettingsSystemRouteImport.update({
-  id: '/settings/system',
-  path: '/settings/system',
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmployeesRoute = EmployeesRouteImport.update({
@@ -114,9 +102,7 @@ export interface FileRoutesByFullPath {
   '/work-locations': typeof WorkLocationsRoute
   '/departments': typeof DepartmentsRoute
   '/contract-types': typeof ContractTypesRoute
-  '/settings/alerts': typeof SettingsAlertsRoute
-  '/settings/backup': typeof SettingsBackupRoute
-  '/settings/system': typeof SettingsSystemRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -131,9 +117,7 @@ export interface FileRoutesByTo {
   '/work-locations': typeof WorkLocationsRoute
   '/departments': typeof DepartmentsRoute
   '/contract-types': typeof ContractTypesRoute
-  '/settings/alerts': typeof SettingsAlertsRoute
-  '/settings/backup': typeof SettingsBackupRoute
-  '/settings/system': typeof SettingsSystemRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -149,16 +133,14 @@ export interface FileRoutesById {
   '/work-locations': typeof WorkLocationsRoute
   '/departments': typeof DepartmentsRoute
   '/contract-types': typeof ContractTypesRoute
-  '/settings/alerts': typeof SettingsAlertsRoute
-  '/settings/backup': typeof SettingsBackupRoute
-  '/settings/system': typeof SettingsSystemRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/settings/alerts' | '/settings/backup' | '/settings/system'
+  fullPaths: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/settings/alerts' | '/settings/backup' | '/settings/system'
-  id: '__root__' | '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/settings/alerts' | '/settings/backup' | '/settings/system'
+  to: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/settings'
+  id: '__root__' | '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -174,32 +156,16 @@ export interface RootRouteChildren {
   WorkLocationsRoute: typeof WorkLocationsRoute
   DepartmentsRoute: typeof DepartmentsRoute
   ContractTypesRoute: typeof ContractTypesRoute
-  SettingsAlertsRoute: typeof SettingsAlertsRoute
-  SettingsBackupRoute: typeof SettingsBackupRoute
-  SettingsSystemRoute: typeof SettingsSystemRoute
+  SettingsRoute: typeof SettingsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/settings/alerts': {
-      id: '/settings/alerts'
-      path: '/settings/alerts'
-      fullPath: '/settings/alerts'
-      preLoaderRoute: typeof SettingsAlertsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/backup': {
-      id: '/settings/backup'
-      path: '/settings/backup'
-      fullPath: '/settings/backup'
-      preLoaderRoute: typeof SettingsBackupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/system': {
-      id: '/settings/system'
-      path: '/settings/system'
-      fullPath: '/settings/system'
-      preLoaderRoute: typeof SettingsSystemRouteImport
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/employees': {
@@ -302,9 +268,7 @@ const rootRouteChildren: RootRouteChildren = {
   WorkLocationsRoute: WorkLocationsRoute,
   DepartmentsRoute: DepartmentsRoute,
   ContractTypesRoute: ContractTypesRoute,
-  SettingsAlertsRoute: SettingsAlertsRoute,
-  SettingsBackupRoute: SettingsBackupRoute,
-  SettingsSystemRoute: SettingsSystemRoute,
+  SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

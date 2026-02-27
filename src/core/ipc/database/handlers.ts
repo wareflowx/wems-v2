@@ -12,6 +12,7 @@ import {
   medicalVisits,
   positions,
   posts,
+  settings,
   workLocations,
 } from "@/core/db/schema";
 import {
@@ -52,6 +53,7 @@ import {
   updateEmployeeInputSchema,
   updateMedicalVisitInputSchema,
   updatePositionInputSchema,
+  updateSettingsInputSchema,
   updateWorkLocationInputSchema,
 } from "./schemas";
 
@@ -1034,6 +1036,50 @@ export const deleteMedicalVisit = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in deleteMedicalVisit:", error);
+    throw error;
+  }
+});
+
+// Settings handlers
+export const getSettings = os.handler(async () => {
+  try {
+    const db = await getDb();
+    const [result] = await db.select().from(settings).where(eq(settings.id, 1));
+    return result || null;
+  } catch (error) {
+    console.error("Error in getSettings:", error);
+    throw error;
+  }
+});
+
+export const updateSettings = os.handler(async ({ input }) => {
+  try {
+    const validatedData = updateSettingsInputSchema.parse(input);
+    const db = await getDb();
+
+    console.log("Updating settings with:", validatedData);
+
+    // Check if settings exist
+    const [existing] = await db.select().from(settings).where(eq(settings.id, 1));
+
+    if (!existing) {
+      // Create default settings
+      const [created] = await db.insert(settings).values({
+        id: 1,
+        ...validatedData,
+      }).returning();
+      return created;
+    }
+
+    // Update existing settings
+    const [updated] = await db
+      .update(settings)
+      .set(validatedData)
+      .where(eq(settings.id, 1))
+      .returning();
+    return updated;
+  } catch (error) {
+    console.error("Error in updateSettings:", error);
     throw error;
   }
 });

@@ -488,3 +488,30 @@ export async function deleteMedicalVisit(id: number) {
   }
   return client.database.deleteMedicalVisit({ id });
 }
+
+// Settings functions
+export async function getSettings() {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.getSettings();
+}
+
+export async function updateSettings(data: {
+  autoBackup?: boolean;
+  cacesAlerts?: boolean;
+  cacesDays?: number;
+  medicalAlerts?: boolean;
+  medicalDays?: number;
+  contractAlerts?: boolean;
+  theme?: "light" | "dark" | "system";
+  language?: "fr" | "en";
+  readOnlyMode?: boolean;
+}) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.updateSettings(data);
+}

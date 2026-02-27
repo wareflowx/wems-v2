@@ -42,6 +42,7 @@ import {
   getMediaById,
   getPositions,
   getPosts,
+  getSettings,
   getWorkLocations,
   updateCace,
   updateContract,
@@ -50,6 +51,7 @@ import {
   updateEmployee,
   updateMedicalVisit,
   updatePosition,
+  updateSettings,
   updateWorkLocation,
 } from "./handlers";
 
@@ -112,4 +114,7 @@ export const database = {
   createMedicalVisit,
   updateMedicalVisit,
   deleteMedicalVisit,
+  // Settings
+  getSettings,
+  updateSettings,
 };

@@ -11,4 +11,5 @@ export * from "./employees";
 export * from "./medical-visits";
 export * from "./positions";
 export * from "./posts";
+export * from "./settings";
 export * from "./work-locations";

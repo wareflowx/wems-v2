@@ -22,6 +22,7 @@ import {
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { getAppVersion } from "@/actions/app";
+import { useAlerts, useCaces, useMedicalVisits } from "@/hooks";
 import {
   Sidebar,
   SidebarContent,
@@ -74,6 +75,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
   const [_appVersion, setAppVersion] = React.useState("0.0.0");
   const [canWrite, setCanWrite] = React.useState(true);
+
+  // Get counts for sidebar badges
+  const { data: alerts = [] } = useAlerts();
+  const { data: caces = [] } = useCaces();
+  const { data: medicalVisits = [] } = useMedicalVisits();
 
   React.useEffect(() => {
     getAppVersion().then(setAppVersion);
@@ -136,7 +142,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <span>{t("sidebar.alerts")}</span>
                   </Link>
                 </SidebarMenuButton>
-                <SidebarMenuBadge>16</SidebarMenuBadge>
+                {alerts.length > 0 && <SidebarMenuBadge>{alerts.length}</SidebarMenuBadge>}
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -161,7 +167,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <span>{t("sidebar.caces")}</span>
                   </Link>
                 </SidebarMenuButton>
-                <SidebarMenuBadge>7</SidebarMenuBadge>
+                {caces.length > 0 && <SidebarMenuBadge>{caces.length}</SidebarMenuBadge>}
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={t("sidebar.medicalVisits")}>
@@ -170,7 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <span>{t("sidebar.medicalVisits")}</span>
                   </Link>
                 </SidebarMenuButton>
-                <SidebarMenuBadge>9</SidebarMenuBadge>
+                {medicalVisits.length > 0 && <SidebarMenuBadge>{medicalVisits.length}</SidebarMenuBadge>}
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={t("sidebar.contracts")}>

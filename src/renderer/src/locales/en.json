@@ -253,7 +253,8 @@
     "noCaces": "No CACES for this employee",
     "noMedicalVisits": "No medical visits for this employee",
     "noHistory": "No history for this employee",
-    "personalInfo": "Personal Information"
+    "personalInfo": "Personal Information",
+    "position": "Position"
   },
   "documents": {
     "title": "Documents",

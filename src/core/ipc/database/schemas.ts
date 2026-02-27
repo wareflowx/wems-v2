@@ -248,3 +248,21 @@ export const updateMedicalVisitInputSchema = z.object({
 export const deleteMedicalVisitInputSchema = z.object({
   id: z.number(),
 });
+
+// Settings schema
+export const updateSettingsInputSchema = z.object({
+  // Backup
+  autoBackup: z.boolean().optional(),
+
+  // Alerts
+  cacesAlerts: z.boolean().optional(),
+  cacesDays: z.number().min(1).optional(),
+  medicalAlerts: z.boolean().optional(),
+  medicalDays: z.number().min(1).optional(),
+  contractAlerts: z.boolean().optional(),
+
+  // System
+  theme: z.enum(["light", "dark", "system"]).optional(),
+  language: z.enum(["fr", "en"]).optional(),
+  readOnlyMode: z.boolean().optional(),
+});

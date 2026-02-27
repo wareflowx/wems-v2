@@ -104,4 +104,10 @@ export const queryKeys = {
     details: () => ["contract-types", "detail"] as const,
     detail: (id: number) => ["contract-types", "detail", id] as const,
   },
+
+  // Settings
+  settings: {
+    all: ["settings"] as const,
+    detail: () => ["settings", "detail"] as const,
+  },
 } as const;

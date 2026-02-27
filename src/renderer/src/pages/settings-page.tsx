@@ -13,26 +13,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useSettings, useUpdateSettings } from "@/hooks";
+import { useToast } from "@/utils/toast";
 
 type TabValue = "backup" | "alerts" | "system";
 
 export function SettingsPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<TabValue>("backup");
 
-  // Mock state for settings (no backend)
-  const [autoBackup, setAutoBackup] = useState(false);
-  const [backupTime, setBackupTime] = useState("02:00");
-  const [cacesAlerts, setCacesAlerts] = useState(true);
-  const [medicalAlerts, setMedicalAlerts] = useState(true);
-  const [contractAlerts, setContractAlerts] = useState(false);
+  // Backend settings
+  const { data: settings, isLoading } = useSettings();
+  const updateSettings = useUpdateSettings();
 
-  // Appearance settings
-  const [theme, setTheme] = useState("system");
-  const [language, setLanguage] = useState("fr");
+  // Default values if settings not loaded
+  const autoBackup = settings?.autoBackup ?? false;
+  const cacesAlerts = settings?.cacesAlerts ?? true;
+  const cacesDays = settings?.cacesDays ?? 30;
+  const medicalAlerts = settings?.medicalAlerts ?? true;
+  const medicalDays = settings?.medicalDays ?? 7;
+  const contractAlerts = settings?.contractAlerts ?? false;
+  const theme = settings?.theme ?? "system";
+  const language = settings?.language ?? "fr";
+  const readOnlyMode = settings?.readOnlyMode ?? false;
 
-  // Network settings
-  const [readOnlyMode, setReadOnlyMode] = useState(false);
+  const handleSettingChange = (
+    key: string,
+    value: boolean | number | string
+  ) => {
+    updateSettings.mutate({ [key]: value }, {
+      onError: () => {
+        toast({
+          title: "Failed to save",
+          description: "Could not save settings. Please try again.",
+          variant: "destructive",
+        });
+      },
+    });
+  };
 
   return (
     <div className="flex flex-1 flex-col gap-4 ">
@@ -108,26 +127,16 @@ export function SettingsPage() {
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle>{t("settingsBackup.automaticBackup")}</CardTitle>
-                  <CardDescription>{t("settingsBackup.enableAutomaticBackupDesc")}</CardDescription>
+                  <CardDescription>A backup will be created automatically when you log in</CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
-                  <Switch checked={autoBackup} onCheckedChange={setAutoBackup} />
+                  <Switch
+                    checked={autoBackup}
+                    onCheckedChange={(checked) => handleSettingChange("autoBackup", checked)}
+                    disabled={isLoading}
+                  />
                 </div>
               </CardHeader>
-              {autoBackup && (
-                <CardContent>
-                  <div className="flex items-center gap-4">
-                    <Label htmlFor="backupTime">{t("settingsBackup.backupTime")}</Label>
-                    <Input
-                      id="backupTime"
-                      type="time"
-                      className="w-32"
-                      value={backupTime}
-                      onChange={(e) => setBackupTime(e.target.value)}
-                    />
-                  </div>
-                </CardContent>
-              )}
             </Card>
           </div>
         )}
@@ -143,14 +152,24 @@ export function SettingsPage() {
                   <CardDescription>{t("settingsAlerts.enableExpiryAlerts")}</CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
-                  <Switch checked={cacesAlerts} onCheckedChange={setCacesAlerts} />
+                  <Switch
+                    checked={cacesAlerts}
+                    onCheckedChange={(checked) => handleSettingChange("cacesAlerts", checked)}
+                    disabled={isLoading}
+                  />
                 </div>
               </CardHeader>
               {cacesAlerts && (
                 <CardContent>
                   <div className="flex items-center gap-4">
                     <Label htmlFor="cacesDays">{t("settingsAlerts.daysBeforeExpiry")}</Label>
-                    <Input id="cacesDays" type="number" className="w-24" defaultValue="30" />
+                    <Input
+                      id="cacesDays"
+                      type="number"
+                      className="w-24"
+                      value={cacesDays}
+                      onChange={(e) => handleSettingChange("cacesDays", parseInt(e.target.value) || 30)}
+                    />
                   </div>
                 </CardContent>
               )}
@@ -164,14 +183,24 @@ export function SettingsPage() {
                   <CardDescription>{t("settingsAlerts.enableVisitAlerts")}</CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
-                  <Switch checked={medicalAlerts} onCheckedChange={setMedicalAlerts} />
+                  <Switch
+                    checked={medicalAlerts}
+                    onCheckedChange={(checked) => handleSettingChange("medicalAlerts", checked)}
+                    disabled={isLoading}
+                  />
                 </div>
               </CardHeader>
               {medicalAlerts && (
                 <CardContent>
                   <div className="flex items-center gap-4">
                     <Label htmlFor="medicalDays">{t("settingsAlerts.daysBeforeVisit")}</Label>
-                    <Input id="medicalDays" type="number" className="w-24" defaultValue="7" />
+                    <Input
+                      id="medicalDays"
+                      type="number"
+                      className="w-24"
+                      value={medicalDays}
+                      onChange={(e) => handleSettingChange("medicalDays", parseInt(e.target.value) || 7)}
+                    />
                   </div>
                 </CardContent>
               )}
@@ -185,7 +214,11 @@ export function SettingsPage() {
                   <CardDescription>Get notified when employee contracts are expiring</CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
-                  <Switch checked={contractAlerts} onCheckedChange={setContractAlerts} />
+                  <Switch
+                    checked={contractAlerts}
+                    onCheckedChange={(checked) => handleSettingChange("contractAlerts", checked)}
+                    disabled={isLoading}
+                  />
                 </div>
               </CardHeader>
             </Card>
@@ -229,7 +262,11 @@ export function SettingsPage() {
                       Choose your preferred theme
                     </p>
                   </div>
-                  <Select value={theme} onValueChange={setTheme}>
+                  <Select
+                    value={theme}
+                    onValueChange={(value: "light" | "dark" | "system") => handleSettingChange("theme", value)}
+                    disabled={isLoading}
+                  >
                     <SelectTrigger className="w-32">
                       <SelectValue />
                     </SelectTrigger>
@@ -247,7 +284,11 @@ export function SettingsPage() {
                       Select application language
                     </p>
                   </div>
-                  <Select value={language} onValueChange={setLanguage}>
+                  <Select
+                    value={language}
+                    onValueChange={(value: "fr" | "en") => handleSettingChange("language", value)}
+                    disabled={isLoading}
+                  >
                     <SelectTrigger className="w-32">
                       <SelectValue />
                     </SelectTrigger>
@@ -268,7 +309,11 @@ export function SettingsPage() {
                   <CardDescription>Disable all database write operations</CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
-                  <Switch checked={readOnlyMode} onCheckedChange={setReadOnlyMode} />
+                  <Switch
+                    checked={readOnlyMode}
+                    onCheckedChange={(checked) => handleSettingChange("readOnlyMode", checked)}
+                    disabled={isLoading}
+                  />
                 </div>
               </CardHeader>
             </Card>

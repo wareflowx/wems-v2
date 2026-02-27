@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -63,55 +64,57 @@ export function SettingsPage() {
         {activeTab === "backup" && (
           <div className="space-y-6 px-4">
             {/* Manual Backup */}
-            <div className="rounded-lg border bg-card p-4">
-              <div className="flex items-center justify-between">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
-                  <h3 className="font-medium">{t("settingsBackup.manualBackup")}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t("settingsBackup.manualBackupDesc")}
-                  </p>
+                  <CardTitle>{t("settingsBackup.manualBackup")}</CardTitle>
+                  <CardDescription>{t("settingsBackup.manualBackupDesc")}</CardDescription>
                 </div>
-                <Button>{t("settingsBackup.createBackup")}</Button>
-              </div>
-            </div>
+                <CardAction>
+                  <Button>{t("settingsBackup.createBackup")}</Button>
+                </CardAction>
+              </CardHeader>
+            </Card>
 
             {/* Restoration */}
-            <div className="rounded-lg border bg-card p-4">
-              <div className="flex items-center justify-between">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
-                  <h3 className="font-medium">{t("settingsBackup.restoration")}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t("settingsBackup.restorationDesc")}
-                  </p>
+                  <CardTitle>{t("settingsBackup.restoration")}</CardTitle>
+                  <CardDescription>{t("settingsBackup.restorationDesc")}</CardDescription>
                 </div>
-                <Button variant="outline">{t("settingsBackup.selectBackupFile")}</Button>
-              </div>
-            </div>
+                <CardAction>
+                  <Button variant="outline">{t("settingsBackup.selectBackupFile")}</Button>
+                </CardAction>
+              </CardHeader>
+            </Card>
 
             {/* Automatic Backup */}
-            <div className="rounded-lg border bg-card p-4">
-              <div className="flex items-center justify-between">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
-                  <h3 className="font-medium">{t("settingsBackup.automaticBackup")}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t("settingsBackup.enableAutomaticBackupDesc")}
-                  </p>
+                  <CardTitle>{t("settingsBackup.automaticBackup")}</CardTitle>
+                  <CardDescription>{t("settingsBackup.enableAutomaticBackupDesc")}</CardDescription>
                 </div>
-                <Switch checked={autoBackup} onCheckedChange={setAutoBackup} />
-              </div>
+                <CardAction>
+                  <Switch checked={autoBackup} onCheckedChange={setAutoBackup} />
+                </CardAction>
+              </CardHeader>
               {autoBackup && (
-                <div className="mt-4 flex items-center gap-4">
-                  <Label htmlFor="backupTime">{t("settingsBackup.backupTime")}</Label>
-                  <Input
-                    id="backupTime"
-                    type="time"
-                    className="w-32"
-                    value={backupTime}
-                    onChange={(e) => setBackupTime(e.target.value)}
-                  />
-                </div>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="backupTime">{t("settingsBackup.backupTime")}</Label>
+                    <Input
+                      id="backupTime"
+                      type="time"
+                      className="w-32"
+                      value={backupTime}
+                      onChange={(e) => setBackupTime(e.target.value)}
+                    />
+                  </div>
+                </CardContent>
               )}
-            </div>
+            </Card>
           </div>
         )}
 
@@ -119,55 +122,59 @@ export function SettingsPage() {
         {activeTab === "alerts" && (
           <div className="space-y-6 px-4">
             {/* CACES Alerts */}
-            <div className="rounded-lg border bg-card p-4">
-              <div className="flex items-center justify-between">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
-                  <h3 className="font-medium">{t("settingsAlerts.cacesExpiryAlerts")}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t("settingsAlerts.enableExpiryAlerts")}
-                  </p>
+                  <CardTitle>{t("settingsAlerts.cacesExpiryAlerts")}</CardTitle>
+                  <CardDescription>{t("settingsAlerts.enableExpiryAlerts")}</CardDescription>
                 </div>
-                <Switch checked={cacesAlerts} onCheckedChange={setCacesAlerts} />
-              </div>
+                <CardAction>
+                  <Switch checked={cacesAlerts} onCheckedChange={setCacesAlerts} />
+                </CardAction>
+              </CardHeader>
               {cacesAlerts && (
-                <div className="mt-4 flex items-center gap-4">
-                  <Label htmlFor="cacesDays">{t("settingsAlerts.daysBeforeExpiry")}</Label>
-                  <Input id="cacesDays" type="number" className="w-24" defaultValue="30" />
-                </div>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="cacesDays">{t("settingsAlerts.daysBeforeExpiry")}</Label>
+                    <Input id="cacesDays" type="number" className="w-24" defaultValue="30" />
+                  </div>
+                </CardContent>
               )}
-            </div>
+            </Card>
 
             {/* Medical Visit Alerts */}
-            <div className="rounded-lg border bg-card p-4">
-              <div className="flex items-center justify-between">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
-                  <h3 className="font-medium">{t("settingsAlerts.medicalVisitAlerts")}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t("settingsAlerts.enableVisitAlerts")}
-                  </p>
+                  <CardTitle>{t("settingsAlerts.medicalVisitAlerts")}</CardTitle>
+                  <CardDescription>{t("settingsAlerts.enableVisitAlerts")}</CardDescription>
                 </div>
-                <Switch checked={medicalAlerts} onCheckedChange={setMedicalAlerts} />
-              </div>
+                <CardAction>
+                  <Switch checked={medicalAlerts} onCheckedChange={setMedicalAlerts} />
+                </CardAction>
+              </CardHeader>
               {medicalAlerts && (
-                <div className="mt-4 flex items-center gap-4">
-                  <Label htmlFor="medicalDays">{t("settingsAlerts.daysBeforeVisit")}</Label>
-                  <Input id="medicalDays" type="number" className="w-24" defaultValue="7" />
-                </div>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="medicalDays">{t("settingsAlerts.daysBeforeVisit")}</Label>
+                    <Input id="medicalDays" type="number" className="w-24" defaultValue="7" />
+                  </div>
+                </CardContent>
               )}
-            </div>
+            </Card>
 
             {/* Contract Alerts */}
-            <div className="rounded-lg border bg-card p-4">
-              <div className="flex items-center justify-between">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
-                  <h3 className="font-medium">Contract expiry alerts</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Get notified when employee contracts are expiring
-                  </p>
+                  <CardTitle>Contract expiry alerts</CardTitle>
+                  <CardDescription>Get notified when employee contracts are expiring</CardDescription>
                 </div>
-                <Switch checked={contractAlerts} onCheckedChange={setContractAlerts} />
-              </div>
-            </div>
+                <CardAction>
+                  <Switch checked={contractAlerts} onCheckedChange={setContractAlerts} />
+                </CardAction>
+              </CardHeader>
+            </Card>
           </div>
         )}
 
@@ -175,9 +182,11 @@ export function SettingsPage() {
         {activeTab === "system" && (
           <div className="space-y-6 px-4">
             {/* App Info */}
-            <div className="rounded-lg border bg-card p-4">
-              <h3 className="font-medium mb-4">Application</h3>
-              <div className="space-y-3">
+            <Card>
+              <CardHeader>
+                <CardTitle>Application</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Version</span>
                   <span className="text-sm">2.1.1</span>
@@ -190,21 +199,21 @@ export function SettingsPage() {
                   <span className="text-sm text-muted-foreground">Database size</span>
                   <span className="text-sm">--</span>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Cache */}
-            <div className="rounded-lg border bg-card p-4">
-              <div className="flex items-center justify-between">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
-                  <h3 className="font-medium">Clear cache</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Clear cached data to free up space
-                  </p>
+                  <CardTitle>Clear cache</CardTitle>
+                  <CardDescription>Clear cached data to free up space</CardDescription>
                 </div>
-                <Button variant="outline">Clear cache</Button>
-              </div>
-            </div>
+                <CardAction>
+                  <Button variant="outline">Clear cache</Button>
+                </CardAction>
+              </CardHeader>
+            </Card>
           </div>
         )}
       </div>

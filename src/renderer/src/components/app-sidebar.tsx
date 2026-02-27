@@ -228,6 +228,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
+                <div
+                  className={`flex items-center gap-2 rounded-md px-2 py-1.5  ${
+                    canWrite
+                      ? "bg-green-500/10 text-green-600 border border-green-500/20"
+                      : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                  }`}
+                >
+                  {canWrite ? (
+                    <Pen className="h-4 w-4" />
+                  ) : (
+                    <Lock className="h-4 w-4" />
+                  )}
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    {canWrite ? "Write mode" : "Read only"}
+                  </span>
+                </div>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={t("sidebar.settings")}>
                   <Link to="/settings">
                     <Settings2 />
@@ -243,38 +261,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.help")}>
-                  <Link to="/help">
-                    <MessageCircleQuestion />
-                    <span>{t("sidebar.help")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t bg-card">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <div
-              className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm ${
-                canWrite
-                  ? "bg-green-100 text-green-800"
-                  : "bg-amber-100 text-amber-800"
-              }`}
-            >
-              {canWrite ? (
-                <Pen className="h-4 w-4" />
-              ) : (
-                <Lock className="h-4 w-4" />
-              )}
-              <span className="group-data-[collapsible=icon]:hidden">
-                {canWrite ? "Write mode" : "Read only"}
-              </span>
-            </div>
-          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
               <div className="flex w-full cursor-pointer items-center">

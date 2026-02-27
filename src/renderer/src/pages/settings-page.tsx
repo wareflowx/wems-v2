@@ -12,7 +12,7 @@ export function SettingsPage() {
           <span className="text-sm font-medium">Settings</span>
 
           <Tabs className="ml-6" defaultValue="backup">
-            <TabsList className="h-full justify-start gap-1 bg-transparent p-0">
+            <TabsList className="h-full justify-start gap-1 p-0">
               <TabsTrigger value="backup">Backup</TabsTrigger>
               <TabsTrigger value="alerts">Alerts</TabsTrigger>
               <TabsTrigger value="system">System</TabsTrigger>

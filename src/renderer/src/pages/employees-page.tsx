@@ -7,6 +7,7 @@ import {
   CreateEmployeeDialog,
 } from "@/components/employees/CreateEmployeeDialog";
 import { DeleteEmployeeDialog } from "@/components/employees/DeleteEmployeeDialog";
+import { EditEmployeeDialog } from "@/components/employees/EditEmployeeDialog";
 import { EmployeesTable } from "@/components/employees/employees-table";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { MetricsSection } from "@/components/ui/metrics-section";
@@ -18,6 +19,7 @@ import {
   useDepartments,
   useEmployees,
   usePositions,
+  useUpdateEmployee,
   useWorkLocations,
 } from "@/hooks";
 import { useToast } from "@/utils/toast";
@@ -35,6 +37,7 @@ export function EmployeesPage() {
     id: number;
     name: string;
   } | null>(null);
+  const [employeeToEdit, setEmployeeToEdit] = useState<any | null>(null);
 
   // Use TanStack Query hooks
   const { data: employees = [], isLoading, error } = useEmployees();
@@ -44,6 +47,7 @@ export function EmployeesPage() {
   const { data: departments = [] } = useDepartments();
   const createEmployee = useCreateEmployee();
   const deleteEmployee = useDeleteEmployee();
+  const updateEmployee = useUpdateEmployee();
 
   // KPIs - calculated dynamically
   const kpis = useMemo(() => {
@@ -89,10 +93,15 @@ export function EmployeesPage() {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleEditClick = () => {
-    toast({
-      title: "Edit employee",
-      description: "Employee editing coming soon",
+  const handleEditClick = (employee: any) => {
+    setEmployeeToEdit(employee);
+  };
+
+  const handleEditSubmit = (data: any) => {
+    updateEmployee.mutate(data, {
+      onSuccess: () => {
+        setEmployeeToEdit(null);
+      },
     });
   };
 
@@ -205,6 +214,16 @@ export function EmployeesPage() {
         onConfirm={handleDeleteEmployee}
         onOpenChange={setIsDeleteDialogOpen}
         open={isDeleteDialogOpen}
+      />
+      <EditEmployeeDialog
+        employee={employeeToEdit}
+        contract={employeeToEdit ? contracts.find((c: any) => c.employeeId === employeeToEdit.id && c.isActive) : undefined}
+        departments={departments}
+        onEdit={handleEditSubmit}
+        onOpenChange={(open) => !open && setEmployeeToEdit(null)}
+        open={!!employeeToEdit}
+        positions={positions}
+        workLocations={workLocations}
       />
     </div>
   );

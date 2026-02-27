@@ -11,10 +11,11 @@ let db: ReturnType<typeof drizzle> | null = null;
 const inDevelopment = process.env.NODE_ENV === "development";
 
 export function getDataDir(): string {
-  // Use userData directory for data storage
-  // This is the proper location for app data (writable, per-user)
+  // Use directory next to executable for portable data storage
   // In development: use project root for easier debugging
-  const baseDir = inDevelopment ? process.cwd() : app.getPath("userData");
+  const baseDir = inDevelopment
+    ? process.cwd()
+    : path.dirname(process.execPath);
 
   return path.join(baseDir, "data");
 }

@@ -250,24 +250,25 @@ export const createEmployee = os.handler(async ({ input }) => {
 
     // Use transaction to ensure atomicity
     // Note: better-sqlite3 does not support async transaction functions
-    const result = db.transaction((tx) => {
-      const [newEmployee] = tx
+    const insertResult = db.transaction((tx) => {
+      const employeeResult = tx
         .insert(employees)
         .values(employeeData)
-        .returning();
+        .returning()
+        .get();
 
       tx.insert(contracts).values({
-        employeeId: newEmployee.id,
+        employeeId: employeeResult.id,
         contractType,
         startDate: contractStartDate || employeeData.hireDate,
         endDate: contractEndDate || null,
         isActive: true,
       });
 
-      return newEmployee;
+      return employeeResult;
     });
 
-    return result;
+    return insertResult;
   } catch (error) {
     console.error("Error in createEmployee:", error);
     throw error;

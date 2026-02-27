@@ -141,6 +141,7 @@ export const getAllMediaInputSchema = z.object({
 export const createAttachmentInputSchema = z.object({
   id: z.string().optional(),
   employeeId: z.number(),
+  employeeName: z.string().optional(), // For slugified folder path
   entityType: z.enum(["contract", "caces", "document", "medical_visit"]),
   entityId: z.number().optional(),
   originalName: z.string(),

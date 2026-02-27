@@ -132,12 +132,29 @@ export function getMediaPath(type: string, fileName: string): string {
 }
 
 /**
+ * Slugify a string for use in file paths
+ */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove accents
+    .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric with hyphens
+    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+}
+
+/**
  * Get the relative path for an attachment
+ * Uses employeeName if provided for a more readable path
  */
 export function getAttachmentPath(
   entityType: string,
   employeeId: number,
-  fileName: string
+  fileName: string,
+  employeeName?: string
 ): string {
-  return path.join(entityType, employeeId.toString(), fileName);
+  const folderName = employeeName
+    ? `${employeeId}-${slugify(employeeName)}`
+    : employeeId.toString();
+  return path.join(entityType, folderName, fileName);
 }

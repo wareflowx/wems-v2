@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CacesFileUpload } from "./CacesFileUpload";
+import { CacesFileUpload, type FileData } from "./CacesFileUpload";
 
 interface Employee {
   id: number;
@@ -34,7 +34,7 @@ interface AddCacesDialogProps {
     category: string;
     dateObtained: string;
     expirationDate: string;
-    document: string;
+    document: FileData | null;
   }) => void;
   employees?: Employee[];
 }
@@ -50,7 +50,7 @@ export function AddCacesDialog({
   const [category, setCategory] = useState<string>("");
   const [issueDate, setIssueDate] = useState<string>("");
   const [expiryDate, setExpiryDate] = useState<string>("");
-  const [document, setDocument] = useState<string>("");
+  const [document, setDocument] = useState<FileData | null>(null);
 
   const handleSubmit = () => {
     onAdd?.({
@@ -62,6 +62,10 @@ export function AddCacesDialog({
     });
   };
 
+  const handleDocumentChange = (file: FileData | null) => {
+    setDocument(file);
+  };
+
   const isFormValid = employeeId && category && issueDate && expiryDate;
 
   // Reset form when dialog closes
@@ -71,7 +75,7 @@ export function AddCacesDialog({
       setCategory("");
       setIssueDate("");
       setExpiryDate("");
-      setDocument("");
+      setDocument(null);
     }
     onOpenChange?.(open);
   };
@@ -155,7 +159,7 @@ export function AddCacesDialog({
 
           <CacesFileUpload
             label={t("caces.document")}
-            onChange={setDocument}
+            onChange={handleDocumentChange}
             value={document}
           />
         </div>

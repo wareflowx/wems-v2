@@ -676,7 +676,8 @@ export const createAttachment = os.handler(async ({ input }) => {
       filePath = getAttachmentPath(
         validatedData.entityType,
         validatedData.employeeId,
-        storedName
+        storedName,
+        validatedData.employeeName
       );
 
       // Save file to disk first

@@ -285,6 +285,7 @@ export async function getAttachmentById(id: string) {
 export async function createAttachment(data: {
   id?: string;
   employeeId: number;
+  employeeName?: string;
   entityType: "contract" | "caces" | "document" | "medical_visit";
   entityId?: number;
   originalName: string;

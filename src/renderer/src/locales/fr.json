@@ -219,6 +219,8 @@
   "employeeDetail": {
     "title": "Fiche employé",
     "edit": "Modifier",
+    "editEmployee": "Modifier l'employé",
+    "editEmployeeDescription": "Mettre à jour les informations de l'employé",
     "information": "Information",
     "documents": "Documents",
     "caces": "CACES",
@@ -237,10 +239,21 @@
     "contractType": "Type de contrat",
     "startDate": "Date début",
     "status": "Statut",
+    "statusActive": "Actif",
+    "statusOnLeave": "En congés",
+    "statusTerminated": "Licencié",
+    "workLocation": "Lieu de travail",
+    "department": "Département",
+    "hireDate": "Date d'embauche",
+    "terminationDate": "Date de fin",
+    "selectPosition": "Sélectionner un poste",
+    "selectWorkLocation": "Sélectionner un lieu de travail",
+    "selectDepartment": "Sélectionner un département",
     "noDocuments": "Aucun document pour cet employé",
     "noCaces": "Aucun CACES pour cet employé",
     "noMedicalVisits": "Aucune visite médicale pour cet employé",
-    "noHistory": "Aucun historique pour cet employé"
+    "noHistory": "Aucun historique pour cet employé",
+    "personalInfo": "Informations personnelles"
   },
   "documents": {
     "title": "Documents",

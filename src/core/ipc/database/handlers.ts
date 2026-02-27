@@ -248,25 +248,29 @@ export const createEmployee = os.handler(async ({ input }) => {
       ...employeeData
     } = validatedData;
 
-    // Use transaction to ensure atomicity
-    const result = await db.transaction(async (tx) => {
-      const [newEmployee] = await tx
-        .insert(employees)
-        .values(employeeData)
-        .returning();
+    // Insert employee first
+    const [newEmployee] = await db
+      .insert(employees)
+      .values(employeeData)
+      .returning();
 
-      await tx.insert(contracts).values({
+    // Then insert contract with the employee's ID
+    // Use try-catch with manual rollback to ensure atomicity
+    try {
+      await db.insert(contracts).values({
         employeeId: newEmployee.id,
         contractType,
         startDate: contractStartDate || employeeData.hireDate,
         endDate: contractEndDate || null,
         isActive: true,
       });
+    } catch (contractError) {
+      // Rollback: delete the employee if contract creation fails
+      await db.delete(employees).where(eq(employees.id, newEmployee.id));
+      throw contractError;
+    }
 
-      return newEmployee;
-    });
-
-    return result;
+    return newEmployee;
   } catch (error) {
     console.error("Error in createEmployee:", error);
     throw error;

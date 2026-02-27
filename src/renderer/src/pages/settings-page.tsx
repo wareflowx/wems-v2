@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/utils/tailwind";
 
 type TabValue = "backup" | "alerts" | "system";
 
@@ -70,9 +71,9 @@ export function SettingsPage() {
                   <CardTitle>{t("settingsBackup.manualBackup")}</CardTitle>
                   <CardDescription>{t("settingsBackup.manualBackupDesc")}</CardDescription>
                 </div>
-                <CardAction>
+                <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Button>{t("settingsBackup.createBackup")}</Button>
-                </CardAction>
+                </div>
               </CardHeader>
             </Card>
 
@@ -83,9 +84,9 @@ export function SettingsPage() {
                   <CardTitle>{t("settingsBackup.restoration")}</CardTitle>
                   <CardDescription>{t("settingsBackup.restorationDesc")}</CardDescription>
                 </div>
-                <CardAction>
+                <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Button variant="outline">{t("settingsBackup.selectBackupFile")}</Button>
-                </CardAction>
+                </div>
               </CardHeader>
             </Card>
 
@@ -96,9 +97,9 @@ export function SettingsPage() {
                   <CardTitle>{t("settingsBackup.automaticBackup")}</CardTitle>
                   <CardDescription>{t("settingsBackup.enableAutomaticBackupDesc")}</CardDescription>
                 </div>
-                <CardAction>
+                <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Switch checked={autoBackup} onCheckedChange={setAutoBackup} />
-                </CardAction>
+                </div>
               </CardHeader>
               {autoBackup && (
                 <CardContent>
@@ -128,9 +129,9 @@ export function SettingsPage() {
                   <CardTitle>{t("settingsAlerts.cacesExpiryAlerts")}</CardTitle>
                   <CardDescription>{t("settingsAlerts.enableExpiryAlerts")}</CardDescription>
                 </div>
-                <CardAction>
+                <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Switch checked={cacesAlerts} onCheckedChange={setCacesAlerts} />
-                </CardAction>
+                </div>
               </CardHeader>
               {cacesAlerts && (
                 <CardContent>
@@ -149,9 +150,9 @@ export function SettingsPage() {
                   <CardTitle>{t("settingsAlerts.medicalVisitAlerts")}</CardTitle>
                   <CardDescription>{t("settingsAlerts.enableVisitAlerts")}</CardDescription>
                 </div>
-                <CardAction>
+                <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Switch checked={medicalAlerts} onCheckedChange={setMedicalAlerts} />
-                </CardAction>
+                </div>
               </CardHeader>
               {medicalAlerts && (
                 <CardContent>
@@ -170,9 +171,9 @@ export function SettingsPage() {
                   <CardTitle>Contract expiry alerts</CardTitle>
                   <CardDescription>Get notified when employee contracts are expiring</CardDescription>
                 </div>
-                <CardAction>
+                <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Switch checked={contractAlerts} onCheckedChange={setContractAlerts} />
-                </CardAction>
+                </div>
               </CardHeader>
             </Card>
           </div>
@@ -209,9 +210,9 @@ export function SettingsPage() {
                   <CardTitle>Clear cache</CardTitle>
                   <CardDescription>Clear cached data to free up space</CardDescription>
                 </div>
-                <CardAction>
+                <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Button variant="outline">Clear cache</Button>
-                </CardAction>
+                </div>
               </CardHeader>
             </Card>
           </div>

@@ -97,6 +97,7 @@ export function useCreateEmployee() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.employees.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.lists() });
     },
   });
 }

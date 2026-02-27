@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+type TabValue = "backup" | "alerts" | "system";
 
 export function SettingsPage() {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<TabValue>("backup");
 
   return (
     <div className="flex flex-1 flex-col gap-4 ">
@@ -11,34 +14,57 @@ export function SettingsPage() {
         <div className="flex h-13 items-center border-b px-4">
           <span className="text-sm font-medium">Settings</span>
 
-          <Tabs className="ml-6" defaultValue="backup">
-            <TabsList className="h-full justify-start gap-1 p-0">
-              <TabsTrigger value="backup">Backup</TabsTrigger>
-              <TabsTrigger value="alerts">Alerts</TabsTrigger>
-              <TabsTrigger value="system">System</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="ml-6 flex gap-1">
+            <button
+              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                activeTab === "backup"
+                  ? "bg-secondary text-secondary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => setActiveTab("backup")}
+            >
+              Backup
+            </button>
+            <button
+              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                activeTab === "alerts"
+                  ? "bg-secondary text-secondary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => setActiveTab("alerts")}
+            >
+              Alerts
+            </button>
+            <button
+              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                activeTab === "system"
+                  ? "bg-secondary text-secondary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => setActiveTab("system")}
+            >
+              System
+            </button>
+          </div>
         </div>
 
-        <Tabs defaultValue="backup">
-          <TabsContent value="backup">
-            <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
-              Backup settings coming soon...
-            </div>
-          </TabsContent>
+        {activeTab === "backup" && (
+          <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
+            Backup settings coming soon...
+          </div>
+        )}
 
-          <TabsContent value="alerts">
-            <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
-              Alerts settings coming soon...
-            </div>
-          </TabsContent>
+        {activeTab === "alerts" && (
+          <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
+            Alerts settings coming soon...
+          </div>
+        )}
 
-          <TabsContent value="system">
-            <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
-              System settings coming soon...
-            </div>
-          </TabsContent>
-        </Tabs>
+        {activeTab === "system" && (
+          <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
+            System settings coming soon...
+          </div>
+        )}
       </div>
     </div>
   );

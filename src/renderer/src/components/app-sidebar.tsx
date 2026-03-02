@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   AlertTriangle,
   Briefcase,
@@ -14,6 +14,7 @@ import {
   MapPin,
   MessageCircleQuestion,
   Pen,
+  Search,
   Settings2,
   ShieldAlert,
   SquareTerminal,
@@ -25,6 +26,16 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { getAppVersion } from "@/actions/app";
 import { useAlerts, useCaces, useDrivingAuthorizations, useMedicalVisits, useOnlineTrainings } from "@/hooks";
+import {
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandShortcut,
+  CommandSeparator,
+} from "@/components/ui/command";
 import {
   Sidebar,
   SidebarContent,
@@ -77,6 +88,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
   const [_appVersion, setAppVersion] = React.useState("0.0.0");
   const [canWrite, setCanWrite] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
+  const navigate = useNavigate();
 
   // Get counts for sidebar badges
   const { data: alerts = [] } = useAlerts();
@@ -98,10 +111,180 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     window.onLockStatusChanged?.((writeMode) => {
       setCanWrite(writeMode);
     });
+
+    // Handle Cmd+K / Ctrl+K keyboard shortcut
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+        event.preventDefault();
+        setOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const handleCommandSelect = (callback: () => void) => {
+    callback();
+    setOpen(false);
+  };
+
+  // Quick actions command palette
+  const quickActions = [
+    {
+      heading: "Navigation",
+    },
+    {
+      id: "home",
+      title: "Dashboard",
+      shortcut: "G H",
+      action: () => navigate({ to: "/" }),
+      icon: Home,
+    },
+    {
+      id: "employees",
+      title: "Employees",
+      shortcut: "G E",
+      action: () => navigate({ to: "/employees" }),
+      icon: Users,
+    },
+    {
+      id: "alerts",
+      title: "Alerts",
+      shortcut: "G A",
+      action: () => navigate({ to: "/alerts" }),
+      icon: AlertTriangle,
+    },
+    {
+      id: "documents",
+      title: "Documents",
+      shortcut: "G D",
+      action: () => navigate({ to: "/documents" }),
+      icon: FileText,
+    },
+    {
+      id: "caces",
+      title: "CACES",
+      shortcut: "G C",
+      action: () => navigate({ to: "/caces" }),
+      icon: ShieldAlert,
+    },
+    {
+      id: "medical-visits",
+      title: "Medical Visits",
+      shortcut: "G M",
+      action: () => navigate({ to: "/medical-visits" }),
+      icon: Stethoscope,
+    },
+    {
+      id: "driving-authorizations",
+      title: "Driving Authorizations",
+      shortcut: "G R",
+      action: () => navigate({ to: "/driving-authorizations" }),
+      icon: Car,
+    },
+    {
+      id: "online-trainings",
+      title: "Online Trainings",
+      shortcut: "G T",
+      action: () => navigate({ to: "/online-trainings" }),
+      icon: GraduationCap,
+    },
+    {
+      id: "contracts",
+      title: "Contracts",
+      shortcut: "G O",
+      action: () => navigate({ to: "/contracts" }),
+      icon: FileText,
+    },
+    {
+      heading: "Reference Data",
+    },
+    {
+      id: "positions",
+      title: "Positions",
+      shortcut: "P P",
+      action: () => navigate({ to: "/positions" }),
+      icon: Briefcase,
+    },
+    {
+      id: "work-locations",
+      title: "Work Locations",
+      shortcut: "P W",
+      action: () => navigate({ to: "/work-locations" }),
+      icon: MapPin,
+    },
+    {
+      id: "departments",
+      title: "Departments",
+      shortcut: "P D",
+      action: () => navigate({ to: "/departments" }),
+      icon: Building2,
+    },
+    {
+      id: "contract-types",
+      title: "Contract Types",
+      shortcut: "P C",
+      action: () => navigate({ to: "/contract-types" }),
+      icon: ClipboardList,
+    },
+    {
+      heading: "Settings",
+    },
+    {
+      id: "settings",
+      title: "Settings",
+      shortcut: "S S",
+      action: () => navigate({ to: "/settings" }),
+      icon: Settings2,
+    },
+    {
+      id: "trash",
+      title: "Trash",
+      shortcut: "S T",
+      action: () => navigate({ to: "/trash" }),
+      icon: Trash2,
+    },
+  ];
+
+  // Group items by heading
+  const groupedActions = quickActions.reduce<{ heading?: string; items: typeof quickActions }[]>((acc, item) => {
+    if ("heading" in item && item.heading) {
+      acc.push({ heading: item.heading, items: [] });
+    } else if (acc.length > 0) {
+      acc[acc.length - 1].items.push(item);
+    }
+    return acc;
   }, []);
 
   return (
-    <Sidebar
+    <>
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <CommandInput placeholder="Type a command or search..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          {groupedActions.map((group, groupIndex) => (
+            <React.Fragment key={group.heading || `group-${groupIndex}`}>
+              {group.heading && (
+                <CommandGroup heading={group.heading}>
+                  {group.items.map((item) => (
+                    <CommandItem
+                      key={item.id}
+                      onSelect={() => handleCommandSelect(item.action)}
+                    >
+                      {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+                      <span>{item.title}</span>
+                      {item.shortcut && <CommandShortcut>{item.shortcut}</CommandShortcut>}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+              {group.heading && groupIndex < groupedActions.length - 1 && <CommandSeparator />}
+            </React.Fragment>
+          ))}
+        </CommandList>
+      </CommandDialog>
+      <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
       collapsible="icon"
       {...props}
@@ -296,6 +479,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter className="border-t bg-card">
         <SidebarMenu>
           <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Quick actions"
+              onClick={() => setOpen(true)}
+            >
+              <Search className="size-4" />
+              <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
+                Quick actions
+              </span>
+              <CommandShortcut>Ctrl+K</CommandShortcut>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
               <div className="flex w-full cursor-pointer items-center">
                 <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
@@ -309,5 +504,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
+    </>
   );
 }

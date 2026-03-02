@@ -380,15 +380,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="bg-card">
+        {/* Quick actions - visible even when sidebar is collapsed */}
         <SidebarGroup>
           <SidebarGroupContent>
             <div
-              className="mt-1 flex cursor-pointer items-center gap-2 rounded-md border bg-muted/50 px-2 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="mt-1 flex cursor-pointer items-center gap-2 rounded-md border bg-muted/50 px-2 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
               onClick={() => setOpen(true)}
             >
               <Search className="size-4" />
-              <span className="flex-1 text-xs">Quick actions</span>
-              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="flex-1 text-xs group-data-[collapsible=icon]:hidden">Quick actions</span>
+              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 group-data-[collapsible=icon]:hidden">
                 <span className="text-xs">Ctrl</span>
                 <span>K</span>
               </kbd>

@@ -76,11 +76,8 @@ export function CreateContractDialog({
       endDate: endDate || null,
     });
 
-    // Reset form
-    setEmployeeId("");
-    setContractType("");
-    setStartDate("");
-    setEndDate("");
+    // Close dialog after submit
+    onOpenChange?.(false);
     onOpenChange(false);
   };
 

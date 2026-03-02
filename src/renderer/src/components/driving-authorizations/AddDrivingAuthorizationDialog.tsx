@@ -62,6 +62,8 @@ export function AddDrivingAuthorizationDialog({
       expirationDate,
       document,
     });
+    // Close dialog after submit
+    onOpenChange?.(false);
   };
 
   const isFormValid = employeeId && licenseCategory && dateObtained && expirationDate;

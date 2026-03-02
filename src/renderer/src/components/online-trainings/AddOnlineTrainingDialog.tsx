@@ -67,6 +67,8 @@ export function AddOnlineTrainingDialog({
       status: status as "in_progress" | "completed" | "expired",
       document,
     });
+    // Close dialog after submit
+    onOpenChange?.(false);
   };
 
   const isFormValid = employeeId && trainingName && completionDate && (!hasExpiration || expirationDate);

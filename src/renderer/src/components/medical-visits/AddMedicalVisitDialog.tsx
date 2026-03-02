@@ -42,6 +42,8 @@ export function AddMedicalVisitDialog({
 
   const handleSubmit = () => {
     onAdd?.({ employee, type, scheduledDate });
+    // Close dialog after submit
+    onOpenChange?.(false);
   };
 
   const isFormValid = employee && type && scheduledDate;

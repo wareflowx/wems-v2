@@ -60,6 +60,8 @@ export function AddCacesDialog({
       expirationDate: expiryDate,
       document,
     });
+    // Close dialog after submit
+    onOpenChange?.(false);
   };
 
   const handleDocumentChange = (file: FileData | null) => {

@@ -62,6 +62,8 @@ export function AddDocumentDialog({
       size: 0,
       filePath: `/files/documents/${document}`,
     });
+    // Close dialog after submit
+    onOpenChange?.(false);
   };
 
   const isFormValid = employeeId && name && document;

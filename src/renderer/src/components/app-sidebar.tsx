@@ -327,17 +327,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="bg-card">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Quick actions (Ctrl+K)"
-                  onClick={() => setOpen(true)}
-                >
-                  <Search className="size-4" />
-                  <span>Quick actions</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
+            <div
+              className="flex cursor-pointer items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+              onClick={() => setOpen(true)}
+            >
+              <Search className="size-4" />
+              <span className="flex-1 text-xs">Quick actions</span>
+              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">Ctrl</span>
+                <span>K</span>
+              </kbd>
+            </div>
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>

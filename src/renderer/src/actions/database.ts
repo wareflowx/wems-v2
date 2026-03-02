@@ -423,8 +423,90 @@ export async function deleteCace(id: number) {
   return client.database.deleteCace({ id });
 }
 
+// Driving Authorizations actions
+export async function getDrivingAuthorizations() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getDrivingAuthorizations();
+}
+
+export async function getDrivingAuthorizationsByEmployee(employeeId: number) {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getDrivingAuthorizationsByEmployee({ employeeId });
+}
+
+export async function createDrivingAuthorization(data: { employeeId: number; licenseCategory: string; dateObtained: string; expirationDate: string; attachmentId?: string }) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.createDrivingAuthorization(data);
+}
+
+export async function updateDrivingAuthorization(data: { id: number; licenseCategory?: string; dateObtained?: string; expirationDate?: string; attachmentId?: string | null }) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.updateDrivingAuthorization(data);
+}
+
+export async function deleteDrivingAuthorization(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.deleteDrivingAuthorization({ id });
+}
+
+// Online Trainings actions
+export async function getOnlineTrainings() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getOnlineTrainings();
+}
+
+export async function getOnlineTrainingsByEmployee(employeeId: number) {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getOnlineTrainingsByEmployee({ employeeId });
+}
+
+export async function createOnlineTraining(data: { employeeId: number; trainingName: string; trainingProvider: string; completionDate: string; expirationDate?: string; status?: "in_progress" | "completed" | "expired"; attachmentId?: string }) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.createOnlineTraining(data);
+}
+
+export async function updateOnlineTraining(data: { id: number; trainingName?: string; trainingProvider?: string; completionDate?: string; expirationDate?: string | null; status?: "in_progress" | "completed" | "expired"; attachmentId?: string | null }) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.updateOnlineTraining(data);
+}
+
+export async function deleteOnlineTraining(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.deleteOnlineTraining({ id });
+}
+
 // Attachment by entity actions
-export async function getAttachmentsByEntity(entityType: "contract" | "caces" | "document" | "medical_visit", entityId: number) {
+export async function getAttachmentsByEntity(entityType: "contract" | "caces" | "document" | "medical_visit" | "driving_authorization" | "online_training", entityId: number) {
   const client = getClient();
   if (!client) {
     return [];
@@ -432,7 +514,7 @@ export async function getAttachmentsByEntity(entityType: "contract" | "caces" | 
   return client.database.getAttachmentsByEntity({ entityType, entityId });
 }
 
-export async function getAttachmentsByType(entityType: "contract" | "caces" | "document" | "medical_visit") {
+export async function getAttachmentsByType(entityType: "contract" | "caces" | "document" | "medical_visit" | "driving_authorization" | "online_training") {
   const client = getClient();
   if (!client) {
     return [];

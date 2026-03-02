@@ -9,84 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as EmployeesRouteImport } from './routes/employees'
-import { Route as DocumentsRouteImport } from './routes/documents'
-import { Route as CacesRouteImport } from './routes/caces'
-import { Route as MedicalVisitsRouteImport } from './routes/medical-visits'
-import { Route as AlertsRouteImport } from './routes/alerts'
-import { Route as ContractsRouteImport } from './routes/contracts'
-import { Route as PostsRouteImport } from './routes/posts'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as PositionsRouteImport } from './routes/positions'
 import { Route as WorkLocationsRouteImport } from './routes/work-locations'
-import { Route as DepartmentsRouteImport } from './routes/departments'
-import { Route as ContractTypesRouteImport } from './routes/contract-types'
 import { Route as TrashRouteImport } from './routes/trash'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PostsRouteImport } from './routes/posts'
+import { Route as PositionsRouteImport } from './routes/positions'
+import { Route as OnlineTrainingsRouteImport } from './routes/online-trainings'
+import { Route as MedicalVisitsRouteImport } from './routes/medical-visits'
+import { Route as EmployeesRouteImport } from './routes/employees'
+import { Route as DrivingAuthorizationsRouteImport } from './routes/driving-authorizations'
+import { Route as DocumentsRouteImport } from './routes/documents'
+import { Route as DepartmentsRouteImport } from './routes/departments'
+import { Route as ContractsRouteImport } from './routes/contracts'
+import { Route as ContractTypesRouteImport } from './routes/contract-types'
+import { Route as CacesRouteImport } from './routes/caces'
+import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as IndexRouteImport } from './routes/index'
 
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EmployeesRoute = EmployeesRouteImport.update({
-  id: '/employees',
-  path: '/employees',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocumentsRoute = DocumentsRouteImport.update({
-  id: '/documents',
-  path: '/documents',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CacesRoute = CacesRouteImport.update({
-  id: '/caces',
-  path: '/caces',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MedicalVisitsRoute = MedicalVisitsRouteImport.update({
-  id: '/medical-visits',
-  path: '/medical-visits',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AlertsRoute = AlertsRouteImport.update({
-  id: '/alerts',
-  path: '/alerts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContractsRoute = ContractsRouteImport.update({
-  id: '/contracts',
-  path: '/contracts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PostsRoute = PostsRouteImport.update({
-  id: '/posts',
-  path: '/posts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PositionsRoute = PositionsRouteImport.update({
-  id: '/positions',
-  path: '/positions',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const WorkLocationsRoute = WorkLocationsRouteImport.update({
   id: '/work-locations',
   path: '/work-locations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DepartmentsRoute = DepartmentsRouteImport.update({
-  id: '/departments',
-  path: '/departments',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContractTypesRoute = ContractTypesRouteImport.update({
-  id: '/contract-types',
-  path: '/contract-types',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrashRoute = TrashRouteImport.update({
@@ -94,172 +36,215 @@ const TrashRoute = TrashRouteImport.update({
   path: '/trash',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsRoute = PostsRouteImport.update({
+  id: '/posts',
+  path: '/posts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PositionsRoute = PositionsRouteImport.update({
+  id: '/positions',
+  path: '/positions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnlineTrainingsRoute = OnlineTrainingsRouteImport.update({
+  id: '/online-trainings',
+  path: '/online-trainings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MedicalVisitsRoute = MedicalVisitsRouteImport.update({
+  id: '/medical-visits',
+  path: '/medical-visits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployeesRoute = EmployeesRouteImport.update({
+  id: '/employees',
+  path: '/employees',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DrivingAuthorizationsRoute = DrivingAuthorizationsRouteImport.update({
+  id: '/driving-authorizations',
+  path: '/driving-authorizations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DepartmentsRoute = DepartmentsRouteImport.update({
+  id: '/departments',
+  path: '/departments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContractsRoute = ContractsRouteImport.update({
+  id: '/contracts',
+  path: '/contracts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContractTypesRoute = ContractTypesRouteImport.update({
+  id: '/contract-types',
+  path: '/contract-types',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CacesRoute = CacesRouteImport.update({
+  id: '/caces',
+  path: '/caces',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlertsRoute = AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/posts': typeof PostsRoute
-  '/employees': typeof EmployeesRoute
-  '/documents': typeof DocumentsRoute
-  '/caces': typeof CacesRoute
-  '/medical-visits': typeof MedicalVisitsRoute
   '/alerts': typeof AlertsRoute
-  '/contracts': typeof ContractsRoute
-  '/positions': typeof PositionsRoute
-  '/work-locations': typeof WorkLocationsRoute
-  '/departments': typeof DepartmentsRoute
+  '/caces': typeof CacesRoute
   '/contract-types': typeof ContractTypesRoute
-  '/trash': typeof TrashRoute
+  '/contracts': typeof ContractsRoute
+  '/departments': typeof DepartmentsRoute
+  '/documents': typeof DocumentsRoute
+  '/driving-authorizations': typeof DrivingAuthorizationsRoute
+  '/employees': typeof EmployeesRoute
+  '/medical-visits': typeof MedicalVisitsRoute
+  '/online-trainings': typeof OnlineTrainingsRoute
+  '/positions': typeof PositionsRoute
+  '/posts': typeof PostsRoute
   '/settings': typeof SettingsRoute
+  '/trash': typeof TrashRoute
+  '/work-locations': typeof WorkLocationsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/posts': typeof PostsRoute
-  '/employees': typeof EmployeesRoute
-  '/documents': typeof DocumentsRoute
-  '/caces': typeof CacesRoute
-  '/medical-visits': typeof MedicalVisitsRoute
   '/alerts': typeof AlertsRoute
-  '/contracts': typeof ContractsRoute
-  '/positions': typeof PositionsRoute
-  '/work-locations': typeof WorkLocationsRoute
-  '/departments': typeof DepartmentsRoute
+  '/caces': typeof CacesRoute
   '/contract-types': typeof ContractTypesRoute
-  '/trash': typeof TrashRoute
+  '/contracts': typeof ContractsRoute
+  '/departments': typeof DepartmentsRoute
+  '/documents': typeof DocumentsRoute
+  '/driving-authorizations': typeof DrivingAuthorizationsRoute
+  '/employees': typeof EmployeesRoute
+  '/medical-visits': typeof MedicalVisitsRoute
+  '/online-trainings': typeof OnlineTrainingsRoute
+  '/positions': typeof PositionsRoute
+  '/posts': typeof PostsRoute
   '/settings': typeof SettingsRoute
+  '/trash': typeof TrashRoute
+  '/work-locations': typeof WorkLocationsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/posts': typeof PostsRoute
-  '/employees': typeof EmployeesRoute
-  '/documents': typeof DocumentsRoute
-  '/caces': typeof CacesRoute
-  '/medical-visits': typeof MedicalVisitsRoute
   '/alerts': typeof AlertsRoute
-  '/contracts': typeof ContractsRoute
-  '/positions': typeof PositionsRoute
-  '/work-locations': typeof WorkLocationsRoute
-  '/departments': typeof DepartmentsRoute
+  '/caces': typeof CacesRoute
   '/contract-types': typeof ContractTypesRoute
-  '/trash': typeof TrashRoute
+  '/contracts': typeof ContractsRoute
+  '/departments': typeof DepartmentsRoute
+  '/documents': typeof DocumentsRoute
+  '/driving-authorizations': typeof DrivingAuthorizationsRoute
+  '/employees': typeof EmployeesRoute
+  '/medical-visits': typeof MedicalVisitsRoute
+  '/online-trainings': typeof OnlineTrainingsRoute
+  '/positions': typeof PositionsRoute
+  '/posts': typeof PostsRoute
   '/settings': typeof SettingsRoute
+  '/trash': typeof TrashRoute
+  '/work-locations': typeof WorkLocationsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/trash' | '/settings'
+  fullPaths:
+    | '/'
+    | '/alerts'
+    | '/caces'
+    | '/contract-types'
+    | '/contracts'
+    | '/departments'
+    | '/documents'
+    | '/driving-authorizations'
+    | '/employees'
+    | '/medical-visits'
+    | '/online-trainings'
+    | '/positions'
+    | '/posts'
+    | '/settings'
+    | '/trash'
+    | '/work-locations'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/trash' | '/settings'
-  id: '__root__' | '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/trash' | '/settings'
+  to:
+    | '/'
+    | '/alerts'
+    | '/caces'
+    | '/contract-types'
+    | '/contracts'
+    | '/departments'
+    | '/documents'
+    | '/driving-authorizations'
+    | '/employees'
+    | '/medical-visits'
+    | '/online-trainings'
+    | '/positions'
+    | '/posts'
+    | '/settings'
+    | '/trash'
+    | '/work-locations'
+  id:
+    | '__root__'
+    | '/'
+    | '/alerts'
+    | '/caces'
+    | '/contract-types'
+    | '/contracts'
+    | '/departments'
+    | '/documents'
+    | '/driving-authorizations'
+    | '/employees'
+    | '/medical-visits'
+    | '/online-trainings'
+    | '/positions'
+    | '/posts'
+    | '/settings'
+    | '/trash'
+    | '/work-locations'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PostsRoute: typeof PostsRoute
-  EmployeesRoute: typeof EmployeesRoute
-  DocumentsRoute: typeof DocumentsRoute
-  CacesRoute: typeof CacesRoute
-  MedicalVisitsRoute: typeof MedicalVisitsRoute
   AlertsRoute: typeof AlertsRoute
-  ContractsRoute: typeof ContractsRoute
-  PositionsRoute: typeof PositionsRoute
-  WorkLocationsRoute: typeof WorkLocationsRoute
-  DepartmentsRoute: typeof DepartmentsRoute
+  CacesRoute: typeof CacesRoute
   ContractTypesRoute: typeof ContractTypesRoute
-  TrashRoute: typeof TrashRoute
+  ContractsRoute: typeof ContractsRoute
+  DepartmentsRoute: typeof DepartmentsRoute
+  DocumentsRoute: typeof DocumentsRoute
+  DrivingAuthorizationsRoute: typeof DrivingAuthorizationsRoute
+  EmployeesRoute: typeof EmployeesRoute
+  MedicalVisitsRoute: typeof MedicalVisitsRoute
+  OnlineTrainingsRoute: typeof OnlineTrainingsRoute
+  PositionsRoute: typeof PositionsRoute
+  PostsRoute: typeof PostsRoute
   SettingsRoute: typeof SettingsRoute
+  TrashRoute: typeof TrashRoute
+  WorkLocationsRoute: typeof WorkLocationsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/employees': {
-      id: '/employees'
-      path: '/employees'
-      fullPath: '/employees'
-      preLoaderRoute: typeof EmployeesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/documents': {
-      id: '/documents'
-      path: '/documents'
-      fullPath: '/documents'
-      preLoaderRoute: typeof DocumentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/caces': {
-      id: '/caces'
-      path: '/caces'
-      fullPath: '/caces'
-      preLoaderRoute: typeof CacesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/medical-visits': {
-      id: '/medical-visits'
-      path: '/medical-visits'
-      fullPath: '/medical-visits'
-      preLoaderRoute: typeof MedicalVisitsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/alerts': {
-      id: '/alerts'
-      path: '/alerts'
-      fullPath: '/alerts'
-      preLoaderRoute: typeof AlertsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contracts': {
-      id: '/contracts'
-      path: '/contracts'
-      fullPath: '/contracts'
-      preLoaderRoute: typeof ContractsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/posts': {
-      id: '/posts'
-      path: '/posts'
-      fullPath: '/posts'
-      preLoaderRoute: typeof PostsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/positions': {
-      id: '/positions'
-      path: '/positions'
-      fullPath: '/positions'
-      preLoaderRoute: typeof PositionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/work-locations': {
       id: '/work-locations'
       path: '/work-locations'
       fullPath: '/work-locations'
       preLoaderRoute: typeof WorkLocationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/departments': {
-      id: '/departments'
-      path: '/departments'
-      fullPath: '/departments'
-      preLoaderRoute: typeof DepartmentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contract-types': {
-      id: '/contract-types'
-      path: '/contract-types'
-      fullPath: '/contract-types'
-      preLoaderRoute: typeof ContractTypesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trash': {
@@ -269,24 +254,124 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrashRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts': {
+      id: '/posts'
+      path: '/posts'
+      fullPath: '/posts'
+      preLoaderRoute: typeof PostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/positions': {
+      id: '/positions'
+      path: '/positions'
+      fullPath: '/positions'
+      preLoaderRoute: typeof PositionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/online-trainings': {
+      id: '/online-trainings'
+      path: '/online-trainings'
+      fullPath: '/online-trainings'
+      preLoaderRoute: typeof OnlineTrainingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/medical-visits': {
+      id: '/medical-visits'
+      path: '/medical-visits'
+      fullPath: '/medical-visits'
+      preLoaderRoute: typeof MedicalVisitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employees': {
+      id: '/employees'
+      path: '/employees'
+      fullPath: '/employees'
+      preLoaderRoute: typeof EmployeesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driving-authorizations': {
+      id: '/driving-authorizations'
+      path: '/driving-authorizations'
+      fullPath: '/driving-authorizations'
+      preLoaderRoute: typeof DrivingAuthorizationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/departments': {
+      id: '/departments'
+      path: '/departments'
+      fullPath: '/departments'
+      preLoaderRoute: typeof DepartmentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contracts': {
+      id: '/contracts'
+      path: '/contracts'
+      fullPath: '/contracts'
+      preLoaderRoute: typeof ContractsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contract-types': {
+      id: '/contract-types'
+      path: '/contract-types'
+      fullPath: '/contract-types'
+      preLoaderRoute: typeof ContractTypesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/caces': {
+      id: '/caces'
+      path: '/caces'
+      fullPath: '/caces'
+      preLoaderRoute: typeof CacesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PostsRoute: PostsRoute,
-  EmployeesRoute: EmployeesRoute,
-  DocumentsRoute: DocumentsRoute,
-  CacesRoute: CacesRoute,
-  MedicalVisitsRoute: MedicalVisitsRoute,
   AlertsRoute: AlertsRoute,
-  ContractsRoute: ContractsRoute,
-  PositionsRoute: PositionsRoute,
-  WorkLocationsRoute: WorkLocationsRoute,
-  DepartmentsRoute: DepartmentsRoute,
+  CacesRoute: CacesRoute,
   ContractTypesRoute: ContractTypesRoute,
-  TrashRoute: TrashRoute,
+  ContractsRoute: ContractsRoute,
+  DepartmentsRoute: DepartmentsRoute,
+  DocumentsRoute: DocumentsRoute,
+  DrivingAuthorizationsRoute: DrivingAuthorizationsRoute,
+  EmployeesRoute: EmployeesRoute,
+  MedicalVisitsRoute: MedicalVisitsRoute,
+  OnlineTrainingsRoute: OnlineTrainingsRoute,
+  PositionsRoute: PositionsRoute,
+  PostsRoute: PostsRoute,
   SettingsRoute: SettingsRoute,
+  TrashRoute: TrashRoute,
+  WorkLocationsRoute: WorkLocationsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

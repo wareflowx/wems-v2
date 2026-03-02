@@ -13,7 +13,7 @@ export const onlineTrainings = sqliteTable("online_trainings", {
 
   // Training details
   trainingName: text("training_name").notNull(),
-  trainingProvider: text("training_provider").notNull(), // Platform name (e.g., "Udemy", "LinkedIn Learning", "Formateur")
+  trainingProvider: text("training_provider"), // Platform name (e.g., "Udemy", "LinkedIn Learning", "Formateur")
   completionDate: text("completion_date").notNull(),
   expirationDate: text("expiration_date"), // Optional - for certifications that expire
 

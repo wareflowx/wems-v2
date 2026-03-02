@@ -274,7 +274,7 @@ export const deleteDrivingAuthorizationInputSchema = z.object({
 export const createOnlineTrainingInputSchema = z.object({
   employeeId: z.number().min(1, "Employee is required"),
   trainingName: z.string().min(1, "Training name is required"),
-  trainingProvider: z.string().min(1, "Training provider is required"),
+  trainingProvider: z.string().optional(),
   completionDate: z.string().min(1, "Completion date is required"),
   expirationDate: z.string().optional(),
   status: z.enum(["in_progress", "completed", "expired"]).default("completed"),

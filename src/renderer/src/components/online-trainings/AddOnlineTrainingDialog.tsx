@@ -69,7 +69,7 @@ export function AddOnlineTrainingDialog({
     });
   };
 
-  const isFormValid = employeeId && trainingName && trainingProvider && completionDate && (!hasExpiration || expirationDate);
+  const isFormValid = employeeId && trainingName && completionDate && (!hasExpiration || expirationDate);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {

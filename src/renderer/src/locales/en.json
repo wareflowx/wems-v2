@@ -584,5 +584,21 @@
     "personal": "Personal",
     "professional": "Professional",
     "review": "Review"
+  },
+  "trash": {
+    "title": "Trash",
+    "description": "Manage deleted items",
+    "search": "Search...",
+    "name": "Name",
+    "deletedAt": "Deleted at",
+    "actions": "Actions",
+    "restore": "Restore",
+    "empty": "No deleted items",
+    "restoreSuccess": "Item restored successfully",
+    "employees": "Employees",
+    "positions": "Positions",
+    "workLocations": "Work Locations",
+    "departments": "Departments",
+    "contractTypes": "Contract Types"
   }
 }

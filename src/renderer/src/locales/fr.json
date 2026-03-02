@@ -584,5 +584,21 @@
     "personal": "Personnel",
     "professional": "Professionnel",
     "review": "Révision"
+  },
+  "trash": {
+    "title": "Corbeille",
+    "description": "Gérer les éléments supprimés",
+    "search": "Rechercher...",
+    "name": "Nom",
+    "deletedAt": "Supprimé le",
+    "actions": "Actions",
+    "restore": "Restaurer",
+    "empty": "Aucun élément supprimé",
+    "restoreSuccess": "Élément restauré avec succès",
+    "employees": "Employés",
+    "positions": "Postes",
+    "workLocations": "Lieux de travail",
+    "departments": "Départements",
+    "contractTypes": "Types de contrats"
   }
 }

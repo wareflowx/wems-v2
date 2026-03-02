@@ -409,7 +409,8 @@
     "edit": "Modifier",
     "empty": "Aucune autorisation de conduite trouvée",
     "totalDrivingAuthorizations": "Total autorisations",
-    "ofTotal": "sur total"
+    "ofTotal": "sur total",
+    "document": "Document"
   },
   "onlineTrainings": {
     "title": "Formations en ligne",
@@ -442,7 +443,8 @@
     "edit": "Modifier",
     "empty": "Aucune formation en ligne trouvée",
     "totalOnlineTrainings": "Total formations",
-    "ofTotal": "sur total"
+    "ofTotal": "sur total",
+    "document": "Certificat"
   },
   "alerts": {
     "title": "Alertes",

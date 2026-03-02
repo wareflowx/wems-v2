@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CacesFileUpload, type FileData } from "@/components/caces/CacesFileUpload";
 
 interface Employee {
   id: number;
@@ -33,6 +34,7 @@ interface AddDrivingAuthorizationDialogProps {
     licenseCategory: string;
     dateObtained: string;
     expirationDate: string;
+    document: FileData | null;
   }) => void;
   employees?: Employee[];
 }
@@ -50,6 +52,7 @@ export function AddDrivingAuthorizationDialog({
   const [licenseCategory, setLicenseCategory] = useState<string>("");
   const [dateObtained, setDateObtained] = useState<string>("");
   const [expirationDate, setExpirationDate] = useState<string>("");
+  const [document, setDocument] = useState<FileData | null>(null);
 
   const handleSubmit = () => {
     onAdd?.({
@@ -57,6 +60,7 @@ export function AddDrivingAuthorizationDialog({
       licenseCategory,
       dateObtained,
       expirationDate,
+      document,
     });
   };
 
@@ -68,6 +72,7 @@ export function AddDrivingAuthorizationDialog({
       setLicenseCategory("");
       setDateObtained("");
       setExpirationDate("");
+      setDocument(null);
     }
     onOpenChange?.(open);
   };
@@ -130,6 +135,11 @@ export function AddDrivingAuthorizationDialog({
               onChange={(e) => setExpirationDate(e.target.value)}
             />
           </div>
+          <CacesFileUpload
+            value={document}
+            onChange={setDocument}
+            label={t("drivingAuthorizations.document")}
+          />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => handleOpenChange(false)}>

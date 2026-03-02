@@ -286,7 +286,7 @@ export async function createAttachment(data: {
   id?: string;
   employeeId: number;
   employeeName?: string;
-  entityType: "contract" | "caces" | "document" | "medical_visit";
+  entityType: "contract" | "caces" | "document" | "medical_visit" | "driving_authorization" | "online_training";
   entityId?: number;
   originalName: string;
   mimeType?: string;

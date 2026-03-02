@@ -18,6 +18,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AddOnlineTrainingDialog } from "@/components/online-trainings/AddOnlineTrainingDialog";
 import { EditOnlineTrainingDialog } from "@/components/online-trainings/EditOnlineTrainingDialog";
+import { useToast } from "@/utils/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MetricsSection } from "@/components/ui/metrics-section";
@@ -50,9 +51,11 @@ import {
   useUpdateOnlineTraining,
   useEmployees,
 } from "@/hooks";
+import * as db from "@/actions/database";
 
 export function OnlineTrainingsPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
@@ -171,12 +174,69 @@ export function OnlineTrainingsPage() {
     }
   };
 
-  const handleAdd = (data: any) => {
-    createTraining.mutate(data, {
-      onSuccess: () => {
-        setIsAddDialogOpen(false);
+  const handleAdd = async (data: {
+    employeeId: number;
+    trainingName: string;
+    trainingProvider: string;
+    completionDate: string;
+    expirationDate?: string;
+    status: "in_progress" | "completed" | "expired";
+    document: {
+      name: string;
+      data: string;
+      mimeType: string;
+      size: number;
+    } | null;
+  }) => {
+    let attachmentId: string | undefined;
+
+    // If there's a document, create the attachment first
+    if (data.document) {
+      try {
+        // Get employee name for the folder path
+        const employee = employees.find((e) => e.id === data.employeeId);
+        const employeeName = employee
+          ? `${employee.firstName} ${employee.lastName}`
+          : undefined;
+
+        const attachment = await db.createAttachment({
+          employeeId: data.employeeId,
+          employeeName,
+          entityType: "online_training",
+          originalName: data.document.name,
+          mimeType: data.document.mimeType,
+          size: data.document.size,
+          fileData: data.document.data,
+        });
+        attachmentId = attachment?.id;
+      } catch (error) {
+        console.error("Failed to create attachment:", error);
+        toast({
+          title: "Failed to upload document",
+          description: "The document could not be uploaded. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Then create the training with the attachmentId
+    createTraining.mutate(
+      {
+        employeeId: data.employeeId,
+        trainingName: data.trainingName,
+        trainingProvider: data.trainingProvider,
+        completionDate: data.completionDate,
+        expirationDate: data.expirationDate,
+        status: data.status,
+        attachmentId,
       },
-    });
+      {
+        onSuccess: () => {
+          setIsAddDialogOpen(false);
+        },
+      }
+    );
   };
 
   const handleEdit = (data: any) => {

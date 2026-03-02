@@ -54,6 +54,7 @@ import {
   useUpdateDrivingAuthorization,
   useEmployees,
 } from "@/hooks";
+import * as db from "@/actions/database";
 
 export function DrivingAuthorizationsPage() {
   const { t } = useTranslation();
@@ -185,12 +186,65 @@ export function DrivingAuthorizationsPage() {
     }
   };
 
-  const handleAdd = (data: any) => {
-    createAuthorization.mutate(data, {
-      onSuccess: () => {
-        setIsAddDialogOpen(false);
+  const handleAdd = async (data: {
+    employeeId: number;
+    licenseCategory: string;
+    dateObtained: string;
+    expirationDate: string;
+    document: {
+      name: string;
+      data: string;
+      mimeType: string;
+      size: number;
+    } | null;
+  }) => {
+    let attachmentId: string | undefined;
+
+    // If there's a document, create the attachment first
+    if (data.document) {
+      try {
+        // Get employee name for the folder path
+        const employee = employees.find((e) => e.id === data.employeeId);
+        const employeeName = employee
+          ? `${employee.firstName} ${employee.lastName}`
+          : undefined;
+
+        const attachment = await db.createAttachment({
+          employeeId: data.employeeId,
+          employeeName,
+          entityType: "driving_authorization",
+          originalName: data.document.name,
+          mimeType: data.document.mimeType,
+          size: data.document.size,
+          fileData: data.document.data,
+        });
+        attachmentId = attachment?.id;
+      } catch (error) {
+        console.error("Failed to create attachment:", error);
+        toast({
+          title: "Failed to upload document",
+          description: "The document could not be uploaded. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Then create the authorization with the attachmentId
+    createAuthorization.mutate(
+      {
+        employeeId: data.employeeId,
+        licenseCategory: data.licenseCategory,
+        dateObtained: data.dateObtained,
+        expirationDate: data.expirationDate,
+        attachmentId,
       },
-    });
+      {
+        onSuccess: () => {
+          setIsAddDialogOpen(false);
+        },
+      }
+    );
   };
 
   const handleEdit = (data: any) => {

@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CacesFileUpload, type FileData } from "@/components/caces/CacesFileUpload";
 
 interface Employee {
   id: number;
@@ -35,6 +36,7 @@ interface AddOnlineTrainingDialogProps {
     completionDate: string;
     expirationDate?: string;
     status: "in_progress" | "completed" | "expired";
+    document: FileData | null;
   }) => void;
   employees?: Employee[];
 }
@@ -53,6 +55,7 @@ export function AddOnlineTrainingDialog({
   const [expirationDate, setExpirationDate] = useState<string>("");
   const [hasExpiration, setHasExpiration] = useState<boolean>(false);
   const [status, setStatus] = useState<string>("completed");
+  const [document, setDocument] = useState<FileData | null>(null);
 
   const handleSubmit = () => {
     onAdd?.({
@@ -62,6 +65,7 @@ export function AddOnlineTrainingDialog({
       completionDate,
       expirationDate: hasExpiration ? expirationDate : undefined,
       status: status as "in_progress" | "completed" | "expired",
+      document,
     });
   };
 
@@ -76,6 +80,7 @@ export function AddOnlineTrainingDialog({
       setExpirationDate("");
       setHasExpiration(false);
       setStatus("completed");
+      setDocument(null);
     }
     onOpenChange?.(open);
   };
@@ -164,6 +169,11 @@ export function AddOnlineTrainingDialog({
               />
             </div>
           )}
+          <CacesFileUpload
+            value={document}
+            onChange={setDocument}
+            label={t("onlineTrainings.document")}
+          />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => handleOpenChange(false)}>

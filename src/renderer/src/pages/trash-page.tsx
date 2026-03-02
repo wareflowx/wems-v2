@@ -74,6 +74,8 @@ export function TrashPage() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.employees.lists() });
       await queryClient.refetchQueries({ queryKey: queryKeys.employees.lists() });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedEmployees() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedEmployees() });
       toast({ title: t("trash.restoreSuccess") });
     },
     onError: (error) => {
@@ -86,6 +88,8 @@ export function TrashPage() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.positions.lists() });
       await queryClient.refetchQueries({ queryKey: queryKeys.positions.lists() });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedPositions() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedPositions() });
       toast({ title: t("trash.restoreSuccess") });
     },
     onError: (error) => {
@@ -98,6 +102,8 @@ export function TrashPage() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.workLocations.lists() });
       await queryClient.refetchQueries({ queryKey: queryKeys.workLocations.lists() });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedWorkLocations() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedWorkLocations() });
       toast({ title: t("trash.restoreSuccess") });
     },
     onError: (error) => {
@@ -110,6 +116,8 @@ export function TrashPage() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.departments.lists() });
       await queryClient.refetchQueries({ queryKey: queryKeys.departments.lists() });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedDepartments() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedDepartments() });
       toast({ title: t("trash.restoreSuccess") });
     },
     onError: (error) => {
@@ -122,6 +130,8 @@ export function TrashPage() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.contractTypes.lists() });
       await queryClient.refetchQueries({ queryKey: queryKeys.contractTypes.lists() });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedContractTypes() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedContractTypes() });
       toast({ title: t("trash.restoreSuccess") });
     },
     onError: (error) => {

@@ -515,3 +515,92 @@ export async function updateSettings(data: {
   }
   return client.database.updateSettings(data);
 }
+
+// Trash / Restore functions
+export async function getDeletedEmployees() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getDeletedEmployees();
+}
+
+export async function restoreEmployee(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.restoreEmployee({ id });
+}
+
+export async function permanentDeleteEmployee(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.permanentDeleteEmployee({ id });
+}
+
+export async function getDeletedPositions() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getDeletedPositions();
+}
+
+export async function restorePosition(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.restorePosition({ id });
+}
+
+export async function getDeletedWorkLocations() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getDeletedWorkLocations();
+}
+
+export async function restoreWorkLocation(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.restoreWorkLocation({ id });
+}
+
+export async function getDeletedDepartments() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getDeletedDepartments();
+}
+
+export async function restoreDepartment(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.restoreDepartment({ id });
+}
+
+export async function getDeletedContractTypes() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getDeletedContractTypes();
+}
+
+export async function restoreContractType(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.restoreContractType({ id });
+}

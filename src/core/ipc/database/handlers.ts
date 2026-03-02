@@ -1,5 +1,5 @@
 import { os } from "@orpc/server";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, not } from "drizzle-orm";
 import { getDb } from "@/core/db";
 import {
   attachments,
@@ -1398,7 +1398,7 @@ export const getDeletedEmployees = os.handler(async () => {
     return await db
       .select()
       .from(employees)
-      .where(isNull(employees.deletedAt).not())
+      .where(not(isNull(employees.deletedAt)))
       .orderBy(desc(employees.deletedAt));
   } catch (error) {
     console.error("Error in getDeletedEmployees:", error);
@@ -1451,7 +1451,7 @@ export const getDeletedPositions = os.handler(async () => {
     return await db
       .select()
       .from(positions)
-      .where(isNull(positions.deletedAt).not())
+      .where(not(isNull(positions.deletedAt)))
       .orderBy(desc(positions.deletedAt));
   } catch (error) {
     console.error("Error in getDeletedPositions:", error);
@@ -1482,7 +1482,7 @@ export const getDeletedWorkLocations = os.handler(async () => {
     return await db
       .select()
       .from(workLocations)
-      .where(isNull(workLocations.deletedAt).not())
+      .where(not(isNull(workLocations.deletedAt)))
       .orderBy(desc(workLocations.deletedAt));
   } catch (error) {
     console.error("Error in getDeletedWorkLocations:", error);
@@ -1513,7 +1513,7 @@ export const getDeletedDepartments = os.handler(async () => {
     return await db
       .select()
       .from(departments)
-      .where(isNull(departments.deletedAt).not())
+      .where(not(isNull(departments.deletedAt)))
       .orderBy(desc(departments.deletedAt));
   } catch (error) {
     console.error("Error in getDeletedDepartments:", error);
@@ -1544,7 +1544,7 @@ export const getDeletedContractTypes = os.handler(async () => {
     return await db
       .select()
       .from(contractTypes)
-      .where(isNull(contractTypes.deletedAt).not())
+      .where(not(isNull(contractTypes.deletedAt)))
       .orderBy(desc(contractTypes.deletedAt));
   } catch (error) {
     console.error("Error in getDeletedContractTypes:", error);

@@ -17,4 +17,5 @@ export const timestamps = {
 export const timestampsWithSoftDelete = {
   ...timestamps,
   deletedAt: text("deleted_at"), // Nullable, for soft deletes
+  deletedBy: text("deleted_by"), // Track who deleted the record
 };

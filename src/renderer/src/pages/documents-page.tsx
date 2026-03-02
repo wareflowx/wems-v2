@@ -49,7 +49,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useCreateDocument, useDeleteDocument, useDocuments } from "@/hooks";
-import { useDialogStore } from "@/stores/dialog-store";
 
 export function DocumentsPage() {
   const { t } = useTranslation();
@@ -64,23 +63,6 @@ export function DocumentsPage() {
 
   const [deletingDocument, setDeletingDocument] = useState<any>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-
-  // Dialog store sync
-  const activeDialog = useDialogStore((state) => state.activeDialog);
-  const closeDialog = useDialogStore((state) => state.closeDialog);
-
-  useEffect(() => {
-    if (activeDialog === "create-document") {
-      setIsAddDialogOpen(true);
-    }
-  }, [activeDialog]);
-
-  const handleAddDialogClose = (open: boolean) => {
-    setIsAddDialogOpen(open);
-    if (!open) {
-      closeDialog();
-    }
-  };
 
   // Use TanStack Query hook for documents
   const { data: documents = [], isLoading } = useDocuments();
@@ -693,7 +675,7 @@ export function DocumentsPage() {
       </div>
       <AddDocumentDialog
         onAdd={handleAddDocument}
-        onOpenChange={handleAddDialogClose}
+        onOpenChange={setIsAddDialogOpen}
         open={isAddDialogOpen}
       />
       <DeleteDocumentDialog

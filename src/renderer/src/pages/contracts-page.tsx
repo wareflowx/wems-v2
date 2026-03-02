@@ -20,7 +20,6 @@ import {
   useUpdateContract,
 } from "@/hooks";
 import { useEmployees } from "@/hooks/use-employees";
-import { useDialogStore } from "@/stores/dialog-store";
 
 // Transform database contract to table contract
 function transformContract(
@@ -99,23 +98,6 @@ export function ContractsPage() {
   const [selectedContract, setSelectedContract] = useState<Contract | null>(
     null
   );
-
-  // Dialog store sync
-  const activeDialog = useDialogStore((state) => state.activeDialog);
-  const closeDialog = useDialogStore((state) => state.closeDialog);
-
-  useEffect(() => {
-    if (activeDialog === "create-contract") {
-      setCreateDialogOpen(true);
-    }
-  }, [activeDialog]);
-
-  const handleCreateDialogClose = (open: boolean) => {
-    setCreateDialogOpen(open);
-    if (!open) {
-      closeDialog();
-    }
-  };
 
   // Use TanStack Query hooks
   const { data: dbContracts = [], isLoading, error } = useContracts();
@@ -366,7 +348,7 @@ export function ContractsPage() {
         contractTypes={contractTypes}
         employees={employees}
         onCreate={handleCreateContract}
-        onOpenChange={handleCreateDialogClose}
+        onOpenChange={setCreateDialogOpen}
         open={createDialogOpen}
       />
       <EditContractDialog

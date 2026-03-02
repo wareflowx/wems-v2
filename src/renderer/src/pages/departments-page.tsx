@@ -29,7 +29,6 @@ import {
   useDepartments,
   useUpdateDepartment,
 } from "@/hooks";
-import { useDialogStore } from "@/stores/dialog-store";
 import { CreateDepartmentDialog } from "@/components/departments/CreateDepartmentDialog";
 
 const getColorName = (color: string) => {
@@ -42,21 +41,6 @@ export function DepartmentsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-
-  // Dialog store sync
-  const activeDialog = useDialogStore((state) => state.activeDialog);
-  const closeDialog = useDialogStore((state) => state.closeDialog);
-
-  useEffect(() => {
-    if (activeDialog === "create-department") {
-      setIsCreateDialogOpen(true);
-    }
-  }, [activeDialog]);
-
-  const handleCreateDialogClose = () => {
-    setIsCreateDialogOpen(false);
-    closeDialog();
-  };
   const [editingDepartment, setEditingDepartment] = useState<any>(null);
   const [deletingDepartment, setDeletingDepartment] = useState<any>(null);
 
@@ -322,7 +306,7 @@ export function DepartmentsPage() {
       {/* Create Dialog */}
       {isCreateDialogOpen && (
         <CreateDepartmentDialog
-          onClose={handleCreateDialogClose}
+          onClose={() => setIsCreateDialogOpen(false)}
         />
       )}
 

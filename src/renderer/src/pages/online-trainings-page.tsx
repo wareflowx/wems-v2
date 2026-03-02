@@ -52,7 +52,6 @@ import {
   useUpdateOnlineTraining,
   useEmployees,
 } from "@/hooks";
-import { useDialogStore } from "@/stores/dialog-store";
 import * as db from "@/actions/database";
 
 export function OnlineTrainingsPage() {
@@ -62,23 +61,6 @@ export function OnlineTrainingsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-
-  // Dialog store sync
-  const activeDialog = useDialogStore((state) => state.activeDialog);
-  const closeDialog = useDialogStore((state) => state.closeDialog);
-
-  useEffect(() => {
-    if (activeDialog === "create-online-training") {
-      setIsAddDialogOpen(true);
-    }
-  }, [activeDialog]);
-
-  const handleAddDialogClose = (open: boolean) => {
-    setIsAddDialogOpen(open);
-    if (!open) {
-      closeDialog();
-    }
-  };
   const [editingTraining, setEditingTraining] = useState<any>(null);
   const [sortColumn, setSortColumn] = useState<string>("employee");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -602,7 +584,7 @@ export function OnlineTrainingsPage() {
 
       <AddOnlineTrainingDialog
         open={isAddDialogOpen}
-        onOpenChange={handleAddDialogClose}
+        onOpenChange={setIsAddDialogOpen}
         onAdd={handleAdd}
         employees={employees}
       />

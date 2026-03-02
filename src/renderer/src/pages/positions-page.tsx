@@ -32,7 +32,6 @@ import {
   usePositions,
   useUpdatePosition,
 } from "@/hooks";
-import { useDialogStore } from "@/stores/dialog-store";
 
 const getColorName = (color: string) => {
   return color.replace("bg-", "").replace("-500", "").toUpperCase();
@@ -44,23 +43,6 @@ export function PositionsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-
-  // Dialog store sync
-  const activeDialog = useDialogStore((state) => state.activeDialog);
-  const closeDialog = useDialogStore((state) => state.closeDialog);
-
-  useEffect(() => {
-    if (activeDialog === "create-position") {
-      setIsCreateDialogOpen(true);
-    }
-  }, [activeDialog]);
-
-  const handleCreateDialogClose = (open: boolean) => {
-    setIsCreateDialogOpen(open);
-    if (!open) {
-      closeDialog();
-    }
-  };
   const [editingPosition, setEditingPosition] = useState<any>(null);
   const [deletingPosition, setDeletingPosition] = useState<any>(null);
 
@@ -324,7 +306,7 @@ export function PositionsPage() {
       </div>
 
       <CreatePositionDialog
-        onOpenChange={handleCreateDialogClose}
+        onOpenChange={setIsCreateDialogOpen}
         open={isCreateDialogOpen}
       />
 

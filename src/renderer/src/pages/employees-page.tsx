@@ -22,7 +22,6 @@ import {
   useUpdateEmployee,
   useWorkLocations,
 } from "@/hooks";
-import { useDialogStore } from "@/stores/dialog-store";
 import { useToast } from "@/utils/toast";
 
 // Stable empty arrays to prevent infinite re-render loops when data is loading
@@ -39,23 +38,6 @@ export function EmployeesPage() {
     name: string;
   } | null>(null);
   const [employeeToEdit, setEmployeeToEdit] = useState<any | null>(null);
-
-  // Dialog store sync
-  const activeDialog = useDialogStore((state) => state.activeDialog);
-  const closeDialog = useDialogStore((state) => state.closeDialog);
-
-  useEffect(() => {
-    if (activeDialog === "create-employee") {
-      setIsCreateDialogOpen(true);
-    }
-  }, [activeDialog]);
-
-  const handleCreateDialogClose = (open: boolean) => {
-    setIsCreateDialogOpen(open);
-    if (!open) {
-      closeDialog();
-    }
-  };
 
   // Use TanStack Query hooks
   const { data: employees = [], isLoading, error } = useEmployees();
@@ -221,7 +203,7 @@ export function EmployeesPage() {
       <CreateEmployeeDialog
         departments={departments}
         onCreate={handleAddEmployee}
-        onOpenChange={handleCreateDialogClose}
+        onOpenChange={setIsCreateDialogOpen}
         open={isCreateDialogOpen}
         positions={positions}
         workLocations={workLocations}

@@ -38,31 +38,31 @@ export function TrashPage() {
   const [activeTab, setActiveTab] = useState<DeletedItemType>("employee");
 
   // Fetch deleted items based on active tab
-  const { data: deletedEmployees = [] } = useQuery({
+  const { data: deletedEmployees = [], refetch: refetchDeletedEmployees } = useQuery({
     queryKey: queryKeys.trash.deletedEmployees(),
     queryFn: () => db.getDeletedEmployees(),
     enabled: orpcReady && activeTab === "employee",
   });
 
-  const { data: deletedPositions = [] } = useQuery({
+  const { data: deletedPositions = [], refetch: refetchDeletedPositions } = useQuery({
     queryKey: queryKeys.trash.deletedPositions(),
     queryFn: () => db.getDeletedPositions(),
     enabled: orpcReady && activeTab === "position",
   });
 
-  const { data: deletedWorkLocations = [] } = useQuery({
+  const { data: deletedWorkLocations = [], refetch: refetchDeletedWorkLocations } = useQuery({
     queryKey: queryKeys.trash.deletedWorkLocations(),
     queryFn: () => db.getDeletedWorkLocations(),
     enabled: orpcReady && activeTab === "workLocation",
   });
 
-  const { data: deletedDepartments = [] } = useQuery({
+  const { data: deletedDepartments = [], refetch: refetchDeletedDepartments } = useQuery({
     queryKey: queryKeys.trash.deletedDepartments(),
     queryFn: () => db.getDeletedDepartments(),
     enabled: orpcReady && activeTab === "department",
   });
 
-  const { data: deletedContractTypes = [] } = useQuery({
+  const { data: deletedContractTypes = [], refetch: refetchDeletedContractTypes } = useQuery({
     queryKey: queryKeys.trash.deletedContractTypes(),
     queryFn: () => db.getDeletedContractTypes(),
     enabled: orpcReady && activeTab === "contractType",
@@ -108,9 +108,9 @@ export function TrashPage() {
   const restoreContractType = useMutation({
     mutationFn: (id: number) => db.restoreContractType(id),
     onSuccess: async () => {
-      // Invalidate trash key
-      queryClient.invalidateQueries({ queryKey: ["trash"] });
-      // Invalidate all contract-types queries - this should match ["contract-types", "list"]
+      // Refetch deleted items
+      await refetchDeletedContractTypes();
+      // Also trigger refetch of the contract types list
       queryClient.invalidateQueries({ queryKey: ["contract-types"] });
       toast({ title: t("trash.restoreSuccess") });
     },

@@ -273,3 +273,12 @@ export const getAlertsInputSchema = z.object({
   severity: z.string().optional(),
   type: z.string().optional(),
 });
+
+// Restore and permanent delete schemas
+export const restoreInputSchema = z.object({
+  id: z.number(),
+});
+
+export const permanentDeleteInputSchema = z.object({
+  id: z.number(),
+});

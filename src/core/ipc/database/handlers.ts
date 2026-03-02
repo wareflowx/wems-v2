@@ -55,6 +55,8 @@ import {
   updatePositionInputSchema,
   updateSettingsInputSchema,
   updateWorkLocationInputSchema,
+  restoreInputSchema,
+  permanentDeleteInputSchema,
 } from "./schemas";
 
 // Posts handlers
@@ -1381,6 +1383,187 @@ export const getAlerts = os.handler(async ({ input }: { input?: AlertFilters }) 
     return filteredAlerts;
   } catch (error) {
     console.error("Error in getAlerts:", error);
+    throw error;
+  }
+});
+
+// ============================================================
+// Trash/Restore handlers - Soft delete support
+// ============================================================
+
+// Get deleted employees
+export const getDeletedEmployees = os.handler(async () => {
+  try {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(employees)
+      .where(isNull(employees.deletedAt).not())
+      .orderBy(desc(employees.deletedAt));
+  } catch (error) {
+    console.error("Error in getDeletedEmployees:", error);
+    throw error;
+  }
+});
+
+// Restore employee
+export const restoreEmployee = os.handler(async ({ input }) => {
+  try {
+    const validatedData = restoreInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .update(employees)
+      .set({ deletedAt: null })
+      .where(eq(employees.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in restoreEmployee:", error);
+    throw error;
+  }
+});
+
+// Permanent delete employee (and cascade related records)
+export const permanentDeleteEmployee = os.handler(async ({ input }) => {
+  try {
+    const validatedData = permanentDeleteInputSchema.parse(input);
+    const db = await getDb();
+
+    // Permanently delete related records first
+    await db.delete(contracts).where(eq(contracts.employeeId, validatedData.id));
+    await db.delete(caces).where(eq(caces.employeeId, validatedData.id));
+    await db.delete(medicalVisits).where(eq(medicalVisits.employeeId, validatedData.id));
+    await db.delete(attachments).where(eq(attachments.employeeId, validatedData.id));
+
+    // Permanently delete employee
+    await db.delete(employees).where(eq(employees.id, validatedData.id));
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error in permanentDeleteEmployee:", error);
+    throw error;
+  }
+});
+
+// Get deleted positions
+export const getDeletedPositions = os.handler(async () => {
+  try {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(positions)
+      .where(isNull(positions.deletedAt).not())
+      .orderBy(desc(positions.deletedAt));
+  } catch (error) {
+    console.error("Error in getDeletedPositions:", error);
+    throw error;
+  }
+});
+
+// Restore position
+export const restorePosition = os.handler(async ({ input }) => {
+  try {
+    const validatedData = restoreInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .update(positions)
+      .set({ deletedAt: null })
+      .where(eq(positions.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in restorePosition:", error);
+    throw error;
+  }
+});
+
+// Get deleted work locations
+export const getDeletedWorkLocations = os.handler(async () => {
+  try {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(workLocations)
+      .where(isNull(workLocations.deletedAt).not())
+      .orderBy(desc(workLocations.deletedAt));
+  } catch (error) {
+    console.error("Error in getDeletedWorkLocations:", error);
+    throw error;
+  }
+});
+
+// Restore work location
+export const restoreWorkLocation = os.handler(async ({ input }) => {
+  try {
+    const validatedData = restoreInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .update(workLocations)
+      .set({ deletedAt: null })
+      .where(eq(workLocations.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in restoreWorkLocation:", error);
+    throw error;
+  }
+});
+
+// Get deleted departments
+export const getDeletedDepartments = os.handler(async () => {
+  try {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(departments)
+      .where(isNull(departments.deletedAt).not())
+      .orderBy(desc(departments.deletedAt));
+  } catch (error) {
+    console.error("Error in getDeletedDepartments:", error);
+    throw error;
+  }
+});
+
+// Restore department
+export const restoreDepartment = os.handler(async ({ input }) => {
+  try {
+    const validatedData = restoreInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .update(departments)
+      .set({ deletedAt: null })
+      .where(eq(departments.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in restoreDepartment:", error);
+    throw error;
+  }
+});
+
+// Get deleted contract types
+export const getDeletedContractTypes = os.handler(async () => {
+  try {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(contractTypes)
+      .where(isNull(contractTypes.deletedAt).not())
+      .orderBy(desc(contractTypes.deletedAt));
+  } catch (error) {
+    console.error("Error in getDeletedContractTypes:", error);
+    throw error;
+  }
+});
+
+// Restore contract type
+export const restoreContractType = os.handler(async ({ input }) => {
+  try {
+    const validatedData = restoreInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .update(contractTypes)
+      .set({ deletedAt: null })
+      .where(eq(contractTypes.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in restoreContractType:", error);
     throw error;
   }
 });

@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Edit, Filter, Sparkles, UserPlus, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   type CreateEmployeeData,
@@ -22,6 +22,7 @@ import {
   useUpdateEmployee,
   useWorkLocations,
 } from "@/hooks";
+import { useDialogStore } from "@/stores/dialog-store";
 import { useToast } from "@/utils/toast";
 
 // Stable empty arrays to prevent infinite re-render loops when data is loading
@@ -38,6 +39,23 @@ export function EmployeesPage() {
     name: string;
   } | null>(null);
   const [employeeToEdit, setEmployeeToEdit] = useState<any | null>(null);
+
+  // Dialog store sync
+  const activeDialog = useDialogStore((state) => state.activeDialog);
+  const closeDialog = useDialogStore((state) => state.closeDialog);
+
+  useEffect(() => {
+    if (activeDialog === "create-employee") {
+      setIsCreateDialogOpen(true);
+    }
+  }, [activeDialog]);
+
+  const handleCreateDialogClose = (open: boolean) => {
+    setIsCreateDialogOpen(open);
+    if (!open) {
+      closeDialog();
+    }
+  };
 
   // Use TanStack Query hooks
   const { data: employees = [], isLoading, error } = useEmployees();
@@ -203,7 +221,7 @@ export function EmployeesPage() {
       <CreateEmployeeDialog
         departments={departments}
         onCreate={handleAddEmployee}
-        onOpenChange={setIsCreateDialogOpen}
+        onOpenChange={handleCreateDialogClose}
         open={isCreateDialogOpen}
         positions={positions}
         workLocations={workLocations}

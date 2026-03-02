@@ -14,6 +14,7 @@ import {
   MapPin,
   MessageCircleQuestion,
   Pen,
+  Plus,
   Search,
   Settings2,
   ShieldAlert,
@@ -28,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import { Command, CommandList, CommandEmpty, CommandGroup } from "cmdk";
 import { getAppVersion } from "@/actions/app";
 import { useAlerts, useCaces, useDrivingAuthorizations, useMedicalVisits, useOnlineTrainings } from "@/hooks";
+import { useDialogStore } from "@/stores/dialog-store";
 import {
   Sidebar,
   SidebarContent,
@@ -83,6 +85,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [open, setOpen] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
   const navigate = useNavigate();
+  const openDialog = useDialogStore((state) => state.openDialog);
 
   // Get counts for sidebar badges
   const { data: alerts = [] } = useAlerts();
@@ -221,6 +224,79 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       shortcut: "P C",
       action: () => navigate({ to: "/contract-types" }),
       icon: ClipboardList,
+    },
+    {
+      heading: "Create",
+    },
+    {
+      id: "create-employee",
+      title: "New Employee",
+      shortcut: "C E",
+      action: () => {
+        navigate({ to: "/employees" });
+        openDialog("create-employee");
+      },
+      icon: Plus,
+    },
+    {
+      id: "create-document",
+      title: "New Document",
+      shortcut: "C D",
+      action: () => {
+        navigate({ to: "/documents" });
+        openDialog("create-document");
+      },
+      icon: Plus,
+    },
+    {
+      id: "create-caces",
+      title: "New CACES",
+      shortcut: "C C",
+      action: () => {
+        navigate({ to: "/caces" });
+        openDialog("create-caces");
+      },
+      icon: Plus,
+    },
+    {
+      id: "create-medical-visit",
+      title: "New Medical Visit",
+      shortcut: "C M",
+      action: () => {
+        navigate({ to: "/medical-visits" });
+        openDialog("create-medical-visit");
+      },
+      icon: Plus,
+    },
+    {
+      id: "create-driving-authorization",
+      title: "New Driving Authorization",
+      shortcut: "C R",
+      action: () => {
+        navigate({ to: "/driving-authorizations" });
+        openDialog("create-driving-authorization");
+      },
+      icon: Plus,
+    },
+    {
+      id: "create-online-training",
+      title: "New Online Training",
+      shortcut: "C T",
+      action: () => {
+        navigate({ to: "/online-trainings" });
+        openDialog("create-online-training");
+      },
+      icon: Plus,
+    },
+    {
+      id: "create-contract",
+      title: "New Contract",
+      shortcut: "C O",
+      action: () => {
+        navigate({ to: "/contracts" });
+        openDialog("create-contract");
+      },
+      icon: Plus,
     },
     {
       heading: "Settings",

@@ -201,6 +201,7 @@ export function useDeleteEmployee() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.employees.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedEmployees() });
     },
   });
 }

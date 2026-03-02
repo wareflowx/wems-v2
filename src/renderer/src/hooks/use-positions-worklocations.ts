@@ -124,6 +124,9 @@ export function useDeleteDepartment() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.departments.lists(),
       });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedDepartments(),
+      });
     },
   });
 }
@@ -247,6 +250,9 @@ export function useDeleteContractType() {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.contractTypes.lists(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedContractTypes(),
       });
     },
   });
@@ -373,6 +379,7 @@ export function useDeletePosition() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.positions.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedPositions() });
     },
   });
 }
@@ -501,6 +508,9 @@ export function useDeleteWorkLocation() {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.workLocations.lists(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedWorkLocations(),
       });
     },
   });

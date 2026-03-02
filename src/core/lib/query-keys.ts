@@ -52,6 +52,28 @@ export const queryKeys = {
     detail: (id: number) => ["medical-visits", "detail", id] as const,
   },
 
+  // Driving Authorizations
+  drivingAuthorizations: {
+    all: ["driving-authorizations"] as const,
+    lists: () => ["driving-authorizations", "list"] as const,
+    list: (filters: string) => ["driving-authorizations", "list", filters] as const,
+    details: () => ["driving-authorizations", "detail"] as const,
+    detail: (id: number) => ["driving-authorizations", "detail", id] as const,
+    byEmployee: (employeeId: number) =>
+      ["driving-authorizations", "byEmployee", employeeId] as const,
+  },
+
+  // Online Trainings
+  onlineTrainings: {
+    all: ["online-trainings"] as const,
+    lists: () => ["online-trainings", "list"] as const,
+    list: (filters: string) => ["online-trainings", "list", filters] as const,
+    details: () => ["online-trainings", "detail"] as const,
+    detail: (id: number) => ["online-trainings", "detail", id] as const,
+    byEmployee: (employeeId: number) =>
+      ["online-trainings", "byEmployee", employeeId] as const,
+  },
+
   // Alerts
   alerts: {
     all: ["alerts"] as const,

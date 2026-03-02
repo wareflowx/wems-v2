@@ -18,7 +18,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AddDrivingAuthorizationDialog } from "@/components/driving-authorizations/AddDrivingAuthorizationDialog";
 import { EditDrivingAuthorizationDialog } from "@/components/driving-authorizations/EditDrivingAuthorizationDialog";
@@ -55,6 +55,7 @@ import {
   useUpdateDrivingAuthorization,
   useEmployees,
 } from "@/hooks";
+import { useDialogStore } from "@/stores/dialog-store";
 import * as db from "@/actions/database";
 
 export function DrivingAuthorizationsPage() {
@@ -65,6 +66,23 @@ export function DrivingAuthorizationsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+  // Dialog store sync
+  const activeDialog = useDialogStore((state) => state.activeDialog);
+  const closeDialog = useDialogStore((state) => state.closeDialog);
+
+  useEffect(() => {
+    if (activeDialog === "create-driving-authorization") {
+      setIsAddDialogOpen(true);
+    }
+  }, [activeDialog]);
+
+  const handleAddDialogClose = (open: boolean) => {
+    setIsAddDialogOpen(open);
+    if (!open) {
+      closeDialog();
+    }
+  };
   const [editingAuthorization, setEditingAuthorization] = useState<any>(null);
   const [sortColumn, setSortColumn] = useState<string>("employee");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -655,7 +673,7 @@ export function DrivingAuthorizationsPage() {
       {/* Dialogs */}
       <AddDrivingAuthorizationDialog
         open={isAddDialogOpen}
-        onOpenChange={setIsAddDialogOpen}
+        onOpenChange={handleAddDialogClose}
         onAdd={handleAdd}
         employees={employees}
       />

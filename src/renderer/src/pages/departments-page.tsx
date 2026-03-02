@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2, Edit, Plus, Search, SearchX, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ErrorDisplay } from "@/components/ui/error-display";
@@ -29,6 +29,7 @@ import {
   useDepartments,
   useUpdateDepartment,
 } from "@/hooks";
+import { useDialogStore } from "@/stores/dialog-store";
 
 const getColorName = (color: string) => {
   return color.replace("bg-", "").replace("-500", "").toUpperCase();
@@ -40,6 +41,21 @@ export function DepartmentsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  // Dialog store sync
+  const activeDialog = useDialogStore((state) => state.activeDialog);
+  const closeDialog = useDialogStore((state) => state.closeDialog);
+
+  useEffect(() => {
+    if (activeDialog === "create-department") {
+      setIsCreateDialogOpen(true);
+    }
+  }, [activeDialog]);
+
+  const handleCreateDialogClose = () => {
+    setIsCreateDialogOpen(false);
+    closeDialog();
+  };
   const [editingDepartment, setEditingDepartment] = useState<any>(null);
   const [deletingDepartment, setDeletingDepartment] = useState<any>(null);
 
@@ -305,7 +321,7 @@ export function DepartmentsPage() {
       {/* Create Dialog */}
       {isCreateDialogOpen && (
         <CreateDepartmentDialog
-          onClose={() => setIsCreateDialogOpen(false)}
+          onClose={handleCreateDialogClose}
         />
       )}
 

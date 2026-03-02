@@ -17,7 +17,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AddMedicalVisitDialog } from "@/components/medical-visits/AddMedicalVisitDialog";
 import { DeleteMedicalVisitDialog } from "@/components/medical-visits/DeleteMedicalVisitDialog";
@@ -51,6 +51,7 @@ import {
   useDeleteMedicalVisit,
   useMedicalVisits,
 } from "@/hooks";
+import { useDialogStore } from "@/stores/dialog-store";
 
 interface MedicalVisit {
   id: number;
@@ -74,6 +75,23 @@ export function MedicalVisitsPage() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+
+  // Dialog store sync
+  const activeDialog = useDialogStore((state) => state.activeDialog);
+  const closeDialog = useDialogStore((state) => state.closeDialog);
+
+  useEffect(() => {
+    if (activeDialog === "create-medical-visit") {
+      setAddDialogOpen(true);
+    }
+  }, [activeDialog]);
+
+  const handleAddDialogClose = (open: boolean) => {
+    setAddDialogOpen(open);
+    if (!open) {
+      closeDialog();
+    }
+  };
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState<MedicalVisit | undefined>(
     undefined
@@ -636,7 +654,7 @@ export function MedicalVisitsPage() {
       {/* Dialogs */}
       <AddMedicalVisitDialog
         onAdd={handleAddMedicalVisit}
-        onOpenChange={setAddDialogOpen}
+        onOpenChange={handleAddDialogClose}
         open={addDialogOpen}
       />
       <DeleteMedicalVisitDialog

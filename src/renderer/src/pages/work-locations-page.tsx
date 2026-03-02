@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Edit, Plus, Search, SearchX, Sparkles, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ErrorDisplay } from "@/components/ui/error-display";
@@ -32,6 +32,7 @@ import {
   useUpdateWorkLocation,
   useWorkLocations,
 } from "@/hooks";
+import { useDialogStore } from "@/stores/dialog-store";
 
 const getColorName = (color: string) => {
   return color.replace("bg-", "").replace("-500", "").toUpperCase();
@@ -43,6 +44,23 @@ export function WorkLocationsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  // Dialog store sync
+  const activeDialog = useDialogStore((state) => state.activeDialog);
+  const closeDialog = useDialogStore((state) => state.closeDialog);
+
+  useEffect(() => {
+    if (activeDialog === "create-work-location") {
+      setIsCreateDialogOpen(true);
+    }
+  }, [activeDialog]);
+
+  const handleCreateDialogClose = (open: boolean) => {
+    setIsCreateDialogOpen(open);
+    if (!open) {
+      closeDialog();
+    }
+  };
   const [editingLocation, setEditingLocation] = useState<any>(null);
   const [deletingLocation, setDeletingLocation] = useState<any>(null);
 
@@ -309,7 +327,7 @@ export function WorkLocationsPage() {
       </div>
 
       <CreateWorkLocationDialog
-        onOpenChange={setIsCreateDialogOpen}
+        onOpenChange={handleCreateDialogClose}
         open={isCreateDialogOpen}
       />
 

@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { FileText, Plus, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ErrorDisplay } from "@/components/ui/error-display";
@@ -22,6 +22,7 @@ import { EditContractTypeDialog } from "@/components/contract-types/EditContract
 import {
   useContractTypes,
 } from "@/hooks";
+import { useDialogStore } from "@/stores/dialog-store";
 
 export function ContractTypesPage() {
   const { t } = useTranslation();
@@ -29,6 +30,23 @@ export function ContractTypesPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  // Dialog store sync
+  const activeDialog = useDialogStore((state) => state.activeDialog);
+  const closeDialog = useDialogStore((state) => state.closeDialog);
+
+  useEffect(() => {
+    if (activeDialog === "create-contract-type") {
+      setIsCreateDialogOpen(true);
+    }
+  }, [activeDialog]);
+
+  const handleCreateDialogClose = (open: boolean) => {
+    setIsCreateDialogOpen(open);
+    if (!open) {
+      closeDialog();
+    }
+  };
   const [editingContractType, setEditingContractType] = useState<any>(null);
   const [deletingContractType, setDeletingContractType] = useState<any>(null);
 
@@ -175,7 +193,7 @@ export function ContractTypesPage() {
 
       {/* Create Dialog */}
       <CreateContractTypeDialog
-        onOpenChange={setIsCreateDialogOpen}
+        onOpenChange={handleCreateDialogClose}
         open={isCreateDialogOpen}
       />
 

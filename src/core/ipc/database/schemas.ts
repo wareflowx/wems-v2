@@ -142,7 +142,7 @@ export const createAttachmentInputSchema = z.object({
   id: z.string().optional(),
   employeeId: z.number(),
   employeeName: z.string().optional(), // For slugified folder path
-  entityType: z.enum(["contract", "caces", "document", "medical_visit"]),
+  entityType: z.enum(["contract", "caces", "document", "medical_visit", "driving_authorization", "online_training"]),
   entityId: z.number().optional(),
   originalName: z.string(),
   mimeType: z.enum(ALLOWED_ATTACHMENT_MIME_TYPES).optional(),
@@ -160,7 +160,7 @@ export const getAttachmentInputSchema = z.object({
 
 export const getAttachmentsInputSchema = z.object({
   employeeId: z.number().optional(),
-  entityType: z.enum(["contract", "caces", "document", "medical_visit"]).optional(),
+  entityType: z.enum(["contract", "caces", "document", "medical_visit", "driving_authorization", "online_training"]).optional(),
 });
 
 // Department schemas
@@ -246,6 +246,52 @@ export const updateMedicalVisitInputSchema = z.object({
 });
 
 export const deleteMedicalVisitInputSchema = z.object({
+  id: z.number(),
+});
+
+// Driving Authorization schemas
+export const createDrivingAuthorizationInputSchema = z.object({
+  employeeId: z.number().min(1, "Employee is required"),
+  licenseCategory: z.string().min(1, "License category is required"),
+  dateObtained: z.string().min(1, "Date obtained is required"),
+  expirationDate: z.string().min(1, "Expiration date is required"),
+  attachmentId: z.string().optional(),
+});
+
+export const updateDrivingAuthorizationInputSchema = z.object({
+  id: z.number(),
+  licenseCategory: z.string().min(1, "License category is required").optional(),
+  dateObtained: z.string().min(1, "Date obtained is required").optional(),
+  expirationDate: z.string().min(1, "Expiration date is required").optional(),
+  attachmentId: z.string().optional().nullable(),
+});
+
+export const deleteDrivingAuthorizationInputSchema = z.object({
+  id: z.number(),
+});
+
+// Online Training schemas
+export const createOnlineTrainingInputSchema = z.object({
+  employeeId: z.number().min(1, "Employee is required"),
+  trainingName: z.string().min(1, "Training name is required"),
+  trainingProvider: z.string().min(1, "Training provider is required"),
+  completionDate: z.string().min(1, "Completion date is required"),
+  expirationDate: z.string().optional(),
+  status: z.enum(["in_progress", "completed", "expired"]).default("completed"),
+  attachmentId: z.string().optional(),
+});
+
+export const updateOnlineTrainingInputSchema = z.object({
+  id: z.number(),
+  trainingName: z.string().min(1, "Training name is required").optional(),
+  trainingProvider: z.string().min(1, "Training provider is required").optional(),
+  completionDate: z.string().min(1, "Completion date is required").optional(),
+  expirationDate: z.string().optional().nullable(),
+  status: z.enum(["in_progress", "completed", "expired"]).optional(),
+  attachmentId: z.string().optional().nullable(),
+});
+
+export const deleteOnlineTrainingInputSchema = z.object({
   id: z.number(),
 });
 

@@ -7,9 +7,11 @@ import {
   contracts,
   contractTypes,
   departments,
+  drivingAuthorizations,
   employees,
   media,
   medicalVisits,
+  onlineTrainings,
   positions,
   posts,
   settings,
@@ -29,9 +31,11 @@ import {
   createCaceInputSchema,
   createContractTypeInputSchema,
   createDepartmentInputSchema,
+  createDrivingAuthorizationInputSchema,
   createEmployeeInputSchema,
   createMedicalVisitInputSchema,
   createMediaInputSchema,
+  createOnlineTrainingInputSchema,
   createPositionInputSchema,
   createPostInputSchema,
   createWorkLocationInputSchema,
@@ -39,9 +43,11 @@ import {
   deleteCaceInputSchema,
   deleteContractTypeInputSchema,
   deleteDepartmentInputSchema,
+  deleteDrivingAuthorizationInputSchema,
   deleteEmployeeInputSchema,
   deleteMedicalVisitInputSchema,
   deleteMediaInputSchema,
+  deleteOnlineTrainingInputSchema,
   deletePositionInputSchema,
   deleteWorkLocationInputSchema,
   getAttachmentInputSchema,
@@ -50,8 +56,10 @@ import {
   updateCaceInputSchema,
   updateContractTypeInputSchema,
   updateDepartmentInputSchema,
+  updateDrivingAuthorizationInputSchema,
   updateEmployeeInputSchema,
   updateMedicalVisitInputSchema,
+  updateOnlineTrainingInputSchema,
   updatePositionInputSchema,
   updateSettingsInputSchema,
   updateWorkLocationInputSchema,
@@ -1153,6 +1161,162 @@ export const deleteMedicalVisit = os.handler(async ({ input }) => {
   }
 });
 
+// Driving Authorization handlers
+export const getDrivingAuthorizations = os.handler(async () => {
+  try {
+    const db = await getDb();
+    const allAuthorizations = await db
+      .select()
+      .from(drivingAuthorizations)
+      .where(isNull(drivingAuthorizations.deletedAt))
+      .orderBy(desc(drivingAuthorizations.expirationDate));
+    return allAuthorizations;
+  } catch (error) {
+    console.error("Error in getDrivingAuthorizations:", error);
+    throw error;
+  }
+});
+
+export const getDrivingAuthorizationsByEmployee = os.handler(async ({ input }) => {
+  try {
+    const validatedData = { id: input.employeeId };
+    const db = await getDb();
+    const authorizations = await db
+      .select()
+      .from(drivingAuthorizations)
+      .where(and(eq(drivingAuthorizations.employeeId, validatedData.id), isNull(drivingAuthorizations.deletedAt)))
+      .orderBy(desc(drivingAuthorizations.expirationDate));
+    return authorizations;
+  } catch (error) {
+    console.error("Error in getDrivingAuthorizationsByEmployee:", error);
+    throw error;
+  }
+});
+
+export const createDrivingAuthorization = os.handler(async ({ input }) => {
+  try {
+    const validatedData = createDrivingAuthorizationInputSchema.parse(input);
+    const db = await getDb();
+    const [newAuthorization] = await db
+      .insert(drivingAuthorizations)
+      .values(validatedData)
+      .returning();
+    return newAuthorization;
+  } catch (error) {
+    console.error("Error in createDrivingAuthorization:", error);
+    throw error;
+  }
+});
+
+export const updateDrivingAuthorization = os.handler(async ({ input }) => {
+  try {
+    const validatedData = updateDrivingAuthorizationInputSchema.parse(input);
+    const db = await getDb();
+    const [updated] = await db
+      .update(drivingAuthorizations)
+      .set(validatedData)
+      .where(eq(drivingAuthorizations.id, validatedData.id))
+      .returning();
+    return updated;
+  } catch (error) {
+    console.error("Error in updateDrivingAuthorization:", error);
+    throw error;
+  }
+});
+
+export const deleteDrivingAuthorization = os.handler(async ({ input }) => {
+  try {
+    const validatedData = deleteDrivingAuthorizationInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .update(drivingAuthorizations)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(drivingAuthorizations.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteDrivingAuthorization:", error);
+    throw error;
+  }
+});
+
+// Online Training handlers
+export const getOnlineTrainings = os.handler(async () => {
+  try {
+    const db = await getDb();
+    const allTrainings = await db
+      .select()
+      .from(onlineTrainings)
+      .where(isNull(onlineTrainings.deletedAt))
+      .orderBy(desc(onlineTrainings.completionDate));
+    return allTrainings;
+  } catch (error) {
+    console.error("Error in getOnlineTrainings:", error);
+    throw error;
+  }
+});
+
+export const getOnlineTrainingsByEmployee = os.handler(async ({ input }) => {
+  try {
+    const validatedData = { id: input.employeeId };
+    const db = await getDb();
+    const trainings = await db
+      .select()
+      .from(onlineTrainings)
+      .where(and(eq(onlineTrainings.employeeId, validatedData.id), isNull(onlineTrainings.deletedAt)))
+      .orderBy(desc(onlineTrainings.completionDate));
+    return trainings;
+  } catch (error) {
+    console.error("Error in getOnlineTrainingsByEmployee:", error);
+    throw error;
+  }
+});
+
+export const createOnlineTraining = os.handler(async ({ input }) => {
+  try {
+    const validatedData = createOnlineTrainingInputSchema.parse(input);
+    const db = await getDb();
+    const [newTraining] = await db
+      .insert(onlineTrainings)
+      .values(validatedData)
+      .returning();
+    return newTraining;
+  } catch (error) {
+    console.error("Error in createOnlineTraining:", error);
+    throw error;
+  }
+});
+
+export const updateOnlineTraining = os.handler(async ({ input }) => {
+  try {
+    const validatedData = updateOnlineTrainingInputSchema.parse(input);
+    const db = await getDb();
+    const [updated] = await db
+      .update(onlineTrainings)
+      .set(validatedData)
+      .where(eq(onlineTrainings.id, validatedData.id))
+      .returning();
+    return updated;
+  } catch (error) {
+    console.error("Error in updateOnlineTraining:", error);
+    throw error;
+  }
+});
+
+export const deleteOnlineTraining = os.handler(async ({ input }) => {
+  try {
+    const validatedData = deleteOnlineTrainingInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .update(onlineTrainings)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(onlineTrainings.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteOnlineTraining:", error);
+    throw error;
+  }
+});
+
 // Settings handlers
 export const getSettings = os.handler(async () => {
   try {
@@ -1345,6 +1509,102 @@ export const getAlerts = os.handler(async ({ input }: { input?: AlertFilters }) 
             date: contract.endDate,
           });
         }
+      }
+    }
+
+    // Get all Driving Authorizations (excluding soft-deleted)
+    const allDrivingAuthorizations = await db
+      .select()
+      .from(drivingAuthorizations)
+      .where(isNull(drivingAuthorizations.deletedAt));
+
+    for (const auth of allDrivingAuthorizations) {
+      const expirationDate = new Date(auth.expirationDate);
+      expirationDate.setHours(0, 0, 0, 0);
+
+      const daysUntilExpiration = Math.ceil(
+        (expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (daysUntilExpiration < 0) {
+        // Authorization expired - critical
+        alerts.push({
+          id: `driving-auth-expired-${auth.id}`,
+          type: "Autorisation de conduite expirée",
+          employee: employeeMap.get(auth.employeeId) || "Unknown",
+          employeeId: auth.employeeId,
+          category: auth.licenseCategory,
+          severity: "critical",
+          date: auth.expirationDate,
+        });
+      } else if (daysUntilExpiration <= cacesDays) {
+        // Authorization expiring soon - warning
+        alerts.push({
+          id: `driving-auth-warning-${auth.id}`,
+          type: "Autorisation de conduite expiration proche",
+          employee: employeeMap.get(auth.employeeId) || "Unknown",
+          employeeId: auth.employeeId,
+          category: auth.licenseCategory,
+          daysLeft: daysUntilExpiration,
+          severity: daysUntilExpiration <= 7 ? "critical" : "warning",
+          date: auth.expirationDate,
+        });
+      }
+    }
+
+    // Get all Online Trainings (excluding soft-deleted)
+    const allOnlineTrainings = await db
+      .select()
+      .from(onlineTrainings)
+      .where(isNull(onlineTrainings.deletedAt));
+
+    for (const training of allOnlineTrainings) {
+      // Check for expired training certifications
+      if (training.expirationDate) {
+        const expirationDate = new Date(training.expirationDate);
+        expirationDate.setHours(0, 0, 0, 0);
+
+        const daysUntilExpiration = Math.ceil(
+          (expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        if (daysUntilExpiration < 0) {
+          // Training certification expired - critical
+          alerts.push({
+            id: `training-expired-${training.id}`,
+            type: "Formation expirée",
+            employee: employeeMap.get(training.employeeId) || "Unknown",
+            employeeId: training.employeeId,
+            category: training.trainingName,
+            severity: "critical",
+            date: training.expirationDate,
+          });
+        } else if (daysUntilExpiration <= cacesDays) {
+          // Training certification expiring soon - warning
+          alerts.push({
+            id: `training-warning-${training.id}`,
+            type: "Formation expiration proche",
+            employee: employeeMap.get(training.employeeId) || "Unknown",
+            employeeId: training.employeeId,
+            category: training.trainingName,
+            daysLeft: daysUntilExpiration,
+            severity: daysUntilExpiration <= 7 ? "critical" : "warning",
+            date: training.expirationDate,
+          });
+        }
+      }
+
+      // Check for in-progress trainings
+      if (training.status === "in_progress") {
+        alerts.push({
+          id: `training-in-progress-${training.id}`,
+          type: "Formation en cours",
+          employee: employeeMap.get(training.employeeId) || "Unknown",
+          employeeId: training.employeeId,
+          category: training.trainingName,
+          severity: "info",
+          date: training.completionDate,
+        });
       }
     }
 

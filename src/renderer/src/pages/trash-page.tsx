@@ -38,42 +38,49 @@ export function TrashPage() {
   const [activeTab, setActiveTab] = useState<DeletedItemType>("employee");
 
   // Fetch deleted items based on active tab
-  const { data: deletedEmployees = [], refetch: refetchDeletedEmployees } = useQuery({
+  const { data: deletedEmployees = [] } = useQuery({
     queryKey: queryKeys.trash.deletedEmployees(),
     queryFn: () => db.getDeletedEmployees(),
     enabled: orpcReady && activeTab === "employee",
   });
 
-  const { data: deletedPositions = [], refetch: refetchDeletedPositions } = useQuery({
+  const { data: deletedPositions = [] } = useQuery({
     queryKey: queryKeys.trash.deletedPositions(),
     queryFn: () => db.getDeletedPositions(),
     enabled: orpcReady && activeTab === "position",
   });
 
-  const { data: deletedWorkLocations = [], refetch: refetchDeletedWorkLocations } = useQuery({
+  const { data: deletedWorkLocations = [] } = useQuery({
     queryKey: queryKeys.trash.deletedWorkLocations(),
     queryFn: () => db.getDeletedWorkLocations(),
     enabled: orpcReady && activeTab === "workLocation",
   });
 
-  const { data: deletedDepartments = [], refetch: refetchDeletedDepartments } = useQuery({
+  const { data: deletedDepartments = [] } = useQuery({
     queryKey: queryKeys.trash.deletedDepartments(),
     queryFn: () => db.getDeletedDepartments(),
     enabled: orpcReady && activeTab === "department",
   });
 
-  const { data: deletedContractTypes = [], refetch: refetchDeletedContractTypes } = useQuery({
+  const { data: deletedContractTypes = [] } = useQuery({
     queryKey: queryKeys.trash.deletedContractTypes(),
     queryFn: () => db.getDeletedContractTypes(),
     enabled: orpcReady && activeTab === "contractType",
   });
 
-  // Restore mutations
+  // Restore mutations with optimistic cache update
   const restoreEmployee = useMutation({
     mutationFn: (id: number) => db.restoreEmployee(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["trash", "deleted-employees"] });
-      queryClient.invalidateQueries({ queryKey: ["employees", "list"] });
+      // Get the restored item from deleted list and add it back
+      const deleted = deletedEmployees.find((e: any) => e.id === id);
+      if (deleted) {
+        queryClient.setQueryData(
+          ["employees", "list"],
+          (old: any[] = []) => [...old, { ...deleted, deletedAt: null }]
+        );
+      }
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
       toast({ title: t("trash.restoreSuccess") });
     },
   });
@@ -81,8 +88,14 @@ export function TrashPage() {
   const restorePosition = useMutation({
     mutationFn: (id: number) => db.restorePosition(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["trash", "deleted-positions"] });
-      queryClient.invalidateQueries({ queryKey: ["positions", "list"] });
+      const deleted = deletedPositions.find((p: any) => p.id === id);
+      if (deleted) {
+        queryClient.setQueryData(
+          ["positions", "list"],
+          (old: any[] = []) => [...old, { ...deleted, deletedAt: null }]
+        );
+      }
+      queryClient.invalidateQueries({ queryKey: ["positions"] });
       toast({ title: t("trash.restoreSuccess") });
     },
   });
@@ -90,8 +103,14 @@ export function TrashPage() {
   const restoreWorkLocation = useMutation({
     mutationFn: (id: number) => db.restoreWorkLocation(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["trash", "deleted-work-locations"] });
-      queryClient.invalidateQueries({ queryKey: ["work-locations", "list"] });
+      const deleted = deletedWorkLocations.find((w: any) => w.id === id);
+      if (deleted) {
+        queryClient.setQueryData(
+          ["work-locations", "list"],
+          (old: any[] = []) => [...old, { ...deleted, deletedAt: null }]
+        );
+      }
+      queryClient.invalidateQueries({ queryKey: ["work-locations"] });
       toast({ title: t("trash.restoreSuccess") });
     },
   });
@@ -99,8 +118,14 @@ export function TrashPage() {
   const restoreDepartment = useMutation({
     mutationFn: (id: number) => db.restoreDepartment(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["trash", "deleted-departments"] });
-      queryClient.invalidateQueries({ queryKey: ["departments", "list"] });
+      const deleted = deletedDepartments.find((d: any) => d.id === id);
+      if (deleted) {
+        queryClient.setQueryData(
+          ["departments", "list"],
+          (old: any[] = []) => [...old, { ...deleted, deletedAt: null }]
+        );
+      }
+      queryClient.invalidateQueries({ queryKey: ["departments"] });
       toast({ title: t("trash.restoreSuccess") });
     },
   });
@@ -108,9 +133,15 @@ export function TrashPage() {
   const restoreContractType = useMutation({
     mutationFn: (id: number) => db.restoreContractType(id),
     onSuccess: async () => {
-      // Refetch deleted items
-      await refetchDeletedContractTypes();
-      // Also trigger refetch of the contract types list
+      // Get the restored item from deleted list and add it back to contract types
+      const deleted = deletedContractTypes.find((c: any) => c.id === id);
+      if (deleted) {
+        queryClient.setQueryData(
+          ["contract-types", "list"],
+          (old: any[] = []) => [...old, { ...deleted, deletedAt: null }]
+        );
+      }
+      // Also invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["contract-types"] });
       toast({ title: t("trash.restoreSuccess") });
     },

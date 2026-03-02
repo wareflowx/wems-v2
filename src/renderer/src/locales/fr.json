@@ -381,6 +381,43 @@
       "statusCancelled": "Cette visite a été annulée"
     }
   },
+  "drivingAuthorizations": {
+    "title": "Autorisations de conduite",
+    "description": "Suivez les autorisations de conduite de vos employés et leurs dates d'expiration",
+    "search": "Rechercher...",
+    "employee": "Employé",
+    "category": "Catégorie",
+    "dateObtained": "Date d'obtention",
+    "expirationDate": "Date d'expiration",
+    "status": "Statut",
+    "valid": "Valide",
+    "expired": "Expiré",
+    "warning": "Expire bientôt",
+    "total": "Total",
+    "actions": "Actions",
+    "delete": "Supprimer",
+    "empty": "Aucune autorisation de conduite trouvée"
+  },
+  "onlineTrainings": {
+    "title": "Formations en ligne",
+    "description": "Suivez les formations en ligne et certifications de vos employés",
+    "search": "Rechercher...",
+    "employee": "Employé",
+    "trainingName": "Formation",
+    "provider": "Organisme",
+    "completionDate": "Date de fin",
+    "expirationDate": "Date d'expiration",
+    "status": "Statut",
+    "valid": "Valide",
+    "expired": "Expiré",
+    "warning": "Expire bientôt",
+    "inProgress": "En cours",
+    "completed": "Terminé",
+    "total": "Total",
+    "actions": "Actions",
+    "delete": "Supprimer",
+    "empty": "Aucune formation en ligne trouvée"
+  },
   "alerts": {
     "title": "Alertes",
     "search": "Rechercher...",

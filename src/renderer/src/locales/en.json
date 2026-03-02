@@ -381,6 +381,43 @@
       "statusCancelled": "This visit has been cancelled"
     }
   },
+  "drivingAuthorizations": {
+    "title": "Driving Authorizations",
+    "description": "Track your employees' driving authorizations and expiration dates",
+    "search": "Search...",
+    "employee": "Employee",
+    "category": "Category",
+    "dateObtained": "Date Obtained",
+    "expirationDate": "Expiration Date",
+    "status": "Status",
+    "valid": "Valid",
+    "expired": "Expired",
+    "warning": "Expiring Soon",
+    "total": "Total",
+    "actions": "Actions",
+    "delete": "Delete",
+    "empty": "No driving authorizations found"
+  },
+  "onlineTrainings": {
+    "title": "Online Trainings",
+    "description": "Track your employees' online trainings and certifications",
+    "search": "Search...",
+    "employee": "Employee",
+    "trainingName": "Training",
+    "provider": "Provider",
+    "completionDate": "Completion Date",
+    "expirationDate": "Expiration Date",
+    "status": "Status",
+    "valid": "Valid",
+    "expired": "Expired",
+    "warning": "Expiring Soon",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "total": "Total",
+    "actions": "Actions",
+    "delete": "Delete",
+    "empty": "No online trainings found"
+  },
   "alerts": {
     "title": "Alerts",
     "search": "Search...",

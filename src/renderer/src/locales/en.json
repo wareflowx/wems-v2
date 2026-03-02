@@ -595,6 +595,7 @@
     "restore": "Restore",
     "empty": "No deleted items",
     "restoreSuccess": "Item restored successfully",
+    "restoreError": "Error restoring item",
     "employees": "Employees",
     "positions": "Positions",
     "workLocations": "Work Locations",

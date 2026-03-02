@@ -595,6 +595,7 @@
     "restore": "Restaurer",
     "empty": "Aucun élément supprimé",
     "restoreSuccess": "Élément restauré avec succès",
+    "restoreError": "Erreur lors de la restauration",
     "employees": "Employés",
     "positions": "Postes",
     "workLocations": "Lieux de travail",

@@ -68,44 +68,64 @@ export function TrashPage() {
     enabled: orpcReady && activeTab === "contractType",
   });
 
-  // Restore mutations
+  // Restore mutations with proper cache invalidation
   const restoreEmployee = useMutation({
     mutationFn: (id: number) => db.restoreEmployee(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries();
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.employees.lists() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.employees.lists() });
       toast({ title: t("trash.restoreSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.restoreError"), variant: "destructive" });
     },
   });
 
   const restorePosition = useMutation({
     mutationFn: (id: number) => db.restorePosition(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries();
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.positions.lists() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.positions.lists() });
       toast({ title: t("trash.restoreSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.restoreError"), variant: "destructive" });
     },
   });
 
   const restoreWorkLocation = useMutation({
     mutationFn: (id: number) => db.restoreWorkLocation(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries();
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.workLocations.lists() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.workLocations.lists() });
       toast({ title: t("trash.restoreSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.restoreError"), variant: "destructive" });
     },
   });
 
   const restoreDepartment = useMutation({
     mutationFn: (id: number) => db.restoreDepartment(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries();
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.departments.lists() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.departments.lists() });
       toast({ title: t("trash.restoreSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.restoreError"), variant: "destructive" });
     },
   });
 
   const restoreContractType = useMutation({
     mutationFn: (id: number) => db.restoreContractType(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries();
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.contractTypes.lists() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.contractTypes.lists() });
       toast({ title: t("trash.restoreSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.restoreError"), variant: "destructive" });
     },
   });
 

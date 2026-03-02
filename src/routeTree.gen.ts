@@ -22,6 +22,7 @@ import { Route as PositionsRouteImport } from './routes/positions'
 import { Route as WorkLocationsRouteImport } from './routes/work-locations'
 import { Route as DepartmentsRouteImport } from './routes/departments'
 import { Route as ContractTypesRouteImport } from './routes/contract-types'
+import { Route as TrashRouteImport } from './routes/trash'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -88,6 +89,11 @@ const ContractTypesRoute = ContractTypesRouteImport.update({
   path: '/contract-types',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrashRoute = TrashRouteImport.update({
+  id: '/trash',
+  path: '/trash',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/work-locations': typeof WorkLocationsRoute
   '/departments': typeof DepartmentsRoute
   '/contract-types': typeof ContractTypesRoute
+  '/trash': typeof TrashRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRoutesByTo {
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/work-locations': typeof WorkLocationsRoute
   '/departments': typeof DepartmentsRoute
   '/contract-types': typeof ContractTypesRoute
+  '/trash': typeof TrashRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRoutesById {
@@ -133,14 +141,15 @@ export interface FileRoutesById {
   '/work-locations': typeof WorkLocationsRoute
   '/departments': typeof DepartmentsRoute
   '/contract-types': typeof ContractTypesRoute
+  '/trash': typeof TrashRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/settings'
+  fullPaths: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/trash' | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/settings'
-  id: '__root__' | '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/settings'
+  to: '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/trash' | '/settings'
+  id: '__root__' | '/' | '/posts' | '/employees' | '/documents' | '/caces' | '/medical-visits' | '/alerts' | '/contracts' | '/positions' | '/work-locations' | '/departments' | '/contract-types' | '/trash' | '/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -156,6 +165,7 @@ export interface RootRouteChildren {
   WorkLocationsRoute: typeof WorkLocationsRoute
   DepartmentsRoute: typeof DepartmentsRoute
   ContractTypesRoute: typeof ContractTypesRoute
+  TrashRoute: typeof TrashRoute
   SettingsRoute: typeof SettingsRoute
 }
 
@@ -252,6 +262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContractTypesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trash': {
+      id: '/trash'
+      path: '/trash'
+      fullPath: '/trash'
+      preLoaderRoute: typeof TrashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -268,6 +285,7 @@ const rootRouteChildren: RootRouteChildren = {
   WorkLocationsRoute: WorkLocationsRoute,
   DepartmentsRoute: DepartmentsRoute,
   ContractTypesRoute: ContractTypesRoute,
+  TrashRoute: TrashRoute,
   SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport

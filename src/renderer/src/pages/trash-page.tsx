@@ -107,9 +107,11 @@ export function TrashPage() {
 
   const restoreContractType = useMutation({
     mutationFn: (id: number) => db.restoreContractType(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["trash", "deleted-contract-types"] });
-      queryClient.invalidateQueries({ queryKey: ["contract-types", "list"] });
+    onSuccess: async () => {
+      // Invalidate trash key
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      // Invalidate all contract-types queries - this should match ["contract-types", "list"]
+      queryClient.invalidateQueries({ queryKey: ["contract-types"] });
       toast({ title: t("trash.restoreSuccess") });
     },
   });

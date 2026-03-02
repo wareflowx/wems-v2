@@ -16,6 +16,7 @@ import {
   SearchX,
   ShieldAlert,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -261,15 +262,120 @@ export function DrivingAuthorizationsPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "expired":
-        return "text-red-500";
-      case "warning":
-        return "text-yellow-500";
-      default:
-        return "text-green-500";
+  const getStatusBadge = (status: string) => {
+    const badgeContent = () => {
+      switch (status) {
+        case "expired":
+          return (
+            <span className="inline-flex items-center rounded-md border border-red-500/25 bg-red-500/15 px-2 py-0.5 font-medium text-red-700 text-xs">
+              {t("drivingAuthorizations.expired")}
+            </span>
+          );
+        case "warning":
+          return (
+            <span className="inline-flex items-center rounded-md border border-yellow-600/25 bg-yellow-600/15 px-2 py-0.5 font-medium text-xs text-yellow-700">
+              {t("drivingAuthorizations.warning")}
+            </span>
+          );
+        default:
+          return (
+            <span className="inline-flex items-center rounded-md border border-green-600/25 bg-green-600/15 px-2 py-0.5 font-medium text-green-700 text-xs">
+              {t("drivingAuthorizations.valid")}
+            </span>
+          );
+      }
+    };
+
+    const tooltipContent = () => {
+      switch (status) {
+        case "expired":
+          return t("drivingAuthorizations.expired");
+        case "warning":
+          return t("drivingAuthorizations.warning");
+        default:
+          return t("drivingAuthorizations.valid");
+      }
+    };
+
+    return (
+      <Tooltip>
+        <TooltipTrigger>{badgeContent()}</TooltipTrigger>
+        <TooltipContent className="max-w-xs">
+          <p>{tooltipContent()}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
+
+  const getCategoryBadge = (category: string) => {
+    const categoryColors: { [key: string]: string } = {
+      "B": "bg-blue-500",
+      "C": "bg-green-500",
+      "D": "bg-purple-500",
+      "BE": "bg-orange-500",
+      "CE": "bg-red-500",
+      "DE": "bg-pink-500",
+      "C1": "bg-teal-500",
+      "C1E": "bg-cyan-500",
+      "D1": "bg-indigo-500",
+      "D1E": "bg-violet-500",
+    };
+    const dotColor = categoryColors[category] || "bg-gray-500";
+
+    const badge = (
+      <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+        <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
+        {category}
+      </span>
+    );
+
+    return (
+      <Tooltip>
+        <TooltipTrigger>{badge}</TooltipTrigger>
+        <TooltipContent className="max-w-xs">
+          <p>Category {category}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
+
+  const getDaysBadge = (daysLeft: number) => {
+    let dotColor: string;
+    let text: string;
+
+    if (daysLeft < 0) {
+      dotColor = "bg-red-500";
+      text = `${Math.abs(daysLeft)} days overdue`;
+    } else if (daysLeft <= 30) {
+      dotColor = "bg-yellow-600";
+      text = `${daysLeft} days left`;
+    } else {
+      dotColor = "bg-green-600";
+      text = `${daysLeft} days left`;
     }
+
+    const tooltipContent = () => {
+      if (daysLeft < 0) {
+        return "Authorization has expired";
+      }
+      return "Days until expiration";
+    };
+
+    const badge = (
+      <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+        <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
+        {text}
+      </span>
+    );
+
+    return (
+      <Tooltip>
+        <TooltipTrigger>{badge}</TooltipTrigger>
+        <TooltipContent className="max-w-xs">
+          <p>{tooltipContent()}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
   };
 
   if (isLoading) {
@@ -447,7 +553,9 @@ export function DrivingAuthorizationsPage() {
                         <TableCell className="px-4 font-medium">
                           {emp ? `${emp.firstName} ${emp.lastName}` : "Unknown"}
                         </TableCell>
-                        <TableCell className="px-4">{auth.licenseCategory}</TableCell>
+                        <TableCell className="px-4">
+                          {getCategoryBadge(auth.licenseCategory)}
+                        </TableCell>
                         <TableCell className="px-4 text-muted-foreground">
                           {new Date(auth.dateObtained).toLocaleDateString()}
                         </TableCell>
@@ -455,19 +563,18 @@ export function DrivingAuthorizationsPage() {
                           {new Date(auth.expirationDate).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="px-4">
-                          <span className={`font-medium ${getStatusColor(auth.status)}`}>
-                            {auth.status === "expired" && t("drivingAuthorizations.expired")}
-                            {auth.status === "warning" && t("drivingAuthorizations.warning")}
-                            {auth.status === "valid" && t("drivingAuthorizations.valid")}
-                          </span>
+                          {getDaysBadge(auth.daysLeft)}
+                        </TableCell>
+                        <TableCell className="px-4">
+                          {getStatusBadge(auth.status)}
                         </TableCell>
                         <TableCell className="px-4">
                           <div className="flex items-center justify-end gap-2">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  size="sm"
-                                  variant="outline"
+                                  size="icon"
+                                  variant="ghost"
                                   onClick={() => setEditingAuthorization(auth)}
                                 >
                                   <Edit className="h-4 w-4" />
@@ -478,11 +585,11 @@ export function DrivingAuthorizationsPage() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  size="sm"
-                                  variant="destructive"
+                                  size="icon"
+                                  variant="ghost"
                                   onClick={() => handleDelete(auth.id)}
                                 >
-                                  {t("drivingAuthorizations.delete")}
+                                  <Trash2 className="h-4 w-4 text-destructive" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>{t("drivingAuthorizations.delete")}</TooltipContent>

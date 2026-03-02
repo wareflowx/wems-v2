@@ -13,6 +13,7 @@ import {
   Search,
   SearchX,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -253,17 +254,104 @@ export function OnlineTrainingsPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "expired":
-        return "text-red-500";
-      case "warning":
-        return "text-yellow-500";
-      case "in_progress":
-        return "text-blue-500";
-      default:
-        return "text-green-500";
+  const getStatusBadge = (status: string) => {
+    const badgeContent = () => {
+      switch (status) {
+        case "expired":
+          return (
+            <span className="inline-flex items-center rounded-md border border-red-500/25 bg-red-500/15 px-2 py-0.5 font-medium text-red-700 text-xs">
+              {t("onlineTrainings.expired")}
+            </span>
+          );
+        case "warning":
+          return (
+            <span className="inline-flex items-center rounded-md border border-yellow-600/25 bg-yellow-600/15 px-2 py-0.5 font-medium text-xs text-yellow-700">
+              {t("onlineTrainings.expiringSoon")}
+            </span>
+          );
+        case "in_progress":
+          return (
+            <span className="inline-flex items-center rounded-md border border-blue-600/25 bg-blue-600/15 px-2 py-0.5 font-medium text-blue-700 text-xs">
+              {t("onlineTrainings.inProgress")}
+            </span>
+          );
+        default:
+          return (
+            <span className="inline-flex items-center rounded-md border border-green-600/25 bg-green-600/15 px-2 py-0.5 font-medium text-green-700 text-xs">
+              {t("onlineTrainings.completed")}
+            </span>
+          );
+      }
+    };
+
+    const tooltipContent = () => {
+      switch (status) {
+        case "expired":
+          return t("onlineTrainings.expired");
+        case "warning":
+          return t("onlineTrainings.expiringSoon");
+        case "in_progress":
+          return t("onlineTrainings.inProgress");
+        default:
+          return t("onlineTrainings.completed");
+      }
+    };
+
+    return (
+      <Tooltip>
+        <TooltipTrigger>{badgeContent()}</TooltipTrigger>
+        <TooltipContent className="max-w-xs">
+          <p>{tooltipContent()}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
+
+  const getDaysBadge = (expirationDate: string | null) => {
+    if (!expirationDate) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expDate = new Date(expirationDate);
+    expDate.setHours(0, 0, 0, 0);
+    const daysLeft = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    let dotColor: string;
+    let text: string;
+
+    if (daysLeft < 0) {
+      dotColor = "bg-red-500";
+      text = `${Math.abs(daysLeft)} days overdue`;
+    } else if (daysLeft <= 30) {
+      dotColor = "bg-yellow-600";
+      text = `${daysLeft} days left`;
+    } else {
+      dotColor = "bg-green-600";
+      text = `${daysLeft} days left`;
     }
+
+    const tooltipContent = () => {
+      if (daysLeft < 0) {
+        return "Training has expired";
+      }
+      return "Days until expiration";
+    };
+
+    const badge = (
+      <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+        <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
+        {text}
+      </span>
+    );
+
+    return (
+      <Tooltip>
+        <TooltipTrigger>{badge}</TooltipTrigger>
+        <TooltipContent className="max-w-xs">
+          <p>{tooltipContent()}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
   };
 
   if (isLoading) {
@@ -391,7 +479,14 @@ export function OnlineTrainingsPage() {
                       )}
                     </div>
                   </TableHead>
-                  <TableHead className="px-4">{t("onlineTrainings.expirationDate")}</TableHead>
+                  <TableHead className="px-4" onClick={() => handleSort("expirationDate")}>
+                    <div className="flex items-center gap-1 cursor-pointer">
+                      {t("onlineTrainings.expirationDate")}
+                      {sortColumn === "expirationDate" && (
+                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
+                      )}
+                    </div>
+                  </TableHead>
                   <TableHead className="px-4" onClick={() => handleSort("status")}>
                     <div className="flex items-center gap-1 cursor-pointer">
                       {t("onlineTrainings.status")}
@@ -424,26 +519,21 @@ export function OnlineTrainingsPage() {
                           {emp ? `${emp.firstName} ${emp.lastName}` : "Unknown"}
                         </TableCell>
                         <TableCell className="px-4">{training.trainingName}</TableCell>
-                        <TableCell className="px-4 text-muted-foreground">{training.trainingProvider}</TableCell>
+                        <TableCell className="px-4 text-muted-foreground">{training.trainingProvider || "-"}</TableCell>
                         <TableCell className="px-4 text-muted-foreground">
                           {new Date(training.completionDate).toLocaleDateString()}
                         </TableCell>
-                        <TableCell className="px-4 text-muted-foreground">
-                          {training.expirationDate ? new Date(training.expirationDate).toLocaleDateString() : "-"}
+                        <TableCell className="px-4">
+                          {training.expirationDate ? getDaysBadge(training.expirationDate) : "-"}
                         </TableCell>
                         <TableCell className="px-4">
-                          <span className={`font-medium ${getStatusColor(training.computedStatus)}`}>
-                            {training.computedStatus === "in_progress" && t("onlineTrainings.inProgress")}
-                            {training.computedStatus === "completed" && t("onlineTrainings.completed")}
-                            {training.computedStatus === "expired" && t("onlineTrainings.expired")}
-                            {training.computedStatus === "warning" && t("onlineTrainings.expiringSoon")}
-                          </span>
+                          {getStatusBadge(training.computedStatus)}
                         </TableCell>
                         <TableCell className="px-4">
                           <div className="flex items-center justify-end gap-2">
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button size="sm" variant="outline" onClick={() => setEditingTraining(training)}>
+                                <Button size="icon" variant="ghost" onClick={() => setEditingTraining(training)}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
                               </TooltipTrigger>
@@ -451,8 +541,8 @@ export function OnlineTrainingsPage() {
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button size="sm" variant="destructive" onClick={() => handleDelete(training.id)}>
-                                  {t("onlineTrainings.delete")}
+                                <Button size="icon" variant="ghost" onClick={() => handleDelete(training.id)}>
+                                  <Trash2 className="h-4 w-4 text-destructive" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>{t("onlineTrainings.delete")}</TooltipContent>

@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
-import { Command } from "cmdk";
+import { Command, CommandList, CommandEmpty, CommandGroup } from "cmdk";
 import { getAppVersion } from "@/actions/app";
 import { useAlerts, useCaces, useDrivingAuthorizations, useMedicalVisits, useOnlineTrainings } from "@/hooks";
 import {
@@ -510,7 +510,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
                 Quick actions
               </span>
-              <CommandShortcut>Ctrl+K</CommandShortcut>
+              <span className="ml-auto text-xs text-muted-foreground">Ctrl+K</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>

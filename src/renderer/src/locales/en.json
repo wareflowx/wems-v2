@@ -413,8 +413,8 @@
   },
   "onlineTrainings": {
     "title": "Online Trainings",
-    "description": "Track your employees' online trainings "search": " and certifications",
-   Search...",
+    "description": "Track your employees' online trainings and certifications",
+    "search": "Search...",
     "filter": "Filter",
     "add": "Add Training",
     "addDescription": "Add a new online training for an employee",

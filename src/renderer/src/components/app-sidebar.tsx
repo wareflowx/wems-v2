@@ -232,70 +232,49 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       id: "create-employee",
       title: "New Employee",
       shortcut: "C E",
-      action: () => {
-        navigate({ to: "/employees" });
-        openDialog("create-employee");
-      },
+      action: () => openDialog("create-employee"),
       icon: Plus,
     },
     {
       id: "create-document",
       title: "New Document",
       shortcut: "C D",
-      action: () => {
-        navigate({ to: "/documents" });
-        openDialog("create-document");
-      },
+      action: () => openDialog("create-document"),
       icon: Plus,
     },
     {
       id: "create-caces",
       title: "New CACES",
       shortcut: "C C",
-      action: () => {
-        navigate({ to: "/caces" });
-        openDialog("create-caces");
-      },
+      action: () => openDialog("create-caces"),
       icon: Plus,
     },
     {
       id: "create-medical-visit",
       title: "New Medical Visit",
       shortcut: "C M",
-      action: () => {
-        navigate({ to: "/medical-visits" });
-        openDialog("create-medical-visit");
-      },
+      action: () => openDialog("create-medical-visit"),
       icon: Plus,
     },
     {
       id: "create-driving-authorization",
       title: "New Driving Authorization",
       shortcut: "C R",
-      action: () => {
-        navigate({ to: "/driving-authorizations" });
-        openDialog("create-driving-authorization");
-      },
+      action: () => openDialog("create-driving-authorization"),
       icon: Plus,
     },
     {
       id: "create-online-training",
       title: "New Online Training",
       shortcut: "C T",
-      action: () => {
-        navigate({ to: "/online-trainings" });
-        openDialog("create-online-training");
-      },
+      action: () => openDialog("create-online-training"),
       icon: Plus,
     },
     {
       id: "create-contract",
       title: "New Contract",
       shortcut: "C O",
-      action: () => {
-        navigate({ to: "/contracts" });
-        openDialog("create-contract");
-      },
+      action: () => openDialog("create-contract"),
       icon: Plus,
     },
     {

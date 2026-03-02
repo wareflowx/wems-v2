@@ -1,5 +1,6 @@
 import { Outlet } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/app-sidebar";
+import { DialogManager } from "@/components/dialogs/DialogManager";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
@@ -13,6 +14,7 @@ import { Toaster } from "@/components/ui/sonner";
 export function RootPage() {
   return (
     <div className="[--header-height:calc(--spacing(8))]">
+      <DialogManager />
       <SidebarProvider className="flex flex-col">
         <SiteHeader />
         <div className="flex flex-1">

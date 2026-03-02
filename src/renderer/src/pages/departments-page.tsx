@@ -30,6 +30,7 @@ import {
   useUpdateDepartment,
 } from "@/hooks";
 import { useDialogStore } from "@/stores/dialog-store";
+import { CreateDepartmentDialog } from "@/components/departments/CreateDepartmentDialog";
 
 const getColorName = (color: string) => {
   return color.replace("bg-", "").replace("-500", "").toUpperCase();
@@ -376,70 +377,6 @@ function generateCode(name: string): string {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^A-Z0-9]/g, "_");
-}
-
-function CreateDepartmentDialog({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation();
-  const createDepartment = useCreateDepartment();
-  const [name, setName] = useState("");
-  const [selectedColor, setSelectedColor] = useState(COLORS[0].value);
-
-  const handleSubmit = () => {
-    createDepartment.mutate(
-      { name, code: generateCode(name), color: selectedColor, isActive: true },
-      { onSuccess: onClose }
-    );
-  };
-
-  return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("departments.addDepartment")}</DialogTitle>
-          <DialogDescription>
-            {t("departments.addDepartmentDescription")}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">{t("departments.name")}</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Production"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>Color</Label>
-            <div className="flex flex-wrap gap-2">
-              {COLORS.map((color) => (
-                <button
-                  className={`h-8 w-8 rounded-md ${color.value} ${
-                    selectedColor === color.value
-                      ? "ring-2 ring-gray-900 ring-offset-2"
-                      : ""
-                  } transition-all hover:scale-110`}
-                  key={color.value}
-                  onClick={() => setSelectedColor(color.value)}
-                  title={color.name}
-                  type="button"
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            {t("common.cancel")}
-          </Button>
-          <Button onClick={handleSubmit} disabled={!name}>
-            {t("common.create")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
 }
 
 function EditDepartmentDialog({

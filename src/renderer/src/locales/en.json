@@ -12,6 +12,8 @@
     "documents": "Documents",
     "caces": "CACES",
     "medicalVisits": "Medical Visits",
+    "drivingAuthorizations": "Driving Authorizations",
+    "onlineTrainings": "Online Trainings",
     "alerts": "Alerts",
     "referenceData": "Reference Data",
     "backup": "Backup",

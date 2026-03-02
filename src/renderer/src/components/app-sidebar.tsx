@@ -5,8 +5,10 @@ import {
   AlertTriangle,
   Briefcase,
   Building2,
+  Car,
   ClipboardList,
   FileText,
+  GraduationCap,
   Home,
   Lock,
   MapPin,
@@ -22,7 +24,7 @@ import {
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { getAppVersion } from "@/actions/app";
-import { useAlerts, useCaces, useMedicalVisits } from "@/hooks";
+import { useAlerts, useCaces, useDrivingAuthorizations, useMedicalVisits, useOnlineTrainings } from "@/hooks";
 import {
   Sidebar,
   SidebarContent,
@@ -80,6 +82,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: alerts = [] } = useAlerts();
   const { data: caces = [] } = useCaces();
   const { data: medicalVisits = [] } = useMedicalVisits();
+  const { data: drivingAuthorizations = [] } = useDrivingAuthorizations();
+  const { data: onlineTrainings = [] } = useOnlineTrainings();
 
   React.useEffect(() => {
     getAppVersion().then(setAppVersion);
@@ -177,6 +181,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </Link>
                 </SidebarMenuButton>
                 {medicalVisits.length > 0 && <SidebarMenuBadge>{medicalVisits.length}</SidebarMenuBadge>}
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("sidebar.drivingAuthorizations")}>
+                  <Link to="/driving-authorizations">
+                    <Car />
+                    <span>{t("sidebar.drivingAuthorizations")}</span>
+                  </Link>
+                </SidebarMenuButton>
+                {drivingAuthorizations.length > 0 && <SidebarMenuBadge>{drivingAuthorizations.length}</SidebarMenuBadge>}
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("sidebar.onlineTrainings")}>
+                  <Link to="/online-trainings">
+                    <GraduationCap />
+                    <span>{t("sidebar.onlineTrainings")}</span>
+                  </Link>
+                </SidebarMenuButton>
+                {onlineTrainings.length > 0 && <SidebarMenuBadge>{onlineTrainings.length}</SidebarMenuBadge>}
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={t("sidebar.contracts")}>

@@ -221,20 +221,13 @@ export const deleteWorkLocation = os.handler(async ({ input }) => {
 
 // Employees handlers
 export const getEmployees = os.handler(async () => {
-  console.log("[DB-HANDLER] getEmployees called!");
   try {
     const db = await getDb();
-    console.log("[DB-HANDLER] getEmployees: DB obtained, querying...");
     const result = await db
       .select()
       .from(employees)
       .where(isNull(employees.deletedAt))
       .orderBy(employees.id);
-    console.log(
-      "[DB-HANDLER] getEmployees: Query complete, found",
-      result.length,
-      "employees"
-    );
     return result;
   } catch (error) {
     console.error("Error in getEmployees:", error);
@@ -1177,8 +1170,6 @@ export const updateSettings = os.handler(async ({ input }) => {
     const validatedData = updateSettingsInputSchema.parse(input);
     const db = await getDb();
 
-    console.log("Updating settings with:", validatedData);
-
     // Check if settings exist
     const [existing] = await db.select().from(settings).where(eq(settings.id, 1));
 
@@ -1237,18 +1228,18 @@ export const getAlerts = os.handler(async ({ input }: { input?: AlertFilters }) 
 
     const alerts: Alert[] = [];
 
-    // Get all employees for name lookup
+    // Get all employees for name lookup (excluding soft-deleted)
     const allEmployees = await db.select({
       id: employees.id,
       firstName: employees.firstName,
       lastName: employees.lastName,
-    }).from(employees);
+    }).from(employees).where(isNull(employees.deletedAt));
 
     const employeeMap = new Map(allEmployees.map(e => [e.id, `${e.firstName} ${e.lastName}`]));
 
-    // Get all CACES
+    // Get all CACES (excluding soft-deleted)
     if (appSettings?.cacesAlerts !== false) {
-      const allCaces = await db.select().from(caces);
+      const allCaces = await db.select().from(caces).where(isNull(caces.deletedAt));
 
       for (const cace of allCaces) {
         const expirationDate = new Date(cace.expirationDate);
@@ -1283,9 +1274,9 @@ export const getAlerts = os.handler(async ({ input }: { input?: AlertFilters }) 
       }
     }
 
-    // Get all Medical Visits
+    // Get all Medical Visits (excluding soft-deleted)
     if (appSettings?.medicalAlerts !== false) {
-      const allVisits = await db.select().from(medicalVisits);
+      const allVisits = await db.select().from(medicalVisits).where(isNull(medicalVisits.deletedAt));
 
       for (const visit of allVisits) {
         const scheduledDate = new Date(visit.scheduledDate);
@@ -1320,9 +1311,9 @@ export const getAlerts = os.handler(async ({ input }: { input?: AlertFilters }) 
       }
     }
 
-    // Get all Contracts (only if contract alerts enabled)
+    // Get all Contracts (only if contract alerts enabled, excluding soft-deleted)
     if (appSettings?.contractAlerts) {
-      const allContracts = await db.select().from(contracts).where(eq(contracts.isActive, true));
+      const allContracts = await db.select().from(contracts).where(and(eq(contracts.isActive, true), isNull(contracts.deletedAt)));
 
       for (const contract of allContracts) {
         if (!contract.endDate) continue;
@@ -1428,14 +1419,34 @@ export const permanentDeleteEmployee = os.handler(async ({ input }) => {
     const validatedData = permanentDeleteInputSchema.parse(input);
     const db = await getDb();
 
-    // Permanently delete related records first
-    await db.delete(contracts).where(eq(contracts.employeeId, validatedData.id));
-    await db.delete(caces).where(eq(caces.employeeId, validatedData.id));
-    await db.delete(medicalVisits).where(eq(medicalVisits.employeeId, validatedData.id));
-    await db.delete(attachments).where(eq(attachments.employeeId, validatedData.id));
+    // Get attachments to delete physical files
+    const employeeAttachments = await db
+      .select()
+      .from(attachments)
+      .where(eq(attachments.employeeId, validatedData.id));
 
-    // Permanently delete employee
-    await db.delete(employees).where(eq(employees.id, validatedData.id));
+    // Use transaction to ensure atomicity
+    await db.transaction(async (tx) => {
+      // Delete physical files first
+      for (const attachment of employeeAttachments) {
+        if (attachment.filePath) {
+          try {
+            deleteFile(attachment.filePath);
+          } catch (fileError) {
+            console.error("Error deleting attachment file:", fileError);
+          }
+        }
+      }
+
+      // Permanently delete related records
+      await tx.delete(contracts).where(eq(contracts.employeeId, validatedData.id));
+      await tx.delete(caces).where(eq(caces.employeeId, validatedData.id));
+      await tx.delete(medicalVisits).where(eq(medicalVisits.employeeId, validatedData.id));
+      await tx.delete(attachments).where(eq(attachments.employeeId, validatedData.id));
+
+      // Permanently delete employee
+      await tx.delete(employees).where(eq(employees.id, validatedData.id));
+    });
 
     return { success: true };
   } catch (error) {

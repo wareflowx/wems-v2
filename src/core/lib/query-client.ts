@@ -8,7 +8,7 @@ export const queryClient = new QueryClient({
       gcTime: 1000 * 60 * 30, // 30 minutes - cache retention
       retry: 1, // Retry failed requests once
       refetchOnWindowFocus: false, // Don't refetch on window focus
-      refetchOnMount: false, // Don't refetch on component mount if data exists
+      refetchOnMount: true, // Refetch on component mount to ensure fresh data
     },
     mutations: {
       retry: 1,

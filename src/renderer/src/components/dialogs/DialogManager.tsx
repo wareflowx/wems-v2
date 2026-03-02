@@ -14,6 +14,17 @@ import { CreateDepartmentDialog } from "@/components/departments/CreateDepartmen
 import { CreateContractTypeDialog } from "@/components/contract-types/CreateContractTypeDialog";
 
 import {
+  useCreateCaces,
+  useCreateContract,
+  useCreateContractType,
+  useCreateDepartment,
+  useCreateDocument,
+  useCreateDrivingAuthorization,
+  useCreateEmployee,
+  useCreateMedicalVisit,
+  useCreateOnlineTraining,
+  useCreatePosition,
+  useCreateWorkLocation,
   useDepartments,
   useEmployees,
   usePositions,
@@ -32,6 +43,19 @@ export function DialogManager() {
   const { data: workLocations = [] } = useWorkLocations();
   const { data: contractTypes = [] } = useContractTypes();
 
+  // Create mutations
+  const createEmployee = useCreateEmployee();
+  const createDocument = useCreateDocument();
+  const createCaces = useCreateCaces();
+  const createMedicalVisit = useCreateMedicalVisit();
+  const createDrivingAuthorization = useCreateDrivingAuthorization();
+  const createOnlineTraining = useCreateOnlineTraining();
+  const createContract = useCreateContract();
+  const createPosition = useCreatePosition();
+  const createWorkLocation = useCreateWorkLocation();
+  const createDepartment = useCreateDepartment();
+  const createContractType = useCreateContractType();
+
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       closeDialog();
@@ -45,6 +69,7 @@ export function DialogManager() {
         <CreateEmployeeDialog
           open
           onOpenChange={handleOpenChange}
+          onCreate={(data) => createEmployee.mutate(data)}
           departments={departments}
           positions={positions}
           workLocations={workLocations}
@@ -56,6 +81,7 @@ export function DialogManager() {
         <AddDocumentDialog
           open
           onOpenChange={handleOpenChange}
+          onAdd={(data) => createDocument.mutate(data)}
         />
       );
 
@@ -64,6 +90,7 @@ export function DialogManager() {
         <AddCacesDialog
           open
           onOpenChange={handleOpenChange}
+          onAdd={(data) => createCaces.mutate(data)}
           employees={employees}
         />
       );
@@ -73,6 +100,7 @@ export function DialogManager() {
         <AddMedicalVisitDialog
           open
           onOpenChange={handleOpenChange}
+          onAdd={(data) => createMedicalVisit.mutate(data)}
         />
       );
 
@@ -81,6 +109,7 @@ export function DialogManager() {
         <AddDrivingAuthorizationDialog
           open
           onOpenChange={handleOpenChange}
+          onAdd={(data) => createDrivingAuthorization.mutate(data)}
           employees={employees}
         />
       );
@@ -90,6 +119,7 @@ export function DialogManager() {
         <AddOnlineTrainingDialog
           open
           onOpenChange={handleOpenChange}
+          onAdd={(data) => createOnlineTraining.mutate(data)}
           employees={employees}
         />
       );
@@ -99,6 +129,7 @@ export function DialogManager() {
         <CreateContractDialog
           open
           onOpenChange={handleOpenChange}
+          onCreate={(data) => createContract.mutate(data)}
           employees={employees}
           contractTypes={contractTypes}
         />

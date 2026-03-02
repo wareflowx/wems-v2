@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { timestamps } from "./columns.helpers";
+import { timestampsWithSoftDelete } from "./columns.helpers";
 
 /**
  * Media table - Generic documents not tied to any employee
@@ -17,7 +17,7 @@ export const media = sqliteTable("media", {
 
   filePath: text("file_path"), // Relative path from data/files/media/
 
-  ...timestamps,
+  ...timestampsWithSoftDelete,
 });
 
 // Type inference

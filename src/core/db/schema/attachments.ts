@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { timestamps } from "./columns.helpers";
+import { timestampsWithSoftDelete } from "./columns.helpers";
 import { employees } from "./employees";
 
 /**
@@ -25,7 +25,7 @@ export const attachments = sqliteTable("attachments", {
   size: integer("size").notNull(), // Size in bytes
   filePath: text("file_path").notNull(), // Relative path from data/files/{entityType}/
 
-  ...timestamps,
+  ...timestampsWithSoftDelete,
 });
 
 // Type inference

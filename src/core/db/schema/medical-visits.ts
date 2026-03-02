@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { timestamps } from "./columns.helpers";
+import { timestampsWithSoftDelete } from "./columns.helpers";
 import { employees } from "./employees";
 import { attachments } from "./attachments";
 
@@ -23,8 +23,8 @@ export const medicalVisits = sqliteTable("medical_visits", {
     onDelete: "set null",
   }),
 
-  // Reusable timestamp columns
-  ...timestamps,
+  // Reusable timestamp columns with soft delete
+  ...timestampsWithSoftDelete,
 });
 
 // Type inference

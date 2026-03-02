@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { timestamps } from "./columns.helpers";
+import { timestampsWithSoftDelete } from "./columns.helpers";
 
 /**
  * Departments table - Organizational units
@@ -11,7 +11,7 @@ export const departments = sqliteTable("departments", {
   code: text("code").notNull().unique(),
   color: text("color").notNull(), // ex: "bg-emerald-500", "bg-amber-500"
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  ...timestamps,
+  ...timestampsWithSoftDelete,
 });
 
 // Type inference

@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { timestamps } from "./columns.helpers";
+import { timestampsWithSoftDelete } from "./columns.helpers";
 import { employees } from "./employees";
 
 export const contracts = sqliteTable("contracts", {
@@ -18,8 +18,8 @@ export const contracts = sqliteTable("contracts", {
   // Status
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
 
-  // Reusable timestamp columns
-  ...timestamps,
+  // Reusable timestamp columns with soft delete
+  ...timestampsWithSoftDelete,
 });
 
 // Type inference

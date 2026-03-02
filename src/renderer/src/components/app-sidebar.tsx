@@ -89,6 +89,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [_appVersion, setAppVersion] = React.useState("0.0.0");
   const [canWrite, setCanWrite] = React.useState(true);
   const [open, setOpen] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
   const navigate = useNavigate();
 
   // Get counts for sidebar badges
@@ -121,6 +122,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     window.addEventListener("keydown", handleKeyDown);
+    setMounted(true);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
@@ -259,7 +261,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <>
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      {mounted && (
+        <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
@@ -284,6 +287,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           ))}
         </CommandList>
       </CommandDialog>
+      )}
       <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
       collapsible="icon"

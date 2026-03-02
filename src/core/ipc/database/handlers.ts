@@ -1,5 +1,5 @@
 import { os } from "@orpc/server";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { getDb } from "@/core/db";
 import {
   attachments,
@@ -61,7 +61,11 @@ import {
 export const getPosts = os.handler(async () => {
   try {
     const db = await getDb();
-    const allPosts = await db.select().from(posts).orderBy(posts.id);
+    const allPosts = await db
+      .select()
+      .from(posts)
+      .where(isNull(posts.deletedAt))
+      .orderBy(posts.id);
     return allPosts;
   } catch (error) {
     console.error("Error in getPosts:", error);
@@ -85,7 +89,11 @@ export const createPost = os.handler(async ({ input }) => {
 export const getPositions = os.handler(async () => {
   try {
     const db = await getDb();
-    return await db.select().from(positions).orderBy(positions.id);
+    return await db
+      .select()
+      .from(positions)
+      .where(isNull(positions.deletedAt))
+      .orderBy(positions.id);
   } catch (error) {
     console.error("Error in getPositions:", error);
     throw error;
@@ -132,7 +140,10 @@ export const deletePosition = os.handler(async ({ input }) => {
   try {
     const validatedData = deletePositionInputSchema.parse(input);
     const db = await getDb();
-    await db.delete(positions).where(eq(positions.id, validatedData.id));
+    await db
+      .update(positions)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(positions.id, validatedData.id));
     return { success: true };
   } catch (error) {
     console.error("Error in deletePosition:", error);
@@ -144,7 +155,11 @@ export const deletePosition = os.handler(async ({ input }) => {
 export const getWorkLocations = os.handler(async () => {
   try {
     const db = await getDb();
-    return await db.select().from(workLocations).orderBy(workLocations.id);
+    return await db
+      .select()
+      .from(workLocations)
+      .where(isNull(workLocations.deletedAt))
+      .orderBy(workLocations.id);
   } catch (error) {
     console.error("Error in getWorkLocations:", error);
     throw error;
@@ -192,7 +207,8 @@ export const deleteWorkLocation = os.handler(async ({ input }) => {
     const validatedData = deleteWorkLocationInputSchema.parse(input);
     const db = await getDb();
     await db
-      .delete(workLocations)
+      .update(workLocations)
+      .set({ deletedAt: new Date().toISOString() })
       .where(eq(workLocations.id, validatedData.id));
     return { success: true };
   } catch (error) {
@@ -207,7 +223,11 @@ export const getEmployees = os.handler(async () => {
   try {
     const db = await getDb();
     console.log("[DB-HANDLER] getEmployees: DB obtained, querying...");
-    const result = await db.select().from(employees).orderBy(employees.id);
+    const result = await db
+      .select()
+      .from(employees)
+      .where(isNull(employees.deletedAt))
+      .orderBy(employees.id);
     console.log(
       "[DB-HANDLER] getEmployees: Query complete, found",
       result.length,
@@ -226,7 +246,7 @@ export const getEmployeeById = os.handler(async ({ input }) => {
     const [employee] = await db
       .select()
       .from(employees)
-      .where(eq(employees.id, input.id));
+      .where(and(eq(employees.id, input.id), isNull(employees.deletedAt)));
     if (!employee) {
       throw new Error("Employee not found");
     }
@@ -344,7 +364,10 @@ export const deleteEmployee = os.handler(async ({ input }) => {
   try {
     const validatedData = deleteEmployeeInputSchema.parse(input);
     const db = await getDb();
-    await db.delete(employees).where(eq(employees.id, validatedData.id));
+    await db
+      .update(employees)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(employees.id, validatedData.id));
     return { success: true };
   } catch (error) {
     console.error("Error in deleteEmployee:", error);
@@ -356,7 +379,11 @@ export const deleteEmployee = os.handler(async ({ input }) => {
 export const getContracts = os.handler(async () => {
   try {
     const db = await getDb();
-    return await db.select().from(contracts).orderBy(desc(contracts.id));
+    return await db
+      .select()
+      .from(contracts)
+      .where(isNull(contracts.deletedAt))
+      .orderBy(desc(contracts.id));
   } catch (error) {
     console.error("Error in getContracts:", error);
     throw error;
@@ -369,7 +396,12 @@ export const getContractsByEmployee = os.handler(async ({ input }) => {
     return await db
       .select()
       .from(contracts)
-      .where(eq(contracts.employeeId, input.employeeId))
+      .where(
+        and(
+          eq(contracts.employeeId, input.employeeId),
+          isNull(contracts.deletedAt)
+        )
+      )
       .orderBy(desc(contracts.startDate));
   } catch (error) {
     console.error("Error in getContractsByEmployee:", error);
@@ -383,7 +415,12 @@ export const getActiveContractByEmployee = os.handler(async ({ input }) => {
     const result = await db
       .select()
       .from(contracts)
-      .where(eq(contracts.employeeId, input.employeeId))
+      .where(
+        and(
+          eq(contracts.employeeId, input.employeeId),
+          isNull(contracts.deletedAt)
+        )
+      )
       .orderBy(desc(contracts.id))
       .limit(1);
     return result[0] || null;
@@ -436,7 +473,10 @@ export const updateContract = os.handler(async ({ input }) => {
 export const deleteContract = os.handler(async ({ input }) => {
   try {
     const db = await getDb();
-    await db.delete(contracts).where(eq(contracts.id, input.id));
+    await db
+      .update(contracts)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(contracts.id, input.id));
     return { success: true };
   } catch (error) {
     console.error("Error in deleteContract:", error);
@@ -452,10 +492,14 @@ export const getAllMedia = os.handler(async ({ input }) => {
       return await db
         .select()
         .from(media)
-        .where(eq(media.type, input.type))
+        .where(and(eq(media.type, input.type), isNull(media.deletedAt)))
         .orderBy(desc(media.createdAt));
     }
-    return await db.select().from(media).orderBy(desc(media.createdAt));
+    return await db
+      .select()
+      .from(media)
+      .where(isNull(media.deletedAt))
+      .orderBy(desc(media.createdAt));
   } catch (error) {
     console.error("Error in getAllMedia:", error);
     throw error;
@@ -470,7 +514,7 @@ export const getMediaById = os.handler(async ({ input }) => {
     const [result] = await db
       .select()
       .from(media)
-      .where(eq(media.id, validatedData.id));
+      .where(and(eq(media.id, validatedData.id), isNull(media.deletedAt)));
     return result || null;
   } catch (error) {
     console.error("Error in getMediaById:", error);
@@ -545,19 +589,11 @@ export const deleteMedia = os.handler(async ({ input }) => {
     const validatedData = deleteMediaInputSchema.parse(input);
     const db = await getDb();
 
-    // First get the media to find the file path
-    const [mediaRecord] = await db
-      .select()
-      .from(media)
+    // Soft delete - set deletedAt timestamp
+    await db
+      .update(media)
+      .set({ deletedAt: new Date().toISOString() })
       .where(eq(media.id, validatedData.id));
-
-    if (mediaRecord?.filePath) {
-      // Delete file from disk
-      deleteFile(mediaRecord.filePath);
-    }
-
-    // Delete record from DB
-    await db.delete(media).where(eq(media.id, validatedData.id));
 
     return { success: true };
   } catch (error) {
@@ -617,7 +653,8 @@ export const getAttachments = os.handler(async ({ input }) => {
         .where(
           and(
             eq(attachments.employeeId, validatedData.employeeId),
-            eq(attachments.entityType, validatedData.entityType)
+            eq(attachments.entityType, validatedData.entityType),
+            isNull(attachments.deletedAt)
           )
         )
         .orderBy(desc(attachments.createdAt));
@@ -625,17 +662,31 @@ export const getAttachments = os.handler(async ({ input }) => {
 
     if (validatedData?.employeeId) {
       return await query
-        .where(eq(attachments.employeeId, validatedData.employeeId))
+        .where(
+          and(
+            eq(attachments.employeeId, validatedData.employeeId),
+            isNull(attachments.deletedAt)
+          )
+        )
         .orderBy(desc(attachments.createdAt));
     }
 
     if (validatedData?.entityType) {
       return await query
-        .where(eq(attachments.entityType, validatedData.entityType))
+        .where(
+          and(
+            eq(attachments.entityType, validatedData.entityType),
+            isNull(attachments.deletedAt)
+          )
+        )
         .orderBy(desc(attachments.createdAt));
     }
 
-    return await query.orderBy(desc(attachments.createdAt));
+    return await db
+      .select()
+      .from(attachments)
+      .where(isNull(attachments.deletedAt))
+      .orderBy(desc(attachments.createdAt));
   } catch (error) {
     console.error("Error in getAttachments:", error);
     throw error;
@@ -650,7 +701,12 @@ export const getAttachmentById = os.handler(async ({ input }) => {
     const [result] = await db
       .select()
       .from(attachments)
-      .where(eq(attachments.id, validatedData.id));
+      .where(
+        and(
+          eq(attachments.id, validatedData.id),
+          isNull(attachments.deletedAt)
+        )
+      );
     return result || null;
   } catch (error) {
     console.error("Error in getAttachmentById:", error);
@@ -732,19 +788,11 @@ export const deleteAttachment = os.handler(async ({ input }) => {
     const validatedData = deleteAttachmentInputSchema.parse(input);
     const db = await getDb();
 
-    // First get the attachment to find the file path
-    const [attachmentRecord] = await db
-      .select()
-      .from(attachments)
+    // Soft delete - set deletedAt timestamp
+    await db
+      .update(attachments)
+      .set({ deletedAt: new Date().toISOString() })
       .where(eq(attachments.id, validatedData.id));
-
-    if (attachmentRecord?.filePath) {
-      // Delete file from disk
-      deleteFile(attachmentRecord.filePath);
-    }
-
-    // Delete record from DB
-    await db.delete(attachments).where(eq(attachments.id, validatedData.id));
 
     return { success: true };
   } catch (error) {
@@ -795,7 +843,11 @@ export const downloadAttachment = os.handler(async ({ input }) => {
 export const getDepartments = os.handler(async () => {
   try {
     const db = await getDb();
-    const allDepartments = await db.select().from(departments).where(eq(departments.isActive, 1)).orderBy(departments.name);
+    const allDepartments = await db
+      .select()
+      .from(departments)
+      .where(and(eq(departments.isActive, 1), isNull(departments.deletedAt)))
+      .orderBy(departments.name);
     return allDepartments;
   } catch (error) {
     console.error("Error in getDepartments:", error);
@@ -831,7 +883,10 @@ export const deleteDepartment = os.handler(async ({ input }) => {
   try {
     const validatedData = deleteDepartmentInputSchema.parse(input);
     const db = await getDb();
-    await db.delete(departments).where(eq(departments.id, validatedData.id));
+    await db
+      .update(departments)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(departments.id, validatedData.id));
     return { success: true };
   } catch (error) {
     console.error("Error in deleteDepartment:", error);
@@ -843,7 +898,11 @@ export const deleteDepartment = os.handler(async ({ input }) => {
 export const getContractTypes = os.handler(async () => {
   try {
     const db = await getDb();
-    const allTypes = await db.select().from(contractTypes).where(eq(contractTypes.isActive, 1)).orderBy(contractTypes.name);
+    const allTypes = await db
+      .select()
+      .from(contractTypes)
+      .where(and(eq(contractTypes.isActive, 1), isNull(contractTypes.deletedAt)))
+      .orderBy(contractTypes.name);
     return allTypes;
   } catch (error) {
     console.error("Error in getContractTypes:", error);
@@ -879,7 +938,10 @@ export const deleteContractType = os.handler(async ({ input }) => {
   try {
     const validatedData = deleteContractTypeInputSchema.parse(input);
     const db = await getDb();
-    await db.delete(contractTypes).where(eq(contractTypes.id, validatedData.id));
+    await db
+      .update(contractTypes)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(contractTypes.id, validatedData.id));
     return { success: true };
   } catch (error) {
     console.error("Error in deleteContractType:", error);
@@ -891,7 +953,11 @@ export const deleteContractType = os.handler(async ({ input }) => {
 export const getCaces = os.handler(async () => {
   try {
     const db = await getDb();
-    const allCaces = await db.select().from(caces).orderBy(desc(caces.expirationDate));
+    const allCaces = await db
+      .select()
+      .from(caces)
+      .where(isNull(caces.deletedAt))
+      .orderBy(desc(caces.expirationDate));
     return allCaces;
   } catch (error) {
     console.error("Error in getCaces:", error);
@@ -902,7 +968,13 @@ export const getCaces = os.handler(async () => {
 export const getCacesByEmployee = os.handler(async ({ input }) => {
   try {
     const db = await getDb();
-    const employeeCaces = await db.select().from(caces).where(eq(caces.employeeId, input.employeeId)).orderBy(desc(caces.expirationDate));
+    const employeeCaces = await db
+      .select()
+      .from(caces)
+      .where(
+        and(eq(caces.employeeId, input.employeeId), isNull(caces.deletedAt))
+      )
+      .orderBy(desc(caces.expirationDate));
     return employeeCaces;
   } catch (error) {
     console.error("Error in getCacesByEmployee:", error);
@@ -938,7 +1010,10 @@ export const deleteCace = os.handler(async ({ input }) => {
   try {
     const validatedData = deleteCaceInputSchema.parse(input);
     const db = await getDb();
-    await db.delete(caces).where(eq(caces.id, validatedData.id));
+    await db
+      .update(caces)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(caces.id, validatedData.id));
     return { success: true };
   } catch (error) {
     console.error("Error in deleteCace:", error);
@@ -950,7 +1025,16 @@ export const deleteCace = os.handler(async ({ input }) => {
 export const getAttachmentsByEntity = os.handler(async ({ input }) => {
   try {
     const db = await getDb();
-    const entityAttachments = await db.select().from(attachments).where(and(eq(attachments.entityType, input.entityType), eq(attachments.entityId, input.entityId)));
+    const entityAttachments = await db
+      .select()
+      .from(attachments)
+      .where(
+        and(
+          eq(attachments.entityType, input.entityType),
+          eq(attachments.entityId, input.entityId),
+          isNull(attachments.deletedAt)
+        )
+      );
     return entityAttachments;
   } catch (error) {
     console.error("Error in getAttachmentsByEntity:", error);
@@ -962,7 +1046,16 @@ export const getAttachmentsByEntity = os.handler(async ({ input }) => {
 export const getAttachmentsByType = os.handler(async ({ input }) => {
   try {
     const db = await getDb();
-    const entityAttachments = await db.select().from(attachments).where(eq(attachments.entityType, input.entityType)).orderBy(desc(attachments.createdAt));
+    const entityAttachments = await db
+      .select()
+      .from(attachments)
+      .where(
+        and(
+          eq(attachments.entityType, input.entityType),
+          isNull(attachments.deletedAt)
+        )
+      )
+      .orderBy(desc(attachments.createdAt));
     return entityAttachments;
   } catch (error) {
     console.error("Error in getAttachmentsByType:", error);
@@ -973,7 +1066,16 @@ export const getAttachmentsByType = os.handler(async ({ input }) => {
 export const getAttachmentsByEmployee = os.handler(async ({ input }) => {
   try {
     const db = await getDb();
-    const employeeAttachments = await db.select().from(attachments).where(eq(attachments.employeeId, input.employeeId)).orderBy(desc(attachments.createdAt));
+    const employeeAttachments = await db
+      .select()
+      .from(attachments)
+      .where(
+        and(
+          eq(attachments.employeeId, input.employeeId),
+          isNull(attachments.deletedAt)
+        )
+      )
+      .orderBy(desc(attachments.createdAt));
     return employeeAttachments;
   } catch (error) {
     console.error("Error in getAttachmentsByEmployee:", error);
@@ -985,7 +1087,11 @@ export const getAttachmentsByEmployee = os.handler(async ({ input }) => {
 export const getMedicalVisits = os.handler(async () => {
   try {
     const db = await getDb();
-    const allVisits = await db.select().from(medicalVisits).orderBy(desc(medicalVisits.scheduledDate));
+    const allVisits = await db
+      .select()
+      .from(medicalVisits)
+      .where(isNull(medicalVisits.deletedAt))
+      .orderBy(desc(medicalVisits.scheduledDate));
     return allVisits;
   } catch (error) {
     console.error("Error in getMedicalVisits:", error);
@@ -996,7 +1102,16 @@ export const getMedicalVisits = os.handler(async () => {
 export const getMedicalVisitsByEmployee = os.handler(async ({ input }) => {
   try {
     const db = await getDb();
-    const employeeVisits = await db.select().from(medicalVisits).where(eq(medicalVisits.employeeId, input.employeeId)).orderBy(desc(medicalVisits.scheduledDate));
+    const employeeVisits = await db
+      .select()
+      .from(medicalVisits)
+      .where(
+        and(
+          eq(medicalVisits.employeeId, input.employeeId),
+          isNull(medicalVisits.deletedAt)
+        )
+      )
+      .orderBy(desc(medicalVisits.scheduledDate));
     return employeeVisits;
   } catch (error) {
     console.error("Error in getMedicalVisitsByEmployee:", error);
@@ -1032,7 +1147,10 @@ export const deleteMedicalVisit = os.handler(async ({ input }) => {
   try {
     const validatedData = deleteMedicalVisitInputSchema.parse(input);
     const db = await getDb();
-    await db.delete(medicalVisits).where(eq(medicalVisits.id, validatedData.id));
+    await db
+      .update(medicalVisits)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(medicalVisits.id, validatedData.id));
     return { success: true };
   } catch (error) {
     console.error("Error in deleteMedicalVisit:", error);

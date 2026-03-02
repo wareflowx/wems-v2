@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/utils/toast";
+import { queryKeys } from "@@/lib/query-keys";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as db from "@/actions/database";
 import { useORPCReady } from "@/hooks";
@@ -38,31 +39,31 @@ export function TrashPage() {
 
   // Fetch deleted items based on active tab
   const { data: deletedEmployees = [] } = useQuery({
-    queryKey: ["deleted-employees"],
+    queryKey: queryKeys.trash.deletedEmployees(),
     queryFn: () => db.getDeletedEmployees(),
     enabled: orpcReady && activeTab === "employee",
   });
 
   const { data: deletedPositions = [] } = useQuery({
-    queryKey: ["deleted-positions"],
+    queryKey: queryKeys.trash.deletedPositions(),
     queryFn: () => db.getDeletedPositions(),
     enabled: orpcReady && activeTab === "position",
   });
 
   const { data: deletedWorkLocations = [] } = useQuery({
-    queryKey: ["deleted-work-locations"],
+    queryKey: queryKeys.trash.deletedWorkLocations(),
     queryFn: () => db.getDeletedWorkLocations(),
     enabled: orpcReady && activeTab === "workLocation",
   });
 
   const { data: deletedDepartments = [] } = useQuery({
-    queryKey: ["deleted-departments"],
+    queryKey: queryKeys.trash.deletedDepartments(),
     queryFn: () => db.getDeletedDepartments(),
     enabled: orpcReady && activeTab === "department",
   });
 
   const { data: deletedContractTypes = [] } = useQuery({
-    queryKey: ["deleted-contract-types"],
+    queryKey: queryKeys.trash.deletedContractTypes(),
     queryFn: () => db.getDeletedContractTypes(),
     enabled: orpcReady && activeTab === "contractType",
   });
@@ -71,8 +72,9 @@ export function TrashPage() {
   const restoreEmployee = useMutation({
     mutationFn: (id: number) => db.restoreEmployee(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["deleted-employees"] });
-      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedEmployees() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.all });
       toast({ title: t("trash.restoreSuccess") });
     },
   });
@@ -80,8 +82,9 @@ export function TrashPage() {
   const restorePosition = useMutation({
     mutationFn: (id: number) => db.restorePosition(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["deleted-positions"] });
-      queryClient.invalidateQueries({ queryKey: ["positions"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedPositions() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.positions.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.positions.all });
       toast({ title: t("trash.restoreSuccess") });
     },
   });
@@ -89,8 +92,9 @@ export function TrashPage() {
   const restoreWorkLocation = useMutation({
     mutationFn: (id: number) => db.restoreWorkLocation(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["deleted-work-locations"] });
-      queryClient.invalidateQueries({ queryKey: ["work-locations"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedWorkLocations() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.workLocations.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.workLocations.all });
       toast({ title: t("trash.restoreSuccess") });
     },
   });
@@ -98,8 +102,9 @@ export function TrashPage() {
   const restoreDepartment = useMutation({
     mutationFn: (id: number) => db.restoreDepartment(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["deleted-departments"] });
-      queryClient.invalidateQueries({ queryKey: ["departments"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedDepartments() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.departments.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.departments.all });
       toast({ title: t("trash.restoreSuccess") });
     },
   });
@@ -107,8 +112,9 @@ export function TrashPage() {
   const restoreContractType = useMutation({
     mutationFn: (id: number) => db.restoreContractType(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["deleted-contract-types"] });
-      queryClient.invalidateQueries({ queryKey: ["contract-types"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedContractTypes() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contractTypes.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contractTypes.all });
       toast({ title: t("trash.restoreSuccess") });
     },
   });

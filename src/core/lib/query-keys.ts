@@ -110,4 +110,13 @@ export const queryKeys = {
     all: ["settings"] as const,
     detail: () => ["settings", "detail"] as const,
   },
+
+  // Trash (deleted items)
+  trash: {
+    deletedEmployees: () => ["trash", "deleted-employees"] as const,
+    deletedPositions: () => ["trash", "deleted-positions"] as const,
+    deletedWorkLocations: () => ["trash", "deleted-work-locations"] as const,
+    deletedDepartments: () => ["trash", "deleted-departments"] as const,
+    deletedContractTypes: () => ["trash", "deleted-contract-types"] as const,
+  },
 } as const;

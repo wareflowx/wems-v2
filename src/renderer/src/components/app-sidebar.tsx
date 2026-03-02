@@ -326,6 +326,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="bg-card">
         <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Quick actions (Ctrl+K)"
+                  onClick={() => setOpen(true)}
+                >
+                  <Search className="size-4" />
+                  <span>Quick actions</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.overview")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -501,18 +516,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter className="border-t bg-card">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Quick actions"
-              onClick={() => setOpen(true)}
-            >
-              <Search className="size-4" />
-              <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
-                Quick actions
-              </span>
-              <span className="ml-auto text-xs text-muted-foreground">Ctrl+K</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
               <div className="flex w-full cursor-pointer items-center">

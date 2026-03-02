@@ -328,7 +328,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupContent>
             <div
-              className="mx-2 my-1 flex cursor-pointer items-center gap-2 rounded-md border bg-muted/50 px-2 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="my-1 flex cursor-pointer items-center gap-2 rounded-md border bg-muted/50 px-2 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
               onClick={() => setOpen(true)}
             >
               <Search className="size-4" />

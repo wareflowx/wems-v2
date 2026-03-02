@@ -633,7 +633,8 @@
     "allContracts": "Tous les contrats",
     "allStatuses": "Tous les statuts",
     "employeeId": "ID: EMP-",
-    "employees": "employés"
+    "employees": "employés",
+    "all": "Tous"
   },
   "placeholders": {
     "firstName": "Jean",

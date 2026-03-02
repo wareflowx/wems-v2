@@ -633,7 +633,8 @@
     "allContracts": "All contracts",
     "allStatuses": "All statuses",
     "employeeId": "ID: EMP-",
-    "employees": "employees"
+    "employees": "employees",
+    "all": "All"
   },
   "placeholders": {
     "firstName": "John",

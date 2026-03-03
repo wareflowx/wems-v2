@@ -2,6 +2,7 @@ import type { Contract } from "@@/db/schema/contracts";
 import type { Employee } from "@@/db/schema/employees";
 import type { Position } from "@@/db/schema/positions";
 import type { WorkLocation } from "@@/db/schema/work-locations";
+import type { DrivingAuthorizationStatusResult } from "@/core/lib/driving-authorization";
 import { Link } from "@tanstack/react-router";
 import {
   type ColumnDef,
@@ -39,12 +40,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DrivingAuthorizationBadge } from "./driving-authorization-badge";
 
 interface EmployeesTableProps {
   employees: Employee[];
   positions: Position[];
   workLocations: WorkLocation[];
   contracts: Contract[];
+  authorizationStatuses?: Map<number, DrivingAuthorizationStatusResult>;
   onDeleteClick: (employee: { id: number; name: string }) => void;
   onAddClick?: () => void;
   onEditClick?: (employee: Employee) => void;
@@ -55,6 +58,7 @@ export function EmployeesTable({
   positions,
   workLocations,
   contracts,
+  authorizationStatuses,
   onDeleteClick,
   onAddClick,
   onEditClick,
@@ -224,6 +228,15 @@ export function EmployeesTable({
                 </span>
               );
           }
+        },
+      },
+      {
+        id: "drivingAuthorization",
+        header: t("employees.drivingAuthorizationStatus"),
+        cell: ({ row }) => {
+          const employee = row.original;
+          const status = authorizationStatuses?.get(employee.id) || null;
+          return <DrivingAuthorizationBadge status={status} />;
         },
       },
       {

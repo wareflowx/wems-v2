@@ -21,6 +21,7 @@ import {
   usePositions,
   useUpdateEmployee,
   useWorkLocations,
+  useAllDrivingAuthorizationStatuses,
 } from "@/hooks";
 import { useToast } from "@/utils/toast";
 
@@ -45,9 +46,19 @@ export function EmployeesPage() {
   const { data: workLocations = [] } = useWorkLocations();
   const { data: contracts = [] } = useContracts();
   const { data: departments = [] } = useDepartments();
+  const { data: authorizationStatusesData = [] } = useAllDrivingAuthorizationStatuses();
   const createEmployee = useCreateEmployee();
   const deleteEmployee = useDeleteEmployee();
   const updateEmployee = useUpdateEmployee();
+
+  // Convert authorization statuses array to a Map
+  const authorizationStatuses = useMemo(() => {
+    const map = new Map<number, import("@/core/lib/driving-authorization").DrivingAuthorizationStatusResult>();
+    for (const item of authorizationStatusesData) {
+      map.set(item.employeeId, item.status);
+    }
+    return map;
+  }, [authorizationStatusesData]);
 
   // KPIs - calculated dynamically
   const kpis = useMemo(() => {
@@ -190,6 +201,7 @@ export function EmployeesPage() {
         />
 
         <EmployeesTable
+          authorizationStatuses={authorizationStatuses}
           contracts={contracts}
           employees={employees}
           onAddClick={() => setIsCreateDialogOpen(true)}

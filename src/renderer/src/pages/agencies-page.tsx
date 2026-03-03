@@ -331,6 +331,14 @@ export function AgenciesPage() {
   );
 }
 
+function generateCode(name: string): string {
+  return name
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z0-9]/g, "_");
+}
+
 function CreateAgencyDialog({
   onClose,
 }: {
@@ -339,12 +347,11 @@ function CreateAgencyDialog({
   const { t } = useTranslation();
   const createAgency = useCreateAgency();
   const [name, setName] = useState("");
-  const [code, setCode] = useState("");
   const [isActive, setIsActive] = useState(true);
 
   const handleSubmit = () => {
     createAgency.mutate(
-      { name, code: code || undefined, isActive },
+      { name, code: generateCode(name), isActive },
       { onSuccess: onClose }
     );
   };
@@ -363,15 +370,6 @@ function CreateAgencyDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("agencies.namePlaceholder")}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="code">{t("agencies.code")}</Label>
-            <Input
-              id="code"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder={t("agencies.codePlaceholder")}
             />
           </div>
           <div className="flex items-center gap-2">

@@ -84,7 +84,7 @@ export function TrashPage() {
   });
 
   const restorePosition = useMutation({
-    mutationFn: (id: number) => db.restorePosition(id),
+    mutationFn: (id: number) => db.restorePosition({ id }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.positions.lists() });
       await queryClient.refetchQueries({ queryKey: queryKeys.positions.lists() });

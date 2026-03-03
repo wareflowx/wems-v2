@@ -56,7 +56,7 @@ export function useCreateDepartment() {
       }
       toast({
         title: "Failed to create department",
-        description: err instanceof Error ? err.message : "An error occurred",
+        description: err?.message || err?.error?.message || "An error occurred",
         variant: "destructive",
       });
     },
@@ -183,7 +183,7 @@ export function useCreateContractType() {
       }
       toast({
         title: "Failed to create contract type",
-        description: err instanceof Error ? err.message : "An error occurred",
+        description: err?.message || err?.error?.message || "An error occurred",
         variant: "destructive",
       });
     },
@@ -307,16 +307,18 @@ export function useCreatePosition() {
       return { previousPositions };
     },
 
-    onError: (err, _variables, context) => {
+    onError: (err: any, _variables, context) => {
       if (context?.previousPositions) {
         queryClient.setQueryData(
           queryKeys.positions.lists(),
           context.previousPositions
         );
       }
+      // ORPC might wrap the error, try to get the message from different sources
+      const errorMessage = err?.message || err?.error?.message || "An error occurred";
       toast({
         title: "Failed to create position",
-        description: err instanceof Error ? err.message : "An error occurred",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -466,7 +468,7 @@ export function useCreateWorkLocation() {
       }
       toast({
         title: "Failed to create work location",
-        description: err instanceof Error ? err.message : "An error occurred",
+        description: err?.message || err?.error?.message || "An error occurred",
         variant: "destructive",
       });
     },

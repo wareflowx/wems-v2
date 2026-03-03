@@ -1,8 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Building2, Edit, Plus, Search, SearchX, Trash2 } from "lucide-react";
+import { Building2, Edit, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { Input } from "@/components/ui/input";
 import { MetricsSection } from "@/components/ui/metrics-section";
@@ -147,6 +148,7 @@ export function DepartmentsPage() {
 
           {/* Key Metrics */}
           <MetricsSection
+            className="lg:grid-cols-3"
             kpis={[
               {
                 title: t("departments.totalDepartments"),
@@ -209,46 +211,45 @@ export function DepartmentsPage() {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto rounded-lg border bg-card">
-              <Table className="w-full">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="px-4">
-                      {t("departments.code")}
-                    </TableHead>
-                    <TableHead className="px-4">
-                      {t("departments.name")}
-                    </TableHead>
-                    <TableHead className="px-4">
-                      Color
-                    </TableHead>
-                    <TableHead className="px-4">
-                      {t("departments.status")}
-                    </TableHead>
-                    <TableHead className="px-4 text-right">
-                      {t("departments.actions")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredDepartments.length === 0 ? (
+            {filteredDepartments.length === 0 ? (
+              <div className="flex w-full items-center justify-center">
+                <AnimatedEmpty
+                  title={t("departments.noDepartments", "No departments yet")}
+                  description={t(
+                    "departments.noDepartmentsDescription",
+                    "Create your first department to get started"
+                  )}
+                  icons={[Building2, Building2, Building2]}
+                  action={{
+                    label: t("departments.addDepartment", "Add Department"),
+                    onClick: () => setIsCreateDialogOpen(true),
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-lg border bg-card">
+                <Table className="w-full">
+                  <TableHeader>
                     <TableRow>
-                      <TableCell className="h-64" colSpan={5}>
-                        <div className="flex h-full flex-col items-center justify-center p-8 text-muted-foreground">
-                          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                            <SearchX className="h-8 w-8 opacity-50" />
-                          </div>
-                          <p className="font-medium text-lg">
-                            {t("common.noData")}
-                          </p>
-                          <p className="mt-2 max-w-md text-center text-sm">
-                            {t("dashboard.noDataFound")}
-                          </p>
-                        </div>
-                      </TableCell>
+                      <TableHead className="px-4">
+                        {t("departments.code")}
+                      </TableHead>
+                      <TableHead className="px-4">
+                        {t("departments.name")}
+                      </TableHead>
+                      <TableHead className="px-4">
+                        Color
+                      </TableHead>
+                      <TableHead className="px-4">
+                        {t("departments.status")}
+                      </TableHead>
+                      <TableHead className="px-4 text-right">
+                        {t("departments.actions")}
+                      </TableHead>
                     </TableRow>
-                  ) : (
-                    filteredDepartments.map((department) => (
+                  </TableHeader>
+                  <TableBody>
+                    {filteredDepartments.map((department) => (
                       <TableRow className="hover:bg-muted/50" key={department.id}>
                         <TableCell className="px-4">
                           <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
@@ -294,11 +295,11 @@ export function DepartmentsPage() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </div>
         </div>
       </div>

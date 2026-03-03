@@ -117,13 +117,30 @@ export const createPosition = os.handler(async ({ input }) => {
   try {
     const validatedData = createPositionInputSchema.parse(input);
     const db = await getDb();
+
     const [newPosition] = await db
       .insert(positions)
       .values(validatedData)
       .returning();
     return newPosition;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in createPosition:", error);
+
+    // Check for UNIQUE constraint violation
+    if (error?.code === 'SQLITE_CONSTRAINT_UNIQUE' || error?.message?.includes('UNIQUE constraint failed')) {
+      // Check if it's in the trash
+      const db = await getDb();
+      const existingPosition = await db
+        .select()
+        .from(positions)
+        .where(eq(positions.code, input.code));
+
+      if (existingPosition.length > 0 && existingPosition[0].deletedAt) {
+        throw new Error("A position with this code already exists in the trash. Please restore it or use a different code.");
+      }
+      throw new Error("A position with this code already exists. Please use a different code.");
+    }
+
     throw error;
   }
 });
@@ -198,13 +215,28 @@ export const createWorkLocation = os.handler(async ({ input }) => {
   try {
     const validatedData = createWorkLocationInputSchema.parse(input);
     const db = await getDb();
+
     const [newWorkLocation] = await db
       .insert(workLocations)
       .values(validatedData)
       .returning();
     return newWorkLocation;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in createWorkLocation:", error);
+
+    if (error?.code === 'SQLITE_CONSTRAINT_UNIQUE' || error?.message?.includes('UNIQUE constraint failed')) {
+      const db = await getDb();
+      const existingWorkLocation = await db
+        .select()
+        .from(workLocations)
+        .where(eq(workLocations.code, input.code));
+
+      if (existingWorkLocation.length > 0 && existingWorkLocation[0].deletedAt) {
+        throw new Error("A work location with this code already exists in the trash. Please restore it or use a different code.");
+      }
+      throw new Error("A work location with this code already exists. Please use a different code.");
+    }
+
     throw error;
   }
 });
@@ -880,10 +912,25 @@ export const createDepartment = os.handler(async ({ input }) => {
   try {
     const validatedData = createDepartmentInputSchema.parse(input);
     const db = await getDb();
+
     const [newDepartment] = await db.insert(departments).values(validatedData).returning();
     return newDepartment;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in createDepartment:", error);
+
+    if (error?.code === 'SQLITE_CONSTRAINT_UNIQUE' || error?.message?.includes('UNIQUE constraint failed')) {
+      const db = await getDb();
+      const existingDepartment = await db
+        .select()
+        .from(departments)
+        .where(eq(departments.code, input.code));
+
+      if (existingDepartment.length > 0 && existingDepartment[0].deletedAt) {
+        throw new Error("A department with this code already exists in the trash. Please restore it or use a different code.");
+      }
+      throw new Error("A department with this code already exists. Please use a different code.");
+    }
+
     throw error;
   }
 });
@@ -935,10 +982,25 @@ export const createContractType = os.handler(async ({ input }) => {
   try {
     const validatedData = createContractTypeInputSchema.parse(input);
     const db = await getDb();
+
     const [newType] = await db.insert(contractTypes).values(validatedData).returning();
     return newType;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in createContractType:", error);
+
+    if (error?.code === 'SQLITE_CONSTRAINT_UNIQUE' || error?.message?.includes('UNIQUE constraint failed')) {
+      const db = await getDb();
+      const existingContractType = await db
+        .select()
+        .from(contractTypes)
+        .where(eq(contractTypes.code, input.code));
+
+      if (existingContractType.length > 0 && existingContractType[0].deletedAt) {
+        throw new Error("A contract type with this code already exists in the trash. Please restore it or use a different code.");
+      }
+      throw new Error("A contract type with this code already exists. Please use a different code.");
+    }
+
     throw error;
   }
 });

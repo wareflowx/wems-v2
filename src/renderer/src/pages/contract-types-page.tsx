@@ -100,6 +100,7 @@ export function ContractTypesPage() {
 
           {/* Key Metrics */}
           <MetricsSection
+            className="lg:grid-cols-3"
             kpis={[
               {
                 title: t("contractTypes.totalContractTypes"),
@@ -162,13 +163,12 @@ export function ContractTypesPage() {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto rounded-lg border bg-card">
-              <ContractTypesTable
-                contractTypes={filteredContractTypes}
-                onEdit={setEditingContractType}
-                onDelete={setDeletingContractType}
-              />
-            </div>
+            <ContractTypesTable
+              contractTypes={filteredContractTypes}
+              onEdit={setEditingContractType}
+              onDelete={setDeletingContractType}
+              onAdd={() => setIsCreateDialogOpen(true)}
+            />
           </div>
         </div>
       </div>

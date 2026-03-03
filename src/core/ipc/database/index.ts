@@ -64,6 +64,7 @@ import {
   restoreContractType,
   restoreDepartment,
   restoreEmployee,
+  restorePosition,
   restoreWorkLocation,
   updateCace,
   updateContract,

@@ -105,16 +105,16 @@ export function SearchModal({ children, data, onAction, open: externalOpen, onOp
                                         value={item.title}
                                         onSelect={() => handleSelect(item)}
                                     >
-                                        {item.icon && <item.icon className="size-5 text-muted-foreground" />}
-                                        <div className="flex flex-col">
-                                            <p className="max-w-[250px] truncate text-sm font-medium">
+                                        {item.icon && <item.icon className="size-5 text-muted-foreground shrink-0" />}
+                                        <div className="flex min-w-0 flex-1 flex-col">
+                                            <p className="truncate text-sm font-medium">
                                                 {item.title}
                                             </p>
-                                            <p className="text-muted-foreground text-xs">
+                                            <p className="text-muted-foreground text-xs truncate">
                                                 {item.description}
                                             </p>
                                         </div>
-                                        <p className="text-muted-foreground ml-auto text-xs">
+                                        <p className="text-muted-foreground shrink-0 text-xs">
                                             {item.category}
                                         </p>
                                     </CommandItem>

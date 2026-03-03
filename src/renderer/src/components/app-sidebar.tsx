@@ -90,10 +90,16 @@ function QuickActionsDialog({
 }) {
   if (!open) return null;
 
-  // Filter out groups with no items
-  const filteredGroups = groupedActions.filter(
-    (group) => group.heading && group.items.length > 0
+  // Flatten all items with their group heading for cmdk filtering
+  const allItems = groupedActions.flatMap((group) =>
+    group.items.map((item) => ({
+      ...item,
+      groupHeading: group.heading,
+    }))
   );
+
+  // Find the previous group heading to display separator
+  let lastHeading: string | undefined;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
@@ -114,32 +120,33 @@ function QuickActionsDialog({
           <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
             No actions found.
           </CommandEmpty>
-          {filteredGroups.map((group, groupIndex) => (
-            <React.Fragment key={group.heading || `group-${groupIndex}`}>
-              {group.heading && (
-                <CommandGroup heading={group.heading} className="text-xs font-medium text-muted-foreground px-2 py-1.5">
-                  {group.items.map((item) => (
-                    <CommandItem
-                      key={item.id}
-                      className="flex cursor-default items-center gap-2 rounded-md px-2 py-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
-                      onSelect={() => handleCommandSelect(item.action)}
-                    >
-                      {item.icon && <item.icon className="h-4 w-4 text-muted-foreground" />}
-                      <span className="flex-1">{item.title}</span>
-                      {item.shortcut && (
-                        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                          {item.shortcut}
-                        </kbd>
-                      )}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              )}
-              {groupIndex < filteredGroups.length - 1 && (
-                <div className="-mx-1 my-1 h-px bg-border" />
-              )}
-            </React.Fragment>
-          ))}
+          <CommandGroup>
+            {allItems.map((item, index) => {
+              const showSeparator = lastHeading !== item.groupHeading;
+              lastHeading = item.groupHeading;
+              return (
+                <React.Fragment key={item.id}>
+                  {showSeparator && item.groupHeading && (
+                    <div className="text-xs font-medium text-muted-foreground px-2 py-1.5">
+                      {item.groupHeading}
+                    </div>
+                  )}
+                  <CommandItem
+                    className="flex cursor-default items-center gap-2 rounded-md px-2 py-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
+                    onSelect={() => handleCommandSelect(item.action)}
+                  >
+                    {item.icon && <item.icon className="h-4 w-4 text-muted-foreground" />}
+                    <span className="flex-1">{item.title}</span>
+                    {item.shortcut && (
+                      <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                        {item.shortcut}
+                      </kbd>
+                    )}
+                  </CommandItem>
+                </React.Fragment>
+              );
+            })}
+          </CommandGroup>
         </CommandList>
       </Command>
     </div>

@@ -104,7 +104,7 @@ export function AgenciesPage() {
   const handleDeleteAgency = () => {
     if (deletingAgency) {
       deleteAgency.mutate(
-        { id: deletingAgency.id },
+        deletingAgency.id,
         {
           onSuccess: () => {
             setDeletingAgency(null);

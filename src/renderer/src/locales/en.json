@@ -58,6 +58,8 @@
     "dayAgo": "day ago",
     "editMode": "Edit mode",
     "noDataFound": "No data matches your search criteria",
+    "allGood": "All good!",
+    "noAlertsDescription": "No alerts at this time. Everything is in order.",
     "allTypes": "All types",
     "allSeverities": "All severities",
     "allEmployees": "All employees",

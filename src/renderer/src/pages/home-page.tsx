@@ -338,34 +338,32 @@ export function HomePage() {
           </Select>
         </div>
 
-        {/* Table */}
-        <div className="rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("dashboard.filterByType")}</TableHead>
-                <TableHead>{t("dashboard.filterByEmployee")}</TableHead>
-                <TableHead>{t("dashboard.filterByDetail")}</TableHead>
-                <TableHead>{t("caces.date")}</TableHead>
-                <TableHead>{t("caces.status")}</TableHead>
-                <TableHead className="text-right">
-                  {t("employees.actions")}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentAlerts.length === 0 ? (
+        {/* Table or Empty State */}
+        {recentAlerts.length === 0 ? (
+          <div className="flex w-full items-center justify-center">
+            <AnimatedEmpty
+              title={t("dashboard.allGood", "All good!")}
+              description={t("dashboard.noAlertsDescription", "No alerts at this time. Everything is in order.")}
+              icons={[ShieldAlert, ShieldAlert, ShieldAlert]}
+            />
+          </div>
+        ) : (
+          <div className="rounded-lg border">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell className="h-64" colSpan={6}>
-                    <AnimatedEmpty
-                      title={t("common.noData")}
-                      description={t("dashboard.noDataFound")}
-                      icons={[SearchX, SearchX, SearchX]}
-                    />
-                  </TableCell>
+                  <TableHead>{t("dashboard.filterByType")}</TableHead>
+                  <TableHead>{t("dashboard.filterByEmployee")}</TableHead>
+                  <TableHead>{t("dashboard.filterByDetail")}</TableHead>
+                  <TableHead>{t("caces.date")}</TableHead>
+                  <TableHead>{t("caces.status")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("employees.actions")}
+                  </TableHead>
                 </TableRow>
-              ) : (
-                recentAlerts.map((alert) => (
+              </TableHeader>
+              <TableBody>
+                {recentAlerts.map((alert) => (
                   <TableRow className="hover:bg-muted/50" key={alert.id}>
                     <TableCell>{getTypeBadge(alert.type)}</TableCell>
                     <TableCell>
@@ -391,11 +389,11 @@ export function HomePage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
     </div>
   );

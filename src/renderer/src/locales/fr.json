@@ -58,6 +58,8 @@
     "dayAgo": "jour de suite",
     "editMode": "Mode édition",
     "noDataFound": "Aucune donnée ne correspond à vos critères de recherche",
+    "allGood": "Tout va bien !",
+    "noAlertsDescription": "Aucune alerte pour le moment. Tout est en ordre.",
     "allTypes": "Tous les types",
     "allSeverities": "Toutes les sévérités",
     "allEmployees": "Tous les employés",

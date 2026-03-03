@@ -163,7 +163,6 @@ export function PositionsPage() {
                 value: kpis.activePositions,
                 description: `${((kpis.activePositions / kpis.totalPositions) * 100).toFixed(0)}${t("common.ofTotal")}`,
                 icon: <Sparkles className="h-4 w-4" />,
-                iconColor: "text-green-500",
               },
               {
                 title: t("positions.inactive"),

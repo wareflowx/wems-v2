@@ -85,6 +85,27 @@ Currently available:
 - `docs/electron/message-channel-main.md` - MessageChannelMain for port transfer
 - `docs/electron/browser-window.md` - BrowserWindow creation and options
 
+## Database Migrations
+
+**IMPORTANT:** Do not use `sqlite3` CLI command directly - it's not available on the development machine.
+
+For database migrations:
+1. Create a migration script in `scripts/` using better-sqlite3
+2. Run it with `node scripts/<migration-name>.js`
+3. If you get a NODE_MODULE_VERSION error, run `npm rebuild better first
+
+Example-sqlite3` migration script:
+```javascript
+const Database = require('better-sqlite3');
+const path = require('path');
+const dbPath = path.join(__dirname, '..', 'data', 'database.db');
+const db = new Database(dbPath);
+
+// Run migrations
+db.exec('ALTER TABLE ...');
+db.close();
+```
+
 ## Lessons Learned
 
 **Always check `docs/learning/` before starting work on known issues.** This directory contains documented solutions to past problems to avoid repeating mistakes.

@@ -14,6 +14,7 @@ import { CreateDepartmentDialog } from "@/components/departments/CreateDepartmen
 import { CreateContractTypeDialog } from "@/components/contract-types/CreateContractTypeDialog";
 
 import {
+  useAgencies,
   useCreateCaces,
   useCreateContract,
   useCreateContractType,
@@ -42,6 +43,7 @@ export function DialogManager() {
   const { data: positions = [] } = usePositions();
   const { data: workLocations = [] } = useWorkLocations();
   const { data: contractTypes = [] } = useContractTypes();
+  const { data: agencies = [] } = useAgencies();
 
   // Create mutations
   const createEmployee = useCreateEmployee();
@@ -73,6 +75,7 @@ export function DialogManager() {
           departments={departments}
           positions={positions}
           workLocations={workLocations}
+          agencies={agencies}
         />
       );
 

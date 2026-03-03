@@ -316,6 +316,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: Building2,
     },
     {
+      id: "agencies",
+      title: "Agencies",
+      shortcut: "P A",
+      action: () => navigate({ to: "/agencies" }),
+      icon: Building2,
+    },
+    {
       id: "contract-types",
       title: "Contract Types",
       shortcut: "P C",
@@ -565,6 +572,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link to="/departments">
                     <Building2 />
                     <span>{t("departments.title")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("agencies.title")}>
+                  <Link to="/agencies">
+                    <Building2 />
+                    <span>{t("agencies.title")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

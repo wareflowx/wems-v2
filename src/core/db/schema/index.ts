@@ -2,6 +2,7 @@
 
 // Re-export schema types for convenience
 export * from "drizzle-orm/sqlite-core";
+export * from "./agencies";
 export * from "./attachments";
 export * from "./caces";
 export * from "./contracts";

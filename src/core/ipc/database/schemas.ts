@@ -83,6 +83,7 @@ export const createEmployeeInputSchema = z.object({
   positionId: z.number().optional(),
   workLocationId: z.number().optional(),
   department: z.string().min(1, "Department is required").trim(),
+  agencyId: z.number().optional().nullable(),
   status: z.enum(["active", "on_leave", "terminated"]).default("active"),
   hireDate: z.string().min(1, "Hire date is required"),
   terminationDate: z.string().optional(),
@@ -105,6 +106,7 @@ export const updateEmployeeInputSchema = z.object({
   positionId: z.number().optional().nullable(),
   workLocationId: z.number().optional().nullable(),
   department: z.string().min(1, "Department is required").trim().optional(),
+  agencyId: z.number().optional().nullable(),
   status: z.enum(["active", "on_leave", "terminated"]).optional(),
   hireDate: z.string().min(1, "Hire date is required").optional(),
   terminationDate: z.string().optional().nullable(),
@@ -180,6 +182,24 @@ export const updateDepartmentInputSchema = z.object({
 });
 
 export const deleteDepartmentInputSchema = z.object({
+  id: z.number(),
+});
+
+// Agency schemas
+export const createAgencyInputSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  code: z.string().optional(),
+  isActive: z.boolean().default(true),
+});
+
+export const updateAgencyInputSchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, "Name is required").optional(),
+  code: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const deleteAgencyInputSchema = z.object({
   id: z.number(),
 });
 
@@ -297,6 +317,9 @@ export const deleteOnlineTrainingInputSchema = z.object({
 
 // Settings schema
 export const updateSettingsInputSchema = z.object({
+  // Company
+  companyName: z.string().optional(),
+
   // Backup
   autoBackup: z.boolean().optional(),
 

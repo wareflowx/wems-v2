@@ -357,6 +357,39 @@ export async function deleteDepartment(id: number) {
   return client.database.deleteDepartment({ id });
 }
 
+// Agencies
+export async function getAgencies() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getAgencies();
+}
+
+export async function createAgency(data: { name: string; code?: string; isActive?: boolean }) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.createAgency(data);
+}
+
+export async function updateAgency(data: { id: number; name?: string; code?: string; isActive?: boolean }) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.updateAgency(data);
+}
+
+export async function deleteAgency(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.deleteAgency({ id });
+}
+
 // Contract Types
 export async function getContractTypes() {
   const client = getClient();

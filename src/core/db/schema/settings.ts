@@ -4,6 +4,9 @@ import { timestamps } from "./columns.helpers";
 export const settings = sqliteTable("settings", {
   id: integer("id").primaryKey(), // Always 1 (singleton)
 
+  // Company
+  companyName: text("company_name"), // Parent company name (entreprise mère)
+
   // Backup
   autoBackup: integer("auto_backup", { mode: "boolean" }).notNull().default(false),
 

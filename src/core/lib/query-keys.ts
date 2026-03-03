@@ -63,6 +63,13 @@ export const queryKeys = {
       ["driving-authorizations", "byEmployee", employeeId] as const,
   },
 
+  // Driving Authorization Status
+  drivingAuthorizationStatus: {
+    all: ["driving-authorization-status"] as const,
+    byEmployee: (employeeId: number) =>
+      ["driving-authorization-status", "byEmployee", employeeId] as const,
+  },
+
   // Online Trainings
   onlineTrainings: {
     all: ["online-trainings"] as const,

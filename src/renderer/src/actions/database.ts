@@ -75,6 +75,14 @@ export async function deletePosition(data: { id: number }) {
   return client.database.deletePosition(data);
 }
 
+export async function restorePosition(data: { id: number }) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.restorePosition(data);
+}
+
 // Work Locations
 export async function getWorkLocations() {
   const client = getClient();
@@ -645,14 +653,6 @@ export async function getDeletedPositions() {
     return [];
   }
   return client.database.getDeletedPositions();
-}
-
-export async function restorePosition(id: number) {
-  const client = getClient();
-  if (!client) {
-    return null;
-  }
-  return client.database.restorePosition({ id });
 }
 
 export async function getDeletedWorkLocations() {

@@ -164,6 +164,21 @@ export const deletePosition = os.handler(async ({ input }) => {
   }
 });
 
+export const restorePosition = os.handler(async ({ input }) => {
+  try {
+    const validatedData = deletePositionInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .update(positions)
+      .set({ deletedAt: null, deletedBy: null })
+      .where(eq(positions.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in restorePosition:", error);
+    throw error;
+  }
+});
+
 // Work Locations handlers
 export const getWorkLocations = os.handler(async () => {
   try {
@@ -2044,22 +2059,6 @@ export const getDeletedPositions = os.handler(async () => {
       .orderBy(desc(positions.deletedAt));
   } catch (error) {
     console.error("Error in getDeletedPositions:", error);
-    throw error;
-  }
-});
-
-// Restore position
-export const restorePosition = os.handler(async ({ input }) => {
-  try {
-    const validatedData = restoreInputSchema.parse(input);
-    const db = await getDb();
-    await db
-      .update(positions)
-      .set({ deletedAt: null })
-      .where(eq(positions.id, validatedData.id));
-    return { success: true };
-  } catch (error) {
-    console.error("Error in restorePosition:", error);
     throw error;
   }
 });

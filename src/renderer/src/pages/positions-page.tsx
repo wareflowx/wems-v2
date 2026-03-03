@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Briefcase, Edit, Plus, Search, SearchX, Sparkles, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +31,7 @@ import {
   useCreatePosition,
   useDeletePosition,
   usePositions,
+  useRestorePosition,
   useUpdatePosition,
 } from "@/hooks";
 
@@ -43,6 +44,7 @@ export function PositionsPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showDeleted, setShowDeleted] = useState<boolean>(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingPosition, setEditingPosition] = useState<any>(null);
   const [deletingPosition, setDeletingPosition] = useState<any>(null);
@@ -52,20 +54,32 @@ export function PositionsPage() {
   const createPosition = useCreatePosition();
   const updatePosition = useUpdatePosition();
   const deletePosition = useDeletePosition();
+  const restorePosition = useRestorePosition();
+  const { data: deletedPositions = [] } = useQuery({
+    queryKey: ["positions", "deleted"],
+    queryFn: () => db.getDeletedPositions(),
+  });
+  const { data: allPositions = [] } = useQuery({
+    queryKey: ["positions", "all"],
+    queryFn: () => db.getPositions(),
+  });
 
   // KPIs - calculated dynamically
   const kpis = useMemo(
     () => ({
-      totalPositions: positions.length,
-      activePositions: positions.filter((p) => p.isActive).length,
-      inactivePositions: positions.filter((p) => !p.isActive).length,
+      totalPositions: allPositions.length,
+      activePositions: allPositions.filter((p: any) => p.isActive).length,
+      inactivePositions: allPositions.filter((p: any) => !p.isActive).length,
     }),
-    [positions]
+    [allPositions]
   );
+
+  // Get positions to display based on showDeleted toggle
+  const displayPositions = showDeleted ? deletedPositions : positions;
 
   // Filter positions
   const filteredPositions = useMemo(() => {
-    return positions.filter((position) => {
+    return displayPositions.filter((position: any) => {
       const matchesSearch =
         search === "" ||
         position.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -78,7 +92,7 @@ export function PositionsPage() {
 
       return matchesSearch && matchesStatus;
     });
-  }, [positions, search, statusFilter]);
+  }, [displayPositions, search, statusFilter]);
 
   const _handleCreatePosition = (data: any) => {
     createPosition.mutate(data, {
@@ -203,6 +217,12 @@ export function PositionsPage() {
                 </SelectContent>
               </Select>
               <Button
+                variant={showDeleted ? "default" : "outline"}
+                onClick={() => setShowDeleted(!showDeleted)}
+              >
+                {showDeleted ? t("positions.active", "Active") : t("positions.showDeleted", "Show Deleted")}
+              </Button>
+              <Button
                 className="ml-auto gap-2"
                 onClick={() => setIsCreateDialogOpen(true)}
               >
@@ -256,14 +276,16 @@ export function PositionsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPositions.map((position) => (
-                      <TableRow className="hover:bg-muted/50" key={position.id}>
+                    {filteredPositions.map((position: any) => {
+                      const isDeleted = !!position.deletedAt;
+                      return (
+                      <TableRow className={`hover:bg-muted/50 ${isDeleted ? "opacity-50" : ""}`} key={position.id}>
                         <TableCell className="px-4">
                           <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
                             {position.code}
                           </span>
                         </TableCell>
-                        <TableCell className="max-w-[300px] truncate px-4 font-medium">
+                        <TableCell className={`max-w-[300px] truncate px-4 font-medium ${isDeleted ? "line-through" : ""}`}>
                           {position.name}
                         </TableCell>
                         <TableCell className="px-4">
@@ -273,7 +295,11 @@ export function PositionsPage() {
                           </span>
                         </TableCell>
                         <TableCell className="px-4">
-                          {position.isActive ? (
+                          {isDeleted ? (
+                            <span className="inline-flex items-center rounded-md border border-red-500/25 bg-red-500/15 px-2 py-0.5 font-medium text-red-600 text-xs">
+                              {t("positions.deleted", "Deleted")}
+                            </span>
+                          ) : position.isActive ? (
                             <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-2 py-0.5 font-medium text-green-600 text-xs">
                               {t("positions.active")}
                             </span>
@@ -291,24 +317,37 @@ export function PositionsPage() {
                         </TableCell>
                         <TableCell className="px-4">
                           <div className="flex items-center justify-end gap-2">
-                            <Button
-                              onClick={() => setEditingPosition(position)}
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              onClick={() => setDeletingPosition(position)}
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
+                            {isDeleted ? (
+                              <Button
+                                onClick={() => restorePosition.mutate({ id: position.id })}
+                                size="icon"
+                                variant="ghost"
+                              >
+                                <Trash2 className="h-4 w-4 text-green-600" />
+                              </Button>
+                            ) : (
+                              <>
+                                <Button
+                                  onClick={() => setEditingPosition(position)}
+                                  size="icon"
+                                  variant="ghost"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  onClick={() => setDeletingPosition(position)}
+                                  size="icon"
+                                  variant="ghost"
+                                >
+                                  <Trash2 className="h-4 w-4 text-red-600" />
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    );
+                    })}
                   </TableBody>
                 </Table>
               </div>

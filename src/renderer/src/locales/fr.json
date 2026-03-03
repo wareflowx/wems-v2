@@ -129,6 +129,8 @@
     "noPositionsDescription": "Créez votre premier poste pour commencer",
     "createdAt": "Créé le",
     "updatedAt": "Dernière modification",
+    "showDeleted": "Corbeille",
+    "deleted": "Supprimé",
     "actions": "Actions"
   },
   "workLocations": {

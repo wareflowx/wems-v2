@@ -86,6 +86,7 @@ export const database = {
   createPosition,
   updatePosition,
   deletePosition,
+  restorePosition,
   getWorkLocations,
   createWorkLocation,
   updateWorkLocation,

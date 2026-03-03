@@ -384,6 +384,28 @@ export function useDeletePosition() {
   });
 }
 
+export function useRestorePosition() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (data: { id: number }) => db.restorePosition(data),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.positions.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedPositions() });
+      toast({ title: "Position restored successfully" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to restore position",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
 // Work Locations
 export function useWorkLocations() {
   const orpcReady = useORPCReady();

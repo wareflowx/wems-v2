@@ -129,6 +129,8 @@
     "noPositionsDescription": "Create your first position to get started",
     "createdAt": "Created",
     "updatedAt": "Last Updated",
+    "showDeleted": "Trash",
+    "deleted": "Deleted",
     "actions": "Actions"
   },
   "workLocations": {

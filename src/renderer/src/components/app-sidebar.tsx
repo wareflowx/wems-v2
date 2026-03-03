@@ -85,6 +85,48 @@ const _data = {
   ],
 };
 
+function QuickActionsDialog({
+  open,
+  onOpenChange,
+  groupedActions,
+  handleCommandSelect,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  groupedActions: { heading?: string; items: typeof quickActions }[];
+  handleCommandSelect: (callback: () => void) => void;
+}) {
+  return (
+    <CommandDialog onOpenChange={onOpenChange} open={open}>
+      <CommandInput placeholder="Search actions..." />
+      <CommandList>
+        <CommandEmpty>No actions found.</CommandEmpty>
+        {groupedActions.map((group, groupIndex) => (
+          <React.Fragment key={group.heading || `group-${groupIndex}`}>
+            {group.heading && (
+              <CommandGroup heading={group.heading}>
+                {group.items.map((item) => (
+                  <CommandItem
+                    key={item.id}
+                    onSelect={() => handleCommandSelect(item.action)}
+                  >
+                    {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+                    <span className="flex-1">{item.title}</span>
+                    {item.shortcut && <CommandShortcut>{item.shortcut}</CommandShortcut>}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            {group.heading && groupIndex < groupedActions.length - 1 && (
+              <CommandSeparator />
+            )}
+          </React.Fragment>
+        ))}
+      </CommandList>
+    </CommandDialog>
+  );
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
   const [_appVersion, setAppVersion] = React.useState("0.0.0");
@@ -315,34 +357,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <>
-      {mounted && open && (
-        <CommandDialog onOpenChange={setOpen} open={open}>
-          <CommandInput placeholder="Search actions..." />
-          <CommandList>
-            <CommandEmpty>No actions found.</CommandEmpty>
-            {groupedActions.map((group, groupIndex) => (
-              <React.Fragment key={group.heading || `group-${groupIndex}`}>
-                {group.heading && (
-                  <CommandGroup heading={group.heading}>
-                    {group.items.map((item) => (
-                      <CommandItem
-                        key={item.id}
-                        onSelect={() => handleCommandSelect(item.action)}
-                      >
-                        {item.icon && <item.icon className="mr-2 h-4 w-4" />}
-                        <span className="flex-1">{item.title}</span>
-                        {item.shortcut && <CommandShortcut>{item.shortcut}</CommandShortcut>}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                )}
-                {group.heading && groupIndex < groupedActions.length - 1 && (
-                  <CommandSeparator />
-                )}
-              </React.Fragment>
-            ))}
-          </CommandList>
-        </CommandDialog>
+      {mounted && (
+        <QuickActionsDialog
+          open={open}
+          onOpenChange={setOpen}
+          groupedActions={groupedActions}
+          handleCommandSelect={handleCommandSelect}
+        />
       )}
       <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"

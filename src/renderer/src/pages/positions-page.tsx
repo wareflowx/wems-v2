@@ -150,6 +150,7 @@ export function PositionsPage() {
 
           {/* Key Metrics */}
           <MetricsSection
+            className="lg:grid-cols-3"
             kpis={[
               {
                 title: t("positions.totalPositions"),
@@ -213,7 +214,7 @@ export function PositionsPage() {
 
             {/* Table or Empty State */}
             {filteredPositions.length === 0 ? (
-              <div className="flex w-full items-center justify-center p-8">
+              <div className="flex w-full items-center justify-center">
                 <AnimatedEmpty
                   title={t("positions.noPositions", "No positions yet")}
                   description={t(

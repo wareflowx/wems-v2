@@ -11,11 +11,12 @@ interface KPIProps {
 
 interface MetricsSectionProps {
   kpis: KPIProps[];
+  className?: string;
 }
 
-export function MetricsSection({ kpis }: MetricsSectionProps) {
+export function MetricsSection({ kpis, className }: MetricsSectionProps) {
   return (
-    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+    <div className={`grid gap-3 md:grid-cols-2 lg:grid-cols-4 ${className || ""}`}>
       {kpis.map((kpi, index) => (
         <Card className="p-4" key={index}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-2">

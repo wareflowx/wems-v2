@@ -21,14 +21,13 @@ import {
   Stethoscope,
   Trash2,
   Users,
-  X,
 } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
-import { Command, CommandEmpty, CommandGroup, CommandList } from "cmdk";
 import { getAppVersion } from "@/actions/app";
 import { useAlerts, useCaces, useDrivingAuthorizations, useMedicalVisits, useOnlineTrainings } from "@/hooks";
 import { useDialogStore } from "@/stores/dialog-store";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Sidebar,
   SidebarContent,
@@ -88,53 +87,69 @@ function QuickActionsDialog({
   groupedActions: { heading?: string; items: typeof quickActions }[];
   handleCommandSelect: (callback: () => void) => void;
 }) {
+  const [search, setSearch] = React.useState("");
+
+  const filteredActions = React.useMemo(() => {
+    if (!search) return groupedActions;
+    const searchLower = search.toLowerCase();
+    return groupedActions
+      .map((group) => ({
+        ...group,
+        items: group.items.filter(
+          (item) =>
+            item.title.toLowerCase().includes(searchLower) ||
+            item.id.toLowerCase().includes(searchLower)
+        ),
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [groupedActions, search]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
-      <div className="fixed inset-0 bg-black/50" onClick={() => onOpenChange(false)} />
-      <Command className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-xl border bg-popover shadow-lg">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[500px] p-0" showCloseButton>
         <div className="flex items-center border-b px-3">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           <input
             className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-            placeholder="Type a command or search..."
+            placeholder="Search actions..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             autoFocus
-            onKeyDown={(e) => {
-              if (e.key === "Escape") onOpenChange(false);
-            }}
           />
-          <button onClick={() => onOpenChange(false)} className="rounded-sm opacity-70 hover:opacity-100">
-            <X className="h-4 w-4" />
-          </button>
         </div>
-        <CommandList className="max-h-[300px] overflow-y-auto p-1">
-          <CommandEmpty>No results found.</CommandEmpty>
-          {groupedActions.map((group, groupIndex) => (
-            <React.Fragment key={group.heading || `group-${groupIndex}`}>
-              {group.heading && (
-                <CommandGroup heading={group.heading}>
-                  {group.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex cursor-default items-center rounded-md px-2 py-1.5 text-sm hover:bg-muted hover:text-foreground"
-                      onClick={() => handleCommandSelect(item.action)}
-                    >
-                      {item.icon && <item.icon className="mr-2 h-4 w-4" />}
-                      <span className="flex-1">{item.title}</span>
-                      {item.shortcut && (
-                        <span className="ml-auto text-xs text-muted-foreground">{item.shortcut}</span>
-                      )}
-                    </div>
-                  ))}
-                </CommandGroup>
-              )}
-              {group.heading && groupIndex < groupedActions.length - 1 && (
-                <div className="-mx-1 my-1 h-px bg-border" />
-              )}
-            </React.Fragment>
-          ))}
-        </CommandList>
-      </Command>
-    </div>
+        <div className="max-h-[300px] overflow-y-auto p-1">
+          {filteredActions.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">No results found.</p>
+          ) : (
+            filteredActions.map((group, groupIndex) => (
+              <React.Fragment key={group.heading || `group-${groupIndex}`}>
+                {group.heading && (
+                  <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                    {group.heading}
+                  </div>
+                )}
+                {group.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex cursor-default items-center rounded-md px-2 py-1.5 text-sm hover:bg-muted hover:text-foreground"
+                    onClick={() => handleCommandSelect(item.action)}
+                  >
+                    {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+                    <span className="flex-1">{item.title}</span>
+                    {item.shortcut && (
+                      <span className="ml-auto text-xs text-muted-foreground">{item.shortcut}</span>
+                    )}
+                  </div>
+                ))}
+                {group.heading && groupIndex < filteredActions.length - 1 && (
+                  <div className="-mx-1 my-1 h-px bg-border" />
+                )}
+              </React.Fragment>
+            ))
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

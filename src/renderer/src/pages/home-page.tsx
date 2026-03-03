@@ -6,6 +6,7 @@ import { AlertsTable } from "@/components/home/alerts-table";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAlerts, useEmployees } from "@/hooks";
 
 export function HomePage() {

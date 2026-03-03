@@ -139,6 +139,67 @@ export function TrashPage() {
     },
   });
 
+  // Permanent delete mutations
+  const permanentDeleteEmployee = useMutation({
+    mutationFn: (id: number) => db.permanentDeleteEmployee(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedEmployees() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedEmployees() });
+      toast({ title: t("trash.deleteSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.deleteError"), variant: "destructive" });
+    },
+  });
+
+  const permanentDeletePosition = useMutation({
+    mutationFn: (id: number) => db.permanentDeletePosition(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedPositions() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedPositions() });
+      toast({ title: t("trash.deleteSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.deleteError"), variant: "destructive" });
+    },
+  });
+
+  const permanentDeleteWorkLocation = useMutation({
+    mutationFn: (id: number) => db.permanentDeleteWorkLocation(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedWorkLocations() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedWorkLocations() });
+      toast({ title: t("trash.deleteSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.deleteError"), variant: "destructive" });
+    },
+  });
+
+  const permanentDeleteDepartment = useMutation({
+    mutationFn: (id: number) => db.permanentDeleteDepartment(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedDepartments() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedDepartments() });
+      toast({ title: t("trash.deleteSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.deleteError"), variant: "destructive" });
+    },
+  });
+
+  const permanentDeleteContractType = useMutation({
+    mutationFn: (id: number) => db.permanentDeleteContractType(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedContractTypes() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedContractTypes() });
+      toast({ title: t("trash.deleteSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.deleteError"), variant: "destructive" });
+    },
+  });
+
   // Transform data into unified format
   const deletedItems: DeletedItem[] = useMemo(() => {
     let items: DeletedItem[] = [];
@@ -241,6 +302,26 @@ export function TrashPage() {
     }
   };
 
+  const handlePermanentDelete = (item: DeletedItem) => {
+    switch (item.type) {
+      case "employee":
+        permanentDeleteEmployee.mutate(item.id);
+        break;
+      case "position":
+        permanentDeletePosition.mutate(item.id);
+        break;
+      case "workLocation":
+        permanentDeleteWorkLocation.mutate(item.id);
+        break;
+      case "department":
+        permanentDeleteDepartment.mutate(item.id);
+        break;
+      case "contractType":
+        permanentDeleteContractType.mutate(item.id);
+        break;
+    }
+  };
+
   const tabs: { key: DeletedItemType; label: string }[] = [
     { key: "employee", label: t("trash.employees") },
     { key: "position", label: t("trash.positions") },
@@ -334,6 +415,15 @@ export function TrashPage() {
                         >
                           <RotateCcw className="h-4 w-4" />
                           {t("trash.restore")}
+                        </Button>
+                        <Button
+                          onClick={() => handlePermanentDelete(item)}
+                          size="sm"
+                          variant="destructive"
+                          className="gap-1"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          {t("trash.delete")}
                         </Button>
                       </div>
                     </TableCell>

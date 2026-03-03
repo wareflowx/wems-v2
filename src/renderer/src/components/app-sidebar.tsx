@@ -25,8 +25,8 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "cmdk";
 import { getAppVersion } from "@/actions/app";
+import { SearchModal, type CommandItem } from "@/components/ui/search-modal";
 import { useAlerts, useCaces, useDrivingAuthorizations, useMedicalVisits, useOnlineTrainings } from "@/hooks";
 import { useDialogStore } from "@/stores/dialog-store";
 import {
@@ -77,104 +77,6 @@ const _data = {
   ],
 };
 
-function QuickActionsDialog({
-  open,
-  onOpenChange,
-  groupedActions,
-  handleCommandSelect,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  groupedActions: { heading?: string; items: typeof quickActions }[];
-  handleCommandSelect: (callback: () => void) => void;
-}) {
-  if (!open) return null;
-
-  // Filter items based on search - this is handled by cmdk internally
-  // We render items flat but group headings only show when group has items
-  const [searchValue, setSearchValue] = React.useState("");
-
-  const filteredGroups = React.useMemo(() => {
-    if (!searchValue) return groupedActions;
-
-    const searchLower = searchValue.toLowerCase();
-    return groupedActions
-      .map((group) => ({
-        ...group,
-        items: group.items.filter(
-          (item) =>
-            item.title.toLowerCase().includes(searchLower) ||
-            item.id.toLowerCase().includes(searchLower)
-        ),
-      }))
-      .filter((group) => group.items.length > 0);
-  }, [groupedActions, searchValue]);
-
-  // Flatten for rendering
-  const flatItems = filteredGroups.flatMap((group) =>
-    group.items.map((item) => ({
-      ...item,
-      groupHeading: group.heading,
-    }))
-  );
-
-  // Track heading changes for rendering headers
-  let lastHeading: string | undefined;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
-      <div className="fixed inset-0 bg-black/50" onClick={() => onOpenChange(false)} />
-      <Command className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-xl border border-border/50 bg-background shadow-2xl">
-        <div className="flex items-center border-b border-border/50 px-3 py-2">
-          <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
-          <Command.Input
-            className="flex h-8 w-full rounded-md bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            placeholder="Search actions..."
-            value={searchValue}
-            onValueChange={setSearchValue}
-            autoFocus
-          />
-          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            ESC
-          </kbd>
-        </div>
-        <CommandList className="max-h-[320px] overflow-y-auto p-1">
-          <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
-            No actions found.
-          </CommandEmpty>
-          <CommandGroup>
-            {flatItems.map((item) => {
-              const showSeparator = lastHeading !== item.groupHeading;
-              lastHeading = item.groupHeading;
-              return (
-                <React.Fragment key={item.id}>
-                  {showSeparator && item.groupHeading && (
-                    <div className="text-xs font-medium text-muted-foreground px-2 py-1.5">
-                      {item.groupHeading}
-                    </div>
-                  )}
-                  <CommandItem
-                    className="flex cursor-default items-center gap-2 rounded-md px-2 py-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
-                    onSelect={() => handleCommandSelect(item.action)}
-                  >
-                    {item.icon && <item.icon className="h-4 w-4 text-muted-foreground" />}
-                    <span className="flex-1">{item.title}</span>
-                    {item.shortcut && (
-                      <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                        {item.shortcut}
-                      </kbd>
-                    )}
-                  </CommandItem>
-                </React.Fragment>
-              );
-            })}
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </div>
-  );
-}
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
   const [_appVersion, setAppVersion] = React.useState("0.0.0");
@@ -218,19 +120,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleCommandSelect = (callback: () => void) => {
-    callback();
-    setOpen(false);
-  };
-
   // Quick actions command palette
-  const quickActions = [
-    {
-      heading: "Navigation",
-    },
+  const quickActions: CommandItem[] = [
     {
       id: "home",
       title: "Dashboard",
+      description: "Go to dashboard",
+      category: "Navigation",
       shortcut: "G H",
       action: () => navigate({ to: "/" }),
       icon: Home,
@@ -238,6 +134,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "employees",
       title: "Employees",
+      description: "Manage employees",
+      category: "Navigation",
       shortcut: "G E",
       action: () => navigate({ to: "/employees" }),
       icon: Users,
@@ -245,6 +143,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "alerts",
       title: "Alerts",
+      description: "View alerts",
+      category: "Navigation",
       shortcut: "G A",
       action: () => navigate({ to: "/alerts" }),
       icon: AlertTriangle,
@@ -252,6 +152,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "documents",
       title: "Documents",
+      description: "Manage documents",
+      category: "Navigation",
       shortcut: "G D",
       action: () => navigate({ to: "/documents" }),
       icon: FileText,
@@ -259,6 +161,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "caces",
       title: "CACES",
+      description: "Manage CACES",
+      category: "Navigation",
       shortcut: "G C",
       action: () => navigate({ to: "/caces" }),
       icon: ShieldAlert,
@@ -266,6 +170,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "medical-visits",
       title: "Medical Visits",
+      description: "Manage medical visits",
+      category: "Navigation",
       shortcut: "G M",
       action: () => navigate({ to: "/medical-visits" }),
       icon: Stethoscope,
@@ -273,6 +179,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "driving-authorizations",
       title: "Driving Authorizations",
+      description: "Manage driving authorizations",
+      category: "Navigation",
       shortcut: "G R",
       action: () => navigate({ to: "/driving-authorizations" }),
       icon: Car,
@@ -280,6 +188,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "online-trainings",
       title: "Online Trainings",
+      description: "Manage online trainings",
+      category: "Navigation",
       shortcut: "G T",
       action: () => navigate({ to: "/online-trainings" }),
       icon: GraduationCap,
@@ -287,16 +197,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "contracts",
       title: "Contracts",
+      description: "Manage contracts",
+      category: "Navigation",
       shortcut: "G O",
       action: () => navigate({ to: "/contracts" }),
       icon: FileText,
     },
     {
-      heading: "Reference Data",
-    },
-    {
       id: "positions",
       title: "Positions",
+      description: "Manage positions",
+      category: "Reference Data",
       shortcut: "P P",
       action: () => navigate({ to: "/positions" }),
       icon: Briefcase,
@@ -304,6 +215,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "work-locations",
       title: "Work Locations",
+      description: "Manage work locations",
+      category: "Reference Data",
       shortcut: "P W",
       action: () => navigate({ to: "/work-locations" }),
       icon: MapPin,
@@ -311,6 +224,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "departments",
       title: "Departments",
+      description: "Manage departments",
+      category: "Reference Data",
       shortcut: "P D",
       action: () => navigate({ to: "/departments" }),
       icon: Building2,
@@ -318,16 +233,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "contract-types",
       title: "Contract Types",
+      description: "Manage contract types",
+      category: "Reference Data",
       shortcut: "P C",
       action: () => navigate({ to: "/contract-types" }),
       icon: ClipboardList,
     },
     {
-      heading: "Create",
-    },
-    {
       id: "create-employee",
       title: "New Employee",
+      description: "Create a new employee",
+      category: "Create",
       shortcut: "C E",
       action: () => openDialog("create-employee"),
       icon: Plus,
@@ -335,6 +251,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "create-document",
       title: "New Document",
+      description: "Create a new document",
+      category: "Create",
       shortcut: "C D",
       action: () => openDialog("create-document"),
       icon: Plus,
@@ -342,6 +260,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "create-caces",
       title: "New CACES",
+      description: "Create a new CACES",
+      category: "Create",
       shortcut: "C C",
       action: () => openDialog("create-caces"),
       icon: Plus,
@@ -349,6 +269,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "create-medical-visit",
       title: "New Medical Visit",
+      description: "Create a new medical visit",
+      category: "Create",
       shortcut: "C M",
       action: () => openDialog("create-medical-visit"),
       icon: Plus,
@@ -356,6 +278,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "create-driving-authorization",
       title: "New Driving Authorization",
+      description: "Create a new driving authorization",
+      category: "Create",
       shortcut: "C R",
       action: () => openDialog("create-driving-authorization"),
       icon: Plus,
@@ -363,6 +287,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "create-online-training",
       title: "New Online Training",
+      description: "Create a new online training",
+      category: "Create",
       shortcut: "C T",
       action: () => openDialog("create-online-training"),
       icon: Plus,
@@ -370,16 +296,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "create-contract",
       title: "New Contract",
+      description: "Create a new contract",
+      category: "Create",
       shortcut: "C O",
       action: () => openDialog("create-contract"),
       icon: Plus,
     },
     {
-      heading: "Settings",
-    },
-    {
       id: "settings",
       title: "Settings",
+      description: "Go to settings",
+      category: "Settings",
       shortcut: "S S",
       action: () => navigate({ to: "/settings" }),
       icon: Settings2,
@@ -387,31 +314,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       id: "trash",
       title: "Trash",
+      description: "View deleted items",
+      category: "Settings",
       shortcut: "S T",
       action: () => navigate({ to: "/trash" }),
       icon: Trash2,
     },
   ];
 
-  // Group items by heading
-  const groupedActions = quickActions.reduce<{ heading?: string; items: typeof quickActions }[]>((acc, item) => {
-    if ("heading" in item && item.heading) {
-      acc.push({ heading: item.heading, items: [] });
-    } else if (acc.length > 0) {
-      acc[acc.length - 1].items.push(item);
-    }
-    return acc;
-  }, []);
-
   return (
     <>
       {mounted && (
-        <QuickActionsDialog
+        <SearchModal
+          data={quickActions}
           open={open}
           onOpenChange={setOpen}
-          groupedActions={groupedActions}
-          handleCommandSelect={handleCommandSelect}
-        />
+        >
+          <div />
+        </SearchModal>
       )}
       <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"

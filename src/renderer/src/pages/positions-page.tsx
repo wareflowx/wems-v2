@@ -247,6 +247,9 @@ export function PositionsPage() {
                       <TableHead className="px-4">
                         {t("positions.createdAt", "Created")}
                       </TableHead>
+                      <TableHead className="px-4">
+                        {t("positions.updatedAt", "Updated")}
+                      </TableHead>
                       <TableHead className="px-4 text-right">
                         {t("positions.actions")}
                       </TableHead>
@@ -282,6 +285,9 @@ export function PositionsPage() {
                         </TableCell>
                         <TableCell className="px-4 text-muted-foreground text-xs">
                           {position.createdAt ? new Date(position.createdAt).toLocaleDateString() : "-"}
+                        </TableCell>
+                        <TableCell className="px-4 text-muted-foreground text-xs">
+                          {position.updatedAt ? new Date(position.updatedAt).toLocaleDateString() : "-"}
                         </TableCell>
                         <TableCell className="px-4">
                           <div className="flex items-center justify-end gap-2">

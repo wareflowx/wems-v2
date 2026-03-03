@@ -235,8 +235,8 @@ export function EmployeesTable({
         header: t("employees.drivingAuthorizationStatus"),
         cell: ({ row }) => {
           const employee = row.original;
-          const status = authorizationStatuses?.get(employee.id) || null;
-          return <DrivingAuthorizationBadge status={status} />;
+          const status = authorizationStatuses?.get(employee.id);
+          return <DrivingAuthorizationBadge status={status ?? null} />;
         },
       },
       {

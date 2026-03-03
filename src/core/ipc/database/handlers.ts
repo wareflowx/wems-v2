@@ -1378,12 +1378,12 @@ export const getDrivingAuthorizationStatus = os.handler(async ({ input }: { inpu
     }
 
     // Calculate overall status
-    const { medicalVisit, caces, drivingAuthorization, training } = result.details;
+    const details = result.details;
     const validCount = [
-      medicalVisit.valid,
-      caces.valid,
-      drivingAuthorization.valid,
-      training.valid,
+      details.medicalVisit.valid,
+      details.caces.valid,
+      details.drivingAuthorization.valid,
+      details.training.valid,
     ].filter(Boolean).length;
 
     result.authorized = validCount === 4;
@@ -1536,12 +1536,12 @@ export const getAllDrivingAuthorizationStatuses = os.handler(async () => {
       }
 
       // Calculate overall status
-      const { medicalVisit, caces, drivingAuthorization, training } = result.details;
+      const details = result.details;
       const validCount = [
-        medicalVisit.valid,
-        caces.valid,
-        drivingAuthorization.valid,
-        training.valid,
+        details.medicalVisit.valid,
+        details.caces.valid,
+        details.drivingAuthorization.valid,
+        details.training.valid,
       ].filter(Boolean).length;
 
       result.authorized = validCount === 4;

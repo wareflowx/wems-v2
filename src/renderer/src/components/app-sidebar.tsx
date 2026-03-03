@@ -93,37 +93,38 @@ function QuickActionsDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
       <div className="fixed inset-0 bg-black/50" onClick={() => onOpenChange(false)} />
-      <Command className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-xl border bg-popover shadow-lg">
-        <div className="flex items-center border-b px-3">
-          <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+      <Command className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-xl border border-border/50 bg-background shadow-2xl">
+        <div className="flex items-center border-b border-border/50 px-3 py-2">
+          <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
           <Command.Input
-            className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-8 w-full rounded-md bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             placeholder="Search actions..."
             autoFocus
           />
-          <button
-            onClick={() => onOpenChange(false)}
-            className="rounded-sm opacity-70 hover:opacity-100"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            ESC
+          </kbd>
         </div>
-        <CommandList className="max-h-[300px] overflow-y-auto p-1">
-          <CommandEmpty>No results found.</CommandEmpty>
+        <CommandList className="max-h-[320px] overflow-y-auto p-1">
+          <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
+            No actions found.
+          </CommandEmpty>
           {groupedActions.map((group, groupIndex) => (
             <React.Fragment key={group.heading || `group-${groupIndex}`}>
               {group.heading && (
-                <CommandGroup heading={group.heading}>
+                <CommandGroup heading={group.heading} className="text-xs font-medium text-muted-foreground px-2 py-1.5">
                   {group.items.map((item) => (
                     <CommandItem
                       key={item.id}
-                      className="flex cursor-default items-center rounded-md px-2 py-1.5 text-sm aria-selected:bg-muted aria-selected:text-foreground"
+                      className="flex cursor-default items-center gap-2 rounded-md px-2 py-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
                       onSelect={() => handleCommandSelect(item.action)}
                     >
-                      {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+                      {item.icon && <item.icon className="h-4 w-4 text-muted-foreground" />}
                       <span className="flex-1">{item.title}</span>
                       {item.shortcut && (
-                        <span className="ml-auto text-xs text-muted-foreground">{item.shortcut}</span>
+                        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                          {item.shortcut}
+                        </kbd>
                       )}
                     </CommandItem>
                   ))}

@@ -1,19 +1,11 @@
-import {
-  AlertTriangle,
-  Bell,
-  Search,
-  SearchX,
-  ShieldAlert,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { Search, SearchX, ShieldAlert, Sparkles } from "lucide-react";
 import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import { AlertsFilters } from "@/components/home/alerts-filters";
+import { AlertsKPIs } from "@/components/home/alerts-kpis";
 import { AlertsTable } from "@/components/home/alerts-table";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAlerts, useEmployees } from "@/hooks";
 
 export function HomePage() {
@@ -197,66 +189,7 @@ export function HomePage() {
         </div>
 
         {/* Key Metrics */}
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="bg-background p-4">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-2">
-              <CardTitle className="font-medium text-sm">
-                {t("dashboard.totalEmployees")}
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="font-bold text-2xl">{kpis.totalEmployees}</div>
-              <p className="text-muted-foreground text-xs">
-                {kpis.activeEmployees} actifs
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="bg-background p-4">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-2">
-              <CardTitle className="font-medium text-sm">
-                {t("alerts.critical")}
-              </CardTitle>
-              <ShieldAlert className="h-4 w-4 text-red-500" />
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="font-bold text-2xl">{kpis.criticalAlerts}</div>
-              <p className="text-muted-foreground text-xs">
-                {kpis.totalAlerts > 0
-                  ? `${((kpis.criticalAlerts / kpis.totalAlerts) * 100).toFixed(0)}% du total`
-                  : "-"}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="bg-background p-4">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-2">
-              <CardTitle className="font-medium text-sm">
-                {t("alerts.warning")}
-              </CardTitle>
-              <AlertTriangle className="h-4 w-4 text-yellow-500" />
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="font-bold text-2xl">{kpis.warningAlerts}</div>
-              <p className="text-muted-foreground text-xs">
-                {kpis.totalAlerts > 0
-                  ? `${((kpis.warningAlerts / kpis.totalAlerts) * 100).toFixed(0)}% du total`
-                  : "-"}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="bg-background p-4">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-2">
-              <CardTitle className="font-medium text-sm">
-                Toutes les alertes
-              </CardTitle>
-              <Bell className="h-4 w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="font-bold text-2xl">{kpis.totalAlerts}</div>
-              <p className="text-muted-foreground text-xs">Total alertes</p>
-            </CardContent>
-          </Card>
-        </div>
+        <AlertsKPIs kpis={kpis} />
 
         {/* Search and Filters */}
         <AlertsFilters

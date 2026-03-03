@@ -166,7 +166,7 @@ export const deletePosition = os.handler(async ({ input }) => {
 
 export const restorePosition = os.handler(async ({ input }) => {
   try {
-    const validatedData = deletePositionInputSchema.parse(input);
+    const validatedData = restoreInputSchema.parse(input);
     const db = await getDb();
     await db
       .update(positions)

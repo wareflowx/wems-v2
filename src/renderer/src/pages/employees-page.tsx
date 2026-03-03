@@ -13,6 +13,7 @@ import { ErrorDisplay } from "@/components/ui/error-display";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import {
+  useAgencies,
   useContracts,
   useCreateEmployee,
   useDeleteEmployee,
@@ -46,6 +47,7 @@ export function EmployeesPage() {
   const { data: workLocations = [] } = useWorkLocations();
   const { data: contracts = [] } = useContracts();
   const { data: departments = [] } = useDepartments();
+  const { data: agencies = [] } = useAgencies();
   const { data: authorizationStatusesData = [] } = useAllDrivingAuthorizationStatuses();
   const createEmployee = useCreateEmployee();
   const deleteEmployee = useDeleteEmployee();
@@ -231,6 +233,7 @@ export function EmployeesPage() {
         employee={employeeToEdit}
         contract={employeeToEdit ? contracts.find((c: any) => c.employeeId === employeeToEdit.id && c.isActive) : undefined}
         departments={departments}
+        agencies={agencies}
         onEdit={handleEditSubmit}
         onOpenChange={(open) => !open && setEmployeeToEdit(null)}
         open={!!employeeToEdit}

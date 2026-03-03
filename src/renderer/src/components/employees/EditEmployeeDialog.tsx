@@ -38,6 +38,12 @@ interface WorkLocation {
   color?: string;
 }
 
+interface Agency {
+  id: number;
+  name: string;
+  code?: string;
+}
+
 interface Employee {
   id: number;
   firstName: string;
@@ -46,6 +52,7 @@ interface Employee {
   phone?: string;
   positionId?: number;
   workLocationId?: number;
+  agencyId?: number;
   department?: string;
   status?: "active" | "on_leave" | "terminated";
   hireDate: string;
@@ -70,6 +77,7 @@ interface EditEmployeeDialogProps {
   departments?: Department[];
   positions?: Position[];
   workLocations?: WorkLocation[];
+  agencies?: Agency[];
 }
 
 export interface EditEmployeeData {
@@ -81,6 +89,7 @@ export interface EditEmployeeData {
   positionId?: number;
   workLocationId?: number;
   department?: string;
+  agencyId?: number | null;
   status?: "active" | "on_leave" | "terminated";
   hireDate: string;
   terminationDate?: string;
@@ -99,6 +108,7 @@ export function EditEmployeeDialog({
   departments = [],
   positions = [],
   workLocations = [],
+  agencies = [],
 }: EditEmployeeDialogProps) {
   const { t } = useTranslation();
 
@@ -133,6 +143,7 @@ export function EditEmployeeDialog({
         positionId: employee.positionId,
         workLocationId: employee.workLocationId,
         department: employee.department || "",
+        agencyId: employee.agencyId ?? null,
         status: employee.status as "active" | "on_leave" | "terminated",
         hireDate: employee.hireDate,
         terminationDate: employee.terminationDate || "",
@@ -311,6 +322,34 @@ export function EditEmployeeDialog({
                   {workLocations.map((loc) => (
                     <SelectItem key={loc.id} value={loc.id.toString()}>
                       {loc.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="agency">{t("employees.agency")}</Label>
+              <Select
+                value={formData.agencyId?.toString() || ""}
+                onValueChange={(value) =>
+                  updateFormData(
+                    "agencyId",
+                    value ? Number.parseInt(value, 10) : null
+                  )
+                }
+              >
+                <SelectTrigger id="agency">
+                  <SelectValue placeholder={t("employees.selectAgency")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{t("employees.noAgency")}</SelectItem>
+                  {agencies.map((agency) => (
+                    <SelectItem
+                      key={agency.id}
+                      value={agency.id.toString()}
+                    >
+                      {agency.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

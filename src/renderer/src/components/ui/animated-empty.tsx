@@ -26,7 +26,7 @@ export function AnimatedEmpty({
       className={cn(
         "bg-background border-border hover:border-border/80 text-center",
         "border border-dashed rounded-xl p-14 w-full mx-auto",
-        "group hover:bg-muted/50 transition duration-500 hover:duration-200",
+        "group transition duration-500 hover:duration-200",
         className
       )}
     >

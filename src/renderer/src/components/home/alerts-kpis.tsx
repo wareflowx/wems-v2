@@ -24,8 +24,8 @@ export function AlertsKPIs({ kpis }: AlertsKPIsProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="bg-background p-4">
+    <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
+      <Card className="p-4">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-2">
           <CardTitle className="font-medium text-sm">
             {t("dashboard.totalEmployees")}
@@ -35,16 +35,16 @@ export function AlertsKPIs({ kpis }: AlertsKPIsProps) {
         <CardContent className="p-0">
           <div className="font-bold text-2xl">{kpis.totalEmployees}</div>
           <p className="text-muted-foreground text-xs">
-            {kpis.activeEmployees} actifs
+            {kpis.activeEmployees} {t("dashboard.activeEmployees", "actifs")}
           </p>
         </CardContent>
       </Card>
-      <Card className="bg-background p-4">
+      <Card className="p-4">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-2">
           <CardTitle className="font-medium text-sm">
             {t("alerts.critical")}
           </CardTitle>
-          <ShieldAlert className="h-4 w-4 text-red-500" />
+          <ShieldAlert className="h-4 w-4" />
         </CardHeader>
         <CardContent className="p-0">
           <div className="font-bold text-2xl">{kpis.criticalAlerts}</div>
@@ -55,12 +55,12 @@ export function AlertsKPIs({ kpis }: AlertsKPIsProps) {
           </p>
         </CardContent>
       </Card>
-      <Card className="bg-background p-4">
+      <Card className="p-4">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-2">
           <CardTitle className="font-medium text-sm">
             {t("alerts.warning")}
           </CardTitle>
-          <AlertTriangle className="h-4 w-4 text-yellow-500" />
+          <AlertTriangle className="h-4 w-4" />
         </CardHeader>
         <CardContent className="p-0">
           <div className="font-bold text-2xl">{kpis.warningAlerts}</div>
@@ -71,16 +71,16 @@ export function AlertsKPIs({ kpis }: AlertsKPIsProps) {
           </p>
         </CardContent>
       </Card>
-      <Card className="bg-background p-4">
+      <Card className="p-4">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-2">
           <CardTitle className="font-medium text-sm">
-            Toutes les alertes
+            {t("dashboard.allAlerts", "Toutes les alertes")}
           </CardTitle>
-          <Bell className="h-4 w-4 text-blue-500" />
+          <Bell className="h-4 w-4" />
         </CardHeader>
         <CardContent className="p-0">
           <div className="font-bold text-2xl">{kpis.totalAlerts}</div>
-          <p className="text-muted-foreground text-xs">Total alertes</p>
+          <p className="text-muted-foreground text-xs">{t("dashboard.totalAlerts", "Total alertes")}</p>
         </CardContent>
       </Card>
     </div>

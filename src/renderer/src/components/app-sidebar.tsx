@@ -90,15 +90,35 @@ function QuickActionsDialog({
 }) {
   if (!open) return null;
 
-  // Flatten all items with their group heading for cmdk filtering
-  const allItems = groupedActions.flatMap((group) =>
+  // Filter items based on search - this is handled by cmdk internally
+  // We render items flat but group headings only show when group has items
+  const [searchValue, setSearchValue] = React.useState("");
+
+  const filteredGroups = React.useMemo(() => {
+    if (!searchValue) return groupedActions;
+
+    const searchLower = searchValue.toLowerCase();
+    return groupedActions
+      .map((group) => ({
+        ...group,
+        items: group.items.filter(
+          (item) =>
+            item.title.toLowerCase().includes(searchLower) ||
+            item.id.toLowerCase().includes(searchLower)
+        ),
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [groupedActions, searchValue]);
+
+  // Flatten for rendering
+  const flatItems = filteredGroups.flatMap((group) =>
     group.items.map((item) => ({
       ...item,
       groupHeading: group.heading,
     }))
   );
 
-  // Find the previous group heading to display separator
+  // Track heading changes for rendering headers
   let lastHeading: string | undefined;
 
   return (
@@ -110,6 +130,8 @@ function QuickActionsDialog({
           <Command.Input
             className="flex h-8 w-full rounded-md bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             placeholder="Search actions..."
+            value={searchValue}
+            onValueChange={setSearchValue}
             autoFocus
           />
           <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
@@ -121,7 +143,7 @@ function QuickActionsDialog({
             No actions found.
           </CommandEmpty>
           <CommandGroup>
-            {allItems.map((item, index) => {
+            {flatItems.map((item) => {
               const showSeparator = lastHeading !== item.groupHeading;
               lastHeading = item.groupHeading;
               return (

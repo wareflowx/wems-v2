@@ -422,7 +422,7 @@ export function TrashPage() {
                           onClick={() => setDeletingItem(item)}
                           size="sm"
                           variant="destructive"
-                          className="gap-1"
+                          className="gap-1 border border-destructive/20"
                         >
                           <Trash2 className="h-4 w-4" />
                           {t("trash.delete")}

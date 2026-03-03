@@ -90,6 +90,11 @@ function QuickActionsDialog({
 }) {
   if (!open) return null;
 
+  // Filter out groups with no items
+  const filteredGroups = groupedActions.filter(
+    (group) => group.heading && group.items.length > 0
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
       <div className="fixed inset-0 bg-black/50" onClick={() => onOpenChange(false)} />
@@ -109,7 +114,7 @@ function QuickActionsDialog({
           <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
             No actions found.
           </CommandEmpty>
-          {groupedActions.map((group, groupIndex) => (
+          {filteredGroups.map((group, groupIndex) => (
             <React.Fragment key={group.heading || `group-${groupIndex}`}>
               {group.heading && (
                 <CommandGroup heading={group.heading} className="text-xs font-medium text-muted-foreground px-2 py-1.5">
@@ -130,7 +135,7 @@ function QuickActionsDialog({
                   ))}
                 </CommandGroup>
               )}
-              {group.heading && groupIndex < groupedActions.length - 1 && (
+              {groupIndex < filteredGroups.length - 1 && (
                 <div className="-mx-1 my-1 h-px bg-border" />
               )}
             </React.Fragment>

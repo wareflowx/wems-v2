@@ -647,6 +647,38 @@ export async function permanentDeleteEmployee(id: number) {
   return client.database.permanentDeleteEmployee({ id });
 }
 
+export async function permanentDeletePosition(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.permanentDeletePosition({ id });
+}
+
+export async function permanentDeleteWorkLocation(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.permanentDeleteWorkLocation({ id });
+}
+
+export async function permanentDeleteDepartment(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.permanentDeleteDepartment({ id });
+}
+
+export async function permanentDeleteContractType(id: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.permanentDeleteContractType({ id });
+}
+
 export async function getDeletedPositions() {
   const client = getClient();
   if (!client) {

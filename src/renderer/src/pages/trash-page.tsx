@@ -19,6 +19,7 @@ import { queryKeys } from "@@/lib/query-keys";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as db from "@/actions/database";
 import { useORPCReady } from "@/hooks";
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
 
 type DeletedItemType = "employee" | "position" | "workLocation" | "department" | "contractType";
 
@@ -36,6 +37,8 @@ export function TrashPage() {
   const orpcReady = useORPCReady();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<DeletedItemType>("employee");
+  const [deletingItem, setDeletingItem] = useState<DeletedItem | null>(null);
+  const [restoringItem, setRestoringItem] = useState<DeletedItem | null>(null);
 
   // Fetch deleted items based on active tab
   const { data: deletedEmployees = [] } = useQuery({
@@ -136,6 +139,67 @@ export function TrashPage() {
     },
     onError: (error) => {
       toast({ title: t("trash.restoreError"), variant: "destructive" });
+    },
+  });
+
+  // Permanent delete mutations
+  const permanentDeleteEmployee = useMutation({
+    mutationFn: (id: number) => db.permanentDeleteEmployee(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedEmployees() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedEmployees() });
+      toast({ title: t("trash.deleteSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.deleteError"), variant: "destructive" });
+    },
+  });
+
+  const permanentDeletePosition = useMutation({
+    mutationFn: (id: number) => db.permanentDeletePosition(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedPositions() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedPositions() });
+      toast({ title: t("trash.deleteSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.deleteError"), variant: "destructive" });
+    },
+  });
+
+  const permanentDeleteWorkLocation = useMutation({
+    mutationFn: (id: number) => db.permanentDeleteWorkLocation(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedWorkLocations() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedWorkLocations() });
+      toast({ title: t("trash.deleteSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.deleteError"), variant: "destructive" });
+    },
+  });
+
+  const permanentDeleteDepartment = useMutation({
+    mutationFn: (id: number) => db.permanentDeleteDepartment(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedDepartments() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedDepartments() });
+      toast({ title: t("trash.deleteSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.deleteError"), variant: "destructive" });
+    },
+  });
+
+  const permanentDeleteContractType = useMutation({
+    mutationFn: (id: number) => db.permanentDeleteContractType(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedContractTypes() });
+      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedContractTypes() });
+      toast({ title: t("trash.deleteSuccess") });
+    },
+    onError: (error) => {
+      toast({ title: t("trash.deleteError"), variant: "destructive" });
     },
   });
 
@@ -241,6 +305,26 @@ export function TrashPage() {
     }
   };
 
+  const handlePermanentDelete = (item: DeletedItem) => {
+    switch (item.type) {
+      case "employee":
+        permanentDeleteEmployee.mutate(item.id);
+        break;
+      case "position":
+        permanentDeletePosition.mutate(item.id);
+        break;
+      case "workLocation":
+        permanentDeleteWorkLocation.mutate(item.id);
+        break;
+      case "department":
+        permanentDeleteDepartment.mutate(item.id);
+        break;
+      case "contractType":
+        permanentDeleteContractType.mutate(item.id);
+        break;
+    }
+  };
+
   const tabs: { key: DeletedItemType; label: string }[] = [
     { key: "employee", label: t("trash.employees") },
     { key: "position", label: t("trash.positions") },
@@ -327,13 +411,22 @@ export function TrashPage() {
                     <TableCell className="px-4">
                       <div className="flex items-center justify-end gap-2">
                         <Button
-                          onClick={() => handleRestore(item)}
+                          onClick={() => setRestoringItem(item)}
                           size="sm"
                           variant="outline"
                           className="gap-1"
                         >
                           <RotateCcw className="h-4 w-4" />
                           {t("trash.restore")}
+                        </Button>
+                        <Button
+                          onClick={() => setDeletingItem(item)}
+                          size="sm"
+                          variant="destructive"
+                          className="gap-1 border border-destructive/20"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          {t("trash.delete")}
                         </Button>
                       </div>
                     </TableCell>
@@ -344,6 +437,39 @@ export function TrashPage() {
           </Table>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        description={t("trash.deleteConfirmDescription", {
+          name: deletingItem?.name,
+          type: deletingItem?.type,
+        })}
+        onConfirm={() => {
+          if (deletingItem) {
+            handlePermanentDelete(deletingItem);
+            setDeletingItem(null);
+          }
+        }}
+        onOpenChange={(open) => !open && setDeletingItem(null)}
+        open={deletingItem !== null}
+        title={t("trash.deleteConfirmTitle")}
+      />
+
+      {/* Restore Confirmation Dialog */}
+      <DeleteConfirmDialog
+        description={t("trash.restoreConfirmDescription", {
+          name: restoringItem?.name,
+        })}
+        onConfirm={() => {
+          if (restoringItem) {
+            handleRestore(restoringItem);
+            setRestoringItem(null);
+          }
+        }}
+        onOpenChange={(open) => !open && setRestoringItem(null)}
+        open={restoringItem !== null}
+        title={t("trash.restoreConfirmTitle")}
+      />
     </div>
   );
 }

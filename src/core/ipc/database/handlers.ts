@@ -196,6 +196,19 @@ export const restorePosition = os.handler(async ({ input }) => {
   }
 });
 
+// Permanent delete position
+export const permanentDeletePosition = os.handler(async ({ input }) => {
+  try {
+    const validatedData = permanentDeleteInputSchema.parse(input);
+    const db = await getDb();
+    await db.delete(positions).where(eq(positions.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in permanentDeletePosition:", error);
+    throw error;
+  }
+});
+
 // Work Locations handlers
 export const getWorkLocations = os.handler(async () => {
   try {
@@ -2156,6 +2169,19 @@ export const restoreWorkLocation = os.handler(async ({ input }) => {
   }
 });
 
+// Permanent delete work location
+export const permanentDeleteWorkLocation = os.handler(async ({ input }) => {
+  try {
+    const validatedData = permanentDeleteInputSchema.parse(input);
+    const db = await getDb();
+    await db.delete(workLocations).where(eq(workLocations.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in permanentDeleteWorkLocation:", error);
+    throw error;
+  }
+});
+
 // Get deleted departments
 export const getDeletedDepartments = os.handler(async () => {
   try {
@@ -2187,6 +2213,19 @@ export const restoreDepartment = os.handler(async ({ input }) => {
   }
 });
 
+// Permanent delete department
+export const permanentDeleteDepartment = os.handler(async ({ input }) => {
+  try {
+    const validatedData = permanentDeleteInputSchema.parse(input);
+    const db = await getDb();
+    await db.delete(departments).where(eq(departments.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in permanentDeleteDepartment:", error);
+    throw error;
+  }
+});
+
 // Get deleted contract types
 export const getDeletedContractTypes = os.handler(async () => {
   try {
@@ -2214,6 +2253,19 @@ export const restoreContractType = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in restoreContractType:", error);
+    throw error;
+  }
+});
+
+// Permanent delete contract type
+export const permanentDeleteContractType = os.handler(async ({ input }) => {
+  try {
+    const validatedData = permanentDeleteInputSchema.parse(input);
+    const db = await getDb();
+    await db.delete(contractTypes).where(eq(contractTypes.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in permanentDeleteContractType:", error);
     throw error;
   }
 });

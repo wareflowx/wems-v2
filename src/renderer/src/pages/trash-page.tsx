@@ -38,6 +38,7 @@ export function TrashPage() {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<DeletedItemType>("employee");
   const [deletingItem, setDeletingItem] = useState<DeletedItem | null>(null);
+  const [restoringItem, setRestoringItem] = useState<DeletedItem | null>(null);
 
   // Fetch deleted items based on active tab
   const { data: deletedEmployees = [] } = useQuery({
@@ -410,7 +411,7 @@ export function TrashPage() {
                     <TableCell className="px-4">
                       <div className="flex items-center justify-end gap-2">
                         <Button
-                          onClick={() => handleRestore(item)}
+                          onClick={() => setRestoringItem(item)}
                           size="sm"
                           variant="outline"
                           className="gap-1"
@@ -452,6 +453,22 @@ export function TrashPage() {
         onOpenChange={(open) => !open && setDeletingItem(null)}
         open={deletingItem !== null}
         title={t("trash.deleteConfirmTitle")}
+      />
+
+      {/* Restore Confirmation Dialog */}
+      <DeleteConfirmDialog
+        description={t("trash.restoreConfirmDescription", {
+          name: restoringItem?.name,
+        })}
+        onConfirm={() => {
+          if (restoringItem) {
+            handleRestore(restoringItem);
+            setRestoringItem(null);
+          }
+        }}
+        onOpenChange={(open) => !open && setRestoringItem(null)}
+        open={restoringItem !== null}
+        title={t("trash.restoreConfirmTitle")}
       />
     </div>
   );

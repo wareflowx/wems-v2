@@ -90,7 +90,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [_appVersion, setAppVersion] = React.useState("0.0.0");
   const [canWrite, setCanWrite] = React.useState(true);
   const [open, setOpen] = React.useState(false);
-  const [mounted, setMounted] = React.useState(false);
+  const [mounted, setMounted] = React.useState(() => typeof window !== "undefined");
   const navigate = useNavigate();
   const openDialog = useDialogStore((state) => state.openDialog);
 
@@ -315,7 +315,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <>
-      {mounted && (
+      {mounted && open && (
         <CommandDialog onOpenChange={setOpen} open={open}>
           <CommandInput placeholder="Search actions..." />
           <CommandList>

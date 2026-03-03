@@ -3,6 +3,7 @@ import { queryKeys } from "@@/lib/query-keys";
 import * as db from "@/actions/database";
 import { useORPCReady } from "@/hooks";
 import { useToast } from "@/utils/toast";
+import type { DrivingAuthorizationStatusResult } from "@/core/lib/driving-authorization";
 
 // Driving Authorizations
 export function useDrivingAuthorizations() {
@@ -127,5 +128,26 @@ export function useDeleteDrivingAuthorization() {
       });
       toast({ title: "Driving authorization deleted successfully" });
     },
+  });
+}
+
+// Driving Authorization Status
+export function useDrivingAuthorizationStatus(employeeId: number) {
+  const orpcReady = useORPCReady();
+
+  return useQuery<DrivingAuthorizationStatusResult | null>({
+    queryKey: queryKeys.drivingAuthorizationStatus.byEmployee(employeeId),
+    queryFn: () => db.getDrivingAuthorizationStatus(employeeId),
+    enabled: orpcReady && !!employeeId,
+  });
+}
+
+export function useAllDrivingAuthorizationStatuses() {
+  const orpcReady = useORPCReady();
+
+  return useQuery<Array<{ employeeId: number; status: DrivingAuthorizationStatusResult }>>({
+    queryKey: queryKeys.drivingAuthorizationStatus.all,
+    queryFn: () => db.getAllDrivingAuthorizationStatuses(),
+    enabled: orpcReady,
   });
 }

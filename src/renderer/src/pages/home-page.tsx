@@ -9,6 +9,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -356,17 +357,11 @@ export function HomePage() {
               {recentAlerts.length === 0 ? (
                 <TableRow>
                   <TableCell className="h-64" colSpan={6}>
-                    <div className="flex h-full flex-col items-center justify-center p-8 text-muted-foreground">
-                      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                        <SearchX className="h-8 w-8 opacity-50" />
-                      </div>
-                      <p className="font-medium text-lg">
-                        {t("common.noData")}
-                      </p>
-                      <p className="mt-2 max-w-md text-center text-sm">
-                        {t("dashboard.noDataFound")}
-                      </p>
-                    </div>
+                    <AnimatedEmpty
+                      title={t("common.noData")}
+                      description={t("dashboard.noDataFound")}
+                      icons={[SearchX, SearchX, SearchX]}
+                    />
                   </TableCell>
                 </TableRow>
               ) : (

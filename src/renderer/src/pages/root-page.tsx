@@ -4,7 +4,7 @@ import { DialogManager } from "@/components/dialogs/DialogManager";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 
 /* import { TanStackRouterDevtools } from '@tanstack/react-router-devtools' */
 
@@ -14,20 +14,46 @@ import { useState, useEffect } from "react";
 
 const SIDEBAR_STORAGE_KEY = "wems-sidebar-open";
 
-export function RootPage() {
-  const [sidebarOpen, setSidebarOpen] = useState<boolean | undefined>(undefined);
+// Helper to get the initial sidebar state from localStorage
+function getInitialSidebarState(): boolean {
+  if (typeof window === "undefined") return true;
+  const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+  if (stored === null) return true;
+  return stored === "true";
+}
 
-  // Initialize sidebar state from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-    if (stored !== null) {
-      setSidebarOpen(stored === "true");
-    }
-  }, []);
+// Store for external sync
+let sidebarListeners: (() => void)[] = [];
+let currentSidebarValue = typeof window !== "undefined" ? getInitialSidebarState() : true;
+
+function subscribeSidebar(listener: () => void) {
+  sidebarListeners.push(listener);
+  return () => {
+    sidebarListeners = sidebarListeners.filter((l) => l !== listener);
+  };
+}
+
+function getSidebarSnapshot(): boolean {
+  return currentSidebarValue;
+}
+
+function getSidebarServerSnapshot(): boolean {
+  return true;
+}
+
+export function RootPage() {
+  // Use useSyncExternalStore to ensure the value is available immediately on first render
+  const sidebarOpen = useSyncExternalStore(
+    subscribeSidebar,
+    getSidebarSnapshot,
+    getSidebarServerSnapshot
+  );
 
   // Handle sidebar state change
   const handleSidebarOpenChange = (open: boolean) => {
+    currentSidebarValue = open;
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(open));
+    sidebarListeners.forEach((listener) => listener());
   };
 
   return (
@@ -35,7 +61,7 @@ export function RootPage() {
       <DialogManager />
       <SidebarProvider
         className="flex flex-col"
-        open={sidebarOpen}
+        defaultOpen={sidebarOpen}
         onOpenChange={handleSidebarOpenChange}
       >
         <SiteHeader />

@@ -342,6 +342,7 @@ export function HomePage() {
         {recentAlerts.length === 0 ? (
           <div className="flex w-full items-center justify-center">
             <AnimatedEmpty
+              className="border-0 bg-transparent p-0"
               title={t("dashboard.allGood", "All good!")}
               description={t("dashboard.noAlertsDescription", "No alerts at this time. Everything is in order.")}
               icons={[ShieldAlert, ShieldAlert, ShieldAlert]}

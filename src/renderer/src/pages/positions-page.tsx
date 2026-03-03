@@ -1,10 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Edit, Plus, Search, SearchX, Sparkles, Trash2 } from "lucide-react";
+import { Briefcase, Edit, Plus, Search, SearchX, Sparkles, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CreatePositionDialog } from "@/components/positions/CreatePositionDialog";
 import { DeletePositionDialog } from "@/components/positions/DeletePositionDialog";
 import { EditPositionDialog } from "@/components/positions/EditPositionDialog";
+import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import { Button } from "@/components/ui/button";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { Input } from "@/components/ui/input";
@@ -210,47 +211,46 @@ export function PositionsPage() {
               </Button>
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto rounded-lg border bg-card">
-              <Table className="w-full">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="px-4">
-                      {t("positions.code")}
-                    </TableHead>
-                    <TableHead className="px-4">
-                      {t("positions.name")}
-                    </TableHead>
-                    <TableHead className="px-4">
-                      Color
-                    </TableHead>
-                    <TableHead className="px-4">
-                      {t("positions.status")}
-                    </TableHead>
-                    <TableHead className="px-4 text-right">
-                      {t("positions.actions")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPositions.length === 0 ? (
+            {/* Table or Empty State */}
+            {filteredPositions.length === 0 ? (
+              <div className="flex items-center justify-center p-8">
+                <AnimatedEmpty
+                  title={t("positions.noPositions", "No positions yet")}
+                  description={t(
+                    "positions.noPositionsDescription",
+                    "Create your first position to get started"
+                  )}
+                  icons={[Briefcase, Briefcase, Briefcase]}
+                  action={{
+                    label: t("positions.addPosition", "Add Position"),
+                    onClick: () => setIsCreateDialogOpen(true),
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-lg border bg-card">
+                <Table className="w-full">
+                  <TableHeader>
                     <TableRow>
-                      <TableCell className="h-64" colSpan={5}>
-                        <div className="flex h-full flex-col items-center justify-center p-8 text-muted-foreground">
-                          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                            <SearchX className="h-8 w-8 opacity-50" />
-                          </div>
-                          <p className="font-medium text-lg">
-                            {t("common.noData")}
-                          </p>
-                          <p className="mt-2 max-w-md text-center text-sm">
-                            {t("dashboard.noDataFound")}
-                          </p>
-                        </div>
-                      </TableCell>
+                      <TableHead className="px-4">
+                        {t("positions.code")}
+                      </TableHead>
+                      <TableHead className="px-4">
+                        {t("positions.name")}
+                      </TableHead>
+                      <TableHead className="px-4">
+                        Color
+                      </TableHead>
+                      <TableHead className="px-4">
+                        {t("positions.status")}
+                      </TableHead>
+                      <TableHead className="px-4 text-right">
+                        {t("positions.actions")}
+                      </TableHead>
                     </TableRow>
-                  ) : (
-                    filteredPositions.map((position) => (
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPositions.map((position) => (
                       <TableRow className="hover:bg-muted/50" key={position.id}>
                         <TableCell className="px-4">
                           <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
@@ -296,11 +296,11 @@ export function PositionsPage() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </div>
         </div>
       </div>

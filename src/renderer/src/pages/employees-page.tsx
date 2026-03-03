@@ -203,6 +203,7 @@ export function EmployeesPage() {
         />
 
         <EmployeesTable
+          agencies={agencies}
           authorizationStatuses={authorizationStatuses}
           contracts={contracts}
           employees={employees}

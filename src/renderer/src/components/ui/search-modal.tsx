@@ -73,9 +73,20 @@ export function SearchModal({ children, data, onAction, open: externalOpen, onOp
     };
 
     return (
-        <Modal open={open} onOpenChange={setOpen}>
+        <Modal
+            open={open}
+            onOpenChange={(isOpen) => {
+                if (!isOpen) {
+                    setOpen(false);
+                }
+            }}
+        >
             <ModalTrigger asChild>{children}</ModalTrigger>
-            <ModalContent className="p-0 gap-0">
+            <ModalContent
+                className="p-0 gap-0"
+                onInteractOutside={(e) => e.preventDefault()}
+                onPointerDownOutside={(e) => e.preventDefault()}
+            >
                 <ModalTitle className="sr-only">Search</ModalTitle>
                 <Command className="rounded-md">
                     <CommandInput

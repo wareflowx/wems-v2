@@ -687,6 +687,8 @@
     "delete": "Delete permanently",
     "deleteSuccess": "Item permanently deleted",
     "deleteError": "Error deleting item permanently",
+    "deleteConfirmTitle": "Delete permanently",
+    "deleteConfirmDescription": "Are you sure you want to permanently delete \"{{name}}\"? This action cannot be undone.",
     "employees": "Employees",
     "positions": "Positions",
     "workLocations": "Work Locations",

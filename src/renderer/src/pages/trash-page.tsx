@@ -19,6 +19,7 @@ import { queryKeys } from "@@/lib/query-keys";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as db from "@/actions/database";
 import { useORPCReady } from "@/hooks";
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
 
 type DeletedItemType = "employee" | "position" | "workLocation" | "department" | "contractType";
 
@@ -36,6 +37,7 @@ export function TrashPage() {
   const orpcReady = useORPCReady();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<DeletedItemType>("employee");
+  const [deletingItem, setDeletingItem] = useState<DeletedItem | null>(null);
 
   // Fetch deleted items based on active tab
   const { data: deletedEmployees = [] } = useQuery({
@@ -417,7 +419,7 @@ export function TrashPage() {
                           {t("trash.restore")}
                         </Button>
                         <Button
-                          onClick={() => handlePermanentDelete(item)}
+                          onClick={() => setDeletingItem(item)}
                           size="sm"
                           variant="destructive"
                           className="gap-1"
@@ -434,6 +436,23 @@ export function TrashPage() {
           </Table>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        description={t("trash.deleteConfirmDescription", {
+          name: deletingItem?.name,
+          type: deletingItem?.type,
+        })}
+        onConfirm={() => {
+          if (deletingItem) {
+            handlePermanentDelete(deletingItem);
+            setDeletingItem(null);
+          }
+        }}
+        onOpenChange={(open) => !open && setDeletingItem(null)}
+        open={deletingItem !== null}
+        title={t("trash.deleteConfirmTitle")}
+      />
     </div>
   );
 }

@@ -687,6 +687,8 @@
     "delete": "Supprimer définitivement",
     "deleteSuccess": "Élément supprimé définitivement",
     "deleteError": "Erreur lors de la suppression définitive",
+    "deleteConfirmTitle": "Supprimer définitivement",
+    "deleteConfirmDescription": "Êtes-vous sûr de vouloir supprimer définitivement \"{{name}}\" ? Cette action est irréversible.",
     "employees": "Employés",
     "positions": "Postes",
     "workLocations": "Lieux de travail",

@@ -1,5 +1,5 @@
 import { os } from "@orpc/server";
-import { and, desc, eq, isNull, not } from "drizzle-orm";
+import { and, desc, eq, isNull, not, gt } from "drizzle-orm";
 import { getDb } from "@/core/db";
 import {
   attachments,
@@ -25,6 +25,9 @@ import {
   getMediaPath,
   getAttachmentPath,
 } from "@/core/lib/file-storage";
+import {
+  DrivingAuthorizationStatusResult,
+} from "@/core/lib/driving-authorization";
 import { randomUUID } from "node:crypto";
 import {
   createAttachmentInputSchema,
@@ -1235,6 +1238,321 @@ export const deleteDrivingAuthorization = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in deleteDrivingAuthorization:", error);
+    throw error;
+  }
+});
+
+// Driving Authorization Status
+export const getDrivingAuthorizationStatus = os.handler(async ({ input }: { input: { employeeId: number } }) => {
+  try {
+    const db = await getDb();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const result: DrivingAuthorizationStatusResult = {
+      authorized: false,
+      partial: false,
+      details: {
+        medicalVisit: { valid: false },
+        caces: { valid: false },
+        drivingAuthorization: { valid: false },
+        training: { valid: false },
+      },
+    };
+
+    // Check medical visit - must be completed and not expired
+    const visits = await db
+      .select()
+      .from(medicalVisits)
+      .where(
+        and(
+          eq(medicalVisits.employeeId, input.employeeId),
+          eq(medicalVisits.status, "completed"),
+          isNull(medicalVisits.deletedAt)
+        )
+      )
+      .orderBy(desc(medicalVisits.scheduledDate));
+
+    if (visits.length > 0) {
+      const latestVisit = visits[0];
+      // Check if there's a next scheduled visit that is not overdue
+      const nextVisit = await db
+        .select()
+        .from(medicalVisits)
+        .where(
+          and(
+            eq(medicalVisits.employeeId, input.employeeId),
+            eq(medicalVisits.status, "scheduled"),
+            gt(medicalVisits.scheduledDate, today.toISOString().split("T")[0]),
+            isNull(medicalVisits.deletedAt)
+          )
+        )
+        .orderBy(medicalVisits.scheduledDate)
+        .limit(1);
+
+      // Medical visit is valid if there's a completed one and either:
+      // 1. No next visit scheduled (completed is still valid)
+      // 2. A next visit is scheduled in the future
+      if (nextVisit.length > 0 || visits.length > 0) {
+        result.details.medicalVisit = {
+          valid: true,
+          status: latestVisit.status,
+          expiresAt: nextVisit.length > 0 ? nextVisit[0].scheduledDate : undefined,
+          type: latestVisit.type,
+        };
+      }
+    }
+
+    // Check CACES - must have at least one non-expired
+    const cacesList = await db
+      .select()
+      .from(caces)
+      .where(and(eq(caces.employeeId, input.employeeId), isNull(caces.deletedAt)))
+      .orderBy(desc(caces.expirationDate));
+
+    const validCaces = cacesList.find((c) => {
+      const expDate = new Date(c.expirationDate);
+      expDate.setHours(0, 0, 0, 0);
+      return expDate >= today;
+    });
+
+    if (validCaces) {
+      result.details.caces = {
+        valid: true,
+        category: validCaces.category,
+        expiresAt: validCaces.expirationDate,
+      };
+    }
+
+    // Check driving authorization - must have at least one non-expired
+    const auths = await db
+      .select()
+      .from(drivingAuthorizations)
+      .where(and(eq(drivingAuthorizations.employeeId, input.employeeId), isNull(drivingAuthorizations.deletedAt)))
+      .orderBy(desc(drivingAuthorizations.expirationDate));
+
+    const validAuth = auths.find((a) => {
+      const expDate = new Date(a.expirationDate);
+      expDate.setHours(0, 0, 0, 0);
+      return expDate >= today;
+    });
+
+    if (validAuth) {
+      result.details.drivingAuthorization = {
+        valid: true,
+        licenseCategory: validAuth.licenseCategory,
+        expiresAt: validAuth.expirationDate,
+      };
+    }
+
+    // Check training - must have at least one completed training
+    const trainings = await db
+      .select()
+      .from(onlineTrainings)
+      .where(
+        and(
+          eq(onlineTrainings.employeeId, input.employeeId),
+          eq(onlineTrainings.status, "completed"),
+          isNull(onlineTrainings.deletedAt)
+        )
+      )
+      .orderBy(desc(onlineTrainings.completionDate));
+
+    if (trainings.length > 0) {
+      const latestTraining = trainings[0];
+      // Check if expired - if expiration date exists and has passed
+      let isValid = true;
+      if (latestTraining.expirationDate) {
+        const expDate = new Date(latestTraining.expirationDate);
+        expDate.setHours(0, 0, 0, 0);
+        isValid = expDate >= today;
+      }
+
+      if (isValid) {
+        result.details.training = {
+          valid: true,
+          name: latestTraining.trainingName,
+          completedAt: latestTraining.completionDate,
+        };
+      }
+    }
+
+    // Calculate overall status
+    const { medicalVisit, caces, drivingAuthorization, training } = result.details;
+    const validCount = [
+      medicalVisit.valid,
+      caces.valid,
+      drivingAuthorization.valid,
+      training.valid,
+    ].filter(Boolean).length;
+
+    result.authorized = validCount === 4;
+    result.partial = validCount > 0 && validCount < 4;
+
+    return result;
+  } catch (error) {
+    console.error("Error in getDrivingAuthorizationStatus:", error);
+    throw error;
+  }
+});
+
+// Get all driving authorization statuses for employees
+export const getAllDrivingAuthorizationStatuses = os.handler(async () => {
+  try {
+    const db = await getDb();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Get all employees
+    const allEmployees = await db
+      .select()
+      .from(employees)
+      .where(isNull(employees.deletedAt));
+
+    const statuses: Array<{ employeeId: number; status: DrivingAuthorizationStatusResult }> = [];
+
+    for (const employee of allEmployees) {
+      const result: DrivingAuthorizationStatusResult = {
+        authorized: false,
+        partial: false,
+        details: {
+          medicalVisit: { valid: false },
+          caces: { valid: false },
+          drivingAuthorization: { valid: false },
+          training: { valid: false },
+        },
+      };
+
+      // Check medical visit
+      const visits = await db
+        .select()
+        .from(medicalVisits)
+        .where(
+          and(
+            eq(medicalVisits.employeeId, employee.id),
+            eq(medicalVisits.status, "completed"),
+            isNull(medicalVisits.deletedAt)
+          )
+        )
+        .orderBy(desc(medicalVisits.scheduledDate));
+
+      if (visits.length > 0) {
+        const latestVisit = visits[0];
+        const nextVisit = await db
+          .select()
+          .from(medicalVisits)
+          .where(
+            and(
+              eq(medicalVisits.employeeId, employee.id),
+              eq(medicalVisits.status, "scheduled"),
+              gt(medicalVisits.scheduledDate, today.toISOString().split("T")[0]),
+              isNull(medicalVisits.deletedAt)
+            )
+          )
+          .orderBy(medicalVisits.scheduledDate)
+          .limit(1);
+
+        if (nextVisit.length > 0 || visits.length > 0) {
+          result.details.medicalVisit = {
+            valid: true,
+            status: latestVisit.status,
+            expiresAt: nextVisit.length > 0 ? nextVisit[0].scheduledDate : undefined,
+            type: latestVisit.type,
+          };
+        }
+      }
+
+      // Check CACES
+      const cacesList = await db
+        .select()
+        .from(caces)
+        .where(and(eq(caces.employeeId, employee.id), isNull(caces.deletedAt)))
+        .orderBy(desc(caces.expirationDate));
+
+      const validCaces = cacesList.find((c) => {
+        const expDate = new Date(c.expirationDate);
+        expDate.setHours(0, 0, 0, 0);
+        return expDate >= today;
+      });
+
+      if (validCaces) {
+        result.details.caces = {
+          valid: true,
+          category: validCaces.category,
+          expiresAt: validCaces.expirationDate,
+        };
+      }
+
+      // Check driving authorization
+      const auths = await db
+        .select()
+        .from(drivingAuthorizations)
+        .where(and(eq(drivingAuthorizations.employeeId, employee.id), isNull(drivingAuthorizations.deletedAt)))
+        .orderBy(desc(drivingAuthorizations.expirationDate));
+
+      const validAuth = auths.find((a) => {
+        const expDate = new Date(a.expirationDate);
+        expDate.setHours(0, 0, 0, 0);
+        return expDate >= today;
+      });
+
+      if (validAuth) {
+        result.details.drivingAuthorization = {
+          valid: true,
+          licenseCategory: validAuth.licenseCategory,
+          expiresAt: validAuth.expirationDate,
+        };
+      }
+
+      // Check training
+      const trainings = await db
+        .select()
+        .from(onlineTrainings)
+        .where(
+          and(
+            eq(onlineTrainings.employeeId, employee.id),
+            eq(onlineTrainings.status, "completed"),
+            isNull(onlineTrainings.deletedAt)
+          )
+        )
+        .orderBy(desc(onlineTrainings.completionDate));
+
+      if (trainings.length > 0) {
+        const latestTraining = trainings[0];
+        let isValid = true;
+        if (latestTraining.expirationDate) {
+          const expDate = new Date(latestTraining.expirationDate);
+          expDate.setHours(0, 0, 0, 0);
+          isValid = expDate >= today;
+        }
+
+        if (isValid) {
+          result.details.training = {
+            valid: true,
+            name: latestTraining.trainingName,
+            completedAt: latestTraining.completionDate,
+          };
+        }
+      }
+
+      // Calculate overall status
+      const { medicalVisit, caces, drivingAuthorization, training } = result.details;
+      const validCount = [
+        medicalVisit.valid,
+        caces.valid,
+        drivingAuthorization.valid,
+        training.valid,
+      ].filter(Boolean).length;
+
+      result.authorized = validCount === 4;
+      result.partial = validCount > 0 && validCount < 4;
+
+      statuses.push({ employeeId: employee.id, status: result });
+    }
+
+    return statuses;
+  } catch (error) {
+    console.error("Error in getAllDrivingAuthorizationStatuses:", error);
     throw error;
   }
 });

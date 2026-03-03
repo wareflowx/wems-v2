@@ -47,6 +47,8 @@ import {
   getDeletedWorkLocations,
   getDrivingAuthorizations,
   getDrivingAuthorizationsByEmployee,
+  getDrivingAuthorizationStatus,
+  getAllDrivingAuthorizationStatuses,
   getEmployeeById,
   getEmployees,
   getMedicalVisits,
@@ -139,6 +141,8 @@ export const database = {
   // Driving Authorizations
   getDrivingAuthorizations,
   getDrivingAuthorizationsByEmployee,
+  getDrivingAuthorizationStatus,
+  getAllDrivingAuthorizationStatuses,
   createDrivingAuthorization,
   updateDrivingAuthorization,
   deleteDrivingAuthorization,

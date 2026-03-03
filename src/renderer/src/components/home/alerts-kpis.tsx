@@ -35,7 +35,7 @@ export function AlertsKPIs({ kpis }: AlertsKPIsProps) {
         <CardContent className="p-0">
           <div className="font-bold text-2xl">{kpis.totalEmployees}</div>
           <p className="text-muted-foreground text-xs">
-            {kpis.activeEmployees} {t("dashboard.activeEmployees", "actifs")}
+            {kpis.activeEmployees} {t("dashboard.activeEmployees")}
           </p>
         </CardContent>
       </Card>
@@ -74,13 +74,13 @@ export function AlertsKPIs({ kpis }: AlertsKPIsProps) {
       <Card className="p-4">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-2">
           <CardTitle className="font-medium text-sm">
-            {t("dashboard.allAlerts", "Toutes les alertes")}
+            {t("dashboard.allAlerts")}
           </CardTitle>
           <Bell className="h-4 w-4" />
         </CardHeader>
         <CardContent className="p-0">
           <div className="font-bold text-2xl">{kpis.totalAlerts}</div>
-          <p className="text-muted-foreground text-xs">{t("dashboard.totalAlerts", "Total alertes")}</p>
+          <p className="text-muted-foreground text-xs">{t("dashboard.totalAlerts")}</p>
         </CardContent>
       </Card>
     </div>

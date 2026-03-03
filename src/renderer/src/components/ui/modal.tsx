@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import * as DialogPrimitive from "radix-ui";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/tailwind";
 
 interface ModalProps {
@@ -13,21 +14,39 @@ interface ModalProps {
 
 export function Modal({ open, onOpenChange, children }: ModalProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       {children}
-    </Dialog>
+    </DialogPrimitive.Root>
   );
 }
 
 interface ModalContentProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
+  showCloseButton?: boolean;
 }
 
-export function ModalContent({ children, className, ...props }: ModalContentProps) {
+export function ModalContent({ children, className, showCloseButton = false, ...props }: ModalContentProps) {
   return (
-    <DialogContent className={cn("p-0 gap-0 max-w-[500px] overflow-hidden", className)} {...props}>
-      {children}
-    </DialogContent>
+    <DialogPrimitive.Portal>
+      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+      <DialogPrimitive.Content
+        className={cn(
+          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+          className
+        )}
+        {...props}
+      >
+        {children}
+        {showCloseButton && (
+          <DialogPrimitive.Close asChild>
+            <Button className="absolute right-4 top-4" size="icon-sm" variant="ghost">
+              <X />
+              <span className="sr-only">Close</span>
+            </Button>
+          </DialogPrimitive.Close>
+        )}
+      </DialogPrimitive.Content>
+    </DialogPrimitive.Portal>
   );
 }
 
@@ -37,9 +56,9 @@ interface ModalTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
 
 export function ModalTitle({ children, className, ...props }: ModalTitleProps) {
   return (
-    <DialogContent className={cn("sr-only", className)} {...props}>
+    <DialogPrimitive.Title className={cn("text-lg font-semibold", className)} {...props}>
       {children}
-    </DialogContent>
+    </DialogPrimitive.Title>
   );
 }
 
@@ -49,5 +68,5 @@ interface ModalTriggerProps {
 }
 
 export function ModalTrigger({ asChild, children }: ModalTriggerProps) {
-  return <DialogTrigger asChild={asChild}>{children}</DialogTrigger>;
+  return <DialogPrimitive.Trigger asChild={asChild}>{children}</DialogPrimitive.Trigger>;
 }

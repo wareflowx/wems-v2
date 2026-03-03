@@ -440,6 +440,22 @@ export async function getDrivingAuthorizationsByEmployee(employeeId: number) {
   return client.database.getDrivingAuthorizationsByEmployee({ employeeId });
 }
 
+export async function getDrivingAuthorizationStatus(employeeId: number) {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.getDrivingAuthorizationStatus({ employeeId });
+}
+
+export async function getAllDrivingAuthorizationStatuses() {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getAllDrivingAuthorizationStatuses();
+}
+
 export async function createDrivingAuthorization(data: { employeeId: number; licenseCategory: string; dateObtained: string; expirationDate: string; attachmentId?: string }) {
   const client = getClient();
   if (!client) {

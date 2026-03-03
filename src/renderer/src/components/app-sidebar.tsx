@@ -12,7 +12,6 @@ import {
   Home,
   Lock,
   MapPin,
-  MessageCircleQuestion,
   Pen,
   Plus,
   Search,
@@ -22,14 +21,22 @@ import {
   Stethoscope,
   Trash2,
   Users,
-  X,
 } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
-import { Command, CommandList, CommandEmpty, CommandGroup } from "cmdk";
 import { getAppVersion } from "@/actions/app";
 import { useAlerts, useCaces, useDrivingAuthorizations, useMedicalVisits, useOnlineTrainings } from "@/hooks";
 import { useDialogStore } from "@/stores/dialog-store";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command";
 import {
   Sidebar,
   SidebarContent,
@@ -308,60 +315,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <>
-      {mounted && open && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
-          <div
-            className="fixed inset-0 bg-black/50"
-            onClick={() => setOpen(false)}
-          />
-          <Command className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-xl border bg-popover shadow-lg">
-            <div className="flex items-center border-b px-3">
-              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-              <input
-                className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="Type a command or search..."
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Escape") setOpen(false);
-                }}
-              />
-              <button
-                onClick={() => setOpen(false)}
-                className="rounded-sm opacity-70 hover:opacity-100"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <CommandList className="max-h-[300px] overflow-y-auto p-1">
-              <CommandEmpty>No results found.</CommandEmpty>
-              {groupedActions.map((group, groupIndex) => (
-                <React.Fragment key={group.heading || `group-${groupIndex}`}>
-                  {group.heading && (
-                    <CommandGroup heading={group.heading} className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                      {group.items.map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex cursor-default items-center rounded-md px-2 py-1.5 text-sm hover:bg-muted hover:text-foreground"
-                          onClick={() => handleCommandSelect(item.action)}
-                        >
-                          {item.icon && <item.icon className="mr-2 h-4 w-4" />}
-                          <span className="flex-1">{item.title}</span>
-                          {item.shortcut && (
-                            <span className="ml-auto text-xs text-muted-foreground">{item.shortcut}</span>
-                          )}
-                        </div>
-                      ))}
-                    </CommandGroup>
-                  )}
-                  {group.heading && groupIndex < groupedActions.length - 1 && (
-                    <div className="-mx-1 my-1 h-px bg-border" />
-                  )}
-                </React.Fragment>
-              ))}
-            </CommandList>
-          </Command>
-        </div>
-      )}
+      <CommandDialog onOpenChange={setOpen} open={open}>
+        <CommandInput placeholder="Search actions..." />
+        <CommandList>
+          <CommandEmpty>No actions found.</CommandEmpty>
+          {groupedActions.map((group, groupIndex) => (
+            <React.Fragment key={group.heading || `group-${groupIndex}`}>
+              {group.heading && (
+                <CommandGroup heading={group.heading}>
+                  {group.items.map((item) => (
+                    <CommandItem
+                      key={item.id}
+                      onSelect={() => handleCommandSelect(item.action)}
+                    >
+                      {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+                      <span className="flex-1">{item.title}</span>
+                      {item.shortcut && <CommandShortcut>{item.shortcut}</CommandShortcut>}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+              {group.heading && groupIndex < groupedActions.length - 1 && (
+                <CommandSeparator />
+              )}
+            </React.Fragment>
+          ))}
+        </CommandList>
+      </CommandDialog>
       <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
       collapsible="icon"

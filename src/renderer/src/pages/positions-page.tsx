@@ -213,7 +213,7 @@ export function PositionsPage() {
 
             {/* Table or Empty State */}
             {filteredPositions.length === 0 ? (
-              <div className="flex items-center justify-center p-8">
+              <div className="flex w-full items-center justify-center p-8">
                 <AnimatedEmpty
                   title={t("positions.noPositions", "No positions yet")}
                   description={t(

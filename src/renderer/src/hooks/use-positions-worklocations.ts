@@ -360,9 +360,13 @@ export function useDeletePosition() {
         queryKeys.positions.lists()
       );
 
+      // Optimistically add deletedAt to the position
       queryClient.setQueryData(
         queryKeys.positions.lists(),
-        (old: db.Position[] = []) => old.filter((p) => p.id !== data.id)
+        (old: db.Position[] = []) =>
+          old.map((p) =>
+            p.id === data.id ? { ...p, deletedAt: new Date().toISOString() } : p
+          )
       );
 
       return { previousPositions };

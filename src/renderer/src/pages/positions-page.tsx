@@ -64,13 +64,17 @@ export function PositionsPage() {
     queryFn: () => db.getPositions(),
   });
 
-  // KPIs - calculated dynamically
+  // KPIs - calculated dynamically (only count non-deleted positions)
   const kpis = useMemo(
-    () => ({
-      totalPositions: allPositions.length,
-      activePositions: allPositions.filter((p: any) => p.isActive).length,
-      inactivePositions: allPositions.filter((p: any) => !p.isActive).length,
-    }),
+    () => {
+      const activePositions = allPositions.filter((p: any) => !p.deletedAt && p.isActive);
+      const inactivePositions = allPositions.filter((p: any) => !p.deletedAt && !p.isActive);
+      return {
+        totalPositions: allPositions.filter((p: any) => !p.deletedAt).length,
+        activePositions: activePositions.length,
+        inactivePositions: inactivePositions.length,
+      };
+    },
     [allPositions]
   );
 

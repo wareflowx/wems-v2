@@ -1,8 +1,6 @@
-import { Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
   Bell,
-  FileText,
   Search,
   SearchX,
   ShieldAlert,
@@ -10,26 +8,12 @@ import {
   Users,
 } from "lucide-react";
 import { AnimatedEmpty } from "@/components/ui/animated-empty";
+import { AlertsFilters } from "@/components/home/alerts-filters";
+import { AlertsTable } from "@/components/home/alerts-table";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useAlerts, useEmployees } from "@/hooks";
 
 export function HomePage() {
@@ -275,125 +259,37 @@ export function HomePage() {
         </div>
 
         {/* Search and Filters */}
-        <div className="flex flex-wrap gap-2">
-          <div className="relative min-w-[200px] flex-1">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="pl-9"
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("employees.search")}
-              value={search}
-            />
-          </div>
-          <Select onValueChange={setTypeFilter} value={typeFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={t("dashboard.filterByType")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("dashboard.allTypes")}</SelectItem>
-              <SelectItem value="caces">{t("caces.title")}</SelectItem>
-              <SelectItem value="medical">
-                {t("medicalVisits.title")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <Select onValueChange={setSeverityFilter} value={severityFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={t("dashboard.filterBySeverity")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                {t("dashboard.allSeverities")}
-              </SelectItem>
-              <SelectItem value="critical">{t("alerts.critical")}</SelectItem>
-              <SelectItem value="warning">{t("alerts.warning")}</SelectItem>
-              <SelectItem value="info">{t("alerts.info")}</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select onValueChange={setEmployeeFilter} value={employeeFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={t("dashboard.filterByEmployee")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("dashboard.allEmployees")}</SelectItem>
-              {uniqueEmployees.map((employee) => (
-                <SelectItem key={employee} value={employee}>
-                  {employee}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select onValueChange={setDetailFilter} value={detailFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={t("dashboard.filterByDetail")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("dashboard.allDetails")}</SelectItem>
-              {uniqueDetails.map((detail) => (
-                <SelectItem key={detail} value={detail}>
-                  {detail}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <AlertsFilters
+          search={search}
+          onSearchChange={setSearch}
+          typeFilter={typeFilter}
+          onTypeFilterChange={setTypeFilter}
+          severityFilter={severityFilter}
+          onSeverityFilterChange={setSeverityFilter}
+          employeeFilter={employeeFilter}
+          onEmployeeFilterChange={setEmployeeFilter}
+          detailFilter={detailFilter}
+          onDetailFilterChange={setDetailFilter}
+          uniqueEmployees={uniqueEmployees}
+          uniqueDetails={uniqueDetails}
+        />
 
         {/* Table or Empty State */}
         {recentAlerts.length === 0 ? (
           <div className="flex w-full items-center justify-center">
             <AnimatedEmpty
-              className="border-0 bg-transparent p-0"
               title={t("dashboard.allGood", "All good!")}
               description={t("dashboard.noAlertsDescription", "No alerts at this time. Everything is in order.")}
               icons={[ShieldAlert, ShieldAlert, ShieldAlert]}
             />
           </div>
         ) : (
-          <div className="rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("dashboard.filterByType")}</TableHead>
-                  <TableHead>{t("dashboard.filterByEmployee")}</TableHead>
-                  <TableHead>{t("dashboard.filterByDetail")}</TableHead>
-                  <TableHead>{t("caces.date")}</TableHead>
-                  <TableHead>{t("caces.status")}</TableHead>
-                  <TableHead className="text-right">
-                    {t("employees.actions")}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentAlerts.map((alert) => (
-                  <TableRow className="hover:bg-muted/50" key={alert.id}>
-                    <TableCell>{getTypeBadge(alert.type)}</TableCell>
-                    <TableCell>
-                      <Link
-                        className="text-gray-700 underline transition-opacity hover:opacity-80"
-                        to={`/employees/${alert.employeeId}`}
-                      >
-                        {alert.employee}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      {getDetailBadge(alert.category, alert.visitType)}
-                    </TableCell>
-                    <TableCell className="text-gray-700">
-                      {alert.date}
-                    </TableCell>
-                    <TableCell>{getAlertBadge(alert.severity)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button size="icon" variant="ghost">
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <AlertsTable
+            alerts={recentAlerts}
+            getAlertBadge={getAlertBadge}
+            getDetailBadge={getDetailBadge}
+            getTypeBadge={getTypeBadge}
+          />
         )}
       </div>
     </div>

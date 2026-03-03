@@ -418,15 +418,18 @@ export function CreateEmployeeDialog({
                       <SelectValue placeholder={t("employees.selectAgency")} />
                     </SelectTrigger>
                     <SelectContent position="popper">
-                      <SelectItem value="">{t("employees.noAgency")}</SelectItem>
-                      {agencies.map((agency) => (
-                        <SelectItem
-                          key={agency.id}
-                          value={agency.id.toString()}
-                        >
-                          {agency.name}
-                        </SelectItem>
-                      ))}
+                      {agencies.length > 0 && (
+                        <>
+                          {agencies.map((agency) => (
+                            <SelectItem
+                              key={agency.id}
+                              value={agency.id.toString()}
+                            >
+                              {agency.name}
+                            </SelectItem>
+                          ))}
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

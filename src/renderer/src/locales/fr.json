@@ -244,7 +244,9 @@
     "namePlaceholder": "Nom de l'agence",
     "codePlaceholder": "Code (optionnel)",
     "noAgencies": "Aucune agence",
-    "noAgenciesDescription": "Créez votre première agence pour commencer"
+    "noAgenciesDescription": "Créez votre première agence pour commencer",
+    "createdAt": "Créé le",
+    "updatedAt": "Modifié le"
   },
   "contractTypes": {
     "title": "Types de contrat",

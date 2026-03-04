@@ -155,10 +155,11 @@ export function AgenciesPage() {
   }
 
   return (
-    <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel defaultSize={selectedAgency ? 50 : 100} minSize={30}>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-        <div className="min-h-full space-y-3">
+    <>
+      <ResizablePanelGroup className="gap-0.5 p-1.5" direction="horizontal">
+        <ResizablePanel defaultSize={selectedAgency ? 50 : 100} minSize={30} className={selectedAgency ? "border border-border rounded-md" : ""}>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+            <div className="min-h-full space-y-3">
           {/* Header */}
           <PageHeaderCard
             description={t("agencies.description")}
@@ -345,43 +346,46 @@ export function AgenciesPage() {
       </ResizablePanel>
 
       {/* Resizable Handle */}
-      {selectedAgency && <ResizableHandle />}
+      {selectedAgency && <ResizableHandle className="w-1 bg-transparent hover:bg-border rounded-md transition-all duration-200" />}
 
       {/* Detail Panel */}
       {selectedAgency && (
-        <ResizablePanel defaultSize={50} minSize={30}>
+        <ResizablePanel defaultSize={50} minSize={30} className="border border-border rounded-md">
           <AgencyDetailPanel
             agency={selectedAgency}
             onClose={() => setSelectedAgency(null)}
           />
         </ResizablePanel>
       )}
-    </ResizablePanelGroup>
+      </ResizablePanelGroup>
 
-    {/* Create Dialog */}
-    {isCreateDialogOpen && (
-        <CreateAgencyDialog
-          onClose={() => setIsCreateDialogOpen(false)}
-        />
-      )}
+      {/* Dialogs */}
+      <>
+        {/* Create Dialog */}
+        {isCreateDialogOpen && (
+          <CreateAgencyDialog
+            onClose={() => setIsCreateDialogOpen(false)}
+          />
+        )}
 
-      {/* Edit Dialog */}
-      {editingAgency && (
-        <EditAgencyDialog
-          agency={editingAgency}
-          onClose={() => setEditingAgency(null)}
-          onSave={handleUpdateAgency}
-        />
-      )}
+        {/* Edit Dialog */}
+        {editingAgency && (
+          <EditAgencyDialog
+            agency={editingAgency}
+            onClose={() => setEditingAgency(null)}
+            onSave={handleUpdateAgency}
+          />
+        )}
 
-      {/* Delete Dialog */}
-      {deletingAgency && (
-        <DeleteAgencyDialog
-          agency={deletingAgency}
-          onClose={() => setDeletingAgency(null)}
-          onConfirm={handleDeleteAgency}
-        />
-      )}
+        {/* Delete Dialog */}
+        {deletingAgency && (
+          <DeleteAgencyDialog
+            agency={deletingAgency}
+            onClose={() => setDeletingAgency(null)}
+            onConfirm={handleDeleteAgency}
+          />
+        )}
+      </>
     </>
   );
 }
@@ -396,7 +400,7 @@ function AgencyDetailPanel({
   const { t } = useTranslation();
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-y-auto border-l bg-card p-4 pt-6">
+    <div className="flex h-full flex-col gap-4 overflow-y-auto rounded-md p-4 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">{agency.name}</h2>
         <Button onClick={onClose} size="icon" variant="ghost">

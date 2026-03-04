@@ -270,6 +270,22 @@ export function EmployeesTable({
         },
       },
       {
+        id: "contractEndDate",
+        header: t("contracts.endDate"),
+        cell: ({ row }) => {
+          const employee = row.original;
+          const contract = getEmployeeContract(employee.id);
+          if (!contract || !contract.endDate) {
+            return <span className="text-muted-foreground text-xs">-</span>;
+          }
+          return (
+            <span className="text-gray-700 text-xs">
+              {new Date(contract.endDate).toLocaleDateString()}
+            </span>
+          );
+        },
+      },
+      {
         id: "actions",
         header: t("employees.actions"),
         cell: ({ row }) => {

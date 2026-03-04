@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Building2, Edit, Plus, Search, Trash2 } from "lucide-react";
+import { Building2, Edit, Plus, Search, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,11 @@ import {
 } from "@/components/ui/table";
 import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
 import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import {
   useCreateAgency,
   useDeleteAgency,
   useAgencies,
@@ -39,21 +44,31 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export function AgenciesPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { setOpen } = useSidebar();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingAgency, setEditingAgency] = useState<any>(null);
   const [deletingAgency, setDeletingAgency] = useState<any>(null);
+  const [selectedAgency, setSelectedAgency] = useState<any>(null);
 
   // Use TanStack Query hooks
   const { data: agencies = [], isLoading, error } = useAgencies();
   const createAgency = useCreateAgency();
   const updateAgency = useUpdateAgency();
   const deleteAgency = useDeleteAgency();
+
+  // Auto-close sidebar when agency is selected
+  useEffect(() => {
+    if (selectedAgency) {
+      setOpen(false);
+    }
+  }, [selectedAgency, setOpen]);
 
   // KPIs - calculated dynamically
   const kpis = useMemo(
@@ -140,8 +155,9 @@ export function AgenciesPage() {
   }
 
   return (
-    <>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel defaultSize={selectedAgency ? 50 : 100} minSize={30}>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <div className="min-h-full space-y-3">
           {/* Header */}
           <PageHeaderCard
@@ -257,7 +273,11 @@ export function AgenciesPage() {
                   </TableHeader>
                   <TableBody>
                     {filteredAgencies.map((agency) => (
-                      <TableRow className="hover:bg-muted/50" key={agency.id}>
+                      <TableRow
+                        className="cursor-pointer hover:bg-muted/50"
+                        key={agency.id}
+                        onClick={() => setSelectedAgency(agency)}
+                      >
                         <TableCell className="px-4">
                           {agency.code ? (
                             <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
@@ -322,9 +342,24 @@ export function AgenciesPage() {
           </div>
         </div>
       </div>
+      </ResizablePanel>
 
-      {/* Create Dialog */}
-      {isCreateDialogOpen && (
+      {/* Resizable Handle */}
+      {selectedAgency && <ResizableHandle />}
+
+      {/* Detail Panel */}
+      {selectedAgency && (
+        <ResizablePanel defaultSize={50} minSize={30}>
+          <AgencyDetailPanel
+            agency={selectedAgency}
+            onClose={() => setSelectedAgency(null)}
+          />
+        </ResizablePanel>
+      )}
+    </ResizablePanelGroup>
+
+    {/* Create Dialog */}
+    {isCreateDialogOpen && (
         <CreateAgencyDialog
           onClose={() => setIsCreateDialogOpen(false)}
         />
@@ -348,6 +383,67 @@ export function AgenciesPage() {
         />
       )}
     </>
+  );
+}
+
+function AgencyDetailPanel({
+  agency,
+  onClose,
+}: {
+  agency: any;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex h-full flex-col gap-4 overflow-y-auto border-l bg-card p-4 pt-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">{agency.name}</h2>
+        <Button onClick={onClose} size="icon" variant="ghost">
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="space-y-4">
+        <div className="rounded-lg border bg-background p-4">
+          <h3 className="mb-2 text-sm font-medium">{t("agencies.code")}</h3>
+          <p className="text-muted-foreground text-sm">
+            {agency.code || "-"}
+          </p>
+        </div>
+
+        <div className="rounded-lg border bg-background p-4">
+          <h3 className="mb-2 text-sm font-medium">{t("agencies.status")}</h3>
+          {agency.isActive ? (
+            <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-2 py-0.5 font-medium text-green-600 text-xs">
+              {t("agencies.active")}
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-md border border-gray-500/25 bg-gray-500/15 px-2 py-0.5 font-medium text-gray-600 text-xs">
+              {t("agencies.inactive")}
+            </span>
+          )}
+        </div>
+
+        <div className="rounded-lg border bg-background p-4">
+          <h3 className="mb-2 text-sm font-medium">{t("agencies.createdAt")}</h3>
+          <p className="text-muted-foreground text-sm">
+            {agency.createdAt
+              ? new Date(agency.createdAt).toLocaleDateString()
+              : "-"}
+          </p>
+        </div>
+
+        <div className="rounded-lg border bg-background p-4">
+          <h3 className="mb-2 text-sm font-medium">{t("agencies.updatedAt")}</h3>
+          <p className="text-muted-foreground text-sm">
+            {agency.updatedAt
+              ? new Date(agency.updatedAt).toLocaleDateString()
+              : "-"}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 

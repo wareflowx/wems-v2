@@ -22,6 +22,7 @@ import {
 interface Contract {
   id: number;
   employeeId: number;
+  agencyId: number | null;
   contractType: string;
   startDate: string;
   endDate: string | null;
@@ -34,11 +35,18 @@ interface ContractType {
   code: string;
 }
 
+interface Agency {
+  id: number;
+  name: string;
+  code?: string;
+}
+
 export interface EditContractDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdate: (data: {
     id: number;
+    agencyId?: number | null;
     contractType: string;
     startDate: string;
     endDate: string | null;
@@ -46,6 +54,7 @@ export interface EditContractDialogProps {
   }) => void;
   contract: Contract | null;
   contractTypes: ContractType[];
+  agencies?: Agency[];
 }
 
 export function EditContractDialog({
@@ -54,8 +63,10 @@ export function EditContractDialog({
   onUpdate,
   contract,
   contractTypes,
+  agencies = [],
 }: EditContractDialogProps) {
   const { t } = useTranslation();
+  const [agencyId, setAgencyId] = useState<string>("");
   const [contractType, setContractType] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -63,6 +74,7 @@ export function EditContractDialog({
 
   useEffect(() => {
     if (contract) {
+      setAgencyId(contract.agencyId?.toString() || "");
       setContractType(contract.contractType);
       setStartDate(contract.startDate);
       setEndDate(contract.endDate || "");
@@ -78,6 +90,7 @@ export function EditContractDialog({
 
     onUpdate({
       id: contract.id,
+      agencyId: agencyId ? Number(agencyId) : null,
       contractType,
       startDate,
       endDate: endDate || null,
@@ -98,6 +111,24 @@ export function EditContractDialog({
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="agency">{t("employees.agency")}</Label>
+              <Select onValueChange={setAgencyId} value={agencyId}>
+                <SelectTrigger id="agency">
+                  <SelectValue placeholder={t("employees.selectAgency")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {agencies?.map((agency) => (
+                    <SelectItem key={agency.id} value={agency.id.toString()}>
+                      {agency.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-muted-foreground text-xs">
+                {t("contracts.agencyHint")}
+              </p>
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="contract-type">{t("contracts.type")}</Label>
               <Select onValueChange={setContractType} value={contractType}>

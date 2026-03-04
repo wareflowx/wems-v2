@@ -1,5 +1,6 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { timestampsWithSoftDelete } from "./columns.helpers";
+import { agencies } from "./agencies";
 import { employees } from "./employees";
 
 export const contracts = sqliteTable("contracts", {
@@ -9,6 +10,11 @@ export const contracts = sqliteTable("contracts", {
   employeeId: integer("employee_id")
     .notNull()
     .references(() => employees.id, { onDelete: "cascade" }),
+
+  // Agency reference (FK) - for interim workers
+  agencyId: integer("agency_id").references(() => agencies.id, {
+    onDelete: "set null",
+  }),
 
   // Contract details
   contractType: text("contract_type").notNull(), // "CDI", "CDD", "Intérim", "Alternance"

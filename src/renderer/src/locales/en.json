@@ -189,6 +189,7 @@
     "editContract": "Edit contract",
     "editContractDescription": "Edit the contract details",
     "endDateHint": "Leave empty for CDI (permanent contract)",
+    "agencyHint": "For interim workers",
     "inactive": "Inactive",
     "deleteContract": "Delete contract",
     "timelineStatus": {
@@ -243,7 +244,9 @@
     "namePlaceholder": "Agency name",
     "codePlaceholder": "Code (optional)",
     "noAgencies": "No agencies",
-    "noAgenciesDescription": "Create your first agency to get started"
+    "noAgenciesDescription": "Create your first agency to get started",
+    "createdAt": "Created at",
+    "updatedAt": "Updated at"
   },
   "contractTypes": {
     "title": "Contract Types",

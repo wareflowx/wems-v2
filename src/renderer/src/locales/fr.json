@@ -189,6 +189,7 @@
     "editContract": "Modifier le contrat",
     "editContractDescription": "Modifier les détails du contrat",
     "endDateHint": "Laisser vide pour un CDI",
+    "agencyHint": "Pour les salariés intérimaires",
     "inactive": "Inactif",
     "deleteContract": "Supprimer le contrat",
     "timelineStatus": {
@@ -243,7 +244,9 @@
     "namePlaceholder": "Nom de l'agence",
     "codePlaceholder": "Code (optionnel)",
     "noAgencies": "Aucune agence",
-    "noAgenciesDescription": "Créez votre première agence pour commencer"
+    "noAgenciesDescription": "Créez votre première agence pour commencer",
+    "createdAt": "Créé le",
+    "updatedAt": "Modifié le"
   },
   "contractTypes": {
     "title": "Types de contrat",

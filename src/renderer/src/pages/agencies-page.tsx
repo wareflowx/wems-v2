@@ -244,6 +244,12 @@ export function AgenciesPage() {
                       <TableHead className="px-4">
                         {t("agencies.status")}
                       </TableHead>
+                      <TableHead className="px-4">
+                        {t("agencies.createdAt")}
+                      </TableHead>
+                      <TableHead className="px-4">
+                        {t("agencies.updatedAt")}
+                      </TableHead>
                       <TableHead className="px-4 text-right">
                         {t("agencies.actions")}
                       </TableHead>
@@ -274,6 +280,20 @@ export function AgenciesPage() {
                               {t("agencies.inactive")}
                             </span>
                           )}
+                        </TableCell>
+                        <TableCell className="px-4">
+                          <span className="text-muted-foreground text-xs underline">
+                            {agency.createdAt
+                              ? new Date(agency.createdAt).toLocaleDateString()
+                              : "-"}
+                          </span>
+                        </TableCell>
+                        <TableCell className="px-4">
+                          <span className="text-muted-foreground text-xs underline">
+                            {agency.updatedAt
+                              ? new Date(agency.updatedAt).toLocaleDateString()
+                              : "-"}
+                          </span>
                         </TableCell>
                         <TableCell className="px-4">
                           <div className="flex items-center justify-end gap-2">

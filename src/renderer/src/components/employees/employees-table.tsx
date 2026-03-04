@@ -59,6 +59,7 @@ export function EmployeesTable({
   employees,
   positions,
   workLocations,
+  agencies,
   contracts,
   authorizationStatuses,
   onDeleteClick,
@@ -206,10 +207,12 @@ export function EmployeesTable({
         },
       },
       {
-        accessorKey: "agencyId",
+        id: "agency",
         header: t("employees.agency"),
-        cell: ({ getValue }) => {
-          const agencyId = getValue() as number | null;
+        cell: ({ row }) => {
+          const employee = row.original;
+          const contract = getEmployeeContract(employee.id);
+          const agencyId = contract?.agencyId ?? null;
           if (!agencyId) {
             return (
               <span className="text-muted-foreground text-xs">-</span>
@@ -303,6 +306,7 @@ export function EmployeesTable({
       t,
       positions,
       workLocations,
+      agencies,
       onDeleteClick,
       getEmployeeContract,
       onEditClick,

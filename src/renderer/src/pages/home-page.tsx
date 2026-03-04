@@ -6,7 +6,7 @@ import { AlertsTable } from "@/components/home/alerts-table";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { useAlerts, useEmployees } from "@/hooks";
 
 export function HomePage() {
@@ -146,21 +146,13 @@ export function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-4 p-4 py-6">
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <div className="min-h-full space-y-3">
-          <Card className="rounded-md bg-background p-3 shadow-sm">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5">
-                <Sparkles className="h-4 w-4 text-gray-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-gray-700">
-                  <span className="font-medium">{t("dashboard.title")}</span> -
-                  Vue d'ensemble de votre entreprise et alertes importantes
-                </p>
-              </div>
-            </div>
-          </Card>
+          <PageHeaderCard
+            description={t("dashboard.description")}
+            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+            title={t("dashboard.title")}
+          />
           <div className="flex items-center justify-center p-8">
             <p className="text-muted-foreground">Loading...</p>
           </div>
@@ -170,24 +162,14 @@ export function HomePage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-4 bg-sidebar p-4 py-6">
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
       <div className="min-h-full space-y-3">
         {/* Header */}
-        <div className="mb-2">
-          <Card className="rounded-md bg-card p-3 shadow-sm">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5">
-                <Sparkles className="h-4 w-4 text-gray-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-gray-700">
-                  <span className="font-medium">{t("dashboard.title")}</span> -
-                  Vue d'ensemble de votre entreprise et alertes importantes
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
+        <PageHeaderCard
+          description={t("dashboard.description")}
+          icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+          title={t("dashboard.title")}
+        />
 
         {/* Key Metrics */}
         <AlertsKPIs kpis={kpis} />

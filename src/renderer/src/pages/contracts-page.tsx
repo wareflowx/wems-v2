@@ -20,18 +20,21 @@ import {
   useUpdateContract,
 } from "@/hooks";
 import { useEmployees } from "@/hooks/use-employees";
+import { useAgencies } from "@/hooks/use-agencies";
 
 // Transform database contract to table contract
 function transformContract(
   dbContract: {
     id: number;
     employeeId: number;
+    agencyId: number | null;
     contractType: string;
     startDate: string;
     endDate: string | null;
     isActive: boolean;
   },
-  employeeName: string
+  employeeName: string,
+  agencies?: { id: number; name: string }[]
 ): Contract {
   const now = new Date();
   const start = new Date(dbContract.startDate);
@@ -64,6 +67,11 @@ function transformContract(
     status = "active";
   }
 
+  // Get agency name
+  const agency = dbContract.agencyId
+    ? agencies?.find((a) => a.id === dbContract.agencyId)
+    : undefined;
+
   return {
     id: dbContract.id,
     employee: employeeName,
@@ -79,6 +87,7 @@ function transformContract(
     renewalCount: 0,
     salary: 0,
     department: "",
+    agency: agency?.name,
   };
 }
 
@@ -103,6 +112,7 @@ export function ContractsPage() {
   const { data: dbContracts = [], isLoading, error } = useContracts();
   const { data: employees = [] } = useEmployees();
   const { data: contractTypes = [] } = useContractTypes();
+  const { data: agencies = [] } = useAgencies();
   const createContract = useCreateContract();
   const updateContract = useUpdateContract();
   const deleteContract = useDeleteContract();
@@ -119,9 +129,9 @@ export function ContractsPage() {
   // Transform database contracts to table format
   const contracts: Contract[] = useMemo(() => {
     return dbContracts.map((c) =>
-      transformContract(c, employeeMap.get(c.employeeId) || "Unknown")
+      transformContract(c, employeeMap.get(c.employeeId) || "Unknown", agencies)
     );
-  }, [dbContracts, employeeMap]);
+  }, [dbContracts, employeeMap, agencies]);
 
   // KPIs - calculated dynamically
   const kpis = useMemo(() => {
@@ -186,12 +196,14 @@ export function ContractsPage() {
 
   const handleCreateContract = (data: {
     employeeId: number;
+    agencyId?: number | null;
     contractType: string;
     startDate: string;
     endDate?: string | null;
   }) => {
     createContract.mutate({
       employeeId: data.employeeId,
+      agencyId: data.agencyId,
       contractType: data.contractType,
       startDate: data.startDate,
       endDate: data.endDate,
@@ -202,6 +214,7 @@ export function ContractsPage() {
 
   const handleUpdateContract = (data: {
     id: number;
+    agencyId?: number | null;
     contractType: string;
     startDate: string;
     endDate: string | null;
@@ -209,6 +222,7 @@ export function ContractsPage() {
   }) => {
     updateContract.mutate({
       id: data.id,
+      agencyId: data.agencyId,
       contractType: data.contractType,
       startDate: data.startDate,
       endDate: data.endDate,
@@ -345,6 +359,7 @@ export function ContractsPage() {
 
       {/* Dialogs */}
       <CreateContractDialog
+        agencies={agencies}
         contractTypes={contractTypes}
         employees={employees}
         onCreate={handleCreateContract}
@@ -352,6 +367,7 @@ export function ContractsPage() {
         open={createDialogOpen}
       />
       <EditContractDialog
+        agencies={agencies}
         contract={dbContractForEdit}
         contractTypes={contractTypes}
         onOpenChange={setEditDialogOpen}

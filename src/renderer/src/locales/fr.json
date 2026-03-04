@@ -189,6 +189,7 @@
     "editContract": "Modifier le contrat",
     "editContractDescription": "Modifier les détails du contrat",
     "endDateHint": "Laisser vide pour un CDI",
+    "agencyHint": "Pour les salariés intérimaires",
     "inactive": "Inactif",
     "deleteContract": "Supprimer le contrat",
     "timelineStatus": {

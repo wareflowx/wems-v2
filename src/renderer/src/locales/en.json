@@ -189,6 +189,7 @@
     "editContract": "Edit contract",
     "editContractDescription": "Edit the contract details",
     "endDateHint": "Leave empty for CDI (permanent contract)",
+    "agencyHint": "For interim workers",
     "inactive": "Inactive",
     "deleteContract": "Delete contract",
     "timelineStatus": {

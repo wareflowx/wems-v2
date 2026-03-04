@@ -31,17 +31,25 @@ interface ContractType {
   code: string;
 }
 
+interface Agency {
+  id: number;
+  name: string;
+  code?: string;
+}
+
 export interface CreateContractDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreate: (data: {
     employeeId: number;
+    agencyId?: number | null;
     contractType: string;
     startDate: string;
     endDate?: string | null;
   }) => void;
   employees: Employee[];
   contractTypes: ContractType[];
+  agencies?: Agency[];
 }
 
 export function CreateContractDialog({
@@ -50,9 +58,11 @@ export function CreateContractDialog({
   onCreate,
   employees,
   contractTypes,
+  agencies = [],
 }: CreateContractDialogProps) {
   const { t } = useTranslation();
   const [employeeId, setEmployeeId] = useState<string>("");
+  const [agencyId, setAgencyId] = useState<string>("");
   const [contractType, setContractType] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -71,6 +81,7 @@ export function CreateContractDialog({
 
     onCreate({
       employeeId: Number(employeeId),
+      agencyId: agencyId ? Number(agencyId) : null,
       contractType,
       startDate,
       endDate: endDate || null,
@@ -110,6 +121,24 @@ export function CreateContractDialog({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="agency">{t("employees.agency")}</Label>
+              <Select onValueChange={setAgencyId} value={agencyId}>
+                <SelectTrigger id="agency">
+                  <SelectValue placeholder={t("employees.selectAgency")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {agencies?.map((agency) => (
+                    <SelectItem key={agency.id} value={agency.id.toString()}>
+                      {agency.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-muted-foreground text-xs">
+                {t("contracts.agencyHint")}
+              </p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="contract-type">{t("contracts.type")}</Label>

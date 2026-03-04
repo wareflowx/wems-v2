@@ -38,12 +38,6 @@ interface WorkLocation {
   color?: string;
 }
 
-interface Agency {
-  id: number;
-  name: string;
-  code?: string;
-}
-
 interface CreateEmployeeDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -51,7 +45,6 @@ interface CreateEmployeeDialogProps {
   departments?: Department[];
   positions?: Position[];
   workLocations?: WorkLocation[];
-  agencies?: Agency[];
 }
 
 export interface CreateEmployeeData {
@@ -63,7 +56,6 @@ export interface CreateEmployeeData {
   workLocationId?: number;
   contractType: string;
   department: string;
-  agencyId?: number | null;
   status?: "active" | "on_leave" | "terminated";
   hireDate: string;
   contractEndDate?: string;
@@ -82,7 +74,6 @@ export function CreateEmployeeDialog({
   departments = [],
   positions = [],
   workLocations = [],
-  agencies = [],
 }: CreateEmployeeDialogProps) {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
@@ -97,7 +88,6 @@ export function CreateEmployeeDialog({
     workLocationId: undefined,
     contractType: "",
     department: "",
-    agencyId: undefined,
     hireDate: "",
     contractEndDate: "",
   });
@@ -397,39 +387,6 @@ export function CreateEmployeeDialog({
                           {location.name}
                         </SelectItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="agency">
-                    {t("employees.agency")}
-                  </Label>
-                  <Select
-                    onValueChange={(value) =>
-                      updateFormData(
-                        "agencyId",
-                        value ? Number.parseInt(value, 10) : undefined
-                      )
-                    }
-                    value={formData.agencyId?.toString() || ""}
-                  >
-                    <SelectTrigger id="agency">
-                      <SelectValue placeholder={t("employees.selectAgency")} />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      {agencies.length > 0 && (
-                        <>
-                          {agencies.map((agency) => (
-                            <SelectItem
-                              key={agency.id}
-                              value={agency.id.toString()}
-                            >
-                              {agency.name}
-                            </SelectItem>
-                          ))}
-                        </>
-                      )}
                     </SelectContent>
                   </Select>
                 </div>

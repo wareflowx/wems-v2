@@ -507,6 +507,7 @@ export const createContract = os.handler(async ({ input }) => {
       .insert(contracts)
       .values({
         employeeId: input.employeeId,
+        agencyId: input.agencyId || null,
         contractType: input.contractType,
         startDate: input.startDate,
         endDate: input.endDate || null,
@@ -526,6 +527,7 @@ export const updateContract = os.handler(async ({ input }) => {
     const [updated] = await db
       .update(contracts)
       .set({
+        agencyId: input.agencyId ?? null,
         contractType: input.contractType,
         startDate: input.startDate,
         endDate: input.endDate || null,

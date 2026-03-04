@@ -243,6 +243,7 @@ export function ContractTable({
                 {t("employeeDetail.fullName")}
               </TableHead>
               <TableHead className="px-4">{t("contracts.type")}</TableHead>
+              <TableHead className="px-4">{t("employees.agency")}</TableHead>
               <TableHead className="px-4">{t("contracts.startDate")}</TableHead>
               <TableHead className="px-4">{t("contracts.endDate")}</TableHead>
               <TableHead className="px-4">{t("contracts.status")}</TableHead>
@@ -254,7 +255,7 @@ export function ContractTable({
           <TableBody>
             {paginatedContracts.length === 0 ? (
               <TableRow>
-                <TableCell className="h-64" colSpan={7}>
+                <TableCell className="h-64" colSpan={8}>
                   <div className="flex h-full flex-col items-center justify-center p-8 text-muted-foreground">
                     <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                       <SearchX className="h-8 w-8 opacity-50" />
@@ -301,6 +302,15 @@ export function ContractTable({
                   </TableCell>
                   <TableCell className="px-4">
                     {getTypeBadge(contract.type)}
+                  </TableCell>
+                  <TableCell className="px-4">
+                    {contract.agency ? (
+                      <span className="inline-flex items-center rounded-md border border-purple-500/20 bg-purple-500/10 px-2 py-0.5 font-medium text-purple-600 text-xs">
+                        {contract.agency}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">-</span>
+                    )}
                   </TableCell>
                   <TableCell className="px-4 text-gray-700">
                     {contract.startDate}

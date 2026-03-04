@@ -1,5 +1,6 @@
 // Centralized hooks exports
 
+export * from "./use-agencies";
 export * from "./use-alerts";
 export * from "./use-caces";
 export * from "./use-contracts";

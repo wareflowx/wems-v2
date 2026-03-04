@@ -96,6 +96,7 @@ export const queryKeys = {
     departments: () => ["reference", "departments"] as const,
     jobTitles: () => ["reference", "job-titles"] as const,
     contractTypes: () => ["reference", "contract-types"] as const,
+    agencies: () => ["reference", "agencies"] as const,
   },
 
   // Positions
@@ -134,6 +135,15 @@ export const queryKeys = {
     detail: (id: number) => ["contract-types", "detail", id] as const,
   },
 
+  // Agencies
+  agencies: {
+    all: ["agencies"] as const,
+    lists: () => ["agencies", "list"] as const,
+    list: (filters: string) => ["agencies", "list", filters] as const,
+    details: () => ["agencies", "detail"] as const,
+    detail: (id: number) => ["agencies", "detail", id] as const,
+  },
+
   // Settings
   settings: {
     all: ["settings"] as const,
@@ -147,5 +157,6 @@ export const queryKeys = {
     deletedWorkLocations: () => ["trash", "deleted-work-locations"] as const,
     deletedDepartments: () => ["trash", "deleted-departments"] as const,
     deletedContractTypes: () => ["trash", "deleted-contract-types"] as const,
+    deletedAgencies: () => ["trash", "deleted-agencies"] as const,
   },
 } as const;

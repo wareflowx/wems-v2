@@ -476,6 +476,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuButton>
                 {alerts.length > 0 && <SidebarMenuBadge>{alerts.length}</SidebarMenuBadge>}
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t("agencies.title")}>
+                  <Link to="/agencies">
+                    <Building2 />
+                    <span>{t("agencies.title")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

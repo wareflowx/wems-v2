@@ -2,6 +2,7 @@ import { os } from "@orpc/server";
 import { and, desc, eq, isNull, not, gt } from "drizzle-orm";
 import { getDb } from "@/core/db";
 import {
+  agencies,
   attachments,
   caces,
   contracts,
@@ -30,6 +31,7 @@ import {
 } from "@/core/lib/driving-authorization";
 import { randomUUID } from "node:crypto";
 import {
+  createAgencyInputSchema,
   createAttachmentInputSchema,
   createCaceInputSchema,
   createContractTypeInputSchema,
@@ -42,6 +44,7 @@ import {
   createPositionInputSchema,
   createPostInputSchema,
   createWorkLocationInputSchema,
+  deleteAgencyInputSchema,
   deleteAttachmentInputSchema,
   deleteCaceInputSchema,
   deleteContractTypeInputSchema,
@@ -56,6 +59,7 @@ import {
   getAttachmentInputSchema,
   getAttachmentsInputSchema,
   getMediaInputSchema,
+  updateAgencyInputSchema,
   updateCaceInputSchema,
   updateContractTypeInputSchema,
   updateDepartmentInputSchema,
@@ -971,6 +975,89 @@ export const deleteDepartment = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in deleteDepartment:", error);
+    throw error;
+  }
+});
+
+// Agency handlers
+export const getAgencies = os.handler(async () => {
+  try {
+    const db = await getDb();
+    const allAgencies = await db
+      .select()
+      .from(agencies)
+      .where(and(eq(agencies.isActive, 1), isNull(agencies.deletedAt)))
+      .orderBy(agencies.name);
+    return allAgencies;
+  } catch (error) {
+    console.error("Error in getAgencies:", error);
+    throw error;
+  }
+});
+
+export const createAgency = os.handler(async ({ input }) => {
+  try {
+    const validatedData = createAgencyInputSchema.parse(input);
+    const db = await getDb();
+
+    const [newAgency] = await db.insert(agencies).values(validatedData).returning();
+    return newAgency;
+  } catch (error: any) {
+    console.error("Error in createAgency:", error);
+
+    if (error?.code === 'SQLITE_CONSTRAINT_UNIQUE' || error?.message?.includes('UNIQUE constraint failed')) {
+      const db = await getDb();
+      const existingAgency = await db
+        .select()
+        .from(agencies)
+        .where(eq(agencies.code, input.code));
+
+      if (existingAgency.length > 0 && existingAgency[0].deletedAt) {
+        throw new Error("An agency with this code already exists in the trash. Please restore it or use a different code.");
+      }
+      throw new Error("An agency with this code already exists. Please use a different code.");
+    }
+
+    throw error;
+  }
+});
+
+export const updateAgency = os.handler(async ({ input }) => {
+  try {
+    const validatedData = updateAgencyInputSchema.parse(input);
+    const db = await getDb();
+
+    const [updatedAgency] = await db
+      .update(agencies)
+      .set({
+        ...validatedData,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(agencies.id, validatedData.id))
+      .returning();
+
+    if (!updatedAgency) {
+      throw new Error("Agency not found");
+    }
+
+    return updatedAgency;
+  } catch (error) {
+    console.error("Error in updateAgency:", error);
+    throw error;
+  }
+});
+
+export const deleteAgency = os.handler(async ({ input }) => {
+  try {
+    const validatedData = deleteAgencyInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .update(agencies)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(agencies.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteAgency:", error);
     throw error;
   }
 });
@@ -2222,6 +2309,50 @@ export const permanentDeleteDepartment = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in permanentDeleteDepartment:", error);
+    throw error;
+  }
+});
+
+// Get deleted agencies
+export const getDeletedAgencies = os.handler(async () => {
+  try {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(agencies)
+      .where(not(isNull(agencies.deletedAt)))
+      .orderBy(desc(agencies.deletedAt));
+  } catch (error) {
+    console.error("Error in getDeletedAgencies:", error);
+    throw error;
+  }
+});
+
+// Restore agency
+export const restoreAgency = os.handler(async ({ input }) => {
+  try {
+    const validatedData = restoreInputSchema.parse(input);
+    const db = await getDb();
+    await db
+      .update(agencies)
+      .set({ deletedAt: null })
+      .where(eq(agencies.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in restoreAgency:", error);
+    throw error;
+  }
+});
+
+// Permanent delete agency
+export const permanentDeleteAgency = os.handler(async ({ input }) => {
+  try {
+    const validatedData = permanentDeleteInputSchema.parse(input);
+    const db = await getDb();
+    await db.delete(agencies).where(eq(agencies.id, validatedData.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in permanentDeleteAgency:", error);
     throw error;
   }
 });

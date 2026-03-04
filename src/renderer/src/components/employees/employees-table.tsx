@@ -1,3 +1,4 @@
+import type { Agency } from "@@/db/schema/agencies";
 import type { Contract } from "@@/db/schema/contracts";
 import type { Employee } from "@@/db/schema/employees";
 import type { Position } from "@@/db/schema/positions";
@@ -46,6 +47,7 @@ interface EmployeesTableProps {
   employees: Employee[];
   positions: Position[];
   workLocations: WorkLocation[];
+  agencies?: Agency[];
   contracts: Contract[];
   authorizationStatuses?: Map<number, DrivingAuthorizationStatusResult>;
   onDeleteClick: (employee: { id: number; name: string }) => void;
@@ -199,6 +201,24 @@ export function EmployeesTable({
             <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
               <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
               {location?.name || "-"}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "agencyId",
+        header: t("employees.agency"),
+        cell: ({ getValue }) => {
+          const agencyId = getValue() as number | null;
+          if (!agencyId) {
+            return (
+              <span className="text-muted-foreground text-xs">-</span>
+            );
+          }
+          const agency = agencies?.find((a) => a.id === agencyId);
+          return (
+            <span className="inline-flex items-center rounded-md border border-purple-500/20 bg-purple-500/10 px-2 py-0.5 font-medium text-purple-600 text-xs">
+              {agency?.name || "-"}
             </span>
           );
         },

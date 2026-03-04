@@ -185,15 +185,8 @@ export function EmployeesPage() {
 
   return (
     <>
-      <ResizablePanelGroup
-        className={selectedEmployee ? "bg-sidebar gap-1 p-2" : "gap-2 p-2"}
-        direction="horizontal"
-      >
-        <ResizablePanel
-          defaultSize={selectedEmployee ? 50 : 100}
-          minSize={30}
-          className={selectedEmployee ? "border border-border rounded-md bg-background" : "bg-background"}
-        >
+      <ResizablePanelGroup className={selectedEmployee ? "bg-sidebar gap-0.5 p-1.5" : "gap-0.5 p-1.5"} direction="horizontal">
+        <ResizablePanel defaultSize={selectedEmployee ? 50 : 100} minSize={30} className={selectedEmployee ? "border border-border rounded-md bg-background" : "bg-background"}>
           <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
             <div className="min-h-full space-y-3">
               <PageHeaderCard
@@ -238,18 +231,20 @@ export function EmployeesPage() {
                 ]}
               />
 
-              <EmployeesTable
-                agencies={agencies}
-                authorizationStatuses={authorizationStatuses}
-                contracts={contracts}
-                employees={employees}
-                onAddClick={() => setIsCreateDialogOpen(true)}
-                onDeleteClick={handleDeleteClick}
-                onEditClick={handleEditClick}
-                onRowClick={handleRowClick}
-                positions={positions}
-                workLocations={workLocations}
-              />
+              <div className="flex flex-col gap-2">
+                <EmployeesTable
+                  agencies={agencies}
+                  authorizationStatuses={authorizationStatuses}
+                  contracts={contracts}
+                  employees={employees}
+                  onAddClick={() => setIsCreateDialogOpen(true)}
+                  onDeleteClick={handleDeleteClick}
+                  onEditClick={handleEditClick}
+                  onRowClick={handleRowClick}
+                  positions={positions}
+                  workLocations={workLocations}
+                />
+              </div>
             </div>
           </div>
         </ResizablePanel>
@@ -406,22 +401,22 @@ function EmployeeDetailPanel({
 
   return (
     <div className="relative flex h-full flex-col overflow-y-auto rounded-md">
-      {/* Header with close button */}
+      <Button
+        className="absolute left-2 bottom-2 z-10"
+        onClick={onClose}
+      >
+        Close panel
+      </Button>
+
+      {/* Header */}
       <div className="border-b p-4 pt-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">
-              {employee.firstName} {employee.lastName}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {t("common.employeeId")}
-              {employee.id.toString().padStart(4, "0")}
-            </p>
-          </div>
-          <Button onClick={onClose} variant="outline">
-            {t("common.close", "Close")}
-          </Button>
-        </div>
+        <h2 className="text-lg font-semibold">
+          {employee.firstName} {employee.lastName}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {t("common.employeeId")}
+          {employee.id.toString().padStart(4, "0")}
+        </p>
       </div>
 
       {/* Content */}

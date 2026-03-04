@@ -8,6 +8,7 @@ import { ErrorDisplay } from "@/components/ui/error-display";
 import { Input } from "@/components/ui/input";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
+import { Card } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -34,6 +35,8 @@ import {
   useDeleteAgency,
   useAgencies,
   useUpdateAgency,
+  useEmployees,
+  useContracts,
 } from "@/hooks";
 import {
   Dialog,
@@ -156,8 +159,8 @@ export function AgenciesPage() {
 
   return (
     <>
-      <ResizablePanelGroup className="gap-0.5 p-1.5" direction="horizontal">
-        <ResizablePanel defaultSize={selectedAgency ? 50 : 100} minSize={30} className={selectedAgency ? "border border-border rounded-md" : ""}>
+      <ResizablePanelGroup className={selectedAgency ? "bg-sidebar gap-0.5 p-1.5" : "gap-0.5 p-1.5"} direction="horizontal">
+        <ResizablePanel defaultSize={selectedAgency ? 50 : 100} minSize={30} className={selectedAgency ? "border border-border rounded-md bg-background" : "bg-background"}>
           <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
             <div className="min-h-full space-y-3">
           {/* Header */}
@@ -350,7 +353,7 @@ export function AgenciesPage() {
 
       {/* Detail Panel */}
       {selectedAgency && (
-        <ResizablePanel defaultSize={50} minSize={30} className="border border-border rounded-md">
+        <ResizablePanel defaultSize={50} minSize={30} className="border border-border rounded-md bg-background">
           <AgencyDetailPanel
             agency={selectedAgency}
             onClose={() => setSelectedAgency(null)}
@@ -398,54 +401,177 @@ function AgencyDetailPanel({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const { data: employees = [] } = useEmployees();
+  const { data: contracts = [] } = useContracts();
+
+  // Get employees with their contract info for this agency
+  const agencyEmployees = useMemo(() => {
+    const now = new Date();
+    const result: Array<{
+      employee: typeof employees[0];
+      contractType?: string;
+    }> = [];
+
+    contracts.forEach((contract) => {
+      if (contract.agencyId === agency.id && contract.isActive) {
+        // Check if contract has ended
+        if (contract.endDate && new Date(contract.endDate) < now) {
+          return;
+        }
+        const employee = employees.find((e) => e.id === contract.employeeId);
+        if (employee) {
+          result.push({
+            employee,
+            contractType: contract.contractType,
+          });
+        }
+      }
+    });
+
+    return result;
+  }, [employees, contracts, agency.id]);
+
+  const contractColors: { [key: string]: string } = {
+    CDI: "bg-blue-500/15 border border-blue-500/25 text-blue-600",
+    CDD: "bg-orange-500/15 border border-orange-500/25 text-orange-600",
+    "Intérim": "bg-teal-500/15 border border-teal-500/25 text-teal-600",
+    Alternance: "bg-purple-500/15 border border-purple-500/25 text-purple-600",
+  };
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-y-auto rounded-md p-4 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{agency.name}</h2>
-        <Button onClick={onClose} size="icon" variant="ghost">
-          <X className="h-4 w-4" />
-        </Button>
+    <div className="relative flex h-full flex-col overflow-y-auto rounded-md">
+      <Button
+        className="absolute left-2 bottom-2 z-10"
+        onClick={onClose}
+      >
+        Close panel
+      </Button>
+
+      {/* Header */}
+      <div className="border-b p-4 pt-6">
+        <PageHeaderCard
+          description={`${agency.code || ""} - ${
+            agency.isActive
+              ? t("agencies.active")
+              : t("agencies.inactive")
+          }`}
+          icon={
+            <Building2 className="h-4 w-4" />
+          }
+          title={agency.name}
+        />
+
+        {/* Info Grid */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <Card className="p-3">
+            <p className="text-muted-foreground text-xs">{t("agencies.code")}</p>
+            <p className="mt-0.5 font-medium text-sm">
+              {agency.code || "-"}
+            </p>
+          </Card>
+          <Card className="p-3">
+            <p className="text-muted-foreground text-xs">
+              {t("employees.title")}
+            </p>
+            <p className="mt-0.5 text-lg font-semibold">
+              {agencyEmployees.length}
+            </p>
+          </Card>
+          <Card className="p-3">
+            <p className="text-muted-foreground text-xs">
+              {t("agencies.createdAt")}
+            </p>
+            <p className="mt-0.5 text-sm">
+              {agency.createdAt
+                ? new Date(agency.createdAt).toLocaleDateString()
+                : "-"}
+            </p>
+          </Card>
+          <Card className="p-3">
+            <p className="text-muted-foreground text-xs">
+              {t("agencies.updatedAt")}
+            </p>
+            <p className="mt-0.5 text-sm">
+              {agency.updatedAt
+                ? new Date(agency.updatedAt).toLocaleDateString()
+                : "-"}
+            </p>
+          </Card>
+        </div>
       </div>
 
-      <div className="space-y-4">
-        <div className="rounded-lg border bg-background p-4">
-          <h3 className="mb-2 text-sm font-medium">{t("agencies.code")}</h3>
-          <p className="text-muted-foreground text-sm">
-            {agency.code || "-"}
-          </p>
-        </div>
-
-        <div className="rounded-lg border bg-background p-4">
-          <h3 className="mb-2 text-sm font-medium">{t("agencies.status")}</h3>
-          {agency.isActive ? (
-            <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-2 py-0.5 font-medium text-green-600 text-xs">
-              {t("agencies.active")}
-            </span>
-          ) : (
-            <span className="inline-flex items-center rounded-md border border-gray-500/25 bg-gray-500/15 px-2 py-0.5 font-medium text-gray-600 text-xs">
-              {t("agencies.inactive")}
-            </span>
-          )}
-        </div>
-
-        <div className="rounded-lg border bg-background p-4">
-          <h3 className="mb-2 text-sm font-medium">{t("agencies.createdAt")}</h3>
-          <p className="text-muted-foreground text-sm">
-            {agency.createdAt
-              ? new Date(agency.createdAt).toLocaleDateString()
-              : "-"}
-          </p>
-        </div>
-
-        <div className="rounded-lg border bg-background p-4">
-          <h3 className="mb-2 text-sm font-medium">{t("agencies.updatedAt")}</h3>
-          <p className="text-muted-foreground text-sm">
-            {agency.updatedAt
-              ? new Date(agency.updatedAt).toLocaleDateString()
-              : "-"}
-          </p>
-        </div>
+      {/* Employees Table */}
+      <div className="flex-1 overflow-auto p-4">
+        <h3 className="mb-3 text-sm font-medium">
+          {t("employees.employeesList", "Employees")}
+        </h3>
+        {agencyEmployees.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-lg border bg-background py-8 text-center">
+            <Building2 className="mb-2 h-8 w-8 text-muted-foreground" />
+            <p className="text-muted-foreground text-sm">
+              {t("agencies.noEmployees", "No employees in this agency")}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-lg border bg-card">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="px-3">
+                    {t("employeeDetail.fullName")}
+                  </TableHead>
+                  <TableHead className="px-3">
+                    {t("employees.currentContract")}
+                  </TableHead>
+                  <TableHead className="px-3">
+                    {t("employeeDetail.status")}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {agencyEmployees.map(({ employee, contractType }) => (
+                  <TableRow
+                    key={employee.id}
+                    className="hover:bg-muted/50"
+                  >
+                    <TableCell className="px-3 py-2.5">
+                      <div>
+                        <p className="font-medium text-sm">
+                          {employee.firstName} {employee.lastName}
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          {t("common.employeeId")}
+                          {employee.id.toString().padStart(4, "0")}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-3 py-2.5">
+                      <span
+                        className={`inline-flex items-center rounded-md px-2 py-0.5 font-medium text-xs ${
+                          contractColors[contractType || ""] ||
+                          "bg-gray-500/15 border border-gray-500/25 text-gray-600"
+                        }`}
+                      >
+                        {contractType || "-"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-3 py-2.5">
+                      {employee.status === "active" ? (
+                        <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-2 py-0.5 font-medium text-green-600 text-xs">
+                          {t("employees.active")}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-md border border-yellow-500/25 bg-yellow-500/15 px-2 py-0.5 font-medium text-yellow-600 text-xs">
+                          {t("employees.onLeave")}
+                        </span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
     </div>
   );

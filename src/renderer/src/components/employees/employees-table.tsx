@@ -163,33 +163,6 @@ export function EmployeesTable({
         },
       },
       {
-        id: "contractEndDate",
-        header: t("contracts.endDate"),
-        cell: ({ row }) => {
-          const employee = row.original;
-          const contract = getEmployeeContract(employee.id);
-          if (!contract) {
-            return <span className="text-muted-foreground text-xs">-</span>;
-          }
-          // Show "CDI" for CDI contracts (no end date)
-          if (contract.contractType === "CDI") {
-            return (
-              <span className="inline-flex items-center rounded-md border border-blue-500/25 bg-blue-500/15 px-2 py-0.5 font-medium text-blue-600 text-xs">
-                CDI
-              </span>
-            );
-          }
-          if (!contract.endDate) {
-            return <span className="text-muted-foreground text-xs">-</span>;
-          }
-          return (
-            <span className="text-gray-700 text-xs">
-              {new Date(contract.endDate).toLocaleDateString()}
-            </span>
-          );
-        },
-      },
-      {
         accessorKey: "positionId",
         header: t("employees.position"),
         cell: ({ getValue }) => {
@@ -294,6 +267,22 @@ export function EmployeesTable({
         header: t("employeeDetail.startDate"),
         cell: ({ getValue }) => {
           return <span className="text-gray-700">{getValue() as string}</span>;
+        },
+      },
+      {
+        id: "contractEndDate",
+        header: t("contracts.endDate"),
+        cell: ({ row }) => {
+          const employee = row.original;
+          const contract = getEmployeeContract(employee.id);
+          if (!contract || !contract.endDate) {
+            return <span className="text-muted-foreground text-xs">-</span>;
+          }
+          return (
+            <span className="text-gray-700 text-xs">
+              {new Date(contract.endDate).toLocaleDateString()}
+            </span>
+          );
         },
       },
       {

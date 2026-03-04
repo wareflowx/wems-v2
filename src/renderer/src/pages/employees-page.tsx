@@ -186,7 +186,7 @@ export function EmployeesPage() {
   return (
     <>
       <ResizablePanelGroup
-        className={selectedEmployee ? "bg-sidebar gap-0.5 p-1.5" : "gap-0.5 p-1.5"}
+        className={`h-full w-full overflow-hidden ${selectedEmployee ? "bg-sidebar gap-0.5 p-1.5" : "gap-0.5 p-1.5"}`}
         direction="horizontal"
       >
         <ResizablePanel
@@ -194,8 +194,8 @@ export function EmployeesPage() {
           minSize={30}
           className={selectedEmployee ? "border border-border rounded-md bg-background" : "bg-background"}
         >
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-            <div className="min-h-full space-y-3">
+          <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 pt-6">
+            <div className="min-h-full space-y-3 overflow-auto">
               <PageHeaderCard
                 description={t("employees.description")}
                 icon={<Sparkles className="h-4 w-4 text-gray-600" />}

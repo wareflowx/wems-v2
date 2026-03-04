@@ -16,6 +16,7 @@ import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from "@/components/ui/resizable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useSidebar } from "@/components/ui/sidebar";
 import {
   useAgencies,
   useCaces,
@@ -40,6 +41,7 @@ const EMPTY_ARRAY: never[] = [];
 export function EmployeesPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { setOpen } = useSidebar();
   const queryClient = useQueryClient();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -49,6 +51,13 @@ export function EmployeesPage() {
   } | null>(null);
   const [employeeToEdit, setEmployeeToEdit] = useState<any | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+
+  // Auto-close sidebar when employee is selected
+  useEffect(() => {
+    if (selectedEmployee) {
+      setOpen(false);
+    }
+  }, [selectedEmployee, setOpen]);
 
   // Use TanStack Query hooks
   const { data: employees = [], isLoading, error } = useEmployees();
@@ -175,18 +184,18 @@ export function EmployeesPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-      <div className="min-h-full space-y-3">
-        <ResizablePanelGroup
-          className={selectedEmployee ? "bg-sidebar gap-0.5 p-1.5" : "gap-0.5 p-1.5"}
-          direction="horizontal"
+    <>
+      <ResizablePanelGroup
+        className={selectedEmployee ? "bg-sidebar gap-0.5 p-1.5" : "gap-0.5 p-1.5"}
+        direction="horizontal"
+      >
+        <ResizablePanel
+          defaultSize={selectedEmployee ? 50 : 100}
+          minSize={30}
+          className={selectedEmployee ? "border border-border rounded-md bg-background" : "bg-background"}
         >
-          <ResizablePanel
-            defaultSize={selectedEmployee ? 50 : 100}
-            minSize={30}
-            className={selectedEmployee ? "border border-border rounded-md bg-background" : "bg-background"}
-          >
-            <div className="space-y-3">
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+            <div className="min-h-full space-y-3">
               <PageHeaderCard
                 description={t("employees.description")}
                 icon={<Sparkles className="h-4 w-4 text-gray-600" />}
@@ -242,33 +251,35 @@ export function EmployeesPage() {
                 workLocations={workLocations}
               />
             </div>
+          </div>
+        </ResizablePanel>
+
+        {selectedEmployee && (
+          <ResizableHandle className="w-1 bg-transparent hover:bg-border rounded-md transition-all duration-200" />
+        )}
+
+        {selectedEmployee && (
+          <ResizablePanel
+            defaultSize={50}
+            minSize={30}
+            className="border border-border rounded-md bg-background"
+          >
+            <EmployeeDetailPanel
+              employee={selectedEmployee}
+              agencies={agencies}
+              caces={caces}
+              contracts={contracts}
+              departments={departments}
+              drivingAuthorizations={drivingAuthorizations}
+              medicalVisits={medicalVisits}
+              onlineTrainings={onlineTrainings}
+              positions={positions}
+              workLocations={workLocations}
+              onClose={() => setSelectedEmployee(null)}
+            />
           </ResizablePanel>
-          {selectedEmployee && (
-            <>
-              <ResizableHandle className="w-1 bg-transparent hover:bg-border rounded-md transition-all duration-200" />
-              <ResizablePanel
-                defaultSize={50}
-                minSize={30}
-                className="border border-border rounded-md bg-background"
-              >
-                <EmployeeDetailPanel
-                  employee={selectedEmployee}
-                  agencies={agencies}
-                  caces={caces}
-                  contracts={contracts}
-                  departments={departments}
-                  drivingAuthorizations={drivingAuthorizations}
-                  medicalVisits={medicalVisits}
-                  onlineTrainings={onlineTrainings}
-                  positions={positions}
-                  workLocations={workLocations}
-                  onClose={() => setSelectedEmployee(null)}
-                />
-              </ResizablePanel>
-            </>
-          )}
-        </ResizablePanelGroup>
-      </div>
+        )}
+      </ResizablePanelGroup>
 
       <CreateEmployeeDialog
         departments={departments}
@@ -296,7 +307,7 @@ export function EmployeesPage() {
         positions={positions}
         workLocations={workLocations}
       />
-    </div>
+    </>
   );
 }
 
@@ -394,25 +405,23 @@ function EmployeeDetailPanel({
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className="relative flex h-full flex-col overflow-y-auto rounded-md">
       {/* Header with close button */}
-      <div className="relative flex items-center justify-between border-b p-4">
-        <div className="pr-8">
-          <h2 className="text-lg font-semibold">
-            {employee.firstName} {employee.lastName}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {t("common.employeeId")}
-            {employee.id.toString().padStart(4, "0")}
-          </p>
+      <div className="border-b p-4 pt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">
+              {employee.firstName} {employee.lastName}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t("common.employeeId")}
+              {employee.id.toString().padStart(4, "0")}
+            </p>
+          </div>
+          <Button onClick={onClose} variant="outline">
+            {t("common.close", "Close")}
+          </Button>
         </div>
-        <Button
-          className="absolute top-4 right-4 h-8 w-8 p-0"
-          onClick={onClose}
-          variant="ghost"
-        >
-          <X className="h-4 w-4" />
-        </Button>
       </div>
 
       {/* Content */}

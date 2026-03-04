@@ -53,6 +53,7 @@ interface EmployeesTableProps {
   onDeleteClick: (employee: { id: number; name: string }) => void;
   onAddClick?: () => void;
   onEditClick?: (employee: Employee) => void;
+  onRowClick?: (employee: Employee) => void;
 }
 
 export function EmployeesTable({
@@ -65,6 +66,7 @@ export function EmployeesTable({
   onDeleteClick,
   onAddClick,
   onEditClick,
+  onRowClick,
 }: EmployeesTableProps) {
   const { t } = useTranslation();
   const [globalFilter, setGlobalFilter] = useState("");
@@ -326,6 +328,7 @@ export function EmployeesTable({
       onDeleteClick,
       getEmployeeContract,
       onEditClick,
+      onRowClick,
     ]
   );
 
@@ -436,7 +439,11 @@ export function EmployeesTable({
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow className="hover:bg-muted/50" key={row.id}>
+                <TableRow
+                  className={onRowClick ? "cursor-pointer hover:bg-muted/50" : "hover:bg-muted/50"}
+                  key={row.id}
+                  onClick={() => onRowClick?.(row.original)}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell className="px-4" key={cell.id}>
                       {flexRender(

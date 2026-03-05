@@ -1,4 +1,4 @@
-import { Users } from "lucide-react";
+import { ShieldX, TestTubes, Users, FileText, Car, GraduationCap } from "lucide-react";
 import { useParams } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,6 +7,7 @@ import { ErrorDisplay } from "@/components/ui/error-display";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
+import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import {
   Table,
   TableBody,
@@ -266,7 +267,11 @@ export function EmployeeDetailPage() {
           {activeTab === "caces" && (
             <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeCaces.length === 0 ? (
-                <p className="text-muted-foreground text-sm py-4 px-4">No CACES records</p>
+                <AnimatedEmpty
+                  title="No CACES records"
+                  description="This employee has no CACES certificates on file."
+                  icons={[TestTubes, TestTubes, TestTubes]}
+                />
               ) : (
                 <Table>
                   <TableHeader>
@@ -305,7 +310,11 @@ export function EmployeeDetailPage() {
           {activeTab === "medicalVisits" && (
             <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeMedicalVisits.length === 0 ? (
-                <p className="text-muted-foreground text-sm py-4 px-4">No medical visits</p>
+                <AnimatedEmpty
+                  title="No medical visits"
+                  description="This employee has no medical visits on file."
+                  icons={[FileText, FileText, FileText]}
+                />
               ) : (
                 <Table>
                   <TableHeader>
@@ -354,7 +363,11 @@ export function EmployeeDetailPage() {
           {activeTab === "drivingAuthorizations" && (
             <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeDrivingAuthorizations.length === 0 ? (
-                <p className="text-muted-foreground text-sm py-4 px-4">No driving authorizations</p>
+                <AnimatedEmpty
+                  title="No driving authorizations"
+                  description="This employee has no driving authorizations on file."
+                  icons={[Car, Car, Car]}
+                />
               ) : (
                 <Table>
                   <TableHeader>
@@ -393,7 +406,11 @@ export function EmployeeDetailPage() {
           {activeTab === "trainings" && (
             <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeTrainings.length === 0 ? (
-                <p className="text-muted-foreground text-sm py-4 px-4">No trainings</p>
+                <AnimatedEmpty
+                  title="No trainings"
+                  description="This employee has no trainings on file."
+                  icons={[GraduationCap, GraduationCap, GraduationCap]}
+                />
               ) : (
                 <Table>
                   <TableHeader>

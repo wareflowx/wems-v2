@@ -268,6 +268,7 @@ export function EmployeeDetailPage() {
             <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeCaces.length === 0 ? (
                 <AnimatedEmpty
+                  bordered={false}
                   title="No CACES records"
                   description="This employee has no CACES certificates on file."
                   icons={[TestTubes, TestTubes, TestTubes]}
@@ -311,6 +312,7 @@ export function EmployeeDetailPage() {
             <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeMedicalVisits.length === 0 ? (
                 <AnimatedEmpty
+                  bordered={false}
                   title="No medical visits"
                   description="This employee has no medical visits on file."
                   icons={[FileText, FileText, FileText]}
@@ -364,6 +366,7 @@ export function EmployeeDetailPage() {
             <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeDrivingAuthorizations.length === 0 ? (
                 <AnimatedEmpty
+                  bordered={false}
                   title="No driving authorizations"
                   description="This employee has no driving authorizations on file."
                   icons={[Car, Car, Car]}
@@ -407,6 +410,7 @@ export function EmployeeDetailPage() {
             <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeTrainings.length === 0 ? (
                 <AnimatedEmpty
+                  bordered={false}
                   title="No trainings"
                   description="This employee has no trainings on file."
                   icons={[GraduationCap, GraduationCap, GraduationCap]}

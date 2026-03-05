@@ -12,6 +12,7 @@ interface AnimatedEmptyProps {
     onClick: () => void;
   };
   className?: string;
+  bordered?: boolean;
 }
 
 export function AnimatedEmpty({
@@ -20,12 +21,14 @@ export function AnimatedEmpty({
   icons = [],
   action,
   className,
+  bordered = true,
 }: AnimatedEmptyProps) {
   return (
     <div
       className={cn(
         "bg-background border-border hover:border-border/80 text-center",
-        "border border-dashed rounded-xl p-14 w-full mx-auto",
+        bordered && "border border-dashed rounded-xl",
+        "p-14 w-full mx-auto",
         "group transition duration-500 hover:duration-200",
         className
       )}

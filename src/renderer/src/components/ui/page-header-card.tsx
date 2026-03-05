@@ -5,12 +5,14 @@ interface PageHeaderCardProps {
   icon: ReactNode;
   title: string;
   description: string;
+  rightContent?: ReactNode;
 }
 
 export function PageHeaderCard({
   icon,
   title,
   description,
+  rightContent,
 }: PageHeaderCardProps) {
   return (
     <div className="mb-2">
@@ -22,6 +24,7 @@ export function PageHeaderCard({
               <span className="font-medium">{title}</span> - {description}
             </p>
           </div>
+          {rightContent && <div>{rightContent}</div>}
         </div>
       </Card>
     </div>

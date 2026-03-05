@@ -164,6 +164,15 @@ export function EmployeeDetailPage() {
           <PageHeaderCard
             description={employeeData.email || "-"}
             icon={<Users className="h-4 w-4" />}
+            rightContent={
+              employeeData.status === "active" ? (
+                <StatusBadge color="green">{t("employees.active")}</StatusBadge>
+              ) : employeeData.status === "on_leave" ? (
+                <StatusBadge color="yellow">{t("employees.onLeave")}</StatusBadge>
+              ) : (
+                <StatusBadge color="gray">{employeeData.status}</StatusBadge>
+              )
+            }
             title={`${employeeData.firstName} ${employeeData.lastName}`}
           />
 

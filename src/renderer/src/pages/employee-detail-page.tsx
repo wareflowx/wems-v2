@@ -6,7 +6,7 @@ import { EditEmployeeDialog } from "@/components/employees/EditEmployeeDialog";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/badge";
 import {
   useAgencies,
   useCaces,
@@ -112,11 +112,11 @@ export function EmployeeDetailPage() {
   // Tab state for document types
   const [activeTab, setActiveTab] = useState<"caces" | "medicalVisits" | "drivingAuthorizations" | "trainings">("caces");
 
-  const tabs = [
-    { key: "caces" as const, label: "CACES", count: employeeCaces.length, valid: validCaces },
-    { key: "medicalVisits" as const, label: "Medical Visits", count: employeeMedicalVisits.length, valid: validMedicalVisit },
-    { key: "drivingAuthorizations" as const, label: "Driving Authorizations", count: employeeDrivingAuthorizations.length, valid: validDrivingAuth },
-    { key: "trainings" as const, label: "Trainings", count: employeeTrainings.length, valid: validTraining },
+  const tabs: { key: "caces" | "medicalVisits" | "drivingAuthorizations" | "trainings"; label: string; count: number; valid: boolean }[] = [
+    { key: "caces", label: "CACES", count: employeeCaces.length, valid: validCaces },
+    { key: "medicalVisits", label: "Medical Visits", count: employeeMedicalVisits.length, valid: validMedicalVisit },
+    { key: "drivingAuthorizations", label: "Driving Authorizations", count: employeeDrivingAuthorizations.length, valid: validDrivingAuth },
+    { key: "trainings", label: "Trainings", count: employeeTrainings.length, valid: validTraining },
   ];
 
   // Loading state
@@ -247,11 +247,9 @@ export function EmployeeDetailPage() {
                     {tab.count}
                   </span>
                 )}
-                {tab.valid ? (
-                  <span className="ml-1 text-green-600">✓</span>
-                ) : (
-                  <span className="ml-1 text-red-600">✗</span>
-                )}
+                <StatusBadge color={tab.valid ? "green" : "red"} className="ml-2">
+                  {tab.valid ? "Valid" : "Invalid"}
+                </StatusBadge>
               </button>
             ))}
           </div>

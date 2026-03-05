@@ -17,6 +17,7 @@ import { Route as PositionsRouteImport } from './routes/positions'
 import { Route as OnlineTrainingsRouteImport } from './routes/online-trainings'
 import { Route as MedicalVisitsRouteImport } from './routes/medical-visits'
 import { Route as EmployeesRouteImport } from './routes/employees'
+import { Route as EmployeeDetailRouteImport } from './routes/employees.$employeeId'
 import { Route as DrivingAuthorizationsRouteImport } from './routes/driving-authorizations'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DepartmentsRouteImport } from './routes/departments'
@@ -65,6 +66,11 @@ const MedicalVisitsRoute = MedicalVisitsRouteImport.update({
 const EmployeesRoute = EmployeesRouteImport.update({
   id: '/employees',
   path: '/employees',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployeeDetailRoute = EmployeeDetailRouteImport.update({
+  id: '/employees/$employeeId',
+  path: '/employees/$employeeId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DrivingAuthorizationsRoute = DrivingAuthorizationsRouteImport.update({
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/documents': typeof DocumentsRoute
   '/driving-authorizations': typeof DrivingAuthorizationsRoute
   '/employees': typeof EmployeesRoute
+  '/employees/$employeeId': typeof EmployeeDetailRoute
   '/medical-visits': typeof MedicalVisitsRoute
   '/online-trainings': typeof OnlineTrainingsRoute
   '/positions': typeof PositionsRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/documents': typeof DocumentsRoute
   '/driving-authorizations': typeof DrivingAuthorizationsRoute
   '/employees': typeof EmployeesRoute
+  '/employees/$employeeId': typeof EmployeeDetailRoute
   '/medical-visits': typeof MedicalVisitsRoute
   '/online-trainings': typeof OnlineTrainingsRoute
   '/positions': typeof PositionsRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/documents': typeof DocumentsRoute
   '/driving-authorizations': typeof DrivingAuthorizationsRoute
   '/employees': typeof EmployeesRoute
+  '/employees/$employeeId': typeof EmployeeDetailRoute
   '/medical-visits': typeof MedicalVisitsRoute
   '/online-trainings': typeof OnlineTrainingsRoute
   '/positions': typeof PositionsRoute
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/driving-authorizations'
     | '/employees'
+    | '/employees/$employeeId'
     | '/medical-visits'
     | '/online-trainings'
     | '/positions'
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/driving-authorizations'
     | '/employees'
+    | '/employees/$employeeId'
     | '/medical-visits'
     | '/online-trainings'
     | '/positions'
@@ -219,6 +230,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/driving-authorizations'
     | '/employees'
+    | '/employees/$employeeId'
     | '/medical-visits'
     | '/online-trainings'
     | '/positions'
@@ -238,6 +250,7 @@ export interface RootRouteChildren {
   DocumentsRoute: typeof DocumentsRoute
   DrivingAuthorizationsRoute: typeof DrivingAuthorizationsRoute
   EmployeesRoute: typeof EmployeesRoute
+  EmployeeDetailRoute: typeof EmployeeDetailRoute
   MedicalVisitsRoute: typeof MedicalVisitsRoute
   OnlineTrainingsRoute: typeof OnlineTrainingsRoute
   PositionsRoute: typeof PositionsRoute
@@ -303,6 +316,13 @@ declare module '@tanstack/react-router' {
       path: '/employees'
       fullPath: '/employees'
       preLoaderRoute: typeof EmployeesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employees/$employeeId': {
+      id: '/employees/$employeeId'
+      path: '/employees/$employeeId'
+      fullPath: '/employees/$employeeId'
+      preLoaderRoute: typeof EmployeeDetailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/driving-authorizations': {
@@ -382,6 +402,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocumentsRoute: DocumentsRoute,
   DrivingAuthorizationsRoute: DrivingAuthorizationsRoute,
   EmployeesRoute: EmployeesRoute,
+  EmployeeDetailRoute: EmployeeDetailRoute,
   MedicalVisitsRoute: MedicalVisitsRoute,
   OnlineTrainingsRoute: OnlineTrainingsRoute,
   PositionsRoute: PositionsRoute,

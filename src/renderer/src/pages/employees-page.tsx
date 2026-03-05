@@ -710,21 +710,21 @@ function EmployeeDetailPanel({
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-4">
-          <Button variant="outline" onClick={onToggleFullscreen}>
+          <Button onClick={onToggleFullscreen}>
             {isFullscreen ? (
               <>
-                <Minimize2 className="mr-2 h-4 w-4" />
+                <Minimize2 className="mr-1 h-4 w-4" />
                 Exit Fullscreen
               </>
             ) : (
               <>
-                <Maximize2 className="mr-2 h-4 w-4" />
+                <Maximize2 className="mr-1 h-4 w-4" />
                 Fullscreen
               </>
             )}
           </Button>
-          <Button variant="outline" onClick={onClose}>
-            <X className="mr-2 h-4 w-4" />
+          <Button onClick={onClose}>
+            <X className="mr-1 h-4 w-4" />
             Close
           </Button>
         </div>

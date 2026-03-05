@@ -438,20 +438,6 @@ function EmployeeDetailPanel({
 
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden rounded-md">
-      {/* Action Buttons */}
-      <div className="absolute right-2 top-2 z-10 flex gap-1">
-        <Button size="icon" variant="ghost" onClick={onToggleFullscreen}>
-          {isFullscreen ? (
-            <Minimize2 className="h-4 w-4" />
-          ) : (
-            <Maximize2 className="h-4 w-4" />
-          )}
-        </Button>
-        <Button size="icon" variant="ghost" onClick={onClose}>
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
       {/* Header */}
       <div className="border-b p-4 pt-6">
         <PageHeaderCard
@@ -720,6 +706,27 @@ function EmployeeDetailPanel({
               </table>
             </div>
           )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 pt-4">
+          <Button variant="outline" onClick={onToggleFullscreen}>
+            {isFullscreen ? (
+              <>
+                <Minimize2 className="mr-2 h-4 w-4" />
+                Exit Fullscreen
+              </>
+            ) : (
+              <>
+                <Maximize2 className="mr-2 h-4 w-4" />
+                Fullscreen
+              </>
+            )}
+          </Button>
+          <Button variant="outline" onClick={onClose}>
+            <X className="mr-2 h-4 w-4" />
+            Close
+          </Button>
         </div>
       </div>
     </div>

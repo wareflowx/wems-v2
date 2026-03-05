@@ -406,6 +406,29 @@ function EmployeeDetailPanel({
   const department = departments.find((d) => d.id === employee.department);
   const agency = agencies.find((a) => a.id === currentContract?.agencyId);
 
+  // Check if certifications are valid (not expired)
+  const now = new Date();
+
+  // Valid CACES: at least one not expired
+  const validCaces = employeeCaces.some((c: any) => c.expirationDate && new Date(c.expirationDate) > now);
+
+  // Valid medical visit: at least one not expired and completed
+  const validMedicalVisit = employeeMedicalVisits.some(
+    (m: any) => m.status === "completed" && m.expirationDate && new Date(m.expirationDate) > now
+  );
+
+  // Valid driving authorization: at least one not expired
+  const validDrivingAuth = employeeDrivingAuthorizations.some(
+    (d: any) => d.expirationDate && new Date(d.expirationDate) > now
+  );
+
+  // Valid training: at least one completed
+  const validTraining = employeeTrainings.some((t: any) => t.status === "completed");
+
+  // Can drive: all 4 conditions met
+  const canDrive = validCaces && validMedicalVisit && validDrivingAuth && validTraining;
+  const partialDriving = (validCaces ? 1 : 0) + (validMedicalVisit ? 1 : 0) + (validDrivingAuth ? 1 : 0) + (validTraining ? 1 : 0);
+
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden rounded-md">
       <Button className="absolute left-2 bottom-2 z-10" onClick={onClose}>
@@ -462,36 +485,53 @@ function EmployeeDetailPanel({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">
-              Certifications
+              Driving Authorization
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
+            {/* Can Drive Status */}
+            <div className="mb-2">
+              {canDrive ? (
+                <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-3 py-1.5 font-medium text-green-600 text-xs">
+                  Authorized to drive
+                </span>
+              ) : partialDriving > 0 ? (
+                <span className="inline-flex items-center rounded-md border border-yellow-500/25 bg-yellow-500/15 px-3 py-1.5 font-medium text-yellow-600 text-xs">
+                  Partial ({partialDriving}/4)
+                </span>
+              ) : (
+                <span className="inline-flex items-center rounded-md border border-red-500/25 bg-red-500/15 px-3 py-1.5 font-medium text-red-600 text-xs">
+                  Not authorized
+                </span>
+              )}
+            </div>
+
             {/* CACES */}
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">CACES</span>
-              <span className={`font-medium ${employeeCaces.length > 0 ? "text-green-600" : "text-red-600"}`}>
-                {employeeCaces.length}
+              <span className={`font-medium ${validCaces ? "text-green-600" : "text-red-600"}`}>
+                {validCaces ? "Valid" : "Invalid"}
               </span>
             </div>
             {/* Medical Visits */}
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Medical Visits</span>
-              <span className={`font-medium ${employeeMedicalVisits.length > 0 ? "text-green-600" : "text-red-600"}`}>
-                {employeeMedicalVisits.length}
+              <span className="text-muted-foreground">Medical Visit</span>
+              <span className={`font-medium ${validMedicalVisit ? "text-green-600" : "text-red-600"}`}>
+                {validMedicalVisit ? "Valid" : "Invalid"}
               </span>
             </div>
             {/* Driving Authorizations */}
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Driving Auth.</span>
-              <span className={`font-medium ${employeeDrivingAuthorizations.length > 0 ? "text-green-600" : "text-red-600"}`}>
-                {employeeDrivingAuthorizations.length}
+              <span className={`font-medium ${validDrivingAuth ? "text-green-600" : "text-red-600"}`}>
+                {validDrivingAuth ? "Valid" : "Invalid"}
               </span>
             </div>
             {/* Trainings */}
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Trainings</span>
-              <span className="font-medium">
-                {employeeTrainings.filter((t) => t.status === "completed").length}/{employeeTrainings.length}
+              <span className="text-muted-foreground">Training</span>
+              <span className={`font-medium ${validTraining ? "text-green-600" : "text-red-600"}`}>
+                {validTraining ? "Completed" : "Missing"}
               </span>
             </div>
           </CardContent>

@@ -1,5 +1,5 @@
-import { ArrowLeft, Edit, Users } from "lucide-react";
-import { Link, useParams } from "@tanstack/react-router";
+import { Users } from "lucide-react";
+import { useParams } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { EditEmployeeDialog } from "@/components/employees/EditEmployeeDialog";
@@ -140,17 +140,6 @@ export function EmployeeDetailPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 overflow-y-auto">
       <div className="min-h-full space-y-6">
-        {/* Back Button */}
-        <div className="mb-4">
-          <Link
-            to="/employees"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Employees
-          </Link>
-        </div>
-
         {/* Header */}
         <div className="border-b pb-4">
           <PageHeaderCard

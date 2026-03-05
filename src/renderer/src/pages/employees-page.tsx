@@ -488,7 +488,7 @@ function EmployeeDetailPanel({
               Driving Authorization
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm">
+          <CardContent className="space-y-4 text-sm">
             {/* Can Drive Status */}
             <div className="mb-2">
               {canDrive ? (
@@ -506,33 +506,128 @@ function EmployeeDetailPanel({
               )}
             </div>
 
-            {/* CACES */}
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">CACES</span>
-              <span className={`font-medium ${validCaces ? "text-green-600" : "text-red-600"}`}>
-                {validCaces ? "Valid" : "Invalid"}
-              </span>
-            </div>
-            {/* Medical Visits */}
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Medical Visit</span>
-              <span className={`font-medium ${validMedicalVisit ? "text-green-600" : "text-red-600"}`}>
-                {validMedicalVisit ? "Valid" : "Invalid"}
-              </span>
-            </div>
-            {/* Driving Authorizations */}
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Driving Auth.</span>
-              <span className={`font-medium ${validDrivingAuth ? "text-green-600" : "text-red-600"}`}>
-                {validDrivingAuth ? "Valid" : "Invalid"}
-              </span>
-            </div>
-            {/* Trainings */}
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Training</span>
-              <span className={`font-medium ${validTraining ? "text-green-600" : "text-red-600"}`}>
-                {validTraining ? "Completed" : "Missing"}
-              </span>
+            {/* Detailed Table */}
+            <div className="rounded-md border overflow-hidden">
+              <table className="w-full text-xs">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">Requirement</th>
+                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">Status</th>
+                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">Details</th>
+                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">Expires</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {/* CACES */}
+                  <tr>
+                    <td className="px-3 py-2 font-medium">CACES</td>
+                    <td className="px-3 py-2">
+                      {validCaces ? (
+                        <span className="text-green-600 font-medium">Valid</span>
+                      ) : (
+                        <span className="text-red-600 font-medium">Invalid</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {employeeCaces.length > 0
+                        ? employeeCaces.map((c: any) => c.category).join(", ")
+                        : "-"}
+                    </td>
+                    <td className="px-3 py-2">
+                      {employeeCaces.length > 0 ? (
+                        <span className={validCaces ? "text-green-600" : "text-red-600"}>
+                          {new Date(Math.max(...employeeCaces.map((c: any) => new Date(c.expirationDate).getTime()))).toLocaleDateString()}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </td>
+                  </tr>
+                  {/* Medical Visit */}
+                  <tr>
+                    <td className="px-3 py-2 font-medium">Medical Visit</td>
+                    <td className="px-3 py-2">
+                      {validMedicalVisit ? (
+                        <span className="text-green-600 font-medium">Valid</span>
+                      ) : (
+                        <span className="text-red-600 font-medium">Invalid</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {employeeMedicalVisits.length > 0
+                        ? employeeMedicalVisits
+                            .filter((m: any) => m.status === "completed")
+                            .map((m: any) => m.fitnessStatus || m.type)
+                            .slice(0, 1)
+                            .join(", ") || "-"
+                        : "-"}
+                    </td>
+                    <td className="px-3 py-2">
+                      {employeeMedicalVisits.filter((m: any) => m.expirationDate).length > 0 ? (
+                        <span className={validMedicalVisit ? "text-green-600" : "text-red-600"}>
+                          {new Date(Math.max(...employeeMedicalVisits.filter((m: any) => m.expirationDate).map((m: any) => new Date(m.expirationDate).getTime()))).toLocaleDateString()}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </td>
+                  </tr>
+                  {/* Driving Authorization */}
+                  <tr>
+                    <td className="px-3 py-2 font-medium">Driving Auth.</td>
+                    <td className="px-3 py-2">
+                      {validDrivingAuth ? (
+                        <span className="text-green-600 font-medium">Valid</span>
+                      ) : (
+                        <span className="text-red-600 font-medium">Invalid</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {employeeDrivingAuthorizations.length > 0
+                        ? employeeDrivingAuthorizations.map((d: any) => d.licenseCategory).join(", ")
+                        : "-"}
+                    </td>
+                    <td className="px-3 py-2">
+                      {employeeDrivingAuthorizations.length > 0 ? (
+                        <span className={validDrivingAuth ? "text-green-600" : "text-red-600"}>
+                          {new Date(Math.max(...employeeDrivingAuthorizations.map((d: any) => new Date(d.expirationDate).getTime()))).toLocaleDateString()}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </td>
+                  </tr>
+                  {/* Training */}
+                  <tr>
+                    <td className="px-3 py-2 font-medium">Training</td>
+                    <td className="px-3 py-2">
+                      {validTraining ? (
+                        <span className="text-green-600 font-medium">Completed</span>
+                      ) : (
+                        <span className="text-red-600 font-medium">Missing</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {employeeTrainings.length > 0
+                        ? employeeTrainings
+                            .filter((t: any) => t.status === "completed")
+                            .map((t: any) => t.trainingName)
+                            .slice(0, 1)
+                            .join(", ") || "-"
+                        : "-"}
+                    </td>
+                    <td className="px-3 py-2">
+                      {employeeTrainings.filter((t: any) => t.expirationDate).length > 0 ? (
+                        <span className={validTraining ? "text-green-600" : "text-red-600"}>
+                          {new Date(Math.max(...employeeTrainings.filter((t: any) => t.expirationDate).map((t: any) => new Date(t.expirationDate).getTime()))).toLocaleDateString()}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </CardContent>
         </Card>

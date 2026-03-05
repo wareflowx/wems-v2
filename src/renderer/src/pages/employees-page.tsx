@@ -1,6 +1,6 @@
 import type { Employee } from "@@/db/schema/employees";
 import { useQueryClient } from "@tanstack/react-query";
-import { Edit, Filter, Sparkles, UserPlus, Users, X } from "lucide-react";
+import { Edit, Filter, Maximize2, Minimize2, Sparkles, UserPlus, Users, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -57,6 +57,7 @@ export function EmployeesPage() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null,
   );
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Auto-close sidebar when employee is selected
   useEffect(() => {
@@ -201,10 +202,10 @@ export function EmployeesPage() {
         direction="horizontal"
       >
         <ResizablePanel
-          defaultSize={selectedEmployee ? 50 : 100}
-          minSize={30}
+          defaultSize={isFullscreen ? 0 : selectedEmployee ? 50 : 100}
+          minSize={isFullscreen ? 0 : 30}
           className={
-            selectedEmployee
+            selectedEmployee && !isFullscreen
               ? "border border-border rounded-md bg-background"
               : "bg-background"
           }
@@ -271,15 +272,15 @@ export function EmployeesPage() {
           </div>
         </ResizablePanel>
 
-        {selectedEmployee && (
+        {selectedEmployee && !isFullscreen && (
           <ResizableHandle className="w-1 bg-transparent hover:bg-border rounded-md transition-all duration-200" />
         )}
 
         {selectedEmployee && (
           <ResizablePanel
-            defaultSize={50}
-            minSize={25}
-            className="overflow-hidden border border-border rounded-md bg-background"
+            defaultSize={isFullscreen ? 100 : 50}
+            minSize={isFullscreen ? 100 : 25}
+            className={`overflow-hidden border border-border rounded-md bg-background ${isFullscreen ? "border-0 rounded-none" : ""}`}
           >
             <EmployeeDetailPanel
               employee={selectedEmployee}
@@ -288,11 +289,13 @@ export function EmployeesPage() {
               contracts={contracts}
               departments={departments}
               drivingAuthorizations={drivingAuthorizations}
+              isFullscreen={isFullscreen}
               medicalVisits={medicalVisits}
               onlineTrainings={onlineTrainings}
               positions={positions}
               workLocations={workLocations}
               onClose={() => setSelectedEmployee(null)}
+              onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
             />
           </ResizablePanel>
         )}
@@ -342,11 +345,13 @@ interface EmployeeDetailPanelProps {
   contracts: any[];
   departments: any[];
   drivingAuthorizations: any[];
+  isFullscreen: boolean;
   medicalVisits: any[];
   onlineTrainings: any[];
   positions: any[];
   workLocations: any[];
   onClose: () => void;
+  onToggleFullscreen: () => void;
 }
 
 function EmployeeDetailPanel({
@@ -356,11 +361,13 @@ function EmployeeDetailPanel({
   contracts,
   departments,
   drivingAuthorizations,
+  isFullscreen,
   medicalVisits,
   onlineTrainings,
   positions,
   workLocations,
   onClose,
+  onToggleFullscreen,
 }: EmployeeDetailPanelProps) {
   const { t } = useTranslation();
 
@@ -431,9 +438,19 @@ function EmployeeDetailPanel({
 
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden rounded-md">
-      <Button className="absolute left-2 bottom-2 z-10" onClick={onClose}>
-        Close panel
-      </Button>
+      {/* Action Buttons */}
+      <div className="absolute right-2 top-2 z-10 flex gap-1">
+        <Button size="icon" variant="ghost" onClick={onToggleFullscreen}>
+          {isFullscreen ? (
+            <Minimize2 className="h-4 w-4" />
+          ) : (
+            <Maximize2 className="h-4 w-4" />
+          )}
+        </Button>
+        <Button size="icon" variant="ghost" onClick={onClose}>
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
 
       {/* Header */}
       <div className="border-b p-4 pt-6">

@@ -280,7 +280,7 @@ export function EmployeesPage() {
           <ResizablePanel
             defaultSize={isFullscreen ? 100 : 50}
             minSize={isFullscreen ? 100 : 25}
-            className={`overflow-hidden border border-border rounded-md bg-background ${isFullscreen ? "border-0 rounded-none" : ""}`}
+            className={`overflow-hidden border border-border rounded-md bg-background`}
           >
             <EmployeeDetailPanel
               employee={selectedEmployee}
@@ -710,23 +710,23 @@ function EmployeeDetailPanel({
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-4">
-          <Button onClick={onToggleFullscreen}>
-            {isFullscreen ? (
-              <>
-                <Minimize2 className="mr-1 h-4 w-4" />
-                Exit Fullscreen
-              </>
-            ) : (
-              <>
+          {isFullscreen ? (
+            <Button onClick={onToggleFullscreen}>
+              <Minimize2 className="mr-1 h-4 w-4" />
+              Exit Fullscreen
+            </Button>
+          ) : (
+            <>
+              <Button onClick={onToggleFullscreen}>
                 <Maximize2 className="mr-1 h-4 w-4" />
                 Fullscreen
-              </>
-            )}
-          </Button>
-          <Button onClick={onClose}>
-            <X className="mr-1 h-4 w-4" />
-            Close
-          </Button>
+              </Button>
+              <Button onClick={onClose}>
+                <X className="mr-1 h-4 w-4" />
+                Close
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

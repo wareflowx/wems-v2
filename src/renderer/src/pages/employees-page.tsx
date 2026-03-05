@@ -406,208 +406,96 @@ function EmployeeDetailPanel({
   const department = departments.find((d) => d.id === employee.department);
   const agency = agencies.find((a) => a.id === currentContract?.agencyId);
 
-  // Status badge
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return (
-          <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-2 py-0.5 font-medium text-green-600 text-xs">
-            {t("employees.active")}
-          </span>
-        );
-      case "on_leave":
-        return (
-          <span className="inline-flex items-center rounded-md border border-yellow-500/25 bg-yellow-500/15 px-2 py-0.5 font-medium text-xs text-yellow-600">
-            {t("employees.onLeave")}
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center rounded-md border border-gray-500/25 bg-gray-500/15 px-2 py-0.5 font-medium text-gray-600 text-xs">
-            {status}
-          </span>
-        );
-    }
-  };
-
   return (
     <div className="relative flex h-full flex-col overflow-y-auto rounded-md">
+      <Button className="absolute left-2 bottom-2 z-10" onClick={onClose}>
+        Close panel
+      </Button>
+
       {/* Header */}
       <div className="border-b p-4 pt-6">
-        <h2 className="text-lg font-semibold">
-          {employee.firstName} {employee.lastName}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {t("common.employeeId")}
-          {employee.id.toString().padStart(4, "0")}
-        </p>
-        <Button className="mt-4" onClick={onClose}>
-          Close panel
-        </Button>
-      </div>
+        <PageHeaderCard
+          description={employee.email || "-"}
+          icon={<Users className="h-4 w-4" />}
+          title={`${employee.firstName} ${employee.lastName}`}
+        />
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="space-y-4">
-          {/* Status */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">
-              {t("employeeDetail.status")}
-            </span>
-            {getStatusBadge(employee.status)}
-          </div>
-
-          {/* Contact Info */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Contact Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              {employee.email && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Email</span>
-                  <span className="text-right">{employee.email}</span>
-                </div>
-              )}
-              {employee.phone && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Phone</span>
-                  <span className="text-right">{employee.phone}</span>
-                </div>
-              )}
-            </CardContent>
+        {/* Info Grid */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <Card className="p-3">
+            <p className="text-muted-foreground text-xs">
+              {t("common.employeeId")}
+            </p>
+            <p className="mt-0.5 font-medium text-sm">
+              {employee.id.toString().padStart(4, "0")}
+            </p>
           </Card>
-
-          {/* Employment Details */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Employment Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              {position && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Position</span>
-                  <span className="text-right font-medium">
-                    {position.name}
-                  </span>
-                </div>
-              )}
-              {workLocation && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Work Location</span>
-                  <span className="text-right">{workLocation.name}</span>
-                </div>
-              )}
-              {department && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Department</span>
-                  <span className="text-right">{department.name}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Hire Date</span>
-                <span className="text-right">{employee.hireDate}</span>
-              </div>
-            </CardContent>
+          <Card className="p-3">
+            <p className="text-muted-foreground text-xs">
+              {t("employees.position")}
+            </p>
+            <p className="mt-0.5 text-sm font-medium">
+              {position?.name || "-"}
+            </p>
           </Card>
-
-          {/* Contract */}
-          {currentContract && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Current Contract
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Type</span>
-                  <span className="text-right font-medium">
-                    {currentContract.contractType}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Start Date</span>
-                  <span className="text-right">
-                    {currentContract.startDate}
-                  </span>
-                </div>
-                {currentContract.endDate && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">End Date</span>
-                    <span className="text-right">
-                      {currentContract.endDate}
-                    </span>
-                  </div>
-                )}
-                {agency && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Agency</span>
-                    <span className="text-right">{agency.name}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Certifications Summary */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Certifications
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              {/* CACES */}
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">CACES</span>
-                <span
-                  className={`font-medium ${employeeCaces.length > 0 ? "text-green-600" : "text-red-600"}`}
-                >
-                  {employeeCaces.length}{" "}
-                  {employeeCaces.length === 1 ? "certificate" : "certificates"}
-                </span>
-              </div>
-              {/* Medical Visits */}
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Medical Visits</span>
-                <span
-                  className={`font-medium ${employeeMedicalVisits.length > 0 ? "text-green-600" : "text-red-600"}`}
-                >
-                  {employeeMedicalVisits.length}{" "}
-                  {employeeMedicalVisits.length === 1 ? "visit" : "visits"}
-                </span>
-              </div>
-              {/* Driving Authorizations */}
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Driving Auth.</span>
-                <span
-                  className={`font-medium ${employeeDrivingAuthorizations.length > 0 ? "text-green-600" : "text-red-600"}`}
-                >
-                  {employeeDrivingAuthorizations.length}{" "}
-                  {employeeDrivingAuthorizations.length === 1
-                    ? "authorization"
-                    : "authorizations"}
-                </span>
-              </div>
-              {/* Trainings */}
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Trainings</span>
-                <span className="font-medium">
-                  {
-                    employeeTrainings.filter((t) => t.status === "completed")
-                      .length
-                  }
-                  /{employeeTrainings.length} completed
-                </span>
-              </div>
-            </CardContent>
+          <Card className="p-3">
+            <p className="text-muted-foreground text-xs">
+              {t("employees.workLocation")}
+            </p>
+            <p className="mt-0.5 text-sm">
+              {workLocation?.name || "-"}
+            </p>
+          </Card>
+          <Card className="p-3">
+            <p className="text-muted-foreground text-xs">
+              {t("employeeDetail.startDate")}
+            </p>
+            <p className="mt-0.5 text-sm">
+              {employee.hireDate}
+            </p>
           </Card>
         </div>
+      </div>
+
+      {/* Certifications */}
+      <div className="flex-1 overflow-y-auto p-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              Certifications
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            {/* CACES */}
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">CACES</span>
+              <span className={`font-medium ${employeeCaces.length > 0 ? "text-green-600" : "text-red-600"}`}>
+                {employeeCaces.length}
+              </span>
+            </div>
+            {/* Medical Visits */}
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Medical Visits</span>
+              <span className={`font-medium ${employeeMedicalVisits.length > 0 ? "text-green-600" : "text-red-600"}`}>
+                {employeeMedicalVisits.length}
+              </span>
+            </div>
+            {/* Driving Authorizations */}
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Driving Auth.</span>
+              <span className={`font-medium ${employeeDrivingAuthorizations.length > 0 ? "text-green-600" : "text-red-600"}`}>
+                {employeeDrivingAuthorizations.length}
+              </span>
+            </div>
+            {/* Trainings */}
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Trainings</span>
+              <span className="font-medium">
+                {employeeTrainings.filter((t) => t.status === "completed").length}/{employeeTrainings.length}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

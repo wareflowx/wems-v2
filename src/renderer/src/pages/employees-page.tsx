@@ -195,7 +195,8 @@ export function EmployeesPage() {
 
   return (
     <>
-      <ResizablePanelGroup
+      <div className="h-full w-full overflow-hidden">
+        <ResizablePanelGroup
         className={`h-full w-full ${selectedEmployee ? "bg-sidebar gap-0.5 p-1.5" : "gap-0.5 p-1.5"}`}
         direction="horizontal"
       >
@@ -295,9 +296,10 @@ export function EmployeesPage() {
             />
           </ResizablePanel>
         )}
-      </ResizablePanelGroup>
+        </ResizablePanelGroup>
+    </div>
 
-      <CreateEmployeeDialog
+    <CreateEmployeeDialog
         departments={departments}
         onCreate={handleAddEmployee}
         onOpenChange={setIsCreateDialogOpen}

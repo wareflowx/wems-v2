@@ -13,7 +13,11 @@ import { EmployeesTable } from "@/components/employees/employees-table";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
-import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from "@/components/ui/resizable";
+import {
+  ResizablePanel,
+  ResizablePanelGroup,
+  ResizableHandle,
+} from "@/components/ui/resizable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -50,7 +54,9 @@ export function EmployeesPage() {
     name: string;
   } | null>(null);
   const [employeeToEdit, setEmployeeToEdit] = useState<any | null>(null);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null,
+  );
 
   // Auto-close sidebar when employee is selected
   useEffect(() => {
@@ -66,7 +72,8 @@ export function EmployeesPage() {
   const { data: contracts = [] } = useContracts();
   const { data: departments = [] } = useDepartments();
   const { data: agencies = [] } = useAgencies();
-  const { data: authorizationStatusesData = [] } = useAllDrivingAuthorizationStatuses();
+  const { data: authorizationStatusesData = [] } =
+    useAllDrivingAuthorizationStatuses();
   const { data: caces = [] } = useCaces();
   const { data: medicalVisits = [] } = useMedicalVisits();
   const { data: drivingAuthorizations = [] } = useDrivingAuthorizations();
@@ -77,7 +84,10 @@ export function EmployeesPage() {
 
   // Convert authorization statuses array to a Map
   const authorizationStatuses = useMemo(() => {
-    const map = new Map<number, import("@/core/lib/driving-authorization").DrivingAuthorizationStatusResult>();
+    const map = new Map<
+      number,
+      import("@/core/lib/driving-authorization").DrivingAuthorizationStatusResult
+    >();
     for (const item of authorizationStatusesData) {
       map.set(item.employeeId, item.status);
     }
@@ -172,7 +182,7 @@ export function EmployeesPage() {
         <ErrorDisplay
           message={t(
             "employees.errorLoadingMessage",
-            "Make sure the application is running correctly. If the problem persists, please restart."
+            "Make sure the application is running correctly. If the problem persists, please restart.",
           )}
           onRetry={() =>
             queryClient.invalidateQueries({ queryKey: ["employees"] })
@@ -185,10 +195,23 @@ export function EmployeesPage() {
 
   return (
     <>
-      <ResizablePanelGroup className={selectedEmployee ? "bg-sidebar gap-0.5 p-1.5" : "gap-0.5 p-1.5"} direction="horizontal">
-        <ResizablePanel defaultSize={selectedEmployee ? 50 : 100} minSize={30} className={selectedEmployee ? "border border-border rounded-md bg-background" : "bg-background"}>
+      <ResizablePanelGroup
+        className={
+          selectedEmployee ? "bg-sidebar gap-0.5 p-1.5" : "gap-0.5 p-1.5"
+        }
+        direction="horizontal"
+      >
+        <ResizablePanel
+          defaultSize={selectedEmployee ? 50 : 100}
+          minSize={30}
+          className={
+            selectedEmployee
+              ? "border border-border rounded-md bg-background"
+              : "bg-background"
+          }
+        >
           <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-            <div className="min-h-full space-y-3">
+            <div className="min-h-full space-y-2">
               <PageHeaderCard
                 description={t("employees.description")}
                 icon={<Sparkles className="h-4 w-4 text-gray-600" />}
@@ -196,6 +219,7 @@ export function EmployeesPage() {
               />
 
               <MetricsSection
+                className={selectedEmployee ? "lg:grid-cols-2" : ""}
                 kpis={[
                   {
                     title: t("dashboard.totalEmployees"),
@@ -207,26 +231,25 @@ export function EmployeesPage() {
                     title: t("employees.active"),
                     value: kpis.activeEmployees,
                     description: `${(
-                      (kpis.activeEmployees / kpis.totalEmployees) * 100
+                      (kpis.activeEmployees / kpis.totalEmployees) *
+                      100
                     ).toFixed(0)}${t("common.ofTotal")}`,
                     icon: <Edit className="h-4 w-4" />,
-                    iconColor: "text-green-500",
                   },
                   {
                     title: t("employees.onLeave"),
                     value: kpis.onLeaveEmployees,
                     description: `${(
-                      (kpis.onLeaveEmployees / kpis.totalEmployees) * 100
+                      (kpis.onLeaveEmployees / kpis.totalEmployees) *
+                      100
                     ).toFixed(0)}${t("common.ofTotal")}`,
                     icon: <Filter className="h-4 w-4" />,
-                    iconColor: "text-yellow-500",
                   },
                   {
                     title: t("dashboard.newHires"),
                     value: kpis.newHiresThisMonth,
                     description: t("dashboard.thisMonth"),
                     icon: <UserPlus className="h-4 w-4" />,
-                    iconColor: "text-green-500",
                   },
                 ]}
               />
@@ -259,7 +282,7 @@ export function EmployeesPage() {
             minSize={30}
             className="border border-border rounded-md bg-background"
           >
-            <EmployeeDetailPanel
+            {/*<EmployeeDetailPanel
               employee={selectedEmployee}
               agencies={agencies}
               caces={caces}
@@ -271,7 +294,7 @@ export function EmployeesPage() {
               positions={positions}
               workLocations={workLocations}
               onClose={() => setSelectedEmployee(null)}
-            />
+            />*/}
           </ResizablePanel>
         )}
       </ResizablePanelGroup>
@@ -293,7 +316,13 @@ export function EmployeesPage() {
       />
       <EditEmployeeDialog
         employee={employeeToEdit}
-        contract={employeeToEdit ? contracts.find((c: any) => c.employeeId === employeeToEdit.id && c.isActive) : undefined}
+        contract={
+          employeeToEdit
+            ? contracts.find(
+                (c: any) => c.employeeId === employeeToEdit.id && c.isActive,
+              )
+            : undefined
+        }
         departments={departments}
         agencies={agencies}
         onEdit={handleEditSubmit}
@@ -371,7 +400,9 @@ function EmployeeDetailPanel({
 
   // Get position and work location
   const position = positions.find((p) => p.id === employee.positionId);
-  const workLocation = workLocations.find((w) => w.id === employee.workLocationId);
+  const workLocation = workLocations.find(
+    (w) => w.id === employee.workLocationId,
+  );
   const department = departments.find((d) => d.id === employee.department);
   const agency = agencies.find((a) => a.id === currentContract?.agencyId);
 
@@ -401,13 +432,6 @@ function EmployeeDetailPanel({
 
   return (
     <div className="relative flex h-full flex-col overflow-y-auto rounded-md">
-      <Button
-        className="absolute left-2 bottom-2 z-10"
-        onClick={onClose}
-      >
-        Close panel
-      </Button>
-
       {/* Header */}
       <div className="border-b p-4 pt-6">
         <h2 className="text-lg font-semibold">
@@ -417,6 +441,9 @@ function EmployeeDetailPanel({
           {t("common.employeeId")}
           {employee.id.toString().padStart(4, "0")}
         </p>
+        <Button className="mt-4" onClick={onClose}>
+          Close panel
+        </Button>
       </div>
 
       {/* Content */}
@@ -424,14 +451,18 @@ function EmployeeDetailPanel({
         <div className="space-y-4">
           {/* Status */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">{t("employeeDetail.status")}</span>
+            <span className="text-sm text-muted-foreground">
+              {t("employeeDetail.status")}
+            </span>
             {getStatusBadge(employee.status)}
           </div>
 
           {/* Contact Info */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Contact Information</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Contact Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               {employee.email && (
@@ -452,13 +483,17 @@ function EmployeeDetailPanel({
           {/* Employment Details */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Employment Details</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Employment Details
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               {position && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Position</span>
-                  <span className="text-right font-medium">{position.name}</span>
+                  <span className="text-right font-medium">
+                    {position.name}
+                  </span>
                 </div>
               )}
               {workLocation && (
@@ -484,21 +519,29 @@ function EmployeeDetailPanel({
           {currentContract && (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Current Contract</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Current Contract
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Type</span>
-                  <span className="text-right font-medium">{currentContract.contractType}</span>
+                  <span className="text-right font-medium">
+                    {currentContract.contractType}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Start Date</span>
-                  <span className="text-right">{currentContract.startDate}</span>
+                  <span className="text-right">
+                    {currentContract.startDate}
+                  </span>
                 </div>
                 {currentContract.endDate && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">End Date</span>
-                    <span className="text-right">{currentContract.endDate}</span>
+                    <span className="text-right">
+                      {currentContract.endDate}
+                    </span>
                   </div>
                 )}
                 {agency && (
@@ -514,36 +557,52 @@ function EmployeeDetailPanel({
           {/* Certifications Summary */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Certifications</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Certifications
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               {/* CACES */}
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">CACES</span>
-                <span className={`font-medium ${employeeCaces.length > 0 ? "text-green-600" : "text-red-600"}`}>
-                  {employeeCaces.length} {employeeCaces.length === 1 ? "certificate" : "certificates"}
+                <span
+                  className={`font-medium ${employeeCaces.length > 0 ? "text-green-600" : "text-red-600"}`}
+                >
+                  {employeeCaces.length}{" "}
+                  {employeeCaces.length === 1 ? "certificate" : "certificates"}
                 </span>
               </div>
               {/* Medical Visits */}
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Medical Visits</span>
-                <span className={`font-medium ${employeeMedicalVisits.length > 0 ? "text-green-600" : "text-red-600"}`}>
-                  {employeeMedicalVisits.length} {employeeMedicalVisits.length === 1 ? "visit" : "visits"}
+                <span
+                  className={`font-medium ${employeeMedicalVisits.length > 0 ? "text-green-600" : "text-red-600"}`}
+                >
+                  {employeeMedicalVisits.length}{" "}
+                  {employeeMedicalVisits.length === 1 ? "visit" : "visits"}
                 </span>
               </div>
               {/* Driving Authorizations */}
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Driving Auth.</span>
-                <span className={`font-medium ${employeeDrivingAuthorizations.length > 0 ? "text-green-600" : "text-red-600"}`}>
-                  {employeeDrivingAuthorizations.length} {employeeDrivingAuthorizations.length === 1 ? "authorization" : "authorizations"}
+                <span
+                  className={`font-medium ${employeeDrivingAuthorizations.length > 0 ? "text-green-600" : "text-red-600"}`}
+                >
+                  {employeeDrivingAuthorizations.length}{" "}
+                  {employeeDrivingAuthorizations.length === 1
+                    ? "authorization"
+                    : "authorizations"}
                 </span>
               </div>
               {/* Trainings */}
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Trainings</span>
                 <span className="font-medium">
-                  {employeeTrainings.filter((t) => t.status === "completed").length}/
-                  {employeeTrainings.length} completed
+                  {
+                    employeeTrainings.filter((t) => t.status === "completed")
+                      .length
+                  }
+                  /{employeeTrainings.length} completed
                 </span>
               </div>
             </CardContent>

@@ -280,7 +280,7 @@ export function EmployeesPage() {
           <ResizablePanel
             defaultSize={isFullscreen ? 100 : 50}
             minSize={isFullscreen ? 100 : 25}
-            className={`overflow-hidden border border-border rounded-md bg-background`}
+            className={`overflow-hidden bg-background ${!isFullscreen ? "border border-border rounded-md" : ""}`}
           >
             <EmployeeDetailPanel
               employee={selectedEmployee}
@@ -437,7 +437,7 @@ function EmployeeDetailPanel({
   const partialDriving = (validCaces ? 1 : 0) + (validMedicalVisit ? 1 : 0) + (validDrivingAuth ? 1 : 0) + (validTraining ? 1 : 0);
 
   return (
-    <div className="relative flex h-full w-full flex-col overflow-hidden rounded-md">
+    <div className={`relative flex h-full w-full flex-col overflow-hidden ${isFullscreen ? "" : "rounded-md"}`}>
       {/* Header */}
       <div className="border-b p-4 pt-6">
         <PageHeaderCard

@@ -1,4 +1,4 @@
-import { ShieldX, TestTubes, Users, FileText, Car, GraduationCap } from "lucide-react";
+import { ShieldX, TestTubes, Users, FileText, Car, GraduationCap, FileSignature } from "lucide-react";
 import { useParams } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -91,6 +91,12 @@ export function EmployeeDetailPage() {
     return onlineTrainings.filter((t) => t.employeeId === employeeData.id);
   }, [onlineTrainings, employeeData]);
 
+  // Get all contracts for the employee
+  const employeeContracts = useMemo(() => {
+    if (!employeeData) return [];
+    return contracts.filter((c) => c.employeeId === employeeData.id);
+  }, [contracts, employeeData]);
+
   // Get position and work location
   const position = employeeData ? positions.find((p) => p.id === employeeData.positionId) : undefined;
   const workLocation = employeeData ? workLocations.find((w) => w.id === employeeData.workLocationId) : undefined;
@@ -119,9 +125,10 @@ export function EmployeeDetailPage() {
   const partialDriving = (validCaces ? 1 : 0) + (validMedicalVisit ? 1 : 0) + (validDrivingAuth ? 1 : 0) + (validTraining ? 1 : 0);
 
   // Tab state for document types
-  const [activeTab, setActiveTab] = useState<"caces" | "medicalVisits" | "drivingAuthorizations" | "trainings">("caces");
+  const [activeTab, setActiveTab] = useState<"caces" | "medicalVisits" | "drivingAuthorizations" | "trainings" | "contracts">("contracts");
 
-  const tabs: { key: "caces" | "medicalVisits" | "drivingAuthorizations" | "trainings"; label: string; count: number; valid: boolean }[] = [
+  const tabs: { key: "caces" | "medicalVisits" | "drivingAuthorizations" | "trainings" | "contracts"; label: string; count: number; valid?: boolean }[] = [
+    { key: "contracts", label: "Contracts", count: employeeContracts.length },
     { key: "caces", label: "CACES", count: employeeCaces.length, valid: validCaces },
     { key: "medicalVisits", label: "Medical Visits", count: employeeMedicalVisits.length, valid: validMedicalVisit },
     { key: "drivingAuthorizations", label: "Driving Authorizations", count: employeeDrivingAuthorizations.length, valid: validDrivingAuth },
@@ -265,12 +272,58 @@ export function EmployeeDetailPage() {
                     {tab.count}
                   </span>
                 )}
-                <StatusBadge color={tab.valid ? "green" : "red"} className="ml-2">
-                  {tab.valid ? "Valid" : "Invalid"}
-                </StatusBadge>
+                {tab.valid !== undefined && (
+                  <StatusBadge color={tab.valid ? "green" : "red"} className="ml-2">
+                    {tab.valid ? "Valid" : "Invalid"}
+                  </StatusBadge>
+                )}
               </button>
             ))}
           </div>
+
+          {/* Contracts Table */}
+          {activeTab === "contracts" && (
+            <div className="overflow-x-auto rounded-lg border bg-card">
+              {employeeContracts.length === 0 ? (
+                <AnimatedEmpty
+                  bordered={false}
+                  title="No contracts"
+                  description="This employee has no contracts on file."
+                  icons={[FileSignature, FileSignature, FileSignature]}
+                />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="px-4">Type</TableHead>
+                      <TableHead className="px-4">Start Date</TableHead>
+                      <TableHead className="px-4">End Date</TableHead>
+                      <TableHead className="px-4">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {employeeContracts.map((contract: any) => {
+                      const isActive = contract.isActive && (!contract.endDate || new Date(contract.endDate) >= new Date());
+                      return (
+                        <TableRow key={contract.id}>
+                          <TableCell className="px-4 font-medium">{contract.contractType}</TableCell>
+                          <TableCell className="px-4">{contract.startDate}</TableCell>
+                          <TableCell className="px-4">{contract.endDate || "-"}</TableCell>
+                          <TableCell className="px-4">
+                            {isActive ? (
+                              <StatusBadge color="green">Active</StatusBadge>
+                            ) : (
+                              <StatusBadge color="gray">Inactive</StatusBadge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
+          )}
 
           {/* CACES Table */}
           {activeTab === "caces" && (

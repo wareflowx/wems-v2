@@ -280,9 +280,9 @@ export function EmployeesPage() {
           <ResizablePanel
             defaultSize={50}
             minSize={30}
-            className="border border-border rounded-md bg-background"
+            className="overflow-hidden border border-border rounded-md bg-background"
           >
-            {/*<EmployeeDetailPanel
+            <EmployeeDetailPanel
               employee={selectedEmployee}
               agencies={agencies}
               caces={caces}
@@ -294,7 +294,7 @@ export function EmployeesPage() {
               positions={positions}
               workLocations={workLocations}
               onClose={() => setSelectedEmployee(null)}
-            />*/}
+            />
           </ResizablePanel>
         )}
       </ResizablePanelGroup>
@@ -407,7 +407,7 @@ function EmployeeDetailPanel({
   const agency = agencies.find((a) => a.id === currentContract?.agencyId);
 
   return (
-    <div className="relative flex h-full flex-col overflow-y-auto rounded-md">
+    <div className="relative flex h-full w-full flex-col overflow-hidden rounded-md">
       <Button className="absolute left-2 bottom-2 z-10" onClick={onClose}>
         Close panel
       </Button>

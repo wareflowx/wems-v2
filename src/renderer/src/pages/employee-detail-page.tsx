@@ -125,10 +125,9 @@ export function EmployeeDetailPage() {
   const partialDriving = (validCaces ? 1 : 0) + (validMedicalVisit ? 1 : 0) + (validDrivingAuth ? 1 : 0) + (validTraining ? 1 : 0);
 
   // Tab state for document types
-  const [activeTab, setActiveTab] = useState<"caces" | "medicalVisits" | "drivingAuthorizations" | "trainings" | "contracts">("contracts");
+  const [activeTab, setActiveTab] = useState<"caces" | "medicalVisits" | "drivingAuthorizations" | "trainings">("caces");
 
-  const tabs: { key: "caces" | "medicalVisits" | "drivingAuthorizations" | "trainings" | "contracts"; label: string; count: number; valid?: boolean }[] = [
-    { key: "contracts", label: "Contracts", count: employeeContracts.length },
+  const tabs: { key: "caces" | "medicalVisits" | "drivingAuthorizations" | "trainings"; label: string; count: number; valid?: boolean }[] = [
     { key: "caces", label: "CACES", count: employeeCaces.length, valid: validCaces },
     { key: "medicalVisits", label: "Medical Visits", count: employeeMedicalVisits.length, valid: validMedicalVisit },
     { key: "drivingAuthorizations", label: "Driving Authorizations", count: employeeDrivingAuthorizations.length, valid: validDrivingAuth },
@@ -199,7 +198,7 @@ export function EmployeeDetailPage() {
           </div>
 
           {/* Info Grid */}
-          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-5">
             <Card className="p-3">
               <p className="text-muted-foreground text-xs">
                 {t("common.employeeId")}
@@ -232,6 +231,61 @@ export function EmployeeDetailPage() {
                 {employeeData.hireDate}
               </p>
             </Card>
+            <Card className="p-3">
+              <p className="text-muted-foreground text-xs">
+                {t("contracts.title")}
+              </p>
+              <p className="mt-0.5 text-sm">
+                {currentContract ? (
+                  <span className="font-medium">{currentContract.contractType}</span>
+                ) : "-"}
+              </p>
+            </Card>
+          </div>
+
+          {/* Contracts Table (separate section) */}
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">Contracts History</h3>
+            <div className="overflow-x-auto rounded-lg border bg-card">
+              {employeeContracts.length === 0 ? (
+                <AnimatedEmpty
+                  bordered={false}
+                  title="No contracts"
+                  description="This employee has no contracts on file."
+                  icons={[FileSignature, FileSignature, FileSignature]}
+                />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="px-4">Type</TableHead>
+                      <TableHead className="px-4">Start Date</TableHead>
+                      <TableHead className="px-4">End Date</TableHead>
+                      <TableHead className="px-4">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {employeeContracts.map((contract: any) => {
+                      const isActive = contract.isActive && (!contract.endDate || new Date(contract.endDate) >= new Date());
+                      return (
+                        <TableRow key={contract.id}>
+                          <TableCell className="px-4 font-medium">{contract.contractType}</TableCell>
+                          <TableCell className="px-4">{contract.startDate}</TableCell>
+                          <TableCell className="px-4">{contract.endDate || "-"}</TableCell>
+                          <TableCell className="px-4">
+                            {isActive ? (
+                              <StatusBadge color="green">Active</StatusBadge>
+                            ) : (
+                              <StatusBadge color="gray">Inactive</StatusBadge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
           </div>
         </div>
 
@@ -280,50 +334,6 @@ export function EmployeeDetailPage() {
               </button>
             ))}
           </div>
-
-          {/* Contracts Table */}
-          {activeTab === "contracts" && (
-            <div className="overflow-x-auto rounded-lg border bg-card">
-              {employeeContracts.length === 0 ? (
-                <AnimatedEmpty
-                  bordered={false}
-                  title="No contracts"
-                  description="This employee has no contracts on file."
-                  icons={[FileSignature, FileSignature, FileSignature]}
-                />
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="px-4">Type</TableHead>
-                      <TableHead className="px-4">Start Date</TableHead>
-                      <TableHead className="px-4">End Date</TableHead>
-                      <TableHead className="px-4">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {employeeContracts.map((contract: any) => {
-                      const isActive = contract.isActive && (!contract.endDate || new Date(contract.endDate) >= new Date());
-                      return (
-                        <TableRow key={contract.id}>
-                          <TableCell className="px-4 font-medium">{contract.contractType}</TableCell>
-                          <TableCell className="px-4">{contract.startDate}</TableCell>
-                          <TableCell className="px-4">{contract.endDate || "-"}</TableCell>
-                          <TableCell className="px-4">
-                            {isActive ? (
-                              <StatusBadge color="green">Active</StatusBadge>
-                            ) : (
-                              <StatusBadge color="gray">Inactive</StatusBadge>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-            </div>
-          )}
 
           {/* CACES Table */}
           {activeTab === "caces" && (

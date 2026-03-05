@@ -8,6 +8,14 @@ import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   useAgencies,
   useCaces,
   useContracts,
@@ -256,182 +264,174 @@ export function EmployeeDetailPage() {
 
           {/* CACES Table */}
           {activeTab === "caces" && (
-            <div>
+            <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeCaces.length === 0 ? (
-                <p className="text-muted-foreground text-sm py-4">No CACES records</p>
+                <p className="text-muted-foreground text-sm py-4 px-4">No CACES records</p>
               ) : (
-                <div className="rounded-md border overflow-hidden">
-                  <table className="w-full text-xs">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Category</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Obtained</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Expires</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {employeeCaces.map((c: any) => {
-                        const isExpired = c.expirationDate && new Date(c.expirationDate) < now;
-                        return (
-                          <tr key={c.id}>
-                            <td className="px-3 py-2 font-medium">{c.category}</td>
-                            <td className="px-3 py-2">{c.dateObtained}</td>
-                            <td className="px-3 py-2">{c.expirationDate}</td>
-                            <td className="px-3 py-2">
-                              {isExpired ? (
-                                <span className="text-red-600 font-medium">Expired</span>
-                              ) : (
-                                <span className="text-green-600 font-medium">Valid</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="px-4">Category</TableHead>
+                      <TableHead className="px-4">Obtained</TableHead>
+                      <TableHead className="px-4">Expires</TableHead>
+                      <TableHead className="px-4">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {employeeCaces.map((c: any) => {
+                      const isExpired = c.expirationDate && new Date(c.expirationDate) < now;
+                      return (
+                        <TableRow key={c.id}>
+                          <TableCell className="px-4 font-medium">{c.category}</TableCell>
+                          <TableCell className="px-4">{c.dateObtained}</TableCell>
+                          <TableCell className="px-4">{c.expirationDate}</TableCell>
+                          <TableCell className="px-4">
+                            {isExpired ? (
+                              <StatusBadge color="red">Expired</StatusBadge>
+                            ) : (
+                              <StatusBadge color="green">Valid</StatusBadge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               )}
             </div>
           )}
 
           {/* Medical Visits Table */}
           {activeTab === "medicalVisits" && (
-            <div>
+            <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeMedicalVisits.length === 0 ? (
-                <p className="text-muted-foreground text-sm py-4">No medical visits</p>
+                <p className="text-muted-foreground text-sm py-4 px-4">No medical visits</p>
               ) : (
-                <div className="rounded-md border overflow-hidden">
-                  <table className="w-full text-xs">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Type</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Scheduled</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Completed</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Fitness</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {employeeMedicalVisits.map((m: any) => {
-                        const isExpired = m.expirationDate && new Date(m.expirationDate) < now;
-                        return (
-                          <tr key={m.id}>
-                            <td className="px-3 py-2 font-medium">{m.type}</td>
-                            <td className="px-3 py-2">{m.scheduledDate || "-"}</td>
-                            <td className="px-3 py-2">{m.actualDate || "-"}</td>
-                            <td className="px-3 py-2">{m.fitnessStatus || "-"}</td>
-                            <td className="px-3 py-2">
-                              {m.status === "completed" ? (
-                                isExpired ? (
-                                  <span className="text-red-600 font-medium">Expired</span>
-                                ) : (
-                                  <span className="text-green-600 font-medium">Valid</span>
-                                )
-                              ) : m.status === "scheduled" ? (
-                                <span className="text-blue-600 font-medium">Scheduled</span>
-                              ) : m.status === "overdue" ? (
-                                <span className="text-orange-600 font-medium">Overdue</span>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="px-4">Type</TableHead>
+                      <TableHead className="px-4">Scheduled</TableHead>
+                      <TableHead className="px-4">Completed</TableHead>
+                      <TableHead className="px-4">Fitness</TableHead>
+                      <TableHead className="px-4">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {employeeMedicalVisits.map((m: any) => {
+                      const isExpired = m.expirationDate && new Date(m.expirationDate) < now;
+                      return (
+                        <TableRow key={m.id}>
+                          <TableCell className="px-4 font-medium">{m.type}</TableCell>
+                          <TableCell className="px-4">{m.scheduledDate || "-"}</TableCell>
+                          <TableCell className="px-4">{m.actualDate || "-"}</TableCell>
+                          <TableCell className="px-4">{m.fitnessStatus || "-"}</TableCell>
+                          <TableCell className="px-4">
+                            {m.status === "completed" ? (
+                              isExpired ? (
+                                <StatusBadge color="red">Expired</StatusBadge>
                               ) : (
-                                <span className="text-muted-foreground">{m.status}</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                                <StatusBadge color="green">Valid</StatusBadge>
+                              )
+                            ) : m.status === "scheduled" ? (
+                              <StatusBadge color="blue">Scheduled</StatusBadge>
+                            ) : m.status === "overdue" ? (
+                              <StatusBadge color="orange">Overdue</StatusBadge>
+                            ) : (
+                              <span className="text-muted-foreground">{m.status}</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               )}
             </div>
           )}
 
           {/* Driving Authorizations Table */}
           {activeTab === "drivingAuthorizations" && (
-            <div>
+            <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeDrivingAuthorizations.length === 0 ? (
-                <p className="text-muted-foreground text-sm py-4">No driving authorizations</p>
+                <p className="text-muted-foreground text-sm py-4 px-4">No driving authorizations</p>
               ) : (
-                <div className="rounded-md border overflow-hidden">
-                  <table className="w-full text-xs">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">License</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Obtained</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Expires</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {employeeDrivingAuthorizations.map((d: any) => {
-                        const isExpired = d.expirationDate && new Date(d.expirationDate) < now;
-                        return (
-                          <tr key={d.id}>
-                            <td className="px-3 py-2 font-medium">{d.licenseCategory}</td>
-                            <td className="px-3 py-2">{d.dateObtained}</td>
-                            <td className="px-3 py-2">{d.expirationDate}</td>
-                            <td className="px-3 py-2">
-                              {isExpired ? (
-                                <span className="text-red-600 font-medium">Expired</span>
-                              ) : (
-                                <span className="text-green-600 font-medium">Valid</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="px-4">License</TableHead>
+                      <TableHead className="px-4">Obtained</TableHead>
+                      <TableHead className="px-4">Expires</TableHead>
+                      <TableHead className="px-4">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {employeeDrivingAuthorizations.map((d: any) => {
+                      const isExpired = d.expirationDate && new Date(d.expirationDate) < now;
+                      return (
+                        <TableRow key={d.id}>
+                          <TableCell className="px-4 font-medium">{d.licenseCategory}</TableCell>
+                          <TableCell className="px-4">{d.dateObtained}</TableCell>
+                          <TableCell className="px-4">{d.expirationDate}</TableCell>
+                          <TableCell className="px-4">
+                            {isExpired ? (
+                              <StatusBadge color="red">Expired</StatusBadge>
+                            ) : (
+                              <StatusBadge color="green">Valid</StatusBadge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               )}
             </div>
           )}
 
           {/* Online Trainings Table */}
           {activeTab === "trainings" && (
-            <div>
+            <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeTrainings.length === 0 ? (
-                <p className="text-muted-foreground text-sm py-4">No trainings</p>
+                <p className="text-muted-foreground text-sm py-4 px-4">No trainings</p>
               ) : (
-                <div className="rounded-md border overflow-hidden">
-                  <table className="w-full text-xs">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Training</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Provider</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Completed</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Expires</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {employeeTrainings.map((t: any) => {
-                        const isExpired = t.expirationDate && new Date(t.expirationDate) < now;
-                        return (
-                          <tr key={t.id}>
-                            <td className="px-3 py-2 font-medium">{t.trainingName}</td>
-                            <td className="px-3 py-2">{t.trainingProvider || "-"}</td>
-                            <td className="px-3 py-2">{t.completionDate}</td>
-                            <td className="px-3 py-2">{t.expirationDate || "-"}</td>
-                            <td className="px-3 py-2">
-                              {t.status === "completed" ? (
-                                isExpired ? (
-                                  <span className="text-orange-600 font-medium">Expired</span>
-                                ) : (
-                                  <span className="text-green-600 font-medium">Completed</span>
-                                )
-                              ) : t.status === "in_progress" ? (
-                                <span className="text-blue-600 font-medium">In Progress</span>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="px-4">Training</TableHead>
+                      <TableHead className="px-4">Provider</TableHead>
+                      <TableHead className="px-4">Completed</TableHead>
+                      <TableHead className="px-4">Expires</TableHead>
+                      <TableHead className="px-4">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {employeeTrainings.map((t: any) => {
+                      const isExpired = t.expirationDate && new Date(t.expirationDate) < now;
+                      return (
+                        <TableRow key={t.id}>
+                          <TableCell className="px-4 font-medium">{t.trainingName}</TableCell>
+                          <TableCell className="px-4">{t.trainingProvider || "-"}</TableCell>
+                          <TableCell className="px-4">{t.completionDate}</TableCell>
+                          <TableCell className="px-4">{t.expirationDate || "-"}</TableCell>
+                          <TableCell className="px-4">
+                            {t.status === "completed" ? (
+                              isExpired ? (
+                                <StatusBadge color="orange">Expired</StatusBadge>
                               ) : (
-                                <span className="text-red-600 font-medium">{t.status}</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                                <StatusBadge color="green">Completed</StatusBadge>
+                              )
+                            ) : t.status === "in_progress" ? (
+                              <StatusBadge color="blue">In Progress</StatusBadge>
+                            ) : (
+                              <StatusBadge color="red">{t.status}</StatusBadge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               )}
             </div>
           )}

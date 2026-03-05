@@ -61,7 +61,7 @@ export function RootPage() {
         <SiteHeader />
         <div className="flex flex-1">
           <AppSidebar />
-          <SidebarInset>
+          <SidebarInset className="flex flex-1 flex-col">
             {/*<header className="h-14 border-b"></header>*/}
             <Outlet />
             {/* Uncomment the following line to enable the router devtools */}

@@ -196,9 +196,7 @@ export function EmployeesPage() {
   return (
     <>
       <ResizablePanelGroup
-        className={
-          selectedEmployee ? "bg-sidebar gap-0.5 p-1.5" : "gap-0.5 p-1.5"
-        }
+        className={`h-full w-full ${selectedEmployee ? "bg-sidebar gap-0.5 p-1.5" : "gap-0.5 p-1.5"}`}
         direction="horizontal"
       >
         <ResizablePanel
@@ -279,7 +277,7 @@ export function EmployeesPage() {
         {selectedEmployee && (
           <ResizablePanel
             defaultSize={50}
-            minSize={30}
+            minSize={25}
             className="overflow-hidden border border-border rounded-md bg-background"
           >
             <EmployeeDetailPanel

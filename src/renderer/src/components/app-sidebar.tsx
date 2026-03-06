@@ -10,9 +10,7 @@ import {
   FileText,
   GraduationCap,
   Home,
-  Lock,
   MapPin,
-  Pen,
   Plus,
   Search,
   Settings2,
@@ -82,7 +80,6 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
   const { t } = useTranslation();
   const [_appVersion, setAppVersion] = React.useState("0.0.0");
-  const [canWrite, setCanWrite] = React.useState(true);
   const [mounted, setMounted] = React.useState(() => typeof window !== "undefined");
   const navigate = useNavigate();
   const location = useLocation();
@@ -102,18 +99,6 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
 
   React.useEffect(() => {
     getAppVersion().then(setAppVersion);
-
-    // Initial check for write mode
-    window
-      .getWriteMode?.()
-      .then(setCanWrite)
-      .catch(() => setCanWrite(true));
-
-    // Listen for real-time lock status changes
-    window.onLockStatusChanged?.((writeMode) => {
-      setCanWrite(writeMode);
-    });
-
     setMounted(true);
   }, []);
 
@@ -126,13 +111,15 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
     >
       <SidebarHeader className="border-b bg-card">
         <SidebarMenu>
-          <SidebarMenuItem className="flex gap-2 p-1">
-            <div className="rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 p-1.5">
-              <Users className="h-4 w-4 text-white" />
-            </div>
-            <h1 className="font-semibold text-gray-900 text-lg group-data-[collapsible=icon]:hidden">
-              {t("app.name")}
-            </h1>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
+              <div className="flex w-full cursor-pointer items-center">
+                <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
+                  {t("sidebar.toggle")}
+                </span>
+                <SidebarTrigger className="ml-auto size-4" />
+              </div>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -288,24 +275,6 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <div
-                  className={`flex items-center gap-2 rounded-md px-2 py-1.5  ${
-                    canWrite
-                      ? "bg-green-500/10 text-green-600 border border-green-500/20"
-                      : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
-                  }`}
-                >
-                  {canWrite ? (
-                    <Pen className="h-4 w-4" />
-                  ) : (
-                    <Lock className="h-4 w-4" />
-                  )}
-                  <span className="group-data-[collapsible=icon]:hidden">
-                    {canWrite ? "Write mode" : "Read only"}
-                  </span>
-                </div>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive("/settings")} tooltip={t("sidebar.settings")}>
                   <Link to="/settings">
                     <Settings2 />
@@ -325,20 +294,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t bg-card">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
-              <div className="flex w-full cursor-pointer items-center">
-                <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
-                  {t("sidebar.toggle")}
-                </span>
-                <SidebarTrigger className="ml-auto size-4" />
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
     </>

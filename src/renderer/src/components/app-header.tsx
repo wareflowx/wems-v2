@@ -1,6 +1,11 @@
 import { Download, Plus, Search } from "lucide-react";
 import * as React from "react";
 import { Button } from "./ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 interface AppHeaderProps {
   onQuickActionsClick?: () => void;
@@ -22,29 +27,35 @@ export const AppHeader = ({ onQuickActionsClick }: AppHeaderProps) => {
 
   return (
     <header className="flex h-13 w-full items-center justify-between border-b bg-card px-4">
-      <div className="flex items-center gap-2">
-        <h1 className="text-lg font-semibold">WEMS</h1>
-      </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <Button
+          className="w-50 bg-background"
           onClick={onQuickActionsClick}
           variant="outline"
         >
-          <Search className="size-4" />
-          <span className="flex-1 text-xs group-data-[collapsible=icon]:hidden">Quick actions</span>
-          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 group-data-[collapsible=icon]:hidden">
-            <span className="text-xs">Ctrl</span>
-            <span>K</span>
-          </kbd>
+          <Search className="size-4 text-muted-foreground" />
+          <span className="flex-1 text-left text-xs text-muted-foreground">Search...</span>
         </Button>
-        <Button variant="outline" size="icon">
-          <Plus className="h-4 w-4" />
-        </Button>
+      </div>
+      <div className="flex items-center gap-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" size="icon">
+              <Plus className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Create new</TooltipContent>
+        </Tooltip>
         <div className="h-6 w-px bg-border" />
-        <Button variant="outline" className="gap-2">
-          <Download className="h-4 w-4" />
-          Export
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Export data</TooltipContent>
+        </Tooltip>
       </div>
     </header>
   );

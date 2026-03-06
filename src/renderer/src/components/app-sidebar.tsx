@@ -1,6 +1,6 @@
 "use client";
 
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   AlertTriangle,
   Briefcase,
@@ -85,6 +85,13 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
   const [canWrite, setCanWrite] = React.useState(true);
   const [mounted, setMounted] = React.useState(() => typeof window !== "undefined");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Helper to check if a path is active
+  const isActive = (path: string) => {
+    if (path === "/") return location.pathname === "/";
+    return location.pathname.startsWith(path);
+  };
 
   // Get counts for sidebar badges
   const { data: alerts = [] } = useAlerts();
@@ -141,7 +148,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.dashboard")}>
+                <SidebarMenuButton asChild isActive={isActive("/")} tooltip={t("sidebar.dashboard")}>
                   <Link to="/">
                     <Home />
                     <span>{t("sidebar.dashboard")}</span>
@@ -149,7 +156,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.employees")}>
+                <SidebarMenuButton asChild isActive={isActive("/employees")} tooltip={t("sidebar.employees")}>
                   <Link to="/employees">
                     <Users />
                     <span>{t("sidebar.employees")}</span>
@@ -157,7 +164,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.alerts")}>
+                <SidebarMenuButton asChild isActive={isActive("/alerts")} tooltip={t("sidebar.alerts")}>
                   <Link to="/alerts">
                     <AlertTriangle />
                     <span>{t("sidebar.alerts")}</span>
@@ -166,7 +173,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 {alerts.length > 0 && <SidebarMenuBadge>{alerts.length}</SidebarMenuBadge>}
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("agencies.title")}>
+                <SidebarMenuButton asChild isActive={isActive("/agencies")} tooltip={t("agencies.title")}>
                   <Link to="/agencies">
                     <Building2 />
                     <span>{t("agencies.title")}</span>
@@ -182,7 +189,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.documents")}>
+                <SidebarMenuButton asChild isActive={isActive("/documents")} tooltip={t("sidebar.documents")}>
                   <Link to="/documents">
                     <FileText />
                     <span>{t("sidebar.documents")}</span>
@@ -190,7 +197,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.caces")}>
+                <SidebarMenuButton asChild isActive={isActive("/caces")} tooltip={t("sidebar.caces")}>
                   <Link to="/caces">
                     <ShieldAlert />
                     <span>{t("sidebar.caces")}</span>
@@ -199,7 +206,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 {caces.length > 0 && <SidebarMenuBadge>{caces.length}</SidebarMenuBadge>}
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.medicalVisits")}>
+                <SidebarMenuButton asChild isActive={isActive("/medical-visits")} tooltip={t("sidebar.medicalVisits")}>
                   <Link to="/medical-visits">
                     <Stethoscope />
                     <span>{t("sidebar.medicalVisits")}</span>
@@ -208,7 +215,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 {medicalVisits.length > 0 && <SidebarMenuBadge>{medicalVisits.length}</SidebarMenuBadge>}
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.drivingAuthorizations")}>
+                <SidebarMenuButton asChild isActive={isActive("/driving-authorizations")} tooltip={t("sidebar.drivingAuthorizations")}>
                   <Link to="/driving-authorizations">
                     <Car />
                     <span>{t("sidebar.drivingAuthorizations")}</span>
@@ -217,7 +224,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 {drivingAuthorizations.length > 0 && <SidebarMenuBadge>{drivingAuthorizations.length}</SidebarMenuBadge>}
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.onlineTrainings")}>
+                <SidebarMenuButton asChild isActive={isActive("/online-trainings")} tooltip={t("sidebar.onlineTrainings")}>
                   <Link to="/online-trainings">
                     <GraduationCap />
                     <span>{t("sidebar.onlineTrainings")}</span>
@@ -226,7 +233,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 {onlineTrainings.length > 0 && <SidebarMenuBadge>{onlineTrainings.length}</SidebarMenuBadge>}
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.contracts")}>
+                <SidebarMenuButton asChild isActive={isActive("/contracts")} tooltip={t("sidebar.contracts")}>
                   <Link to="/contracts">
                     <FileText />
                     <span>{t("sidebar.contracts")}</span>
@@ -242,7 +249,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("positions.title")}>
+                <SidebarMenuButton asChild isActive={isActive("/positions")} tooltip={t("positions.title")}>
                   <Link to="/positions">
                     <Briefcase />
                     <span>{t("positions.title")}</span>
@@ -250,7 +257,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("workLocations.title")}>
+                <SidebarMenuButton asChild isActive={isActive("/work-locations")} tooltip={t("workLocations.title")}>
                   <Link to="/work-locations">
                     <MapPin />
                     <span>{t("workLocations.title")}</span>
@@ -258,7 +265,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("departments.title")}>
+                <SidebarMenuButton asChild isActive={isActive("/departments")} tooltip={t("departments.title")}>
                   <Link to="/departments">
                     <Building2 />
                     <span>{t("departments.title")}</span>
@@ -266,7 +273,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("contractTypes.title")}>
+                <SidebarMenuButton asChild isActive={isActive("/contract-types")} tooltip={t("contractTypes.title")}>
                   <Link to="/contract-types">
                     <ClipboardList />
                     <span>{t("contractTypes.title")}</span>
@@ -299,7 +306,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 </div>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.settings")}>
+                <SidebarMenuButton asChild isActive={isActive("/settings")} tooltip={t("sidebar.settings")}>
                   <Link to="/settings">
                     <Settings2 />
                     <span>{t("sidebar.settings")}</span>
@@ -307,7 +314,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.trash")}>
+                <SidebarMenuButton asChild isActive={isActive("/trash")} tooltip={t("sidebar.trash")}>
                   <Link to="/trash">
                     <Trash2 />
                     <span>{t("sidebar.trash")}</span>

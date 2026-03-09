@@ -1,8 +1,8 @@
 <h1 align="center">WEMS</h1>
 
 <p align="center">
-  <a href="https://wems.vercel.app">
-    <img src="https://img.shields.io/website?down_color=lightgrey&down_message=offline&up_color=green&up_message=online&url=https%3A%2F%2Fwems.vercel.app" alt="Website">
+  <a href="https://wareflowx.nesalia.com">
+    <img src="https://img.shields.io/website?down_color=lightgrey&down_message=offline&up_color=green&up_message=online&url=https%3A%2F%2Fwareflowx.nesalia.com" alt="Website">
   </a>
   <a href="https://github.com/wareflowx/wems-v2/releases">
     <img src="https://img.shields.io/github/v/release/wareflowx/wems-v2" alt="Release">

@@ -12,6 +12,7 @@ import {
   employees,
   media,
   medicalVisits,
+  notes,
   onlineTrainings,
   positions,
   posts,
@@ -2399,6 +2400,402 @@ export const permanentDeleteContractType = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in permanentDeleteContractType:", error);
+    throw error;
+  }
+});
+
+// Migration: Add notes table
+export const migrateAddNotesTable = os.handler(async () => {
+  try {
+    const db = await getDb();
+
+    // Check if notes table exists
+    const result = await db.execute(
+      `SELECT name FROM sqlite_master WHERE type='table' AND name='notes'`
+    );
+
+    if (!result || result.length === 0) {
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS notes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          description TEXT,
+          isCompleted INTEGER DEFAULT 0,
+          createdAt TEXT DEFAULT (datetime('now')),
+          updatedAt TEXT DEFAULT (datetime('now')),
+          deletedAt TEXT
+        )
+      `);
+      console.log("[MIGRATION] Notes table created successfully");
+    } else {
+      console.log("[MIGRATION] Notes table already exists");
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error in migrateAddNotesTable:", error);
+    throw error;
+  }
+});
+
+// Notes handlers
+export const getNotes = os.handler(async () => {
+  try {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(notes)
+      .where(isNull(notes.deletedAt))
+      .orderBy(desc(notes.createdAt));
+  } catch (error) {
+    console.error("Error in getNotes:", error);
+    throw error;
+  }
+});
+
+export const createNote = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const [newNote] = await db
+      .insert(notes)
+      .values({
+        title: input.title,
+        description: input.description || null,
+      })
+      .returning();
+    return newNote;
+  } catch (error) {
+    console.error("Error in createNote:", error);
+    throw error;
+  }
+});
+
+export const updateNote = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const updateData: Partial<typeof notes.$inferInsert> = {};
+    if (input.title !== undefined) updateData.title = input.title;
+    if (input.description !== undefined) updateData.description = input.description;
+    if (input.isCompleted !== undefined) updateData.isCompleted = input.isCompleted;
+
+    const [updatedNote] = await db
+      .update(notes)
+      .set({ ...updateData, updatedAt: new Date().toISOString() })
+      .where(eq(notes.id, input.id))
+      .returning();
+    return updatedNote;
+  } catch (error) {
+    console.error("Error in updateNote:", error);
+    throw error;
+  }
+});
+
+export const deleteNote = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    await db
+      .update(notes)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(notes.id, input.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteNote:", error);
+    throw error;
+  }
+});
+
+import { gte, lte, and, isNull } from "drizzle-orm";
+import { app } from "electron";
+import * as fs from "fs";
+import * as path from "path";
+import {
+  generateCsv,
+  writeCsvToFile,
+  getCsvExtension,
+} from "@/core/lib/exporters/csv-exporter";
+import {
+  writeExcelToFile,
+  getExcelExtension,
+} from "@/core/lib/exporters/excel-exporter";
+import {
+  writePdfToFile,
+  getPdfExtension,
+} from "@/core/lib/exporters/pdf-exporter";
+import { getDateRangeParams } from "@/core/lib/date-utils";
+import { randomUUID } from "node:crypto";
+
+// ============================================================
+// Export types and interfaces
+// ============================================================
+
+export type ExportType = "employees" | "attachments" | "media";
+export type ExportFormat = "csv" | "xlsx" | "pdf";
+export type DateRange = "today" | "7days" | "30days" | "all";
+
+export interface ExportOptions {
+  types: ExportType[];
+  format: ExportFormat;
+  dateRange: DateRange;
+}
+
+export interface ExportResult {
+  success: boolean;
+  filePath?: string;
+  recordCount: number;
+  canceled?: boolean;
+  error?: string;
+}
+
+export interface ExportPreview {
+  employees: number;
+  attachments: number;
+  media: number;
+  total: number;
+}
+
+// ============================================================
+// Export Preview - count records before export
+// ============================================================
+
+export const previewExport = os.handler(async ({ input }: { input: { types: ExportType[]; dateRange: DateRange } }) => {
+  try {
+    const db = await getDb();
+    const { types, dateRange } = input;
+    const params = getDateRangeParams(dateRange);
+
+    const preview: ExportPreview = {
+      employees: 0,
+      attachments: 0,
+      media: 0,
+      total: 0,
+    };
+
+    if (types.includes("employees")) {
+      if (!params.start || !params.end) {
+        // No date filter - count all
+        const result = await db
+          .select({ count: employees.id })
+          .from(employees)
+          .where(isNull(employees.deletedAt));
+        preview.employees = result.length;
+      } else {
+        // With date filter
+        const result = await db
+          .select({ count: employees.id })
+          .from(employees)
+          .where(
+            and(
+              isNull(employees.deletedAt),
+              gte(employees.createdAt, params.start.toISOString()),
+              lte(employees.createdAt, params.end.toISOString())
+            )
+          );
+        preview.employees = result.length;
+      }
+      preview.total += preview.employees;
+    }
+
+    if (types.includes("attachments")) {
+      if (!params.start || !params.end) {
+        const result = await db
+          .select({ count: attachments.id })
+          .from(attachments)
+          .where(isNull(attachments.deletedAt));
+        preview.attachments = result.length;
+      } else {
+        const result = await db
+          .select({ count: attachments.id })
+          .from(attachments)
+          .where(
+            and(
+              isNull(attachments.deletedAt),
+              gte(attachments.createdAt, params.start.toISOString()),
+              lte(attachments.createdAt, params.end.toISOString())
+            )
+          );
+        preview.attachments = result.length;
+      }
+      preview.total += preview.attachments;
+    }
+
+    if (types.includes("media")) {
+      if (!params.start || !params.end) {
+        const result = await db
+          .select({ count: media.id })
+          .from(media)
+          .where(isNull(media.deletedAt));
+        preview.media = result.length;
+      } else {
+        const result = await db
+          .select({ count: media.id })
+          .from(media)
+          .where(
+            and(
+              isNull(media.deletedAt),
+              gte(media.createdAt, params.start.toISOString()),
+              lte(media.createdAt, params.end.toISOString())
+            )
+          );
+        preview.media = result.length;
+      }
+      preview.total += preview.media;
+    }
+
+    return preview;
+  } catch (error) {
+    console.error("Error in previewExport:", error);
+    throw error;
+  }
+});
+
+// ============================================================
+// Export Data - generate and save export file
+// ============================================================
+
+export const exportData = os.handler(async ({ input }: { input: ExportOptions }) => {
+  try {
+    const { types, format, dateRange } = input;
+
+    if (!types || types.length === 0) {
+      return { success: false, error: "No export types selected", recordCount: 0 };
+    }
+
+    const db = await getDb();
+    const params = getDateRangeParams(dateRange);
+
+    // Get data based on selected types
+    const data: Record<string, unknown[]> = {};
+    let totalRecords = 0;
+
+    if (types.includes("employees")) {
+      if (!params.start || !params.end) {
+        data.employees = await db
+          .select()
+          .from(employees)
+          .where(isNull(employees.deletedAt));
+      } else {
+        data.employees = await db
+          .select()
+          .from(employees)
+          .where(
+            and(
+              isNull(employees.deletedAt),
+              gte(employees.createdAt, params.start.toISOString()),
+              lte(employees.createdAt, params.end.toISOString())
+            )
+          );
+      }
+      totalRecords += data.employees.length;
+    }
+
+    if (types.includes("attachments")) {
+      if (!params.start || !params.end) {
+        data.attachments = await db
+          .select()
+          .from(attachments)
+          .where(isNull(attachments.deletedAt));
+      } else {
+        data.attachments = await db
+          .select()
+          .from(attachments)
+          .where(
+            and(
+              isNull(attachments.deletedAt),
+              gte(attachments.createdAt, params.start.toISOString()),
+              lte(attachments.createdAt, params.end.toISOString())
+            )
+          );
+      }
+      totalRecords += data.attachments.length;
+    }
+
+    if (types.includes("media")) {
+      if (!params.start || !params.end) {
+        data.media = await db
+          .select()
+          .from(media)
+          .where(isNull(media.deletedAt));
+      } else {
+        data.media = await db
+          .select()
+          .from(media)
+          .where(
+            and(
+              isNull(media.deletedAt),
+              gte(media.createdAt, params.start.toISOString()),
+              lte(media.createdAt, params.end.toISOString())
+            )
+          );
+      }
+      totalRecords += data.media.length;
+    }
+
+    // Get export directory
+    const documentsPath = app.getPath("documents");
+    const exportDir = path.join(documentsPath, "WEMS", "exports");
+
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(exportDir)) {
+      fs.mkdirSync(exportDir, { recursive: true });
+    }
+
+    // Generate filename
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    const isMultiType = types.length > 1;
+
+    let filePath: string;
+    let extension: string;
+
+    if (format === "csv") {
+      extension = getCsvExtension(isMultiType);
+      filePath = path.join(exportDir, `export-${timestamp}.${extension}`);
+      await writeCsvToFile(data, filePath, isMultiType);
+    } else if (format === "xlsx") {
+      extension = getExcelExtension();
+      filePath = path.join(exportDir, `export-${timestamp}.${extension}`);
+      await writeExcelToFile(data, filePath);
+    } else if (format === "pdf") {
+      extension = getPdfExtension();
+      filePath = path.join(exportDir, `export-${timestamp}.${extension}`);
+      await writePdfToFile(data, filePath);
+    } else {
+      return { success: false, error: "Invalid export format", recordCount: 0 };
+    }
+
+    return { success: true, filePath, recordCount: totalRecords };
+  } catch (error) {
+    console.error("Error in exportData:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return { success: false, error: message, recordCount: 0 };
+  }
+});
+
+// ============================================================
+// Open exported file
+// ============================================================
+
+export const openExportedFile = os.handler(async ({ input }: { input: { filePath: string } }) => {
+  try {
+    const { shell } = await import("electron");
+    await shell.openPath(input.filePath);
+    return { success: true };
+  } catch (error) {
+    console.error("Error in openExportedFile:", error);
+    throw error;
+  }
+});
+
+// ============================================================
+// Open export folder
+// ============================================================
+
+export const openExportFolder = os.handler(async ({ input }: { input: { filePath: string } }) => {
+  try {
+    const { shell } = await import("electron");
+    shell.showItemInFolder(input.filePath);
+    return { success: true };
+  } catch (error) {
+    console.error("Error in openExportFolder:", error);
     throw error;
   }
 });

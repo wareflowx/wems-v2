@@ -31,6 +31,63 @@ export async function createPost(data: { title: string; content: string }) {
   return client.database.createPost(data);
 }
 
+// Notes
+export interface Note {
+  id: number;
+  title: string;
+  description: string | null;
+  isCompleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export async function getNotes(): Promise<Note[]> {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getNotes();
+}
+
+export async function createNote(data: { title: string; description?: string }): Promise<Note | null> {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.createNote(data);
+}
+
+export async function updateNote(data: {
+  id: number;
+  title?: string;
+  description?: string;
+  isCompleted?: boolean;
+}): Promise<Note | null> {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.updateNote(data);
+}
+
+export async function deleteNote(id: number): Promise<boolean | null> {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.deleteNote({ id });
+}
+
+// Migration: Add notes table
+export async function migrateAddNotesTable(): Promise<{ success: boolean } | null> {
+  const client = getClient();
+  if (!client) {
+    return null;
+  }
+  return client.database.migrateAddNotesTable();
+}
+
 // Positions
 export async function getPositions() {
   const client = getClient();
@@ -766,4 +823,68 @@ export async function restoreContractType(id: number) {
     return null;
   }
   return client.database.restoreContractType({ id });
+}
+
+// ============================================================
+// Export functions
+// ============================================================
+
+export type ExportType = 'employees' | 'attachments' | 'media';
+export type ExportFormat = 'csv' | 'xlsx' | 'pdf';
+export type DateRange = 'today' | '7days' | '30days' | 'all';
+
+export interface ExportOptions {
+  types: ExportType[];
+  format: ExportFormat;
+  dateRange: DateRange;
+}
+
+export interface ExportResult {
+  success: boolean;
+  filePath?: string;
+  recordCount: number;
+  canceled?: boolean;
+  error?: string;
+}
+
+export interface ExportPreview {
+  employees: number;
+  attachments: number;
+  media: number;
+  total: number;
+}
+
+export async function previewExport(
+  types: ExportType[],
+  dateRange: DateRange
+): Promise<ExportPreview> {
+  const client = getClient();
+  if (!client) {
+    return { employees: 0, attachments: 0, media: 0, total: 0 };
+  }
+  return client.database.previewExport({ types, dateRange });
+}
+
+export async function exportData(options: ExportOptions): Promise<ExportResult> {
+  const client = getClient();
+  if (!client) {
+    return { success: false, error: 'ORPC not ready', recordCount: 0 };
+  }
+  return client.database.exportData(options);
+}
+
+export async function openExportedFile(filePath: string): Promise<{ success: boolean }> {
+  const client = getClient();
+  if (!client) {
+    return { success: false };
+  }
+  return client.database.openExportedFile({ filePath });
+}
+
+export async function openExportFolder(filePath: string): Promise<{ success: boolean }> {
+  const client = getClient();
+  if (!client) {
+    return { success: false };
+  }
+  return client.database.openExportFolder({ filePath });
 }

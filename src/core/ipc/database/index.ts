@@ -98,7 +98,11 @@ import {
   exportData,
   openExportedFile,
   openExportFolder,
+  // Export history handlers
+  getExportHistory,
+  deleteExportFromHistory,
 } from "./handlers";
+import { getExportHistory as getExportHistoryLib, deleteExportFromHistory as deleteExportFromHistoryLib } from "@/core/lib/export-history";
 
 export const database = {
   getPosts,
@@ -214,4 +218,7 @@ export const database = {
   exportData,
   openExportedFile,
   openExportFolder,
+  // Export history
+  getExportHistory: getExportHistoryLib,
+  deleteExportFromHistory: deleteExportFromHistoryLib,
 };

@@ -7,6 +7,7 @@ import {
   Building2,
   Car,
   ClipboardList,
+  Download,
   FileText,
   GraduationCap,
   Home,
@@ -25,6 +26,7 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { getAppVersion } from "@/actions/app";
 import { useAlerts, useCaces, useDrivingAuthorizations, useMedicalVisits, useOnlineTrainings } from "@/hooks";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -32,13 +34,11 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 const _data = {
@@ -102,6 +102,19 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
     setMounted(true);
   }, []);
 
+  // Handle Cmd+K / Ctrl+K keyboard shortcut
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+        event.preventDefault();
+        onQuickActionsClick?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onQuickActionsClick]);
+
   return (
     <>
       <Sidebar
@@ -109,25 +122,22 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
       collapsible="icon"
       {...props}
     >
-      <SidebarHeader className="border-b bg-card">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
-              <div className="flex w-full cursor-pointer items-center">
-                <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
-                  {t("sidebar.toggle")}
-                </span>
-                <SidebarTrigger className="ml-auto size-4" />
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
       <SidebarContent className="bg-card">
         {/* Quick actions - visible even when sidebar is collapsed */}
         <SidebarGroup>
           <SidebarGroupContent>
-            
+            <Button
+              className="w-full justify-start gap-2"
+              variant="outline"
+              onClick={onQuickActionsClick}
+              size="sm"
+            >
+              <Search className="size-4 text-muted-foreground shrink-0" />
+              <span className="flex-1 text-left text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">Search...</span>
+              <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground group-data-[collapsible=icon]:hidden">
+                <span className="text-xs">⌘K</span>
+              </kbd>
+            </Button>
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
@@ -287,6 +297,14 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                   <Link to="/trash">
                     <Trash2 />
                     <span>{t("sidebar.trash")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive("/exports")} tooltip={t("sidebar.exports", "Exports")}>
+                  <Link to="/exports">
+                    <Download />
+                    <span>{t("sidebar.exports", "Exports")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

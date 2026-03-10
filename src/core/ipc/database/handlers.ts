@@ -2522,6 +2522,7 @@ import {
   getPdfExtension,
 } from "@/core/lib/exporters/pdf-exporter";
 import { getDateRangeParams } from "@/core/lib/date-utils";
+import { addExportToHistory, getExportHistory, deleteExportFromHistory } from "@/core/lib/export-history";
 import { randomUUID } from "node:crypto";
 
 // ============================================================
@@ -2762,6 +2763,14 @@ export const exportData = os.handler(async ({ input }: { input: ExportOptions })
       return { success: false, error: "Invalid export format", recordCount: 0 };
     }
 
+    // Save to history
+    await addExportToHistory({
+      types,
+      format,
+      recordCount: totalRecords,
+      filePath,
+    });
+
     return { success: true, filePath, recordCount: totalRecords };
   } catch (error) {
     console.error("Error in exportData:", error);
@@ -2799,3 +2808,6 @@ export const openExportFolder = os.handler(async ({ input }: { input: { filePath
     throw error;
   }
 });
+
+// Re-export export history handlers
+export { getExportHistory, deleteExportFromHistory };

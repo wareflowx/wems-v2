@@ -888,3 +888,29 @@ export async function openExportFolder(filePath: string): Promise<{ success: boo
   }
   return client.database.openExportFolder({ filePath });
 }
+
+// Export history types
+export interface ExportHistoryRecord {
+  id: string;
+  timestamp: string;
+  types: ExportType[];
+  format: ExportFormat;
+  recordCount: number;
+  filePath: string;
+}
+
+export async function getExportHistory(): Promise<ExportHistoryRecord[]> {
+  const client = getClient();
+  if (!client) {
+    return [];
+  }
+  return client.database.getExportHistory();
+}
+
+export async function deleteExportFromHistory(id: string): Promise<{ success: boolean }> {
+  const client = getClient();
+  if (!client) {
+    return { success: false };
+  }
+  return client.database.deleteExportFromHistory({ id });
+}

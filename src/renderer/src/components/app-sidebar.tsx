@@ -281,7 +281,7 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-auto">
+        <SidebarGroup className="mt-auto pb-4">
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>

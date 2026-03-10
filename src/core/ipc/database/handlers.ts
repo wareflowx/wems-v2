@@ -2810,4 +2810,4 @@ export const openExportFolder = os.handler(async ({ input }: { input: { filePath
 });
 
 // Re-export export history handlers
-export { getExportHistory, deleteExportFromHistory };
+export { addExportToHistory, getExportHistory, deleteExportFromHistory };

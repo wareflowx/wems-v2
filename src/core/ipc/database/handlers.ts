@@ -2732,8 +2732,8 @@ export const exportData = os.handler(async ({ input }: { input: ExportOptions })
     }
 
     // Get export directory
-    const documentsPath = app.getPath("documents");
-    const exportDir = path.join(documentsPath, "WEMS", "exports");
+    const userDataPath = app.getPath("userData");
+    const exportDir = path.join(userDataPath, "exports");
 
     // Create directory if it doesn't exist
     if (!fs.existsSync(exportDir)) {

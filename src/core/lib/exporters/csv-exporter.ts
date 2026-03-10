@@ -74,7 +74,7 @@ const mapToRow = (
   const row: Record<string, unknown> = {};
 
   for (const [label, key] of Object.entries(columns)) {
-    const value = record[key as keyof typeof record];
+    const value = (record as Record<string, unknown>)[key as string];
     row[label] = value ?? '';
   }
 

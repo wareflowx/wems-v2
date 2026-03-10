@@ -4,8 +4,11 @@
 
 import ExcelJS from 'exceljs';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 import type { Employee, Attachment } from '@/core/db/schema';
 import type { Media } from '@/core/db/schema';
+import { generateCsv } from './csv-exporter';
 
 export type ExportType = 'employees' | 'attachments' | 'media';
 
@@ -73,74 +76,70 @@ const parseDate = (value: string | Date | null | undefined): Date | undefined =>
 };
 
 /**
- * Generate Excel file
+ * Generate Excel file by converting CSV data
  */
 export const generateExcel = async (data: ExportData): Promise<Buffer> => {
-  const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'WEMS';
-  workbook.created = new Date();
+  // Create a temp directory
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wems-export-'));
 
-  for (const type of ['employees', 'attachments', 'media'] as ExportType[]) {
-    const records = data[type];
-    if (!records || records.length === 0) continue;
+  try {
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'WEMS';
+    workbook.created = new Date();
 
-    const columns = getColumns(type);
-    const sheet = workbook.addWorksheet(SHEET_NAMES[type]);
+    for (const type of ['employees', 'attachments', 'media'] as ExportType[]) {
+      const records = data[type];
+      if (!records || records.length === 0) continue;
 
-    // Add header row
-    const headerRow = sheet.addRow(columns.map(c => c.key));
+      const columns = getColumns(type);
+      const sheet = workbook.addWorksheet(SHEET_NAMES[type]);
 
-    // Style headers
-    headerRow.font = { bold: true };
-    headerRow.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFE0E0E0' },
-    };
-    headerRow.border = {
-      top: { style: 'thin' },
-      left: { style: 'thin' },
-      bottom: { style: 'thin' },
-      right: { style: 'thin' },
-    };
+      // Add header
+      sheet.addRow(columns.map(c => c.key));
 
-    // Add data rows
-    for (const record of records) {
-      const row: (string | number | Date | undefined)[] = [];
+      // Style header
+      const headerRow = sheet.getRow(1);
+      headerRow.font = { bold: true };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' },
+      };
 
-      for (const col of columns) {
-        const value = record[col.prop as keyof typeof record];
+      // Add data rows
+      for (const record of records) {
+        const row: (string | number | Date) = [];
 
-        if (col.isDate && value) {
-          const dateValue = parseDate(value as string | Date);
-          row.push(dateValue);
-        } else {
-          row.push(value as string | number | undefined);
+        for (const col of columns) {
+          const value = (record as Record<string, unknown>)[col.prop];
+
+          if (col.isDate && value) {
+            const dateValue = parseDate(value as string | Date);
+            row.push(dateValue as Date);
+          } else {
+            row.push(String(value ?? ''));
+          }
         }
+
+        sheet.addRow(row);
       }
 
-      const dataRow = sheet.addRow(row);
-
-      // Apply date formatting to date columns
-      for (let i = 0; i < columns.length; i++) {
-        if (columns[i].isDate) {
-          const cell = dataRow.getCell(i + 1);
-          cell.numFmt = 'dd/mm/yyyy';
-        }
-      }
+      // Auto-fit columns
+      sheet.columns.forEach((column) => {
+        column.width = 15;
+      });
     }
 
-    // Auto-fit columns
-    sheet.columns.forEach((column, index) => {
-      const maxLength = Math.max(
-        ...(sheet.getColumn(index + 1).values as string[]).map(v => String(v).length),
-        columns[index].key.length
-      );
-      column.width = Math.min(Math.max(maxLength + 2, 10), 50);
-    });
-  }
+    // Write to temp file
+    const tempFile = path.join(tempDir, 'export.xlsx');
+    await workbook.xlsx.writeFile(tempFile);
 
-  return await workbook.xlsx.writeBuffer() as Buffer;
+    // Read back as buffer
+    return fs.readFileSync(tempFile);
+  } finally {
+    // Clean up temp directory
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 };
 
 /**

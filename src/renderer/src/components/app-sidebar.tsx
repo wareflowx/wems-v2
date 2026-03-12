@@ -1,34 +1,30 @@
 "use client";
 
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import {
   AlertTriangle,
   Briefcase,
   Building2,
   Car,
   ClipboardList,
+  Download,
   FileText,
   GraduationCap,
   Home,
-  Lock,
   MapPin,
-  Pen,
-  Plus,
   Search,
   Settings2,
   ShieldAlert,
-  SquareTerminal,
   Stethoscope,
   Trash2,
   Users,
-  X,
+  LucideIcon,
 } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "cmdk";
 import { getAppVersion } from "@/actions/app";
 import { useAlerts, useCaces, useDrivingAuthorizations, useMedicalVisits, useOnlineTrainings } from "@/hooks";
-import { useDialogStore } from "@/stores/dialog-store";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -36,153 +32,50 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-const _data = {
-  user: {
-    name: "User",
-    email: "user@example.com",
-  },
-  navMain: [
-    {
-      title: "Playground",
-      url: "/",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "Home",
-          url: "/",
-        },
-        {
-          title: "Posts",
-          url: "/posts",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-    },
-  ],
-};
+interface NavItemProps {
+  path: string;
+  icon: LucideIcon;
+  label: string;
+  badge?: number;
+}
 
-function QuickActionsDialog({
-  open,
-  onOpenChange,
-  groupedActions,
-  handleCommandSelect,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  groupedActions: { heading?: string; items: typeof quickActions }[];
-  handleCommandSelect: (callback: () => void) => void;
-}) {
-  if (!open) return null;
-
-  // Filter items based on search - this is handled by cmdk internally
-  // We render items flat but group headings only show when group has items
-  const [searchValue, setSearchValue] = React.useState("");
-
-  const filteredGroups = React.useMemo(() => {
-    if (!searchValue) return groupedActions;
-
-    const searchLower = searchValue.toLowerCase();
-    return groupedActions
-      .map((group) => ({
-        ...group,
-        items: group.items.filter(
-          (item) =>
-            item.title.toLowerCase().includes(searchLower) ||
-            item.id.toLowerCase().includes(searchLower)
-        ),
-      }))
-      .filter((group) => group.items.length > 0);
-  }, [groupedActions, searchValue]);
-
-  // Flatten for rendering
-  const flatItems = filteredGroups.flatMap((group) =>
-    group.items.map((item) => ({
-      ...item,
-      groupHeading: group.heading,
-    }))
-  );
-
-  // Track heading changes for rendering headers
-  let lastHeading: string | undefined;
+function NavItem({ path, icon: Icon, label, badge }: NavItemProps) {
+  const location = useLocation();
+  const isActive = path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
-      <div className="fixed inset-0 bg-black/50" onClick={() => onOpenChange(false)} />
-      <Command className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-xl border border-border/50 bg-background shadow-2xl">
-        <div className="flex items-center border-b border-border/50 px-3 py-2">
-          <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
-          <Command.Input
-            className="flex h-8 w-full rounded-md bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            placeholder="Search actions..."
-            value={searchValue}
-            onValueChange={setSearchValue}
-            autoFocus
-          />
-          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            ESC
-          </kbd>
-        </div>
-        <CommandList className="max-h-[320px] overflow-y-auto p-1">
-          <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
-            No actions found.
-          </CommandEmpty>
-          <CommandGroup>
-            {flatItems.map((item) => {
-              const showSeparator = lastHeading !== item.groupHeading;
-              lastHeading = item.groupHeading;
-              return (
-                <React.Fragment key={item.id}>
-                  {showSeparator && item.groupHeading && (
-                    <div className="text-xs font-medium text-muted-foreground px-2 py-1.5">
-                      {item.groupHeading}
-                    </div>
-                  )}
-                  <CommandItem
-                    className="flex cursor-default items-center gap-2 rounded-md px-2 py-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
-                    onSelect={() => handleCommandSelect(item.action)}
-                  >
-                    {item.icon && <item.icon className="h-4 w-4 text-muted-foreground" />}
-                    <span className="flex-1">{item.title}</span>
-                    {item.shortcut && (
-                      <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                        {item.shortcut}
-                      </kbd>
-                    )}
-                  </CommandItem>
-                </React.Fragment>
-              );
-            })}
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </div>
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        asChild
+        isActive={isActive}
+        tooltip={label}
+        className="data-active:bg-sidebar-accent/50 data-active:border data-active:border-sidebar-accent"
+      >
+        <Link to={path}>
+          <Icon />
+          <span>{label}</span>
+        </Link>
+      </SidebarMenuButton>
+      {badge !== undefined && badge > 0 && <SidebarMenuBadge>{badge}</SidebarMenuBadge>}
+    </SidebarMenuItem>
   );
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  onQuickActionsClick?: () => void;
+}
+
+export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
   const { t } = useTranslation();
   const [_appVersion, setAppVersion] = React.useState("0.0.0");
-  const [canWrite, setCanWrite] = React.useState(true);
-  const [open, setOpen] = React.useState(false);
-  const [mounted, setMounted] = React.useState(() => typeof window !== "undefined");
-  const navigate = useNavigate();
-  const openDialog = useDialogStore((state) => state.openDialog);
+  const [, setMounted] = React.useState(() => typeof window !== "undefined");
 
   // Get counts for sidebar badges
   const { data: alerts = [] } = useAlerts();
@@ -193,297 +86,55 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   React.useEffect(() => {
     getAppVersion().then(setAppVersion);
+    setMounted(true);
+  }, []);
 
-    // Initial check for write mode
-    window
-      .getWriteMode?.()
-      .then(setCanWrite)
-      .catch(() => setCanWrite(true));
-
-    // Listen for real-time lock status changes
-    window.onLockStatusChanged?.((writeMode) => {
-      setCanWrite(writeMode);
-    });
-
-    // Handle Cmd+K / Ctrl+K keyboard shortcut
+  // Handle Cmd+K / Ctrl+K keyboard shortcut
+  React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
-        setOpen((prev) => !prev);
+        onQuickActionsClick?.();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    setMounted(true);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  const handleCommandSelect = (callback: () => void) => {
-    callback();
-    setOpen(false);
-  };
-
-  // Quick actions command palette
-  const quickActions = [
-    {
-      heading: "Navigation",
-    },
-    {
-      id: "home",
-      title: "Dashboard",
-      shortcut: "G H",
-      action: () => navigate({ to: "/" }),
-      icon: Home,
-    },
-    {
-      id: "employees",
-      title: "Employees",
-      shortcut: "G E",
-      action: () => navigate({ to: "/employees" }),
-      icon: Users,
-    },
-    {
-      id: "alerts",
-      title: "Alerts",
-      shortcut: "G A",
-      action: () => navigate({ to: "/alerts" }),
-      icon: AlertTriangle,
-    },
-    {
-      id: "documents",
-      title: "Documents",
-      shortcut: "G D",
-      action: () => navigate({ to: "/documents" }),
-      icon: FileText,
-    },
-    {
-      id: "caces",
-      title: "CACES",
-      shortcut: "G C",
-      action: () => navigate({ to: "/caces" }),
-      icon: ShieldAlert,
-    },
-    {
-      id: "medical-visits",
-      title: "Medical Visits",
-      shortcut: "G M",
-      action: () => navigate({ to: "/medical-visits" }),
-      icon: Stethoscope,
-    },
-    {
-      id: "driving-authorizations",
-      title: "Driving Authorizations",
-      shortcut: "G R",
-      action: () => navigate({ to: "/driving-authorizations" }),
-      icon: Car,
-    },
-    {
-      id: "online-trainings",
-      title: "Online Trainings",
-      shortcut: "G T",
-      action: () => navigate({ to: "/online-trainings" }),
-      icon: GraduationCap,
-    },
-    {
-      id: "contracts",
-      title: "Contracts",
-      shortcut: "G O",
-      action: () => navigate({ to: "/contracts" }),
-      icon: FileText,
-    },
-    {
-      heading: "Reference Data",
-    },
-    {
-      id: "positions",
-      title: "Positions",
-      shortcut: "P P",
-      action: () => navigate({ to: "/positions" }),
-      icon: Briefcase,
-    },
-    {
-      id: "work-locations",
-      title: "Work Locations",
-      shortcut: "P W",
-      action: () => navigate({ to: "/work-locations" }),
-      icon: MapPin,
-    },
-    {
-      id: "departments",
-      title: "Departments",
-      shortcut: "P D",
-      action: () => navigate({ to: "/departments" }),
-      icon: Building2,
-    },
-    {
-      id: "contract-types",
-      title: "Contract Types",
-      shortcut: "P C",
-      action: () => navigate({ to: "/contract-types" }),
-      icon: ClipboardList,
-    },
-    {
-      heading: "Create",
-    },
-    {
-      id: "create-employee",
-      title: "New Employee",
-      shortcut: "C E",
-      action: () => openDialog("create-employee"),
-      icon: Plus,
-    },
-    {
-      id: "create-document",
-      title: "New Document",
-      shortcut: "C D",
-      action: () => openDialog("create-document"),
-      icon: Plus,
-    },
-    {
-      id: "create-caces",
-      title: "New CACES",
-      shortcut: "C C",
-      action: () => openDialog("create-caces"),
-      icon: Plus,
-    },
-    {
-      id: "create-medical-visit",
-      title: "New Medical Visit",
-      shortcut: "C M",
-      action: () => openDialog("create-medical-visit"),
-      icon: Plus,
-    },
-    {
-      id: "create-driving-authorization",
-      title: "New Driving Authorization",
-      shortcut: "C R",
-      action: () => openDialog("create-driving-authorization"),
-      icon: Plus,
-    },
-    {
-      id: "create-online-training",
-      title: "New Online Training",
-      shortcut: "C T",
-      action: () => openDialog("create-online-training"),
-      icon: Plus,
-    },
-    {
-      id: "create-contract",
-      title: "New Contract",
-      shortcut: "C O",
-      action: () => openDialog("create-contract"),
-      icon: Plus,
-    },
-    {
-      heading: "Settings",
-    },
-    {
-      id: "settings",
-      title: "Settings",
-      shortcut: "S S",
-      action: () => navigate({ to: "/settings" }),
-      icon: Settings2,
-    },
-    {
-      id: "trash",
-      title: "Trash",
-      shortcut: "S T",
-      action: () => navigate({ to: "/trash" }),
-      icon: Trash2,
-    },
-  ];
-
-  // Group items by heading
-  const groupedActions = quickActions.reduce<{ heading?: string; items: typeof quickActions }[]>((acc, item) => {
-    if ("heading" in item && item.heading) {
-      acc.push({ heading: item.heading, items: [] });
-    } else if (acc.length > 0) {
-      acc[acc.length - 1].items.push(item);
-    }
-    return acc;
-  }, []);
+  }, [onQuickActionsClick]);
 
   return (
     <>
-      {mounted && (
-        <QuickActionsDialog
-          open={open}
-          onOpenChange={setOpen}
-          groupedActions={groupedActions}
-          handleCommandSelect={handleCommandSelect}
-        />
-      )}
       <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
       collapsible="icon"
       {...props}
     >
-      <SidebarHeader className="border-b bg-card">
-        <SidebarMenu>
-          <SidebarMenuItem className="flex gap-2 p-1">
-            <div className="rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 p-1.5">
-              <Users className="h-4 w-4 text-white" />
-            </div>
-            <h1 className="font-semibold text-gray-900 text-lg group-data-[collapsible=icon]:hidden">
-              {t("app.name")}
-            </h1>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
       <SidebarContent className="bg-card">
-        {/* Quick actions - visible even when sidebar is collapsed */}
-        <SidebarGroup>
+        {/* Quick actions - hidden when collapsed */}
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupContent>
-            <div
-              className="mt-1 flex cursor-pointer items-center gap-2 rounded-md border bg-muted/50 px-2 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-              onClick={() => setOpen(true)}
+            <Button
+              className="w-full justify-start gap-2"
+              variant="outline"
+              onClick={onQuickActionsClick}
+              size="sm"
             >
-              <Search className="size-4" />
-              <span className="flex-1 text-xs group-data-[collapsible=icon]:hidden">Quick actions</span>
-              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 group-data-[collapsible=icon]:hidden">
-                <span className="text-xs">Ctrl</span>
-                <span>K</span>
+              <Search className="size-4 text-muted-foreground shrink-0" />
+              <span className="flex-1 text-left text-xs text-muted-foreground">Search...</span>
+              <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
+                <span className="text-xs">⌘K</span>
               </kbd>
-            </div>
+            </Button>
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>{t("sidebar.overview")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.dashboard")}>
-                  <Link to="/">
-                    <Home />
-                    <span>{t("sidebar.dashboard")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.employees")}>
-                  <Link to="/employees">
-                    <Users />
-                    <span>{t("sidebar.employees")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.alerts")}>
-                  <Link to="/alerts">
-                    <AlertTriangle />
-                    <span>{t("sidebar.alerts")}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {alerts.length > 0 && <SidebarMenuBadge>{alerts.length}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("agencies.title")}>
-                  <Link to="/agencies">
-                    <Building2 />
-                    <span>{t("agencies.title")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <NavItem path="/" icon={Home} label={t("sidebar.dashboard")} />
+              <NavItem path="/employees" icon={Users} label={t("sidebar.employees")} />
+              <NavItem path="/alerts" icon={AlertTriangle} label={t("sidebar.alerts")} badge={alerts.length} />
+              <NavItem path="/agencies" icon={Building2} label={t("agencies.title")} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -492,58 +143,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>{t("sidebar.management")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.documents")}>
-                  <Link to="/documents">
-                    <FileText />
-                    <span>{t("sidebar.documents")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.caces")}>
-                  <Link to="/caces">
-                    <ShieldAlert />
-                    <span>{t("sidebar.caces")}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {caces.length > 0 && <SidebarMenuBadge>{caces.length}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.medicalVisits")}>
-                  <Link to="/medical-visits">
-                    <Stethoscope />
-                    <span>{t("sidebar.medicalVisits")}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {medicalVisits.length > 0 && <SidebarMenuBadge>{medicalVisits.length}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.drivingAuthorizations")}>
-                  <Link to="/driving-authorizations">
-                    <Car />
-                    <span>{t("sidebar.drivingAuthorizations")}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {drivingAuthorizations.length > 0 && <SidebarMenuBadge>{drivingAuthorizations.length}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.onlineTrainings")}>
-                  <Link to="/online-trainings">
-                    <GraduationCap />
-                    <span>{t("sidebar.onlineTrainings")}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {onlineTrainings.length > 0 && <SidebarMenuBadge>{onlineTrainings.length}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.contracts")}>
-                  <Link to="/contracts">
-                    <FileText />
-                    <span>{t("sidebar.contracts")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <NavItem path="/documents" icon={FileText} label={t("sidebar.documents")} />
+              <NavItem path="/caces" icon={ShieldAlert} label={t("sidebar.caces")} badge={caces.length} />
+              <NavItem path="/medical-visits" icon={Stethoscope} label={t("sidebar.medicalVisits")} badge={medicalVisits.length} />
+              <NavItem path="/driving-authorizations" icon={Car} label={t("sidebar.drivingAuthorizations")} badge={drivingAuthorizations.length} />
+              <NavItem path="/online-trainings" icon={GraduationCap} label={t("sidebar.onlineTrainings")} badge={onlineTrainings.length} />
+              <NavItem path="/contracts" icon={FileText} label={t("sidebar.contracts")} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -552,97 +157,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>{t("sidebar.referenceData")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("positions.title")}>
-                  <Link to="/positions">
-                    <Briefcase />
-                    <span>{t("positions.title")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("workLocations.title")}>
-                  <Link to="/work-locations">
-                    <MapPin />
-                    <span>{t("workLocations.title")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("departments.title")}>
-                  <Link to="/departments">
-                    <Building2 />
-                    <span>{t("departments.title")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("contractTypes.title")}>
-                  <Link to="/contract-types">
-                    <ClipboardList />
-                    <span>{t("contractTypes.title")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <NavItem path="/positions" icon={Briefcase} label={t("positions.title")} />
+              <NavItem path="/work-locations" icon={MapPin} label={t("workLocations.title")} />
+              <NavItem path="/departments" icon={Building2} label={t("departments.title")} />
+              <NavItem path="/contract-types" icon={ClipboardList} label={t("contractTypes.title")} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-auto">
+        <SidebarGroup className="mt-auto pb-4">
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <div
-                  className={`flex items-center gap-2 rounded-md px-2 py-1.5  ${
-                    canWrite
-                      ? "bg-green-500/10 text-green-600 border border-green-500/20"
-                      : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
-                  }`}
-                >
-                  {canWrite ? (
-                    <Pen className="h-4 w-4" />
-                  ) : (
-                    <Lock className="h-4 w-4" />
-                  )}
-                  <span className="group-data-[collapsible=icon]:hidden">
-                    {canWrite ? "Write mode" : "Read only"}
-                  </span>
-                </div>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.settings")}>
-                  <Link to="/settings">
-                    <Settings2 />
-                    <span>{t("sidebar.settings")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t("sidebar.trash")}>
-                  <Link to="/trash">
-                    <Trash2 />
-                    <span>{t("sidebar.trash")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <NavItem path="/settings" icon={Settings2} label={t("sidebar.settings")} />
+              <NavItem path="/trash" icon={Trash2} label={t("sidebar.trash")} />
+              <NavItem path="/exports" icon={Download} label={t("sidebar.exports", "Exports")} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t bg-card">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip={t("sidebar.toggle")}>
-              <div className="flex w-full cursor-pointer items-center">
-                <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
-                  {t("sidebar.toggle")}
-                </span>
-                <SidebarTrigger className="ml-auto size-4" />
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
     </>

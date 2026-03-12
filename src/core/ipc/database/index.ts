@@ -1,4 +1,5 @@
 import {
+  migrateAddNotesTable,
   createAgency,
   createAttachment,
   createCace,
@@ -9,6 +10,7 @@ import {
   createEmployee,
   createMedicalVisit,
   createMedia,
+  createNote,
   createOnlineTraining,
   createPosition,
   createPost,
@@ -23,6 +25,7 @@ import {
   deleteEmployee,
   deleteMedicalVisit,
   deleteMedia,
+  deleteNote,
   deleteOnlineTraining,
   deletePosition,
   deleteWorkLocation,
@@ -58,6 +61,7 @@ import {
   getMedicalVisits,
   getMedicalVisitsByEmployee,
   getMediaById,
+  getNotes,
   getOnlineTrainings,
   getOnlineTrainingsByEmployee,
   getPositions,
@@ -84,10 +88,19 @@ import {
   updateDrivingAuthorization,
   updateEmployee,
   updateMedicalVisit,
+  updateNote,
   updateOnlineTraining,
   updatePosition,
   updateSettings,
   updateWorkLocation,
+  // Export handlers
+  previewExport,
+  exportData,
+  openExportedFile,
+  openExportFolder,
+  // Export history handlers
+  getExportHistory,
+  deleteExportFromHistory,
 } from "./handlers";
 
 export const database = {
@@ -171,6 +184,12 @@ export const database = {
   // Settings
   getSettings,
   updateSettings,
+  // Notes
+  migrateAddNotesTable,
+  getNotes,
+  createNote,
+  updateNote,
+  deleteNote,
   // Alerts
   getAlerts,
   // Trash / Restore
@@ -193,4 +212,12 @@ export const database = {
   getDeletedContractTypes,
   restoreContractType,
   permanentDeleteContractType,
+  // Export
+  previewExport,
+  exportData,
+  openExportedFile,
+  openExportFolder,
+  // Export history
+  getExportHistory,
+  deleteExportFromHistory,
 };

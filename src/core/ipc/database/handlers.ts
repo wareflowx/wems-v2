@@ -1,5 +1,5 @@
 import { os } from "@orpc/server";
-import { and, desc, eq, isNull, not, gt } from "drizzle-orm";
+import { and, desc, eq, isNull, not, gt, sql } from "drizzle-orm";
 import { getDb } from "@/core/db";
 import {
   agencies,
@@ -12,6 +12,7 @@ import {
   employees,
   media,
   medicalVisits,
+  notes,
   onlineTrainings,
   positions,
   posts,
@@ -2402,3 +2403,492 @@ export const permanentDeleteContractType = os.handler(async ({ input }) => {
     throw error;
   }
 });
+
+// Migration: Add notes and media tables
+export const migrateAddNotesTable = os.handler(async () => {
+  try {
+    const db = await getDb();
+    // Get raw sqlite client from drizzle
+    const sqlite = db.$client as unknown as { exec: (sql: string) => void; prepare: (sql: string) => { run: () => void } };
+
+    // Check if notes table exists
+    const notesResult = sqlite.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='notes'"
+    ).run();
+
+    // In better-sqlite3, we use prepare().run() for mutations and prepare().all() for queries
+    // Check by looking at the sqlite_master table
+
+    // Use exec for creating tables (DDL)
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS notes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT,
+        isCompleted INTEGER DEFAULT 0,
+        badges TEXT DEFAULT '[]',
+        createdAt TEXT DEFAULT (datetime('now')),
+        updatedAt TEXT DEFAULT (datetime('now')),
+        deletedAt TEXT
+      )
+    `);
+
+    // Add badges column if it doesn't exist (for existing databases)
+    try {
+      sqlite.exec(`ALTER TABLE notes ADD COLUMN badges TEXT DEFAULT '[]'`);
+      console.log("[MIGRATION] Notes badges column added");
+    } catch (e) {
+      // Column already exists, ignore
+    }
+
+    console.log("[MIGRATION] Notes table created successfully");
+
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS media (
+        id TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        file_name TEXT,
+        mime_type TEXT,
+        size INTEGER,
+        file_path TEXT,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now')),
+        deleted_at TEXT,
+        deleted_by TEXT
+      )
+    `);
+
+    // Add deleted_by column if it doesn't exist (for existing databases)
+    try {
+      sqlite.exec(`ALTER TABLE media ADD COLUMN deleted_by TEXT`);
+    } catch (e) {
+      // Column already exists, ignore
+    }
+
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_media_type ON media(type)`);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_media_deleted_at ON media(deleted_at)`);
+    console.log("[MIGRATION] Media table created successfully");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error in migrateAddNotesTable:", error);
+    throw error;
+  }
+});
+
+// Notes handlers
+export const getNotes = os.handler(async () => {
+  try {
+    const db = await getDb();
+    const result = await db
+      .select()
+      .from(notes)
+      .where(isNull(notes.deletedAt))
+      .orderBy(desc(notes.createdAt));
+    return result.map((note) => ({
+      ...note,
+      badges: JSON.parse(note.badges || "[]"),
+    }));
+  } catch (error) {
+    console.error("Error in getNotes:", error);
+    throw error;
+  }
+});
+
+export const createNote = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const [newNote] = await db
+      .insert(notes)
+      .values({
+        title: input.title,
+        description: input.description || null,
+        badges: JSON.stringify(input.badges || []),
+      })
+      .returning();
+    return {
+      ...newNote,
+      badges: JSON.parse(newNote.badges || "[]"),
+    };
+  } catch (error) {
+    console.error("Error in createNote:", error);
+    throw error;
+  }
+});
+
+export const updateNote = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    const updateData: Partial<typeof notes.$inferInsert> = {};
+    if (input.title !== undefined) updateData.title = input.title;
+    if (input.description !== undefined) updateData.description = input.description;
+    if (input.isCompleted !== undefined) updateData.isCompleted = input.isCompleted;
+    if (input.badges !== undefined) updateData.badges = JSON.stringify(input.badges);
+
+    const [updatedNote] = await db
+      .update(notes)
+      .set({ ...updateData, updatedAt: new Date().toISOString() })
+      .where(eq(notes.id, input.id))
+      .returning();
+    return {
+      ...updatedNote,
+      badges: JSON.parse(updatedNote.badges || "[]"),
+    };
+  } catch (error) {
+    console.error("Error in updateNote:", error);
+    throw error;
+  }
+});
+
+export const deleteNote = os.handler(async ({ input }) => {
+  try {
+    const db = await getDb();
+    await db
+      .update(notes)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(notes.id, input.id));
+    return { success: true };
+  } catch (error) {
+    console.error("Error in deleteNote:", error);
+    throw error;
+  }
+});
+
+import { gte, lte, and, isNull } from "drizzle-orm";
+import * as fs from "fs";
+import * as path from "path";
+import {
+  generateCsv,
+  writeCsvToFile,
+  getCsvExtension,
+} from "@/core/lib/exporters/csv-exporter";
+import {
+  writeExcelToFile,
+  getExcelExtension,
+} from "@/core/lib/exporters/excel-exporter";
+import { getDateRangeParams } from "@/core/lib/date-utils";
+import { _getExportHistory, _addExportToHistory, _deleteExportFromHistory } from "@/core/lib/export-history";
+import { randomUUID } from "node:crypto";
+
+// ============================================================
+// Export types and interfaces
+// ============================================================
+
+export type ExportType = "employees" | "attachments" | "media";
+export type ExportFormat = "csv" | "xlsx" | "pdf";
+export type DateRange = "today" | "7days" | "30days" | "all";
+
+export interface ExportOptions {
+  types: ExportType[];
+  format: ExportFormat;
+  dateRange: DateRange;
+}
+
+export interface ExportResult {
+  success: boolean;
+  filePath?: string;
+  recordCount: number;
+  canceled?: boolean;
+  error?: string;
+}
+
+export interface ExportPreview {
+  employees: number;
+  attachments: number;
+  media: number;
+  total: number;
+}
+
+// ============================================================
+// Export Preview - count records before export
+// ============================================================
+
+export const previewExport = os.handler(async ({ input }: { input: { types: ExportType[]; dateRange: DateRange } }) => {
+  try {
+    const db = await getDb();
+    const { types, dateRange } = input;
+    const params = getDateRangeParams(dateRange);
+
+    const preview: ExportPreview = {
+      employees: 0,
+      attachments: 0,
+      media: 0,
+      total: 0,
+    };
+
+    if (types.includes("employees")) {
+      if (!params.start || !params.end) {
+        // No date filter - count all
+        const result = await db
+          .select({ count: employees.id })
+          .from(employees)
+          .where(isNull(employees.deletedAt));
+        preview.employees = result.length;
+      } else {
+        // With date filter
+        const result = await db
+          .select({ count: employees.id })
+          .from(employees)
+          .where(
+            and(
+              isNull(employees.deletedAt),
+              gte(employees.createdAt, params.start.toISOString()),
+              lte(employees.createdAt, params.end.toISOString())
+            )
+          );
+        preview.employees = result.length;
+      }
+      preview.total += preview.employees;
+    }
+
+    if (types.includes("attachments")) {
+      if (!params.start || !params.end) {
+        const result = await db
+          .select({ count: attachments.id })
+          .from(attachments)
+          .where(isNull(attachments.deletedAt));
+        preview.attachments = result.length;
+      } else {
+        const result = await db
+          .select({ count: attachments.id })
+          .from(attachments)
+          .where(
+            and(
+              isNull(attachments.deletedAt),
+              gte(attachments.createdAt, params.start.toISOString()),
+              lte(attachments.createdAt, params.end.toISOString())
+            )
+          );
+        preview.attachments = result.length;
+      }
+      preview.total += preview.attachments;
+    }
+
+    if (types.includes("media")) {
+      if (!params.start || !params.end) {
+        const result = await db
+          .select({ count: media.id })
+          .from(media)
+          .where(isNull(media.deletedAt));
+        preview.media = result.length;
+      } else {
+        const result = await db
+          .select({ count: media.id })
+          .from(media)
+          .where(
+            and(
+              isNull(media.deletedAt),
+              gte(media.createdAt, params.start.toISOString()),
+              lte(media.createdAt, params.end.toISOString())
+            )
+          );
+        preview.media = result.length;
+      }
+      preview.total += preview.media;
+    }
+
+    return preview;
+  } catch (error) {
+    console.error("Error in previewExport:", error);
+    throw error;
+  }
+});
+
+// ============================================================
+// Export Data - generate and save export file
+// ============================================================
+
+export const exportData = os.handler(async ({ input }: { input: ExportOptions }) => {
+  try {
+    const { types, format, dateRange } = input;
+
+    if (!types || types.length === 0) {
+      return { success: false, error: "No export types selected", recordCount: 0 };
+    }
+
+    const db = await getDb();
+    const params = getDateRangeParams(dateRange);
+
+    // Get data based on selected types
+    const data: Record<string, unknown[]> = {};
+    let totalRecords = 0;
+
+    if (types.includes("employees")) {
+      if (!params.start || !params.end) {
+        data.employees = await db
+          .select()
+          .from(employees)
+          .where(isNull(employees.deletedAt));
+      } else {
+        data.employees = await db
+          .select()
+          .from(employees)
+          .where(
+            and(
+              isNull(employees.deletedAt),
+              gte(employees.createdAt, params.start.toISOString()),
+              lte(employees.createdAt, params.end.toISOString())
+            )
+          );
+      }
+      totalRecords += data.employees.length;
+    }
+
+    if (types.includes("attachments")) {
+      if (!params.start || !params.end) {
+        data.attachments = await db
+          .select()
+          .from(attachments)
+          .where(isNull(attachments.deletedAt));
+      } else {
+        data.attachments = await db
+          .select()
+          .from(attachments)
+          .where(
+            and(
+              isNull(attachments.deletedAt),
+              gte(attachments.createdAt, params.start.toISOString()),
+              lte(attachments.createdAt, params.end.toISOString())
+            )
+          );
+      }
+      totalRecords += data.attachments.length;
+    }
+
+    if (types.includes("media")) {
+      if (!params.start || !params.end) {
+        data.media = await db
+          .select()
+          .from(media)
+          .where(isNull(media.deletedAt));
+      } else {
+        data.media = await db
+          .select()
+          .from(media)
+          .where(
+            and(
+              isNull(media.deletedAt),
+              gte(media.createdAt, params.start.toISOString()),
+              lte(media.createdAt, params.end.toISOString())
+            )
+          );
+      }
+      totalRecords += data.media.length;
+    }
+
+    // Get export directory - use directory next to executable for network shared storage
+    const inDevelopment = process.env.NODE_ENV === "development";
+    const baseDir = inDevelopment ? process.cwd() : path.dirname(process.execPath);
+    const exportDir = path.join(baseDir, "exports");
+
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(exportDir)) {
+      fs.mkdirSync(exportDir, { recursive: true });
+    }
+
+    // Generate filename
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    const isMultiType = types.length > 1;
+
+    let filePath: string;
+    let extension: string;
+
+    if (format === "csv") {
+      extension = getCsvExtension(isMultiType);
+      filePath = path.join(exportDir, `export-${timestamp}.${extension}`);
+      await writeCsvToFile(data, filePath, isMultiType);
+    } else if (format === "xlsx") {
+      extension = getExcelExtension();
+      filePath = path.join(exportDir, `export-${timestamp}.${extension}`);
+      await writeExcelToFile(data, filePath);
+    } else {
+      return { success: false, error: "Invalid export format", recordCount: 0 };
+    }
+
+    // Save to history
+    await _addExportToHistory({
+      types,
+      format,
+      recordCount: totalRecords,
+      filePath,
+    });
+
+    return { success: true, filePath, recordCount: totalRecords };
+  } catch (error) {
+    console.error("Error in exportData:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return { success: false, error: message, recordCount: 0 };
+  }
+});
+
+// ============================================================
+// Open exported file
+// ============================================================
+
+export const openExportedFile = os.handler(async ({ input }: { input: { filePath: string } }) => {
+  try {
+    const { shell } = await import("electron");
+    await shell.openPath(input.filePath);
+    return { success: true };
+  } catch (error) {
+    console.error("Error in openExportedFile:", error);
+    throw error;
+  }
+});
+
+// ============================================================
+// Open export folder
+// ============================================================
+
+export const openExportFolder = os.handler(async ({ input }: { input: { filePath: string } }) => {
+  try {
+    const { shell } = await import("electron");
+    shell.showItemInFolder(input.filePath);
+    return { success: true };
+  } catch (error) {
+    console.error("Error in openExportFolder:", error);
+    throw error;
+  }
+});
+
+// Re-export export history handlers as ORPC handlers
+export const getExportHistory = os.handler(async () => {
+  try {
+    return _getExportHistory();
+  } catch (error) {
+    console.error("Error in getExportHistory:", error);
+    throw error;
+  }
+});
+
+export const addExportToHistory = os.handler(
+  async ({
+    input,
+  }: {
+    input: {
+      types: ("employees" | "attachments" | "media")[];
+      format: "csv" | "xlsx" | "pdf";
+      recordCount: number;
+      filePath: string;
+    };
+  }) => {
+    try {
+      return _addExportToHistory(input);
+    } catch (error) {
+      console.error("Error in addExportToHistory:", error);
+      throw error;
+    }
+  }
+);
+
+export const deleteExportFromHistory = os.handler(
+  async ({ input }: { input: { id: string } }) => {
+    try {
+      return _deleteExportFromHistory(input);
+    } catch (error) {
+      console.error("Error in deleteExportFromHistory:", error);
+      throw error;
+    }
+  }
+);

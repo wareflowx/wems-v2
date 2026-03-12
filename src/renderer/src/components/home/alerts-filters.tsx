@@ -42,17 +42,17 @@ export function AlertsFilters({
 
   return (
     <div className="flex flex-wrap gap-2">
-      <div className="relative min-w-[200px] flex-1">
-        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="relative min-w-[120px] sm:min-w-[150px] lg:min-w-[200px] flex-1 max-w-full">
+        <Search className="absolute top-1/2 left-2 sm:left-3 h-3 sm:h-4 w-3 sm:w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          className="pl-9"
+          className="pl-7 sm:pl-9"
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t("employees.search")}
           value={search}
         />
       </div>
       <Select onValueChange={onTypeFilterChange} value={typeFilter}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[120px] sm:w-[140px] lg:w-[160px]">
           <SelectValue placeholder={t("dashboard.filterByType")} />
         </SelectTrigger>
         <SelectContent>
@@ -64,7 +64,7 @@ export function AlertsFilters({
         </SelectContent>
       </Select>
       <Select onValueChange={onSeverityFilterChange} value={severityFilter}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[120px] sm:w-[140px] lg:w-[160px]">
           <SelectValue placeholder={t("dashboard.filterBySeverity")} />
         </SelectTrigger>
         <SelectContent>
@@ -77,7 +77,7 @@ export function AlertsFilters({
         </SelectContent>
       </Select>
       <Select onValueChange={onEmployeeFilterChange} value={employeeFilter}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[120px] sm:w-[140px] lg:w-[160px]">
           <SelectValue placeholder={t("dashboard.filterByEmployee")} />
         </SelectTrigger>
         <SelectContent>
@@ -90,7 +90,7 @@ export function AlertsFilters({
         </SelectContent>
       </Select>
       <Select onValueChange={onDetailFilterChange} value={detailFilter}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[120px] sm:w-[140px] lg:w-[160px]">
           <SelectValue placeholder={t("dashboard.filterByDetail")} />
         </SelectTrigger>
         <SelectContent>

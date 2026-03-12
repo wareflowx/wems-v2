@@ -150,6 +150,14 @@ export const queryKeys = {
     detail: () => ["settings", "detail"] as const,
   },
 
+  // Notes
+  notes: {
+    all: ["notes"] as const,
+    lists: () => ["notes", "list"] as const,
+    details: () => ["notes", "detail"] as const,
+    detail: (id: number) => ["notes", "detail", id] as const,
+  },
+
   // Trash (deleted items)
   trash: {
     deletedEmployees: () => ["trash", "deleted-employees"] as const,
@@ -158,5 +166,10 @@ export const queryKeys = {
     deletedDepartments: () => ["trash", "deleted-departments"] as const,
     deletedContractTypes: () => ["trash", "deleted-contract-types"] as const,
     deletedAgencies: () => ["trash", "deleted-agencies"] as const,
+  },
+
+  // Exports
+  exports: {
+    history: () => ["exports", "history"] as const,
   },
 } as const;

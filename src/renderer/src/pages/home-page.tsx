@@ -1,11 +1,10 @@
-import { Search, SearchX, ShieldAlert, Sparkles } from "lucide-react";
+import { ShieldAlert, Sparkles } from "lucide-react";
 import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import { AlertsFilters } from "@/components/home/alerts-filters";
 import { AlertsKPIs } from "@/components/home/alerts-kpis";
 import { AlertsTable } from "@/components/home/alerts-table";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { useAlerts, useEmployees } from "@/hooks";
 
@@ -65,10 +64,10 @@ export function HomePage() {
   // Calculate KPIs dynamically from alerts data
   const kpis = useMemo(() => {
     const criticalAlerts = allAlerts.filter(
-      (a) => a.severity === "critical"
+      (a) => a.severity === "critical",
     ).length;
     const warningAlerts = allAlerts.filter(
-      (a) => a.severity === "warning"
+      (a) => a.severity === "warning",
     ).length;
     const infoAlerts = allAlerts.filter((a) => a.severity === "info").length;
 
@@ -146,68 +145,68 @@ export function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-        <div className="min-h-full space-y-3">
-          <PageHeaderCard
-            description={t("dashboard.description")}
-            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
-            title={t("dashboard.title")}
-          />
-          <div className="flex items-center justify-center p-8">
-            <p className="text-muted-foreground">Loading...</p>
-          </div>
+      <div className="flex flex-1 flex-col gap-4 p-4">
+        <PageHeaderCard
+          description={t("dashboard.description")}
+          icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+          title={t("dashboard.title")}
+        />
+        <div className="flex items-center justify-center p-8">
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-      <div className="min-h-full space-y-3">
-        {/* Header */}
-        <PageHeaderCard
-          description={t("dashboard.description")}
-          icon={<Sparkles className="h-4 w-4 text-gray-600" />}
-          title={t("dashboard.title")}
-        />
+    <div className="flex flex-1 flex-col gap-2 p-4">
+      {/* Header */}
+      <PageHeaderCard
+        description={t("dashboard.description")}
+        icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+        title={t("dashboard.title")}
+      />
 
-        {/* Key Metrics */}
-        <AlertsKPIs kpis={kpis} />
+      {/* Key Metrics */}
+      <AlertsKPIs kpis={kpis} />
 
-        {/* Search and Filters */}
-        <AlertsFilters
-          search={search}
-          onSearchChange={setSearch}
-          typeFilter={typeFilter}
-          onTypeFilterChange={setTypeFilter}
-          severityFilter={severityFilter}
-          onSeverityFilterChange={setSeverityFilter}
-          employeeFilter={employeeFilter}
-          onEmployeeFilterChange={setEmployeeFilter}
-          detailFilter={detailFilter}
-          onDetailFilterChange={setDetailFilter}
-          uniqueEmployees={uniqueEmployees}
-          uniqueDetails={uniqueDetails}
-        />
+      {/* Search and Filters */}
+      <AlertsFilters
+        search={search}
+        onSearchChange={setSearch}
+        typeFilter={typeFilter}
+        onTypeFilterChange={setTypeFilter}
+        severityFilter={severityFilter}
+        onSeverityFilterChange={setSeverityFilter}
+        employeeFilter={employeeFilter}
+        onEmployeeFilterChange={setEmployeeFilter}
+        detailFilter={detailFilter}
+        onDetailFilterChange={setDetailFilter}
+        uniqueEmployees={uniqueEmployees}
+        uniqueDetails={uniqueDetails}
+      />
 
-        {/* Table or Empty State */}
-        {recentAlerts.length === 0 ? (
-          <div className="flex w-full items-center justify-center">
-            <AnimatedEmpty
-              title={t("dashboard.allGood", "All good!")}
-              description={t("dashboard.noAlertsDescription", "No alerts at this time. Everything is in order.")}
-              icons={[ShieldAlert, ShieldAlert, ShieldAlert]}
-            />
-          </div>
-        ) : (
-          <AlertsTable
-            alerts={recentAlerts}
-            getAlertBadge={getAlertBadge}
-            getDetailBadge={getDetailBadge}
-            getTypeBadge={getTypeBadge}
+      {/* Table or Empty State */}
+      {recentAlerts.length === 0 ? (
+        <div className="flex w-full items-center justify-center">
+          <AnimatedEmpty
+            className="bg-card"
+            title={t("dashboard.allGood", "All good!")}
+            description={t(
+              "dashboard.noAlertsDescription",
+              "No alerts at this time. Everything is in order.",
+            )}
+            icons={[ShieldAlert, ShieldAlert, ShieldAlert]}
           />
-        )}
-      </div>
+        </div>
+      ) : (
+        <AlertsTable
+          alerts={recentAlerts}
+          getAlertBadge={getAlertBadge}
+          getDetailBadge={getDetailBadge}
+          getTypeBadge={getTypeBadge}
+        />
+      )}
     </div>
   );
 }

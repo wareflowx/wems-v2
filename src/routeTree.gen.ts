@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkLocationsRouteImport } from './routes/work-locations'
 import { Route as TrashRouteImport } from './routes/trash'
+import { Route as ExportsRouteImport } from './routes/exports'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PostsRouteImport } from './routes/posts'
 import { Route as PositionsRouteImport } from './routes/positions'
@@ -36,6 +37,11 @@ const WorkLocationsRoute = WorkLocationsRouteImport.update({
 const TrashRoute = TrashRouteImport.update({
   id: '/trash',
   path: '/trash',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExportsRoute = ExportsRouteImport.update({
+  id: '/exports',
+  path: '/exports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/posts': typeof PostsRoute
   '/settings': typeof SettingsRoute
   '/trash': typeof TrashRoute
+  '/exports': typeof ExportsRoute
   '/work-locations': typeof WorkLocationsRoute
 }
 export interface FileRoutesByTo {
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/posts': typeof PostsRoute
   '/settings': typeof SettingsRoute
   '/trash': typeof TrashRoute
+  '/exports': typeof ExportsRoute
   '/work-locations': typeof WorkLocationsRoute
 }
 export interface FileRoutesById {
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/posts': typeof PostsRoute
   '/settings': typeof SettingsRoute
   '/trash': typeof TrashRoute
+  '/exports': typeof ExportsRoute
   '/work-locations': typeof WorkLocationsRoute
 }
 export interface FileRouteTypes {
@@ -257,6 +266,7 @@ export interface RootRouteChildren {
   PostsRoute: typeof PostsRoute
   SettingsRoute: typeof SettingsRoute
   TrashRoute: typeof TrashRoute
+  ExportsRoute: typeof ExportsRoute
   WorkLocationsRoute: typeof WorkLocationsRoute
 }
 
@@ -274,6 +284,13 @@ declare module '@tanstack/react-router' {
       path: '/trash'
       fullPath: '/trash'
       preLoaderRoute: typeof TrashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exports': {
+      id: '/exports'
+      path: '/exports'
+      fullPath: '/exports'
+      preLoaderRoute: typeof ExportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -409,6 +426,7 @@ const rootRouteChildren: RootRouteChildren = {
   PostsRoute: PostsRoute,
   SettingsRoute: SettingsRoute,
   TrashRoute: TrashRoute,
+  ExportsRoute: ExportsRoute,
   WorkLocationsRoute: WorkLocationsRoute,
 }
 export const routeTree = rootRouteImport

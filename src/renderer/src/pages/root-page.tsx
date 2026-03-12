@@ -1,6 +1,5 @@
 import { Outlet } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/app-sidebar";
-import { AppHeader } from "@/components/app-header";
 import { DialogManager } from "@/components/dialogs/DialogManager";
 import { RightSidebar } from "@/components/right-sidebar";
 import { SiteHeader } from "@/components/site-header";
@@ -111,32 +110,19 @@ export function RootPage() {
         open={sidebarOpen}
         onOpenChange={sidebarStore.setValue}
       >
-        <SiteHeader />
-        <div className="flex flex-1">
-          <AppSidebar />
-          <SidebarInset className="flex flex-1 flex-col">
-            <AppHeader
-              onQuickActionsClick={() => setQuickActionsOpen(true)}
+        <SiteHeader
+              onToggleSidebar={() => sidebarStore.setValue(!sidebarOpen)}
               onToggleRightSidebar={() => rightSidebarStore.setValue(!rightSidebarOpen)}
               rightSidebarOpen={rightSidebarOpen}
             />
+        <div className="flex flex-1">
+          <AppSidebar onQuickActionsClick={() => setQuickActionsOpen(true)} />
+          <SidebarInset className="flex flex-1 flex-col overflow-y-auto">
             <Outlet />
             <footer className="mt-auto border-t bg-card sticky bottom-0">
               <div className="container flex h-7 items-center justify-between px-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-3">
-                  <span>© 2024 WEMS</span>
-                  <span className="text-border">|</span>
-                  <button className="hover:text-foreground transition-colors">
-                    Help
-                  </button>
-                  <span className="text-border">|</span>
-                  <button className="hover:text-foreground transition-colors">
-                    Privacy
-                  </button>
-                  <span className="text-border">|</span>
-                  <button className="hover:text-foreground transition-colors">
-                    Terms
-                  </button>
+                  <span>© 2026 WEMS</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1">
@@ -164,7 +150,13 @@ export function RootPage() {
               </div>
             </footer>
           </SidebarInset>
-          {rightSidebarOpen && <RightSidebar />}
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+              rightSidebarOpen ? "w-auto opacity-100" : "w-0 opacity-0"
+            }`}
+          >
+            {rightSidebarOpen && <RightSidebar />}
+          </div>
         </div>
       </SidebarProvider>
       <Toaster />

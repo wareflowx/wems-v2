@@ -32,11 +32,17 @@ export async function createPost(data: { title: string; content: string }) {
 }
 
 // Notes
+export interface NoteBadge {
+  name: string;
+  color: string;
+}
+
 export interface Note {
   id: number;
   title: string;
   description: string | null;
   isCompleted: boolean;
+  badges: NoteBadge[];
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -50,7 +56,7 @@ export async function getNotes(): Promise<Note[]> {
   return client.database.getNotes();
 }
 
-export async function createNote(data: { title: string; description?: string }): Promise<Note | null> {
+export async function createNote(data: { title: string; description?: string; badges?: NoteBadge[] }): Promise<Note | null> {
   const client = getClient();
   if (!client) {
     return null;
@@ -63,6 +69,7 @@ export async function updateNote(data: {
   title?: string;
   description?: string;
   isCompleted?: boolean;
+  badges?: NoteBadge[];
 }): Promise<Note | null> {
   const client = getClient();
   if (!client) {

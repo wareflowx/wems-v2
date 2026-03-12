@@ -1,7 +1,8 @@
 "use client";
 
-import { Maximize } from "lucide-react";
+import { Maximize, Trash2 } from "lucide-react";
 import { useState } from "react";
+import type { Note } from "@/actions/database";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -18,44 +18,36 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-interface Badge {
-  label: string;
-  color: "blue" | "green" | "yellow" | "orange" | "red" | "teal" | "gray" | "purple" | "cyan" | "violet" | "indigo" | "emerald" | "amber" | "rose";
-}
+type BadgeColor = "blue" | "green" | "yellow" | "orange" | "red" | "teal" | "gray" | "purple" | "cyan" | "violet" | "indigo" | "emerald" | "amber" | "rose";
 
-interface Note {
-  id: string;
-  title: string;
-  description: string;
-  badges?: Badge[];
-  completed?: boolean;
-}
+const getBadgeColorClass = (color: string) => {
+  const colorMap: Record<string, string> = {
+    blue: "bg-blue-500/10 border-blue-500/20 text-blue-500",
+    green: "bg-green-500/10 border-green-500/20 text-green-500",
+    yellow: "bg-yellow-500/10 border-yellow-500/20 text-yellow-500",
+    orange: "bg-orange-500/10 border-orange-500/20 text-orange-500",
+    red: "bg-red-500/10 border-red-500/20 text-red-500",
+    teal: "bg-teal-500/10 border-teal-500/20 text-teal-500",
+    gray: "bg-gray-500/10 border-gray-500/20 text-gray-500",
+    purple: "bg-purple-500/10 border-purple-500/20 text-purple-500",
+    cyan: "bg-cyan-500/10 border-cyan-500/20 text-cyan-500",
+    violet: "bg-violet-500/10 border-violet-500/20 text-violet-500",
+    indigo: "bg-indigo-500/10 border-indigo-500/20 text-indigo-500",
+    emerald: "bg-emerald-500/10 border-emerald-500/20 text-emerald-500",
+    amber: "bg-amber-500/10 border-amber-500/20 text-amber-500",
+    rose: "bg-rose-500/10 border-rose-500/20 text-rose-500",
+  };
+  return colorMap[color] || colorMap.gray;
+};
 
 interface NotesListProps {
   notes: Note[];
+  onToggleComplete?: (noteId: number, isCompleted: boolean) => void;
+  onDeleteNote?: (noteId: number) => void;
 }
 
-export function NotesList({ notes }: NotesListProps) {
+export function NotesList({ notes, onToggleComplete, onDeleteNote }: NotesListProps) {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
-  const [completedNotes, setCompletedNotes] = useState<Set<string>>(new Set());
-
-  const toggleComplete = (noteId: string) => {
-    setCompletedNotes((prev) => {
-      const next = new Set(prev);
-      if (next.has(noteId)) {
-        next.delete(noteId);
-      } else {
-        next.add(noteId);
-      }
-      return next;
-    });
-  };
-
-  if (notes.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">No notes yet</p>
-    );
-  }
 
   return (
     <>
@@ -68,35 +60,61 @@ export function NotesList({ notes }: NotesListProps) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Checkbox
-                        checked={completedNotes.has(note.id)}
-                        onCheckedChange={() => toggleComplete(note.id)}
+                        checked={note.isCompleted}
+                        onCheckedChange={(checked) => {
+                          if (onToggleComplete) {
+                            onToggleComplete(note.id, !!checked);
+                          }
+                        }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{completedNotes.has(note.id) ? "Mark as incomplete" : "Mark as complete"}</TooltipContent>
+                    <TooltipContent>{note.isCompleted ? "Mark as incomplete" : "Mark as complete"}</TooltipContent>
                   </Tooltip>
-                  <p className={`text-sm font-medium ${completedNotes.has(note.id) ? "line-through text-muted-foreground" : ""}`}>{note.title}</p>
+                  <p className={`text-sm font-medium ${note.isCompleted ? "line-through text-muted-foreground" : ""}`}>{note.title}</p>
                 </div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="h-6 w-6 shrink-0 text-muted-foreground"
-                      onClick={() => setSelectedNote(note)}
-                    >
-                      <Maximize className="h-3 w-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Open note</TooltipContent>
-                </Tooltip>
+                <div className="flex items-center gap-1">
+                  {onDeleteNote && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                          onClick={() => onDeleteNote(note.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Delete note</TooltipContent>
+                    </Tooltip>
+                  )}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="h-6 w-6 shrink-0 text-muted-foreground"
+                        onClick={() => setSelectedNote(note)}
+                      >
+                        <Maximize className="h-3 w-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Open note</TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
-              <p className={`text-xs text-muted-foreground ${completedNotes.has(note.id) ? "line-through" : ""}`}>{note.description}</p>
+              <p className={`text-xs text-muted-foreground ${note.isCompleted ? "line-through" : ""}`}>
+                {note.description || "No description"}
+              </p>
               {note.badges && note.badges.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {note.badges.map((badge, idx) => (
-                    <StatusBadge key={idx} color={badge.color} className="rounded-sm">
-                      {badge.label}
-                    </StatusBadge>
+                    <span
+                      key={idx}
+                      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${getBadgeColorClass(badge.color)}`}
+                    >
+                      {badge.name}
+                    </span>
                   ))}
                 </div>
               )}
@@ -110,14 +128,19 @@ export function NotesList({ notes }: NotesListProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{selectedNote?.title}</DialogTitle>
-            <DialogDescription>{selectedNote?.description}</DialogDescription>
+            <DialogDescription>
+              {selectedNote?.description || "No description"}
+            </DialogDescription>
           </DialogHeader>
           {selectedNote?.badges && selectedNote.badges.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {selectedNote.badges.map((badge, idx) => (
-                <StatusBadge key={idx} color={badge.color}>
-                  {badge.label}
-                </StatusBadge>
+                <span
+                  key={idx}
+                  className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${getBadgeColorClass(badge.color)}`}
+                >
+                  {badge.name}
+                </span>
               ))}
             </div>
           )}

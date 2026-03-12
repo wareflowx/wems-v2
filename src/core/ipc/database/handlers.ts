@@ -1,5 +1,5 @@
 import { os } from "@orpc/server";
-import { and, desc, eq, isNull, not, gt } from "drizzle-orm";
+import { and, desc, eq, isNull, not, gt, sql } from "drizzle-orm";
 import { getDb } from "@/core/db";
 import {
   agencies,
@@ -2404,32 +2404,71 @@ export const permanentDeleteContractType = os.handler(async ({ input }) => {
   }
 });
 
-// Migration: Add notes table
+// Migration: Add notes and media tables
 export const migrateAddNotesTable = os.handler(async () => {
   try {
     const db = await getDb();
+    // Get raw sqlite client from drizzle
+    const sqlite = db.$client as unknown as { exec: (sql: string) => void; prepare: (sql: string) => { run: () => void } };
 
     // Check if notes table exists
-    const result = await db.execute(
-      `SELECT name FROM sqlite_master WHERE type='table' AND name='notes'`
-    );
+    const notesResult = sqlite.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='notes'"
+    ).run();
 
-    if (!result || result.length === 0) {
-      await db.execute(`
-        CREATE TABLE IF NOT EXISTS notes (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          title TEXT NOT NULL,
-          description TEXT,
-          isCompleted INTEGER DEFAULT 0,
-          createdAt TEXT DEFAULT (datetime('now')),
-          updatedAt TEXT DEFAULT (datetime('now')),
-          deletedAt TEXT
-        )
-      `);
-      console.log("[MIGRATION] Notes table created successfully");
-    } else {
-      console.log("[MIGRATION] Notes table already exists");
+    // In better-sqlite3, we use prepare().run() for mutations and prepare().all() for queries
+    // Check by looking at the sqlite_master table
+
+    // Use exec for creating tables (DDL)
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS notes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT,
+        isCompleted INTEGER DEFAULT 0,
+        badges TEXT DEFAULT '[]',
+        createdAt TEXT DEFAULT (datetime('now')),
+        updatedAt TEXT DEFAULT (datetime('now')),
+        deletedAt TEXT
+      )
+    `);
+
+    // Add badges column if it doesn't exist (for existing databases)
+    try {
+      sqlite.exec(`ALTER TABLE notes ADD COLUMN badges TEXT DEFAULT '[]'`);
+      console.log("[MIGRATION] Notes badges column added");
+    } catch (e) {
+      // Column already exists, ignore
     }
+
+    console.log("[MIGRATION] Notes table created successfully");
+
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS media (
+        id TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        file_name TEXT,
+        mime_type TEXT,
+        size INTEGER,
+        file_path TEXT,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now')),
+        deleted_at TEXT,
+        deleted_by TEXT
+      )
+    `);
+
+    // Add deleted_by column if it doesn't exist (for existing databases)
+    try {
+      sqlite.exec(`ALTER TABLE media ADD COLUMN deleted_by TEXT`);
+    } catch (e) {
+      // Column already exists, ignore
+    }
+
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_media_type ON media(type)`);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_media_deleted_at ON media(deleted_at)`);
+    console.log("[MIGRATION] Media table created successfully");
 
     return { success: true };
   } catch (error) {
@@ -2442,11 +2481,15 @@ export const migrateAddNotesTable = os.handler(async () => {
 export const getNotes = os.handler(async () => {
   try {
     const db = await getDb();
-    return await db
+    const result = await db
       .select()
       .from(notes)
       .where(isNull(notes.deletedAt))
       .orderBy(desc(notes.createdAt));
+    return result.map((note) => ({
+      ...note,
+      badges: JSON.parse(note.badges || "[]"),
+    }));
   } catch (error) {
     console.error("Error in getNotes:", error);
     throw error;
@@ -2461,9 +2504,13 @@ export const createNote = os.handler(async ({ input }) => {
       .values({
         title: input.title,
         description: input.description || null,
+        badges: JSON.stringify(input.badges || []),
       })
       .returning();
-    return newNote;
+    return {
+      ...newNote,
+      badges: JSON.parse(newNote.badges || "[]"),
+    };
   } catch (error) {
     console.error("Error in createNote:", error);
     throw error;
@@ -2477,13 +2524,17 @@ export const updateNote = os.handler(async ({ input }) => {
     if (input.title !== undefined) updateData.title = input.title;
     if (input.description !== undefined) updateData.description = input.description;
     if (input.isCompleted !== undefined) updateData.isCompleted = input.isCompleted;
+    if (input.badges !== undefined) updateData.badges = JSON.stringify(input.badges);
 
     const [updatedNote] = await db
       .update(notes)
       .set({ ...updateData, updatedAt: new Date().toISOString() })
       .where(eq(notes.id, input.id))
       .returning();
-    return updatedNote;
+    return {
+      ...updatedNote,
+      badges: JSON.parse(updatedNote.badges || "[]"),
+    };
   } catch (error) {
     console.error("Error in updateNote:", error);
     throw error;
@@ -2505,7 +2556,6 @@ export const deleteNote = os.handler(async ({ input }) => {
 });
 
 import { gte, lte, and, isNull } from "drizzle-orm";
-import { app } from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import {
@@ -2517,12 +2567,8 @@ import {
   writeExcelToFile,
   getExcelExtension,
 } from "@/core/lib/exporters/excel-exporter";
-import {
-  writePdfToFile,
-  getPdfExtension,
-} from "@/core/lib/exporters/pdf-exporter";
 import { getDateRangeParams } from "@/core/lib/date-utils";
-import { addExportToHistory, getExportHistory, deleteExportFromHistory } from "@/core/lib/export-history";
+import { _getExportHistory, _addExportToHistory, _deleteExportFromHistory } from "@/core/lib/export-history";
 import { randomUUID } from "node:crypto";
 
 // ============================================================
@@ -2731,9 +2777,10 @@ export const exportData = os.handler(async ({ input }: { input: ExportOptions })
       totalRecords += data.media.length;
     }
 
-    // Get export directory
-    const userDataPath = app.getPath("userData");
-    const exportDir = path.join(userDataPath, "exports");
+    // Get export directory - use directory next to executable for network shared storage
+    const inDevelopment = process.env.NODE_ENV === "development";
+    const baseDir = inDevelopment ? process.cwd() : path.dirname(process.execPath);
+    const exportDir = path.join(baseDir, "exports");
 
     // Create directory if it doesn't exist
     if (!fs.existsSync(exportDir)) {
@@ -2755,16 +2802,12 @@ export const exportData = os.handler(async ({ input }: { input: ExportOptions })
       extension = getExcelExtension();
       filePath = path.join(exportDir, `export-${timestamp}.${extension}`);
       await writeExcelToFile(data, filePath);
-    } else if (format === "pdf") {
-      extension = getPdfExtension();
-      filePath = path.join(exportDir, `export-${timestamp}.${extension}`);
-      await writePdfToFile(data, filePath);
     } else {
       return { success: false, error: "Invalid export format", recordCount: 0 };
     }
 
     // Save to history
-    await addExportToHistory({
+    await _addExportToHistory({
       types,
       format,
       recordCount: totalRecords,
@@ -2809,5 +2852,43 @@ export const openExportFolder = os.handler(async ({ input }: { input: { filePath
   }
 });
 
-// Re-export export history handlers
-export { addExportToHistory, getExportHistory, deleteExportFromHistory };
+// Re-export export history handlers as ORPC handlers
+export const getExportHistory = os.handler(async () => {
+  try {
+    return _getExportHistory();
+  } catch (error) {
+    console.error("Error in getExportHistory:", error);
+    throw error;
+  }
+});
+
+export const addExportToHistory = os.handler(
+  async ({
+    input,
+  }: {
+    input: {
+      types: ("employees" | "attachments" | "media")[];
+      format: "csv" | "xlsx" | "pdf";
+      recordCount: number;
+      filePath: string;
+    };
+  }) => {
+    try {
+      return _addExportToHistory(input);
+    } catch (error) {
+      console.error("Error in addExportToHistory:", error);
+      throw error;
+    }
+  }
+);
+
+export const deleteExportFromHistory = os.handler(
+  async ({ input }: { input: { id: string } }) => {
+    try {
+      return _deleteExportFromHistory(input);
+    } catch (error) {
+      console.error("Error in deleteExportFromHistory:", error);
+      throw error;
+    }
+  }
+);

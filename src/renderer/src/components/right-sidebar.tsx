@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Download, PanelRightClose, Loader2, FolderOpen, File } from "lucide-react";
+import { Plus, Download, PanelRightClose, Loader2, FolderOpen, File, X, StickyNote } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NotesList } from "@/components/home/notes-list";
+import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import { useNotes, useCreateNote, useUpdateNote, useDeleteNote } from "@/hooks/use-notes";
 import { useDialogStore } from "@/stores/dialog-store";
 import {
@@ -45,6 +46,11 @@ import { useToast } from "@/utils/toast";
 import { Progress } from "./ui/progress";
 import { Checkbox } from "./ui/checkbox";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -57,7 +63,6 @@ import {
   FileText,
   FileSpreadsheet,
   File as FileIcon,
-  FileText as FilePdf,
   CheckCircle,
   XCircle,
 } from "lucide-react";
@@ -70,6 +75,7 @@ import {
   type ExportFormat,
   type ExportResult,
   type ExportPreview,
+  type NoteBadge,
 } from "@/actions/database";
 
 interface RightSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -111,7 +117,6 @@ export function RightSidebar({
   const formats = [
     { id: "csv" as ExportFormat, label: "CSV", icon: FileIcon },
     { id: "xlsx" as ExportFormat, label: "Excel", icon: FileSpreadsheet },
-    { id: "pdf" as ExportFormat, label: "PDF", icon: FilePdf },
   ];
 
   const dateRanges = [
@@ -120,6 +125,59 @@ export function RightSidebar({
     { id: "30days", label: "Last 30 days" },
     { id: "all", label: "All time" },
   ];
+
+  const COLORS = [
+    { name: "Emerald", value: "emerald", className: "bg-emerald-500" },
+    { name: "Amber", value: "amber", className: "bg-amber-500" },
+    { name: "Indigo", value: "indigo", className: "bg-indigo-500" },
+    { name: "Rose", value: "rose", className: "bg-rose-500" },
+    { name: "Cyan", value: "cyan", className: "bg-cyan-500" },
+    { name: "Violet", value: "violet", className: "bg-violet-500" },
+    { name: "Blue", value: "blue", className: "bg-blue-500" },
+    { name: "Green", value: "green", className: "bg-green-500" },
+    { name: "Red", value: "red", className: "bg-red-500" },
+    { name: "Orange", value: "orange", className: "bg-orange-500" },
+  ];
+
+  const getColorClass = (colorValue: string) => {
+    return COLORS.find(c => c.value === colorValue)?.className || "bg-gray-500";
+  };
+
+  const getBadgeColorClass = (color: string) => {
+    const colorMap: Record<string, string> = {
+      blue: "bg-blue-500/10 border-blue-500/20 text-blue-500",
+      green: "bg-green-500/10 border-green-500/20 text-green-500",
+      yellow: "bg-yellow-500/10 border-yellow-500/20 text-yellow-500",
+      orange: "bg-orange-500/10 border-orange-500/20 text-orange-500",
+      red: "bg-red-500/10 border-red-500/20 text-red-500",
+      teal: "bg-teal-500/10 border-teal-500/20 text-teal-500",
+      gray: "bg-gray-500/10 border-gray-500/20 text-gray-500",
+      purple: "bg-purple-500/10 border-purple-500/20 text-purple-500",
+      cyan: "bg-cyan-500/10 border-cyan-500/20 text-cyan-500",
+      violet: "bg-violet-500/10 border-violet-500/20 text-violet-500",
+      indigo: "bg-indigo-500/10 border-indigo-500/20 text-indigo-500",
+      emerald: "bg-emerald-500/10 border-emerald-500/20 text-emerald-500",
+      amber: "bg-amber-500/10 border-amber-500/20 text-amber-500",
+      rose: "bg-rose-500/10 border-rose-500/20 text-rose-500",
+    };
+    return colorMap[color] || colorMap.gray;
+  };
+
+  // Badges state
+  const [noteBadges, setNoteBadges] = React.useState<NoteBadge[]>([]);
+  const [newBadgeName, setNewBadgeName] = React.useState("");
+  const [newBadgeColor, setNewBadgeColor] = React.useState(COLORS[0].value);
+
+  const addBadge = () => {
+    if (!newBadgeName.trim() || noteBadges.length >= 5) return;
+    if (noteBadges.some(b => b.name.toLowerCase() === newBadgeName.trim().toLowerCase())) return;
+    setNoteBadges([...noteBadges, { name: newBadgeName.trim(), color: newBadgeColor }]);
+    setNewBadgeName("");
+  };
+
+  const removeBadge = (index: number) => {
+    setNoteBadges(noteBadges.filter((_, i) => i !== index));
+  };
 
   // Fetch preview when types or dateRange changes
   React.useEffect(() => {
@@ -232,9 +290,11 @@ export function RightSidebar({
     createNote.mutate({
       title: newNoteTitle,
       description: newNoteDescription,
+      badges: noteBadges,
     });
     setNewNoteTitle("");
     setNewNoteDescription("");
+    setNoteBadges([]);
     setCreateNoteOpen(false);
   };
 
@@ -253,52 +313,90 @@ export function RightSidebar({
                   <Plus className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuContent align="end" className="w-72">
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-semibold">Create new</p>
+                  <p className="text-xs text-muted-foreground">Select an entity type to create</p>
+                </div>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => openDialog("create-employee")}>
-                  <span className="text-sm">Employee</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm">Employee</span>
+                    <span className="text-xs text-muted-foreground">Add a new employee to the system</span>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => openDialog("create-document")}>
-                  <span className="text-sm">Document</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm">Document</span>
+                    <span className="text-xs text-muted-foreground">Upload a new document file</span>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => openDialog("create-caces")}>
-                  <span className="text-sm">CACES</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm">CACES</span>
+                    <span className="text-xs text-muted-foreground">Register a new CACES certification</span>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => openDialog("create-medical-visit")}
                 >
-                  <span className="text-sm">Medical Visit</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm">Medical Visit</span>
+                    <span className="text-xs text-muted-foreground">Schedule a medical examination</span>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => openDialog("create-driving-authorization")}
                 >
-                  <span className="text-sm">Driving Authorization</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm">Driving Authorization</span>
+                    <span className="text-xs text-muted-foreground">Add a driving permit</span>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => openDialog("create-online-training")}
                 >
-                  <span className="text-sm">Online Training</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm">Online Training</span>
+                    <span className="text-xs text-muted-foreground">Register an e-learning course</span>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => openDialog("create-contract")}>
-                  <span className="text-sm">Contract</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm">Contract</span>
+                    <span className="text-xs text-muted-foreground">Create a new work contract</span>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => openDialog("create-position")}>
-                  <span className="text-sm">Position</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm">Position</span>
+                    <span className="text-xs text-muted-foreground">Define a job position</span>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => openDialog("create-work-location")}
                 >
-                  <span className="text-sm">Work Location</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm">Work Location</span>
+                    <span className="text-xs text-muted-foreground">Add a workplace address</span>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => openDialog("create-department")}
                 >
-                  <span className="text-sm">Department</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm">Department</span>
+                    <span className="text-xs text-muted-foreground">Create an organizational unit</span>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => openDialog("create-contract-type")}
                 >
-                  <span className="text-sm">Contract Type</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm">Contract Type</span>
+                    <span className="text-xs text-muted-foreground">Define a contract category</span>
+                  </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -317,29 +415,41 @@ export function RightSidebar({
       <SidebarContent className="bg-card">
         <SidebarGroup>
           <SidebarGroupContent>
-            <Calendar mode="single" className="rounded-md w-full" />
+            <Calendar mode="single" className="rounded-md w-full border" />
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupContent>
-            <Card className="border-0 shadow-none">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">Notes</CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="h-6 w-6 text-muted-foreground"
-                    onClick={() => setCreateNoteOpen(true)}
-                  >
-                    <Plus className="h-3 w-3" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="px-0 pb-0">
-                {isLoading ? (
-                  <p className="text-sm text-muted-foreground px-4">Loading notes...</p>
-                ) : (
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground px-4">Loading notes...</p>
+            ) : notes.length === 0 ? (
+              <AnimatedEmpty
+                title="No notes yet"
+                description="Create your first note to get started"
+                icons={[StickyNote, StickyNote, StickyNote]}
+                action={{
+                  label: "Add Note",
+                  onClick: () => setCreateNoteOpen(true),
+                }}
+                bordered={true}
+                className="py-8 bg-background border rounded-lg"
+              />
+            ) : (
+              <Card className="border-0 shadow-none">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">Notes</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="h-6 w-6 text-muted-foreground"
+                      onClick={() => setCreateNoteOpen(true)}
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-0 pb-0">
                   <NotesList
                     notes={notes}
                     onToggleComplete={(noteId, isCompleted) => {
@@ -349,22 +459,28 @@ export function RightSidebar({
                       deleteNote.mutate(noteId);
                     }}
                   />
-                )}
-              </CardContent>
-              <CardFooter className="justify-center border-t pb-2">
-                <Link
-                  to="/notes"
-                  className="text-sm text-muted-foreground hover:text-foreground"
-                >
-                  See more
-                </Link>
-              </CardFooter>
-            </Card>{" "}
+                </CardContent>
+                <CardFooter className="justify-center border-t pb-2">
+                  <Link
+                    to="/notes"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    See more
+                  </Link>
+                </CardFooter>
+              </Card>
+            )}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <Dialog open={createNoteOpen} onOpenChange={setCreateNoteOpen}>
+      <Dialog open={createNoteOpen} onOpenChange={(open) => {
+        if (!open) {
+          setNoteBadges([]);
+          setNewBadgeName("");
+        }
+        setCreateNoteOpen(open);
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Create Note</DialogTitle>
@@ -387,7 +503,79 @@ export function RightSidebar({
                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
             </div>
-            <Button onClick={handleCreateNote}>Create</Button>
+
+            {/* Badges Section */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Badges</label>
+                <span className="text-xs text-muted-foreground">{noteBadges.length}/5</span>
+              </div>
+
+              {/* Existing badges */}
+              {noteBadges.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {noteBadges.map((badge, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium ${getBadgeColorClass(badge.color)}`}
+                    >
+                      <span>{badge.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeBadge(index)}
+                        className="ml-1 hover:opacity-70"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add new badge */}
+              {noteBadges.length < 5 && (
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <Input
+                      value={newBadgeName}
+                      onChange={(e) => setNewBadgeName(e.target.value)}
+                      placeholder="Badge name"
+                      className="flex-1"
+                      onKeyDown={(e) => e.key === "Enter" && addBadge()}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addBadge}
+                      disabled={!newBadgeName.trim()}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {COLORS.map((color) => (
+                      <Tooltip key={color.value}>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className={`h-8 w-8 rounded-md ${color.className} ${
+                              newBadgeColor === color.value ? "ring-2 ring-gray-900 ring-offset-2" : ""
+                            } transition-all hover:scale-110`}
+                            onClick={() => setNewBadgeColor(color.value)}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{color.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Button onClick={handleCreateNote} disabled={!newNoteTitle.trim()}>Create</Button>
           </div>
         </DialogContent>
       </Dialog>

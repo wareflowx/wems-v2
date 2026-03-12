@@ -1,6 +1,6 @@
 "use client";
 
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import {
   AlertTriangle,
   Briefcase,
@@ -12,15 +12,13 @@ import {
   GraduationCap,
   Home,
   MapPin,
-  Plus,
   Search,
   Settings2,
   ShieldAlert,
-  SquareTerminal,
   Stethoscope,
   Trash2,
   Users,
-  X,
+  LucideIcon,
 } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
@@ -41,37 +39,34 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-const _data = {
-  user: {
-    name: "User",
-    email: "user@example.com",
-  },
-  navMain: [
-    {
-      title: "Playground",
-      url: "/",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "Home",
-          url: "/",
-        },
-        {
-          title: "Posts",
-          url: "/posts",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-    },
-  ],
-};
+interface NavItemProps {
+  path: string;
+  icon: LucideIcon;
+  label: string;
+  badge?: number;
+}
+
+function NavItem({ path, icon: Icon, label, badge }: NavItemProps) {
+  const location = useLocation();
+  const isActive = path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        asChild
+        isActive={isActive}
+        tooltip={label}
+        className="data-active:bg-sidebar-accent/50 data-active:border data-active:border-sidebar-accent"
+      >
+        <Link to={path}>
+          <Icon />
+          <span>{label}</span>
+        </Link>
+      </SidebarMenuButton>
+      {badge !== undefined && badge > 0 && <SidebarMenuBadge>{badge}</SidebarMenuBadge>}
+    </SidebarMenuItem>
+  );
+}
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   onQuickActionsClick?: () => void;
@@ -80,15 +75,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
   const { t } = useTranslation();
   const [_appVersion, setAppVersion] = React.useState("0.0.0");
-  const [mounted, setMounted] = React.useState(() => typeof window !== "undefined");
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Helper to check if a path is active
-  const isActive = (path: string) => {
-    if (path === "/") return location.pathname === "/";
-    return location.pathname.startsWith(path);
-  };
+  const [, setMounted] = React.useState(() => typeof window !== "undefined");
 
   // Get counts for sidebar badges
   const { data: alerts = [] } = useAlerts();
@@ -123,8 +110,8 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
       {...props}
     >
       <SidebarContent className="bg-card">
-        {/* Quick actions - visible even when sidebar is collapsed */}
-        <SidebarGroup>
+        {/* Quick actions - hidden when collapsed */}
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupContent>
             <Button
               className="w-full justify-start gap-2"
@@ -133,8 +120,8 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
               size="sm"
             >
               <Search className="size-4 text-muted-foreground shrink-0" />
-              <span className="flex-1 text-left text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">Search...</span>
-              <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground group-data-[collapsible=icon]:hidden">
+              <span className="flex-1 text-left text-xs text-muted-foreground">Search...</span>
+              <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
                 <span className="text-xs">⌘K</span>
               </kbd>
             </Button>
@@ -144,39 +131,10 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
           <SidebarGroupLabel>{t("sidebar.overview")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/")} tooltip={t("sidebar.dashboard")}>
-                  <Link to="/">
-                    <Home />
-                    <span>{t("sidebar.dashboard")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/employees")} tooltip={t("sidebar.employees")}>
-                  <Link to="/employees">
-                    <Users />
-                    <span>{t("sidebar.employees")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/alerts")} tooltip={t("sidebar.alerts")}>
-                  <Link to="/alerts">
-                    <AlertTriangle />
-                    <span>{t("sidebar.alerts")}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {alerts.length > 0 && <SidebarMenuBadge>{alerts.length}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/agencies")} tooltip={t("agencies.title")}>
-                  <Link to="/agencies">
-                    <Building2 />
-                    <span>{t("agencies.title")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <NavItem path="/" icon={Home} label={t("sidebar.dashboard")} />
+              <NavItem path="/employees" icon={Users} label={t("sidebar.employees")} />
+              <NavItem path="/alerts" icon={AlertTriangle} label={t("sidebar.alerts")} badge={alerts.length} />
+              <NavItem path="/agencies" icon={Building2} label={t("agencies.title")} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -185,58 +143,12 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
           <SidebarGroupLabel>{t("sidebar.management")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/documents")} tooltip={t("sidebar.documents")}>
-                  <Link to="/documents">
-                    <FileText />
-                    <span>{t("sidebar.documents")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/caces")} tooltip={t("sidebar.caces")}>
-                  <Link to="/caces">
-                    <ShieldAlert />
-                    <span>{t("sidebar.caces")}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {caces.length > 0 && <SidebarMenuBadge>{caces.length}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/medical-visits")} tooltip={t("sidebar.medicalVisits")}>
-                  <Link to="/medical-visits">
-                    <Stethoscope />
-                    <span>{t("sidebar.medicalVisits")}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {medicalVisits.length > 0 && <SidebarMenuBadge>{medicalVisits.length}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/driving-authorizations")} tooltip={t("sidebar.drivingAuthorizations")}>
-                  <Link to="/driving-authorizations">
-                    <Car />
-                    <span>{t("sidebar.drivingAuthorizations")}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {drivingAuthorizations.length > 0 && <SidebarMenuBadge>{drivingAuthorizations.length}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/online-trainings")} tooltip={t("sidebar.onlineTrainings")}>
-                  <Link to="/online-trainings">
-                    <GraduationCap />
-                    <span>{t("sidebar.onlineTrainings")}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {onlineTrainings.length > 0 && <SidebarMenuBadge>{onlineTrainings.length}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/contracts")} tooltip={t("sidebar.contracts")}>
-                  <Link to="/contracts">
-                    <FileText />
-                    <span>{t("sidebar.contracts")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <NavItem path="/documents" icon={FileText} label={t("sidebar.documents")} />
+              <NavItem path="/caces" icon={ShieldAlert} label={t("sidebar.caces")} badge={caces.length} />
+              <NavItem path="/medical-visits" icon={Stethoscope} label={t("sidebar.medicalVisits")} badge={medicalVisits.length} />
+              <NavItem path="/driving-authorizations" icon={Car} label={t("sidebar.drivingAuthorizations")} badge={drivingAuthorizations.length} />
+              <NavItem path="/online-trainings" icon={GraduationCap} label={t("sidebar.onlineTrainings")} badge={onlineTrainings.length} />
+              <NavItem path="/contracts" icon={FileText} label={t("sidebar.contracts")} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -245,38 +157,10 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
           <SidebarGroupLabel>{t("sidebar.referenceData")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/positions")} tooltip={t("positions.title")}>
-                  <Link to="/positions">
-                    <Briefcase />
-                    <span>{t("positions.title")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/work-locations")} tooltip={t("workLocations.title")}>
-                  <Link to="/work-locations">
-                    <MapPin />
-                    <span>{t("workLocations.title")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/departments")} tooltip={t("departments.title")}>
-                  <Link to="/departments">
-                    <Building2 />
-                    <span>{t("departments.title")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/contract-types")} tooltip={t("contractTypes.title")}>
-                  <Link to="/contract-types">
-                    <ClipboardList />
-                    <span>{t("contractTypes.title")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <NavItem path="/positions" icon={Briefcase} label={t("positions.title")} />
+              <NavItem path="/work-locations" icon={MapPin} label={t("workLocations.title")} />
+              <NavItem path="/departments" icon={Building2} label={t("departments.title")} />
+              <NavItem path="/contract-types" icon={ClipboardList} label={t("contractTypes.title")} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -284,30 +168,9 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
         <SidebarGroup className="mt-auto pb-4">
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/settings")} tooltip={t("sidebar.settings")}>
-                  <Link to="/settings">
-                    <Settings2 />
-                    <span>{t("sidebar.settings")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/trash")} tooltip={t("sidebar.trash")}>
-                  <Link to="/trash">
-                    <Trash2 />
-                    <span>{t("sidebar.trash")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/exports")} tooltip={t("sidebar.exports", "Exports")}>
-                  <Link to="/exports">
-                    <Download />
-                    <span>{t("sidebar.exports", "Exports")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <NavItem path="/settings" icon={Settings2} label={t("sidebar.settings")} />
+              <NavItem path="/trash" icon={Trash2} label={t("sidebar.trash")} />
+              <NavItem path="/exports" icon={Download} label={t("sidebar.exports", "Exports")} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

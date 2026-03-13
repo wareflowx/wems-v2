@@ -15,12 +15,12 @@ export interface ExportHistoryRecord {
   filePath: string;
 }
 
-const getHistoryPath = (): string => {
+export const getHistoryPath = (): string => {
   const userDataPath = app.getPath("userData");
   return path.join(userDataPath, "exports-history.json");
 };
 
-const loadHistory = (): ExportHistoryRecord[] => {
+export const loadHistory = (): ExportHistoryRecord[] => {
   try {
     const filePath = getHistoryPath();
     if (!fs.existsSync(filePath)) {
@@ -34,7 +34,7 @@ const loadHistory = (): ExportHistoryRecord[] => {
   }
 };
 
-const saveHistory = (history: ExportHistoryRecord[]): void => {
+export const saveHistory = (history: ExportHistoryRecord[]): void => {
   try {
     const filePath = getHistoryPath();
     const dir = path.dirname(filePath);
@@ -82,3 +82,42 @@ export const deleteExportFromHistory = os.handler(
     return { success: true };
   }
 );
+
+// Internal versions for direct calls (without ORPC)
+export const _addExportToHistory = async (input: {
+  types: ExportType[];
+  format: ExportFormat;
+  recordCount: number;
+  filePath: string;
+}): Promise<{ success: boolean }> => {
+  const history = loadHistory();
+
+  const record: ExportHistoryRecord = {
+    id: crypto.randomUUID(),
+    timestamp: new Date().toISOString(),
+    types: input.types,
+    format: input.format,
+    recordCount: input.recordCount,
+    filePath: input.filePath,
+  };
+
+  history.unshift(record);
+  const trimmed = history.slice(0, 100);
+
+  saveHistory(trimmed);
+
+  return { success: true };
+};
+
+export const _getExportHistory = (): ExportHistoryRecord[] => {
+  return loadHistory();
+};
+
+export const _deleteExportFromHistory = (input: {
+  id: string;
+}): { success: boolean } => {
+  const history = loadHistory();
+  const filtered = history.filter((r) => r.id !== input.id);
+  saveHistory(filtered);
+  return { success: true };
+};

@@ -18,7 +18,7 @@ import {
   posts,
   settings,
   workLocations,
-} from "@/core/db/schema";
+} from "@@/db/schema";
 import {
   saveFile,
   deleteFile,
@@ -26,10 +26,10 @@ import {
   generateStoredFileName,
   getMediaPath,
   getAttachmentPath,
-} from "@/core/lib/file-storage";
+} from "@@/lib/file-storage";
 import {
   DrivingAuthorizationStatusResult,
-} from "@/core/lib/driving-authorization";
+} from "@@/lib/driving-authorization";
 import { randomUUID } from "node:crypto";
 import {
   createAgencyInputSchema,
@@ -2562,13 +2562,13 @@ import {
   generateCsv,
   writeCsvToFile,
   getCsvExtension,
-} from "@/core/lib/exporters/csv-exporter";
+} from "@@/lib/exporters/csv-exporter";
 import {
   writeExcelToFile,
   getExcelExtension,
-} from "@/core/lib/exporters/excel-exporter";
-import { getDateRangeParams } from "@/core/lib/date-utils";
-import { _getExportHistory, _addExportToHistory, _deleteExportFromHistory } from "@/core/lib/export-history";
+} from "@@/lib/exporters/excel-exporter";
+import { getDateRangeParams } from "@@/lib/date-utils";
+import { _getExportHistory, _addExportToHistory, _deleteExportFromHistory } from "@@/lib/export-history";
 import { randomUUID } from "node:crypto";
 
 // ============================================================

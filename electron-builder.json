@@ -6,6 +6,7 @@
     "buildResources": "build"
   },
   "files": ["out/**/*", "package.json"],
+  "npmRebuild": false,
   "extraResources": [
     {
       "from": "src/core/db/migrations",

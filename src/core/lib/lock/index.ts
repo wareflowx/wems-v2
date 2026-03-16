@@ -1,10 +1,10 @@
+import { lockEvents } from "@@/lib/lock-events";
+import { configure, logger } from "@@/lib/logger";
+import { isSuccess, Result } from "@@/lib/result";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { app } from "electron";
-import { lockEvents } from "@/core/lib/lock-events";
-import { configure, logger } from "@/core/lib/logger";
-import { isSuccess, Result } from "@/core/lib/result";
+import { getDataDir } from "@@/db";
 import {
   LockAlreadyExistsError,
   LockFileError,
@@ -37,15 +37,6 @@ export interface LockData {
 let _lockData: LockData | null = null;
 let lastKnownWriteMode: boolean | null = null;
 let heartbeatIntervalId: ReturnType<typeof setInterval> | null = null;
-
-function getDataDir(): string {
-  // Use userData directory for data storage
-  // This is the proper location for app data (writable, per-user)
-  // In development: use project root for easier debugging
-  const inDevelopment = process.env.NODE_ENV === "development";
-  const baseDir = inDevelopment ? process.cwd() : app.getPath("userData");
-  return path.join(baseDir, "data");
-}
 
 function ensureDataDir(): void {
   const dataDir = getDataDir();

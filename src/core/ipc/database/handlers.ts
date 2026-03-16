@@ -1,6 +1,3 @@
-import { os } from "@orpc/server";
-import { and, desc, eq, isNull, not, gt, sql } from "drizzle-orm";
-import { getDb } from "@/core/db";
 import {
   agencies,
   attachments,
@@ -19,18 +16,19 @@ import {
   settings,
   workLocations,
 } from "@@/db/schema";
+import type { DrivingAuthorizationStatusResult } from "@@/lib/driving-authorization";
 import {
-  saveFile,
   deleteFile,
-  readFile,
   generateStoredFileName,
-  getMediaPath,
   getAttachmentPath,
+  getMediaPath,
+  readFile,
+  saveFile,
 } from "@@/lib/file-storage";
-import {
-  DrivingAuthorizationStatusResult,
-} from "@@/lib/driving-authorization";
 import { randomUUID } from "node:crypto";
+import { os } from "@orpc/server";
+import { and, desc, eq, gt, isNull, not } from "drizzle-orm";
+import { getDataDir, getDb } from "@@/db";
 import {
   createAgencyInputSchema,
   createAttachmentInputSchema,
@@ -39,8 +37,8 @@ import {
   createDepartmentInputSchema,
   createDrivingAuthorizationInputSchema,
   createEmployeeInputSchema,
-  createMedicalVisitInputSchema,
   createMediaInputSchema,
+  createMedicalVisitInputSchema,
   createOnlineTrainingInputSchema,
   createPositionInputSchema,
   createPostInputSchema,
@@ -52,14 +50,16 @@ import {
   deleteDepartmentInputSchema,
   deleteDrivingAuthorizationInputSchema,
   deleteEmployeeInputSchema,
-  deleteMedicalVisitInputSchema,
   deleteMediaInputSchema,
+  deleteMedicalVisitInputSchema,
   deleteOnlineTrainingInputSchema,
   deletePositionInputSchema,
   deleteWorkLocationInputSchema,
   getAttachmentInputSchema,
   getAttachmentsInputSchema,
   getMediaInputSchema,
+  permanentDeleteInputSchema,
+  restoreInputSchema,
   updateAgencyInputSchema,
   updateCaceInputSchema,
   updateContractTypeInputSchema,
@@ -71,8 +71,6 @@ import {
   updatePositionInputSchema,
   updateSettingsInputSchema,
   updateWorkLocationInputSchema,
-  restoreInputSchema,
-  permanentDeleteInputSchema,
 } from "./schemas";
 
 // Posts handlers
@@ -132,7 +130,10 @@ export const createPosition = os.handler(async ({ input }) => {
     console.error("Error in createPosition:", error);
 
     // Check for UNIQUE constraint violation
-    if (error?.code === 'SQLITE_CONSTRAINT_UNIQUE' || error?.message?.includes('UNIQUE constraint failed')) {
+    if (
+      error?.code === "SQLITE_CONSTRAINT_UNIQUE" ||
+      error?.message?.includes("UNIQUE constraint failed")
+    ) {
       // Check if it's in the trash
       const db = await getDb();
       const existingPosition = await db
@@ -141,9 +142,13 @@ export const createPosition = os.handler(async ({ input }) => {
         .where(eq(positions.code, input.code));
 
       if (existingPosition.length > 0 && existingPosition[0].deletedAt) {
-        throw new Error("A position with this code already exists in the trash. Please restore it or use a different code.");
+        throw new Error(
+          "A position with this code already exists in the trash. Please restore it or use a different code."
+        );
       }
-      throw new Error("A position with this code already exists. Please use a different code.");
+      throw new Error(
+        "A position with this code already exists. Please use a different code."
+      );
     }
 
     throw error;
@@ -242,17 +247,27 @@ export const createWorkLocation = os.handler(async ({ input }) => {
   } catch (error: any) {
     console.error("Error in createWorkLocation:", error);
 
-    if (error?.code === 'SQLITE_CONSTRAINT_UNIQUE' || error?.message?.includes('UNIQUE constraint failed')) {
+    if (
+      error?.code === "SQLITE_CONSTRAINT_UNIQUE" ||
+      error?.message?.includes("UNIQUE constraint failed")
+    ) {
       const db = await getDb();
       const existingWorkLocation = await db
         .select()
         .from(workLocations)
         .where(eq(workLocations.code, input.code));
 
-      if (existingWorkLocation.length > 0 && existingWorkLocation[0].deletedAt) {
-        throw new Error("A work location with this code already exists in the trash. Please restore it or use a different code.");
+      if (
+        existingWorkLocation.length > 0 &&
+        existingWorkLocation[0].deletedAt
+      ) {
+        throw new Error(
+          "A work location with this code already exists in the trash. Please restore it or use a different code."
+        );
       }
-      throw new Error("A work location with this code already exists. Please use a different code.");
+      throw new Error(
+        "A work location with this code already exists. Please use a different code."
+      );
     }
 
     throw error;
@@ -634,7 +649,7 @@ export const createMedia = os.handler(async ({ input }) => {
           fileName: validatedData.fileName,
           mimeType: validatedData.mimeType,
           size: validatedData.size,
-          filePath: filePath,
+          filePath,
         })
         .returning();
 
@@ -719,7 +734,7 @@ export const getAttachments = os.handler(async ({ input }) => {
     // Validate input
     const validatedData = getAttachmentsInputSchema.parse(input || {});
     const db = await getDb();
-    let query = db.select().from(attachments);
+    const query = db.select().from(attachments);
 
     if (validatedData?.employeeId && validatedData?.entityType) {
       return await query
@@ -775,10 +790,7 @@ export const getAttachmentById = os.handler(async ({ input }) => {
       .select()
       .from(attachments)
       .where(
-        and(
-          eq(attachments.id, validatedData.id),
-          isNull(attachments.deletedAt)
-        )
+        and(eq(attachments.id, validatedData.id), isNull(attachments.deletedAt))
       );
     return result || null;
   } catch (error) {
@@ -800,7 +812,11 @@ export const createAttachment = os.handler(async ({ input }) => {
     let storedName: string | undefined;
     let filePath: string | undefined;
 
-    if (validatedData.fileData && validatedData.originalName && validatedData.employeeId) {
+    if (
+      validatedData.fileData &&
+      validatedData.originalName &&
+      validatedData.employeeId
+    ) {
       // Decode base64 to buffer
       const buffer = Buffer.from(validatedData.fileData, "base64");
       storedName = generateStoredFileName(id, validatedData.originalName);
@@ -933,12 +949,18 @@ export const createDepartment = os.handler(async ({ input }) => {
     const validatedData = createDepartmentInputSchema.parse(input);
     const db = await getDb();
 
-    const [newDepartment] = await db.insert(departments).values(validatedData).returning();
+    const [newDepartment] = await db
+      .insert(departments)
+      .values(validatedData)
+      .returning();
     return newDepartment;
   } catch (error: any) {
     console.error("Error in createDepartment:", error);
 
-    if (error?.code === 'SQLITE_CONSTRAINT_UNIQUE' || error?.message?.includes('UNIQUE constraint failed')) {
+    if (
+      error?.code === "SQLITE_CONSTRAINT_UNIQUE" ||
+      error?.message?.includes("UNIQUE constraint failed")
+    ) {
       const db = await getDb();
       const existingDepartment = await db
         .select()
@@ -946,9 +968,13 @@ export const createDepartment = os.handler(async ({ input }) => {
         .where(eq(departments.code, input.code));
 
       if (existingDepartment.length > 0 && existingDepartment[0].deletedAt) {
-        throw new Error("A department with this code already exists in the trash. Please restore it or use a different code.");
+        throw new Error(
+          "A department with this code already exists in the trash. Please restore it or use a different code."
+        );
       }
-      throw new Error("A department with this code already exists. Please use a different code.");
+      throw new Error(
+        "A department with this code already exists. Please use a different code."
+      );
     }
 
     throw error;
@@ -959,7 +985,16 @@ export const updateDepartment = os.handler(async ({ input }) => {
   try {
     const validatedData = updateDepartmentInputSchema.parse(input);
     const db = await getDb();
-    const [updated] = await db.update(departments).set({ name: validatedData.name, code: validatedData.code, color: validatedData.color, isActive: validatedData.isActive }).where(eq(departments.id, validatedData.id)).returning();
+    const [updated] = await db
+      .update(departments)
+      .set({
+        name: validatedData.name,
+        code: validatedData.code,
+        color: validatedData.color,
+        isActive: validatedData.isActive,
+      })
+      .where(eq(departments.id, validatedData.id))
+      .returning();
     return updated;
   } catch (error) {
     console.error("Error in updateDepartment:", error);
@@ -1003,12 +1038,18 @@ export const createAgency = os.handler(async ({ input }) => {
     const validatedData = createAgencyInputSchema.parse(input);
     const db = await getDb();
 
-    const [newAgency] = await db.insert(agencies).values(validatedData).returning();
+    const [newAgency] = await db
+      .insert(agencies)
+      .values(validatedData)
+      .returning();
     return newAgency;
   } catch (error: any) {
     console.error("Error in createAgency:", error);
 
-    if (error?.code === 'SQLITE_CONSTRAINT_UNIQUE' || error?.message?.includes('UNIQUE constraint failed')) {
+    if (
+      error?.code === "SQLITE_CONSTRAINT_UNIQUE" ||
+      error?.message?.includes("UNIQUE constraint failed")
+    ) {
       const db = await getDb();
       const existingAgency = await db
         .select()
@@ -1016,9 +1057,13 @@ export const createAgency = os.handler(async ({ input }) => {
         .where(eq(agencies.code, input.code));
 
       if (existingAgency.length > 0 && existingAgency[0].deletedAt) {
-        throw new Error("An agency with this code already exists in the trash. Please restore it or use a different code.");
+        throw new Error(
+          "An agency with this code already exists in the trash. Please restore it or use a different code."
+        );
       }
-      throw new Error("An agency with this code already exists. Please use a different code.");
+      throw new Error(
+        "An agency with this code already exists. Please use a different code."
+      );
     }
 
     throw error;
@@ -1072,7 +1117,9 @@ export const getContractTypes = os.handler(async () => {
     const allTypes = await db
       .select()
       .from(contractTypes)
-      .where(and(eq(contractTypes.isActive, 1), isNull(contractTypes.deletedAt)))
+      .where(
+        and(eq(contractTypes.isActive, 1), isNull(contractTypes.deletedAt))
+      )
       .orderBy(contractTypes.name);
     return allTypes;
   } catch (error) {
@@ -1086,22 +1133,35 @@ export const createContractType = os.handler(async ({ input }) => {
     const validatedData = createContractTypeInputSchema.parse(input);
     const db = await getDb();
 
-    const [newType] = await db.insert(contractTypes).values(validatedData).returning();
+    const [newType] = await db
+      .insert(contractTypes)
+      .values(validatedData)
+      .returning();
     return newType;
   } catch (error: any) {
     console.error("Error in createContractType:", error);
 
-    if (error?.code === 'SQLITE_CONSTRAINT_UNIQUE' || error?.message?.includes('UNIQUE constraint failed')) {
+    if (
+      error?.code === "SQLITE_CONSTRAINT_UNIQUE" ||
+      error?.message?.includes("UNIQUE constraint failed")
+    ) {
       const db = await getDb();
       const existingContractType = await db
         .select()
         .from(contractTypes)
         .where(eq(contractTypes.code, input.code));
 
-      if (existingContractType.length > 0 && existingContractType[0].deletedAt) {
-        throw new Error("A contract type with this code already exists in the trash. Please restore it or use a different code.");
+      if (
+        existingContractType.length > 0 &&
+        existingContractType[0].deletedAt
+      ) {
+        throw new Error(
+          "A contract type with this code already exists in the trash. Please restore it or use a different code."
+        );
       }
-      throw new Error("A contract type with this code already exists. Please use a different code.");
+      throw new Error(
+        "A contract type with this code already exists. Please use a different code."
+      );
     }
 
     throw error;
@@ -1112,7 +1172,16 @@ export const updateContractType = os.handler(async ({ input }) => {
   try {
     const validatedData = updateContractTypeInputSchema.parse(input);
     const db = await getDb();
-    const [updated] = await db.update(contractTypes).set({ name: validatedData.name, code: validatedData.code, color: validatedData.color, isActive: validatedData.isActive }).where(eq(contractTypes.id, validatedData.id)).returning();
+    const [updated] = await db
+      .update(contractTypes)
+      .set({
+        name: validatedData.name,
+        code: validatedData.code,
+        color: validatedData.color,
+        isActive: validatedData.isActive,
+      })
+      .where(eq(contractTypes.id, validatedData.id))
+      .returning();
     return updated;
   } catch (error) {
     console.error("Error in updateContractType:", error);
@@ -1184,7 +1253,16 @@ export const updateCace = os.handler(async ({ input }) => {
   try {
     const validatedData = updateCaceInputSchema.parse(input);
     const db = await getDb();
-    const [updated] = await db.update(caces).set({ category: validatedData.category, dateObtained: validatedData.dateObtained, expirationDate: validatedData.expirationDate, attachmentId: validatedData.attachmentId }).where(eq(caces.id, validatedData.id)).returning();
+    const [updated] = await db
+      .update(caces)
+      .set({
+        category: validatedData.category,
+        dateObtained: validatedData.dateObtained,
+        expirationDate: validatedData.expirationDate,
+        attachmentId: validatedData.attachmentId,
+      })
+      .where(eq(caces.id, validatedData.id))
+      .returning();
     return updated;
   } catch (error) {
     console.error("Error in updateCace:", error);
@@ -1309,7 +1387,10 @@ export const createMedicalVisit = os.handler(async ({ input }) => {
   try {
     const validatedData = createMedicalVisitInputSchema.parse(input);
     const db = await getDb();
-    const [newVisit] = await db.insert(medicalVisits).values(validatedData).returning();
+    const [newVisit] = await db
+      .insert(medicalVisits)
+      .values(validatedData)
+      .returning();
     return newVisit;
   } catch (error) {
     console.error("Error in createMedicalVisit:", error);
@@ -1321,7 +1402,18 @@ export const updateMedicalVisit = os.handler(async ({ input }) => {
   try {
     const validatedData = updateMedicalVisitInputSchema.parse(input);
     const db = await getDb();
-    const [updated] = await db.update(medicalVisits).set({ type: validatedData.type, scheduledDate: validatedData.scheduledDate, actualDate: validatedData.actualDate, status: validatedData.status, fitnessStatus: validatedData.fitnessStatus, attachmentId: validatedData.attachmentId }).where(eq(medicalVisits.id, validatedData.id)).returning();
+    const [updated] = await db
+      .update(medicalVisits)
+      .set({
+        type: validatedData.type,
+        scheduledDate: validatedData.scheduledDate,
+        actualDate: validatedData.actualDate,
+        status: validatedData.status,
+        fitnessStatus: validatedData.fitnessStatus,
+        attachmentId: validatedData.attachmentId,
+      })
+      .where(eq(medicalVisits.id, validatedData.id))
+      .returning();
     return updated;
   } catch (error) {
     console.error("Error in updateMedicalVisit:", error);
@@ -1360,21 +1452,28 @@ export const getDrivingAuthorizations = os.handler(async () => {
   }
 });
 
-export const getDrivingAuthorizationsByEmployee = os.handler(async ({ input }) => {
-  try {
-    const validatedData = { id: input.employeeId };
-    const db = await getDb();
-    const authorizations = await db
-      .select()
-      .from(drivingAuthorizations)
-      .where(and(eq(drivingAuthorizations.employeeId, validatedData.id), isNull(drivingAuthorizations.deletedAt)))
-      .orderBy(desc(drivingAuthorizations.expirationDate));
-    return authorizations;
-  } catch (error) {
-    console.error("Error in getDrivingAuthorizationsByEmployee:", error);
-    throw error;
+export const getDrivingAuthorizationsByEmployee = os.handler(
+  async ({ input }) => {
+    try {
+      const validatedData = { id: input.employeeId };
+      const db = await getDb();
+      const authorizations = await db
+        .select()
+        .from(drivingAuthorizations)
+        .where(
+          and(
+            eq(drivingAuthorizations.employeeId, validatedData.id),
+            isNull(drivingAuthorizations.deletedAt)
+          )
+        )
+        .orderBy(desc(drivingAuthorizations.expirationDate));
+      return authorizations;
+    } catch (error) {
+      console.error("Error in getDrivingAuthorizationsByEmployee:", error);
+      throw error;
+    }
   }
-});
+);
 
 export const createDrivingAuthorization = os.handler(async ({ input }) => {
   try {
@@ -1423,158 +1522,171 @@ export const deleteDrivingAuthorization = os.handler(async ({ input }) => {
 });
 
 // Driving Authorization Status
-export const getDrivingAuthorizationStatus = os.handler(async ({ input }: { input: { employeeId: number } }) => {
-  try {
-    const db = await getDb();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+export const getDrivingAuthorizationStatus = os.handler(
+  async ({ input }: { input: { employeeId: number } }) => {
+    try {
+      const db = await getDb();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-    const result: DrivingAuthorizationStatusResult = {
-      authorized: false,
-      partial: false,
-      details: {
-        medicalVisit: { valid: false },
-        caces: { valid: false },
-        drivingAuthorization: { valid: false },
-        training: { valid: false },
-      },
-    };
+      const result: DrivingAuthorizationStatusResult = {
+        authorized: false,
+        partial: false,
+        details: {
+          medicalVisit: { valid: false },
+          caces: { valid: false },
+          drivingAuthorization: { valid: false },
+          training: { valid: false },
+        },
+      };
 
-    // Check medical visit - must be completed and not expired
-    const visits = await db
-      .select()
-      .from(medicalVisits)
-      .where(
-        and(
-          eq(medicalVisits.employeeId, input.employeeId),
-          eq(medicalVisits.status, "completed"),
-          isNull(medicalVisits.deletedAt)
-        )
-      )
-      .orderBy(desc(medicalVisits.scheduledDate));
-
-    if (visits.length > 0) {
-      const latestVisit = visits[0];
-      // Check if there's a next scheduled visit that is not overdue
-      const nextVisit = await db
+      // Check medical visit - must be completed and not expired
+      const visits = await db
         .select()
         .from(medicalVisits)
         .where(
           and(
             eq(medicalVisits.employeeId, input.employeeId),
-            eq(medicalVisits.status, "scheduled"),
-            gt(medicalVisits.scheduledDate, today.toISOString().split("T")[0]),
+            eq(medicalVisits.status, "completed"),
             isNull(medicalVisits.deletedAt)
           )
         )
-        .orderBy(medicalVisits.scheduledDate)
-        .limit(1);
+        .orderBy(desc(medicalVisits.scheduledDate));
 
-      // Medical visit is valid if there's a completed one and either:
-      // 1. No next visit scheduled (completed is still valid)
-      // 2. A next visit is scheduled in the future
-      if (nextVisit.length > 0 || visits.length > 0) {
-        result.details.medicalVisit = {
-          valid: true,
-          status: latestVisit.status,
-          expiresAt: nextVisit.length > 0 ? nextVisit[0].scheduledDate : undefined,
-          type: latestVisit.type,
-        };
+      if (visits.length > 0) {
+        const latestVisit = visits[0];
+        // Check if there's a next scheduled visit that is not overdue
+        const nextVisit = await db
+          .select()
+          .from(medicalVisits)
+          .where(
+            and(
+              eq(medicalVisits.employeeId, input.employeeId),
+              eq(medicalVisits.status, "scheduled"),
+              gt(
+                medicalVisits.scheduledDate,
+                today.toISOString().split("T")[0]
+              ),
+              isNull(medicalVisits.deletedAt)
+            )
+          )
+          .orderBy(medicalVisits.scheduledDate)
+          .limit(1);
+
+        // Medical visit is valid if there's a completed one and either:
+        // 1. No next visit scheduled (completed is still valid)
+        // 2. A next visit is scheduled in the future
+        if (nextVisit.length > 0 || visits.length > 0) {
+          result.details.medicalVisit = {
+            valid: true,
+            status: latestVisit.status,
+            expiresAt:
+              nextVisit.length > 0 ? nextVisit[0].scheduledDate : undefined,
+            type: latestVisit.type,
+          };
+        }
       }
-    }
 
-    // Check CACES - must have at least one non-expired
-    const cacesList = await db
-      .select()
-      .from(caces)
-      .where(and(eq(caces.employeeId, input.employeeId), isNull(caces.deletedAt)))
-      .orderBy(desc(caces.expirationDate));
-
-    const validCaces = cacesList.find((c) => {
-      const expDate = new Date(c.expirationDate);
-      expDate.setHours(0, 0, 0, 0);
-      return expDate >= today;
-    });
-
-    if (validCaces) {
-      result.details.caces = {
-        valid: true,
-        category: validCaces.category,
-        expiresAt: validCaces.expirationDate,
-      };
-    }
-
-    // Check driving authorization - must have at least one non-expired
-    const auths = await db
-      .select()
-      .from(drivingAuthorizations)
-      .where(and(eq(drivingAuthorizations.employeeId, input.employeeId), isNull(drivingAuthorizations.deletedAt)))
-      .orderBy(desc(drivingAuthorizations.expirationDate));
-
-    const validAuth = auths.find((a) => {
-      const expDate = new Date(a.expirationDate);
-      expDate.setHours(0, 0, 0, 0);
-      return expDate >= today;
-    });
-
-    if (validAuth) {
-      result.details.drivingAuthorization = {
-        valid: true,
-        licenseCategory: validAuth.licenseCategory,
-        expiresAt: validAuth.expirationDate,
-      };
-    }
-
-    // Check training - must have at least one completed training
-    const trainings = await db
-      .select()
-      .from(onlineTrainings)
-      .where(
-        and(
-          eq(onlineTrainings.employeeId, input.employeeId),
-          eq(onlineTrainings.status, "completed"),
-          isNull(onlineTrainings.deletedAt)
+      // Check CACES - must have at least one non-expired
+      const cacesList = await db
+        .select()
+        .from(caces)
+        .where(
+          and(eq(caces.employeeId, input.employeeId), isNull(caces.deletedAt))
         )
-      )
-      .orderBy(desc(onlineTrainings.completionDate));
+        .orderBy(desc(caces.expirationDate));
 
-    if (trainings.length > 0) {
-      const latestTraining = trainings[0];
-      // Check if expired - if expiration date exists and has passed
-      let isValid = true;
-      if (latestTraining.expirationDate) {
-        const expDate = new Date(latestTraining.expirationDate);
+      const validCaces = cacesList.find((c) => {
+        const expDate = new Date(c.expirationDate);
         expDate.setHours(0, 0, 0, 0);
-        isValid = expDate >= today;
-      }
+        return expDate >= today;
+      });
 
-      if (isValid) {
-        result.details.training = {
+      if (validCaces) {
+        result.details.caces = {
           valid: true,
-          name: latestTraining.trainingName,
-          completedAt: latestTraining.completionDate,
+          category: validCaces.category,
+          expiresAt: validCaces.expirationDate,
         };
       }
+
+      // Check driving authorization - must have at least one non-expired
+      const auths = await db
+        .select()
+        .from(drivingAuthorizations)
+        .where(
+          and(
+            eq(drivingAuthorizations.employeeId, input.employeeId),
+            isNull(drivingAuthorizations.deletedAt)
+          )
+        )
+        .orderBy(desc(drivingAuthorizations.expirationDate));
+
+      const validAuth = auths.find((a) => {
+        const expDate = new Date(a.expirationDate);
+        expDate.setHours(0, 0, 0, 0);
+        return expDate >= today;
+      });
+
+      if (validAuth) {
+        result.details.drivingAuthorization = {
+          valid: true,
+          licenseCategory: validAuth.licenseCategory,
+          expiresAt: validAuth.expirationDate,
+        };
+      }
+
+      // Check training - must have at least one completed training
+      const trainings = await db
+        .select()
+        .from(onlineTrainings)
+        .where(
+          and(
+            eq(onlineTrainings.employeeId, input.employeeId),
+            eq(onlineTrainings.status, "completed"),
+            isNull(onlineTrainings.deletedAt)
+          )
+        )
+        .orderBy(desc(onlineTrainings.completionDate));
+
+      if (trainings.length > 0) {
+        const latestTraining = trainings[0];
+        // Check if expired - if expiration date exists and has passed
+        let isValid = true;
+        if (latestTraining.expirationDate) {
+          const expDate = new Date(latestTraining.expirationDate);
+          expDate.setHours(0, 0, 0, 0);
+          isValid = expDate >= today;
+        }
+
+        if (isValid) {
+          result.details.training = {
+            valid: true,
+            name: latestTraining.trainingName,
+            completedAt: latestTraining.completionDate,
+          };
+        }
+      }
+
+      // Calculate overall status
+      const details = result.details;
+      const validCount = [
+        details.medicalVisit.valid,
+        details.caces.valid,
+        details.drivingAuthorization.valid,
+        details.training.valid,
+      ].filter(Boolean).length;
+
+      result.authorized = validCount === 4;
+      result.partial = validCount > 0 && validCount < 4;
+
+      return result;
+    } catch (error) {
+      console.error("Error in getDrivingAuthorizationStatus:", error);
+      throw error;
     }
-
-    // Calculate overall status
-    const details = result.details;
-    const validCount = [
-      details.medicalVisit.valid,
-      details.caces.valid,
-      details.drivingAuthorization.valid,
-      details.training.valid,
-    ].filter(Boolean).length;
-
-    result.authorized = validCount === 4;
-    result.partial = validCount > 0 && validCount < 4;
-
-    return result;
-  } catch (error) {
-    console.error("Error in getDrivingAuthorizationStatus:", error);
-    throw error;
   }
-});
+);
 
 // Get all driving authorization statuses for employees
 export const getAllDrivingAuthorizationStatuses = os.handler(async () => {
@@ -1589,7 +1701,10 @@ export const getAllDrivingAuthorizationStatuses = os.handler(async () => {
       .from(employees)
       .where(isNull(employees.deletedAt));
 
-    const statuses: Array<{ employeeId: number; status: DrivingAuthorizationStatusResult }> = [];
+    const statuses: Array<{
+      employeeId: number;
+      status: DrivingAuthorizationStatusResult;
+    }> = [];
 
     for (const employee of allEmployees) {
       const result: DrivingAuthorizationStatusResult = {
@@ -1625,7 +1740,10 @@ export const getAllDrivingAuthorizationStatuses = os.handler(async () => {
             and(
               eq(medicalVisits.employeeId, employee.id),
               eq(medicalVisits.status, "scheduled"),
-              gt(medicalVisits.scheduledDate, today.toISOString().split("T")[0]),
+              gt(
+                medicalVisits.scheduledDate,
+                today.toISOString().split("T")[0]
+              ),
               isNull(medicalVisits.deletedAt)
             )
           )
@@ -1636,7 +1754,8 @@ export const getAllDrivingAuthorizationStatuses = os.handler(async () => {
           result.details.medicalVisit = {
             valid: true,
             status: latestVisit.status,
-            expiresAt: nextVisit.length > 0 ? nextVisit[0].scheduledDate : undefined,
+            expiresAt:
+              nextVisit.length > 0 ? nextVisit[0].scheduledDate : undefined,
             type: latestVisit.type,
           };
         }
@@ -1667,7 +1786,12 @@ export const getAllDrivingAuthorizationStatuses = os.handler(async () => {
       const auths = await db
         .select()
         .from(drivingAuthorizations)
-        .where(and(eq(drivingAuthorizations.employeeId, employee.id), isNull(drivingAuthorizations.deletedAt)))
+        .where(
+          and(
+            eq(drivingAuthorizations.employeeId, employee.id),
+            isNull(drivingAuthorizations.deletedAt)
+          )
+        )
         .orderBy(desc(drivingAuthorizations.expirationDate));
 
       const validAuth = auths.find((a) => {
@@ -1760,7 +1884,12 @@ export const getOnlineTrainingsByEmployee = os.handler(async ({ input }) => {
     const trainings = await db
       .select()
       .from(onlineTrainings)
-      .where(and(eq(onlineTrainings.employeeId, validatedData.id), isNull(onlineTrainings.deletedAt)))
+      .where(
+        and(
+          eq(onlineTrainings.employeeId, validatedData.id),
+          isNull(onlineTrainings.deletedAt)
+        )
+      )
       .orderBy(desc(onlineTrainings.completionDate));
     return trainings;
   } catch (error) {
@@ -1833,14 +1962,20 @@ export const updateSettings = os.handler(async ({ input }) => {
     const db = await getDb();
 
     // Check if settings exist
-    const [existing] = await db.select().from(settings).where(eq(settings.id, 1));
+    const [existing] = await db
+      .select()
+      .from(settings)
+      .where(eq(settings.id, 1));
 
     if (!existing) {
       // Create default settings
-      const [created] = await db.insert(settings).values({
-        id: 1,
-        ...validatedData,
-      }).returning();
+      const [created] = await db
+        .insert(settings)
+        .values({
+          id: 1,
+          ...validatedData,
+        })
+        .returning();
       return created;
     }
 
@@ -1877,189 +2012,181 @@ interface AlertFilters {
 }
 
 // Get alerts from real database data
-export const getAlerts = os.handler(async ({ input }: { input?: AlertFilters }) => {
-  try {
-    const db = await getDb();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+export const getAlerts = os.handler(
+  async ({ input }: { input?: AlertFilters }) => {
+    try {
+      const db = await getDb();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-    // Get settings for alert thresholds
-    const [appSettings] = await db.select().from(settings).where(eq(settings.id, 1));
-    const cacesDays = appSettings?.cacesDays ?? 30;
-    const medicalDays = appSettings?.medicalDays ?? 7;
+      // Get settings for alert thresholds
+      const [appSettings] = await db
+        .select()
+        .from(settings)
+        .where(eq(settings.id, 1));
+      const cacesDays = appSettings?.cacesDays ?? 30;
+      const medicalDays = appSettings?.medicalDays ?? 7;
 
-    const alerts: Alert[] = [];
+      const alerts: Alert[] = [];
 
-    // Get all employees for name lookup (excluding soft-deleted)
-    const allEmployees = await db.select({
-      id: employees.id,
-      firstName: employees.firstName,
-      lastName: employees.lastName,
-    }).from(employees).where(isNull(employees.deletedAt));
+      // Get all employees for name lookup (excluding soft-deleted)
+      const allEmployees = await db
+        .select({
+          id: employees.id,
+          firstName: employees.firstName,
+          lastName: employees.lastName,
+        })
+        .from(employees)
+        .where(isNull(employees.deletedAt));
 
-    const employeeMap = new Map(allEmployees.map(e => [e.id, `${e.firstName} ${e.lastName}`]));
-
-    // Get all CACES (excluding soft-deleted)
-    if (appSettings?.cacesAlerts !== false) {
-      const allCaces = await db.select().from(caces).where(isNull(caces.deletedAt));
-
-      for (const cace of allCaces) {
-        const expirationDate = new Date(cace.expirationDate);
-        expirationDate.setHours(0, 0, 0, 0);
-
-        const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-        if (daysUntilExpiration < 0) {
-          // CACES expired - critical
-          alerts.push({
-            id: `caces-expired-${cace.id}`,
-            type: "CACES expiré",
-            employee: employeeMap.get(cace.employeeId) || "Unknown",
-            employeeId: cace.employeeId,
-            category: cace.category,
-            severity: "critical",
-            date: cace.expirationDate,
-          });
-        } else if (daysUntilExpiration <= cacesDays) {
-          // CACES expiring soon - warning
-          alerts.push({
-            id: `caces-warning-${cace.id}`,
-            type: "CACES expiration proche",
-            employee: employeeMap.get(cace.employeeId) || "Unknown",
-            employeeId: cace.employeeId,
-            category: cace.category,
-            daysLeft: daysUntilExpiration,
-            severity: daysUntilExpiration <= 7 ? "critical" : "warning",
-            date: cace.expirationDate,
-          });
-        }
-      }
-    }
-
-    // Get all Medical Visits (excluding soft-deleted)
-    if (appSettings?.medicalAlerts !== false) {
-      const allVisits = await db.select().from(medicalVisits).where(isNull(medicalVisits.deletedAt));
-
-      for (const visit of allVisits) {
-        const scheduledDate = new Date(visit.scheduledDate);
-        scheduledDate.setHours(0, 0, 0, 0);
-
-        const daysUntilVisit = Math.ceil((scheduledDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-        if (visit.status === "overdue" || (visit.status === "scheduled" && daysUntilVisit < 0)) {
-          // Visit overdue - critical
-          alerts.push({
-            id: `visit-overdue-${visit.id}`,
-            type: "Visite en retard",
-            employee: employeeMap.get(visit.employeeId) || "Unknown",
-            employeeId: visit.employeeId,
-            visitType: visit.type,
-            severity: "critical",
-            date: visit.scheduledDate,
-          });
-        } else if (visit.status === "scheduled" && daysUntilVisit <= medicalDays) {
-          // Visit coming up - info or warning
-          alerts.push({
-            id: `visit-scheduled-${visit.id}`,
-            type: "Visite planifiée",
-            employee: employeeMap.get(visit.employeeId) || "Unknown",
-            employeeId: visit.employeeId,
-            visitType: visit.type,
-            daysLeft: daysUntilVisit,
-            severity: daysUntilVisit <= 3 ? "warning" : "info",
-            date: visit.scheduledDate,
-          });
-        }
-      }
-    }
-
-    // Get all Contracts (only if contract alerts enabled, excluding soft-deleted)
-    if (appSettings?.contractAlerts) {
-      const allContracts = await db.select().from(contracts).where(and(eq(contracts.isActive, true), isNull(contracts.deletedAt)));
-
-      for (const contract of allContracts) {
-        if (!contract.endDate) continue;
-
-        const endDate = new Date(contract.endDate);
-        endDate.setHours(0, 0, 0, 0);
-
-        const daysUntilEnd = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-        if (daysUntilEnd < 0) {
-          // Contract expired - critical
-          alerts.push({
-            id: `contract-expired-${contract.id}`,
-            type: "Contrat expiré",
-            employee: employeeMap.get(contract.employeeId) || "Unknown",
-            employeeId: contract.employeeId,
-            severity: "critical",
-            date: contract.endDate,
-          });
-        } else if (daysUntilEnd <= 30) {
-          // Contract expiring soon - warning
-          alerts.push({
-            id: `contract-warning-${contract.id}`,
-            type: "Contrat expiration proche",
-            employee: employeeMap.get(contract.employeeId) || "Unknown",
-            employeeId: contract.employeeId,
-            daysLeft: daysUntilEnd,
-            severity: daysUntilEnd <= 7 ? "critical" : "warning",
-            date: contract.endDate,
-          });
-        }
-      }
-    }
-
-    // Get all Driving Authorizations (excluding soft-deleted)
-    const allDrivingAuthorizations = await db
-      .select()
-      .from(drivingAuthorizations)
-      .where(isNull(drivingAuthorizations.deletedAt));
-
-    for (const auth of allDrivingAuthorizations) {
-      const expirationDate = new Date(auth.expirationDate);
-      expirationDate.setHours(0, 0, 0, 0);
-
-      const daysUntilExpiration = Math.ceil(
-        (expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      const employeeMap = new Map(
+        allEmployees.map((e) => [e.id, `${e.firstName} ${e.lastName}`])
       );
 
-      if (daysUntilExpiration < 0) {
-        // Authorization expired - critical
-        alerts.push({
-          id: `driving-auth-expired-${auth.id}`,
-          type: "Autorisation de conduite expirée",
-          employee: employeeMap.get(auth.employeeId) || "Unknown",
-          employeeId: auth.employeeId,
-          category: auth.licenseCategory,
-          severity: "critical",
-          date: auth.expirationDate,
-        });
-      } else if (daysUntilExpiration <= cacesDays) {
-        // Authorization expiring soon - warning
-        alerts.push({
-          id: `driving-auth-warning-${auth.id}`,
-          type: "Autorisation de conduite expiration proche",
-          employee: employeeMap.get(auth.employeeId) || "Unknown",
-          employeeId: auth.employeeId,
-          category: auth.licenseCategory,
-          daysLeft: daysUntilExpiration,
-          severity: daysUntilExpiration <= 7 ? "critical" : "warning",
-          date: auth.expirationDate,
-        });
+      // Get all CACES (excluding soft-deleted)
+      if (appSettings?.cacesAlerts !== false) {
+        const allCaces = await db
+          .select()
+          .from(caces)
+          .where(isNull(caces.deletedAt));
+
+        for (const cace of allCaces) {
+          const expirationDate = new Date(cace.expirationDate);
+          expirationDate.setHours(0, 0, 0, 0);
+
+          const daysUntilExpiration = Math.ceil(
+            (expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+          );
+
+          if (daysUntilExpiration < 0) {
+            // CACES expired - critical
+            alerts.push({
+              id: `caces-expired-${cace.id}`,
+              type: "CACES expiré",
+              employee: employeeMap.get(cace.employeeId) || "Unknown",
+              employeeId: cace.employeeId,
+              category: cace.category,
+              severity: "critical",
+              date: cace.expirationDate,
+            });
+          } else if (daysUntilExpiration <= cacesDays) {
+            // CACES expiring soon - warning
+            alerts.push({
+              id: `caces-warning-${cace.id}`,
+              type: "CACES expiration proche",
+              employee: employeeMap.get(cace.employeeId) || "Unknown",
+              employeeId: cace.employeeId,
+              category: cace.category,
+              daysLeft: daysUntilExpiration,
+              severity: daysUntilExpiration <= 7 ? "critical" : "warning",
+              date: cace.expirationDate,
+            });
+          }
+        }
       }
-    }
 
-    // Get all Online Trainings (excluding soft-deleted)
-    const allOnlineTrainings = await db
-      .select()
-      .from(onlineTrainings)
-      .where(isNull(onlineTrainings.deletedAt));
+      // Get all Medical Visits (excluding soft-deleted)
+      if (appSettings?.medicalAlerts !== false) {
+        const allVisits = await db
+          .select()
+          .from(medicalVisits)
+          .where(isNull(medicalVisits.deletedAt));
 
-    for (const training of allOnlineTrainings) {
-      // Check for expired training certifications
-      if (training.expirationDate) {
-        const expirationDate = new Date(training.expirationDate);
+        for (const visit of allVisits) {
+          const scheduledDate = new Date(visit.scheduledDate);
+          scheduledDate.setHours(0, 0, 0, 0);
+
+          const daysUntilVisit = Math.ceil(
+            (scheduledDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+          );
+
+          if (
+            visit.status === "overdue" ||
+            (visit.status === "scheduled" && daysUntilVisit < 0)
+          ) {
+            // Visit overdue - critical
+            alerts.push({
+              id: `visit-overdue-${visit.id}`,
+              type: "Visite en retard",
+              employee: employeeMap.get(visit.employeeId) || "Unknown",
+              employeeId: visit.employeeId,
+              visitType: visit.type,
+              severity: "critical",
+              date: visit.scheduledDate,
+            });
+          } else if (
+            visit.status === "scheduled" &&
+            daysUntilVisit <= medicalDays
+          ) {
+            // Visit coming up - info or warning
+            alerts.push({
+              id: `visit-scheduled-${visit.id}`,
+              type: "Visite planifiée",
+              employee: employeeMap.get(visit.employeeId) || "Unknown",
+              employeeId: visit.employeeId,
+              visitType: visit.type,
+              daysLeft: daysUntilVisit,
+              severity: daysUntilVisit <= 3 ? "warning" : "info",
+              date: visit.scheduledDate,
+            });
+          }
+        }
+      }
+
+      // Get all Contracts (only if contract alerts enabled, excluding soft-deleted)
+      if (appSettings?.contractAlerts) {
+        const allContracts = await db
+          .select()
+          .from(contracts)
+          .where(
+            and(eq(contracts.isActive, true), isNull(contracts.deletedAt))
+          );
+
+        for (const contract of allContracts) {
+          if (!contract.endDate) {
+            continue;
+          }
+
+          const endDate = new Date(contract.endDate);
+          endDate.setHours(0, 0, 0, 0);
+
+          const daysUntilEnd = Math.ceil(
+            (endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+          );
+
+          if (daysUntilEnd < 0) {
+            // Contract expired - critical
+            alerts.push({
+              id: `contract-expired-${contract.id}`,
+              type: "Contrat expiré",
+              employee: employeeMap.get(contract.employeeId) || "Unknown",
+              employeeId: contract.employeeId,
+              severity: "critical",
+              date: contract.endDate,
+            });
+          } else if (daysUntilEnd <= 30) {
+            // Contract expiring soon - warning
+            alerts.push({
+              id: `contract-warning-${contract.id}`,
+              type: "Contrat expiration proche",
+              employee: employeeMap.get(contract.employeeId) || "Unknown",
+              employeeId: contract.employeeId,
+              daysLeft: daysUntilEnd,
+              severity: daysUntilEnd <= 7 ? "critical" : "warning",
+              date: contract.endDate,
+            });
+          }
+        }
+      }
+
+      // Get all Driving Authorizations (excluding soft-deleted)
+      const allDrivingAuthorizations = await db
+        .select()
+        .from(drivingAuthorizations)
+        .where(isNull(drivingAuthorizations.deletedAt));
+
+      for (const auth of allDrivingAuthorizations) {
+        const expirationDate = new Date(auth.expirationDate);
         expirationDate.setHours(0, 0, 0, 0);
 
         const daysUntilExpiration = Math.ceil(
@@ -2067,74 +2194,123 @@ export const getAlerts = os.handler(async ({ input }: { input?: AlertFilters }) 
         );
 
         if (daysUntilExpiration < 0) {
-          // Training certification expired - critical
+          // Authorization expired - critical
           alerts.push({
-            id: `training-expired-${training.id}`,
-            type: "Formation expirée",
-            employee: employeeMap.get(training.employeeId) || "Unknown",
-            employeeId: training.employeeId,
-            category: training.trainingName,
+            id: `driving-auth-expired-${auth.id}`,
+            type: "Autorisation de conduite expirée",
+            employee: employeeMap.get(auth.employeeId) || "Unknown",
+            employeeId: auth.employeeId,
+            category: auth.licenseCategory,
             severity: "critical",
-            date: training.expirationDate,
+            date: auth.expirationDate,
           });
         } else if (daysUntilExpiration <= cacesDays) {
-          // Training certification expiring soon - warning
+          // Authorization expiring soon - warning
           alerts.push({
-            id: `training-warning-${training.id}`,
-            type: "Formation expiration proche",
-            employee: employeeMap.get(training.employeeId) || "Unknown",
-            employeeId: training.employeeId,
-            category: training.trainingName,
+            id: `driving-auth-warning-${auth.id}`,
+            type: "Autorisation de conduite expiration proche",
+            employee: employeeMap.get(auth.employeeId) || "Unknown",
+            employeeId: auth.employeeId,
+            category: auth.licenseCategory,
             daysLeft: daysUntilExpiration,
             severity: daysUntilExpiration <= 7 ? "critical" : "warning",
-            date: training.expirationDate,
+            date: auth.expirationDate,
           });
         }
       }
 
-      // Check for in-progress trainings
-      if (training.status === "in_progress") {
-        alerts.push({
-          id: `training-in-progress-${training.id}`,
-          type: "Formation en cours",
-          employee: employeeMap.get(training.employeeId) || "Unknown",
-          employeeId: training.employeeId,
-          category: training.trainingName,
-          severity: "info",
-          date: training.completionDate,
-        });
+      // Get all Online Trainings (excluding soft-deleted)
+      const allOnlineTrainings = await db
+        .select()
+        .from(onlineTrainings)
+        .where(isNull(onlineTrainings.deletedAt));
+
+      for (const training of allOnlineTrainings) {
+        // Check for expired training certifications
+        if (training.expirationDate) {
+          const expirationDate = new Date(training.expirationDate);
+          expirationDate.setHours(0, 0, 0, 0);
+
+          const daysUntilExpiration = Math.ceil(
+            (expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+          );
+
+          if (daysUntilExpiration < 0) {
+            // Training certification expired - critical
+            alerts.push({
+              id: `training-expired-${training.id}`,
+              type: "Formation expirée",
+              employee: employeeMap.get(training.employeeId) || "Unknown",
+              employeeId: training.employeeId,
+              category: training.trainingName,
+              severity: "critical",
+              date: training.expirationDate,
+            });
+          } else if (daysUntilExpiration <= cacesDays) {
+            // Training certification expiring soon - warning
+            alerts.push({
+              id: `training-warning-${training.id}`,
+              type: "Formation expiration proche",
+              employee: employeeMap.get(training.employeeId) || "Unknown",
+              employeeId: training.employeeId,
+              category: training.trainingName,
+              daysLeft: daysUntilExpiration,
+              severity: daysUntilExpiration <= 7 ? "critical" : "warning",
+              date: training.expirationDate,
+            });
+          }
+        }
+
+        // Check for in-progress trainings
+        if (training.status === "in_progress") {
+          alerts.push({
+            id: `training-in-progress-${training.id}`,
+            type: "Formation en cours",
+            employee: employeeMap.get(training.employeeId) || "Unknown",
+            employeeId: training.employeeId,
+            category: training.trainingName,
+            severity: "info",
+            date: training.completionDate,
+          });
+        }
       }
-    }
 
-    // Apply filters
-    let filteredAlerts = [...alerts];
+      // Apply filters
+      let filteredAlerts = [...alerts];
 
-    if (input?.search) {
-      const searchLower = input.search.toLowerCase();
-      filteredAlerts = filteredAlerts.filter(
-        (alert) =>
-          alert.employee.toLowerCase().includes(searchLower) ||
-          alert.type.toLowerCase().includes(searchLower)
+      if (input?.search) {
+        const searchLower = input.search.toLowerCase();
+        filteredAlerts = filteredAlerts.filter(
+          (alert) =>
+            alert.employee.toLowerCase().includes(searchLower) ||
+            alert.type.toLowerCase().includes(searchLower)
+        );
+      }
+
+      if (input?.severity && input.severity !== "all") {
+        filteredAlerts = filteredAlerts.filter(
+          (alert) => alert.severity === input.severity
+        );
+      }
+
+      if (input?.type && input.type !== "all") {
+        filteredAlerts = filteredAlerts.filter(
+          (alert) => alert.type === input.type
+        );
+      }
+
+      // Sort by date descending
+      filteredAlerts.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       );
+
+      return filteredAlerts;
+    } catch (error) {
+      console.error("Error in getAlerts:", error);
+      throw error;
     }
-
-    if (input?.severity && input.severity !== "all") {
-      filteredAlerts = filteredAlerts.filter((alert) => alert.severity === input.severity);
-    }
-
-    if (input?.type && input.type !== "all") {
-      filteredAlerts = filteredAlerts.filter((alert) => alert.type === input.type);
-    }
-
-    // Sort by date descending
-    filteredAlerts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    return filteredAlerts;
-  } catch (error) {
-    console.error("Error in getAlerts:", error);
-    throw error;
   }
-});
+);
 
 // ============================================================
 // Trash/Restore handlers - Soft delete support
@@ -2197,10 +2373,16 @@ export const permanentDeleteEmployee = os.handler(async ({ input }) => {
       }
 
       // Permanently delete related records
-      await tx.delete(contracts).where(eq(contracts.employeeId, validatedData.id));
+      await tx
+        .delete(contracts)
+        .where(eq(contracts.employeeId, validatedData.id));
       await tx.delete(caces).where(eq(caces.employeeId, validatedData.id));
-      await tx.delete(medicalVisits).where(eq(medicalVisits.employeeId, validatedData.id));
-      await tx.delete(attachments).where(eq(attachments.employeeId, validatedData.id));
+      await tx
+        .delete(medicalVisits)
+        .where(eq(medicalVisits.employeeId, validatedData.id));
+      await tx
+        .delete(attachments)
+        .where(eq(attachments.employeeId, validatedData.id));
 
       // Permanently delete employee
       await tx.delete(employees).where(eq(employees.id, validatedData.id));
@@ -2264,7 +2446,9 @@ export const permanentDeleteWorkLocation = os.handler(async ({ input }) => {
   try {
     const validatedData = permanentDeleteInputSchema.parse(input);
     const db = await getDb();
-    await db.delete(workLocations).where(eq(workLocations.id, validatedData.id));
+    await db
+      .delete(workLocations)
+      .where(eq(workLocations.id, validatedData.id));
     return { success: true };
   } catch (error) {
     console.error("Error in permanentDeleteWorkLocation:", error);
@@ -2396,7 +2580,9 @@ export const permanentDeleteContractType = os.handler(async ({ input }) => {
   try {
     const validatedData = permanentDeleteInputSchema.parse(input);
     const db = await getDb();
-    await db.delete(contractTypes).where(eq(contractTypes.id, validatedData.id));
+    await db
+      .delete(contractTypes)
+      .where(eq(contractTypes.id, validatedData.id));
     return { success: true };
   } catch (error) {
     console.error("Error in permanentDeleteContractType:", error);
@@ -2409,12 +2595,17 @@ export const migrateAddNotesTable = os.handler(async () => {
   try {
     const db = await getDb();
     // Get raw sqlite client from drizzle
-    const sqlite = db.$client as unknown as { exec: (sql: string) => void; prepare: (sql: string) => { run: () => void } };
+    const sqlite = db.$client as unknown as {
+      exec: (sql: string) => void;
+      prepare: (sql: string) => { run: () => void };
+    };
 
     // Check if notes table exists
-    const notesResult = sqlite.prepare(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='notes'"
-    ).run();
+    const notesResult = sqlite
+      .prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='notes'"
+      )
+      .run();
 
     // In better-sqlite3, we use prepare().run() for mutations and prepare().all() for queries
     // Check by looking at the sqlite_master table
@@ -2461,13 +2652,15 @@ export const migrateAddNotesTable = os.handler(async () => {
 
     // Add deleted_by column if it doesn't exist (for existing databases)
     try {
-      sqlite.exec(`ALTER TABLE media ADD COLUMN deleted_by TEXT`);
+      sqlite.exec("ALTER TABLE media ADD COLUMN deleted_by TEXT");
     } catch (e) {
       // Column already exists, ignore
     }
 
-    sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_media_type ON media(type)`);
-    sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_media_deleted_at ON media(deleted_at)`);
+    sqlite.exec("CREATE INDEX IF NOT EXISTS idx_media_type ON media(type)");
+    sqlite.exec(
+      "CREATE INDEX IF NOT EXISTS idx_media_deleted_at ON media(deleted_at)"
+    );
     console.log("[MIGRATION] Media table created successfully");
 
     return { success: true };
@@ -2521,10 +2714,18 @@ export const updateNote = os.handler(async ({ input }) => {
   try {
     const db = await getDb();
     const updateData: Partial<typeof notes.$inferInsert> = {};
-    if (input.title !== undefined) updateData.title = input.title;
-    if (input.description !== undefined) updateData.description = input.description;
-    if (input.isCompleted !== undefined) updateData.isCompleted = input.isCompleted;
-    if (input.badges !== undefined) updateData.badges = JSON.stringify(input.badges);
+    if (input.title !== undefined) {
+      updateData.title = input.title;
+    }
+    if (input.description !== undefined) {
+      updateData.description = input.description;
+    }
+    if (input.isCompleted !== undefined) {
+      updateData.isCompleted = input.isCompleted;
+    }
+    if (input.badges !== undefined) {
+      updateData.badges = JSON.stringify(input.badges);
+    }
 
     const [updatedNote] = await db
       .update(notes)
@@ -2555,21 +2756,20 @@ export const deleteNote = os.handler(async ({ input }) => {
   }
 });
 
-import { gte, lte, and, isNull } from "drizzle-orm";
+import { getDateRangeParams } from "@@/lib/date-utils";
+import {
+  _addExportToHistory,
+  _deleteExportFromHistory,
+  _getExportHistory,
+} from "@@/lib/export-history";
+import { getCsvExtension, writeCsvToFile } from "@@/lib/exporters/csv-exporter";
+import {
+  getExcelExtension,
+  writeExcelToFile,
+} from "@@/lib/exporters/excel-exporter";
+import { and, gte, isNull, lte } from "drizzle-orm";
 import * as fs from "fs";
 import * as path from "path";
-import {
-  generateCsv,
-  writeCsvToFile,
-  getCsvExtension,
-} from "@@/lib/exporters/csv-exporter";
-import {
-  writeExcelToFile,
-  getExcelExtension,
-} from "@@/lib/exporters/excel-exporter";
-import { getDateRangeParams } from "@@/lib/date-utils";
-import { _getExportHistory, _addExportToHistory, _deleteExportFromHistory } from "@@/lib/export-history";
-import { randomUUID } from "node:crypto";
 
 // ============================================================
 // Export types and interfaces
@@ -2604,253 +2804,274 @@ export interface ExportPreview {
 // Export Preview - count records before export
 // ============================================================
 
-export const previewExport = os.handler(async ({ input }: { input: { types: ExportType[]; dateRange: DateRange } }) => {
-  try {
-    const db = await getDb();
-    const { types, dateRange } = input;
-    const params = getDateRangeParams(dateRange);
+export const previewExport = os.handler(
+  async ({
+    input,
+  }: {
+    input: { types: ExportType[]; dateRange: DateRange };
+  }) => {
+    try {
+      const db = await getDb();
+      const { types, dateRange } = input;
+      const params = getDateRangeParams(dateRange);
 
-    const preview: ExportPreview = {
-      employees: 0,
-      attachments: 0,
-      media: 0,
-      total: 0,
-    };
+      const preview: ExportPreview = {
+        employees: 0,
+        attachments: 0,
+        media: 0,
+        total: 0,
+      };
 
-    if (types.includes("employees")) {
-      if (!params.start || !params.end) {
-        // No date filter - count all
-        const result = await db
-          .select({ count: employees.id })
-          .from(employees)
-          .where(isNull(employees.deletedAt));
-        preview.employees = result.length;
-      } else {
-        // With date filter
-        const result = await db
-          .select({ count: employees.id })
-          .from(employees)
-          .where(
-            and(
-              isNull(employees.deletedAt),
-              gte(employees.createdAt, params.start.toISOString()),
-              lte(employees.createdAt, params.end.toISOString())
-            )
-          );
-        preview.employees = result.length;
+      if (types.includes("employees")) {
+        if (params.start && params.end) {
+          // With date filter
+          const result = await db
+            .select({ count: employees.id })
+            .from(employees)
+            .where(
+              and(
+                isNull(employees.deletedAt),
+                gte(employees.createdAt, params.start.toISOString()),
+                lte(employees.createdAt, params.end.toISOString())
+              )
+            );
+          preview.employees = result.length;
+        } else {
+          // No date filter - count all
+          const result = await db
+            .select({ count: employees.id })
+            .from(employees)
+            .where(isNull(employees.deletedAt));
+          preview.employees = result.length;
+        }
+        preview.total += preview.employees;
       }
-      preview.total += preview.employees;
-    }
 
-    if (types.includes("attachments")) {
-      if (!params.start || !params.end) {
-        const result = await db
-          .select({ count: attachments.id })
-          .from(attachments)
-          .where(isNull(attachments.deletedAt));
-        preview.attachments = result.length;
-      } else {
-        const result = await db
-          .select({ count: attachments.id })
-          .from(attachments)
-          .where(
-            and(
-              isNull(attachments.deletedAt),
-              gte(attachments.createdAt, params.start.toISOString()),
-              lte(attachments.createdAt, params.end.toISOString())
-            )
-          );
-        preview.attachments = result.length;
+      if (types.includes("attachments")) {
+        if (params.start && params.end) {
+          const result = await db
+            .select({ count: attachments.id })
+            .from(attachments)
+            .where(
+              and(
+                isNull(attachments.deletedAt),
+                gte(attachments.createdAt, params.start.toISOString()),
+                lte(attachments.createdAt, params.end.toISOString())
+              )
+            );
+          preview.attachments = result.length;
+        } else {
+          const result = await db
+            .select({ count: attachments.id })
+            .from(attachments)
+            .where(isNull(attachments.deletedAt));
+          preview.attachments = result.length;
+        }
+        preview.total += preview.attachments;
       }
-      preview.total += preview.attachments;
-    }
 
-    if (types.includes("media")) {
-      if (!params.start || !params.end) {
-        const result = await db
-          .select({ count: media.id })
-          .from(media)
-          .where(isNull(media.deletedAt));
-        preview.media = result.length;
-      } else {
-        const result = await db
-          .select({ count: media.id })
-          .from(media)
-          .where(
-            and(
-              isNull(media.deletedAt),
-              gte(media.createdAt, params.start.toISOString()),
-              lte(media.createdAt, params.end.toISOString())
-            )
-          );
-        preview.media = result.length;
+      if (types.includes("media")) {
+        if (params.start && params.end) {
+          const result = await db
+            .select({ count: media.id })
+            .from(media)
+            .where(
+              and(
+                isNull(media.deletedAt),
+                gte(media.createdAt, params.start.toISOString()),
+                lte(media.createdAt, params.end.toISOString())
+              )
+            );
+          preview.media = result.length;
+        } else {
+          const result = await db
+            .select({ count: media.id })
+            .from(media)
+            .where(isNull(media.deletedAt));
+          preview.media = result.length;
+        }
+        preview.total += preview.media;
       }
-      preview.total += preview.media;
-    }
 
-    return preview;
-  } catch (error) {
-    console.error("Error in previewExport:", error);
-    throw error;
+      return preview;
+    } catch (error) {
+      console.error("Error in previewExport:", error);
+      throw error;
+    }
   }
-});
+);
 
 // ============================================================
 // Export Data - generate and save export file
 // ============================================================
 
-export const exportData = os.handler(async ({ input }: { input: ExportOptions }) => {
-  try {
-    const { types, format, dateRange } = input;
+export const exportData = os.handler(
+  async ({ input }: { input: ExportOptions }) => {
+    try {
+      const { types, format, dateRange } = input;
 
-    if (!types || types.length === 0) {
-      return { success: false, error: "No export types selected", recordCount: 0 };
-    }
-
-    const db = await getDb();
-    const params = getDateRangeParams(dateRange);
-
-    // Get data based on selected types
-    const data: Record<string, unknown[]> = {};
-    let totalRecords = 0;
-
-    if (types.includes("employees")) {
-      if (!params.start || !params.end) {
-        data.employees = await db
-          .select()
-          .from(employees)
-          .where(isNull(employees.deletedAt));
-      } else {
-        data.employees = await db
-          .select()
-          .from(employees)
-          .where(
-            and(
-              isNull(employees.deletedAt),
-              gte(employees.createdAt, params.start.toISOString()),
-              lte(employees.createdAt, params.end.toISOString())
-            )
-          );
+      if (!types || types.length === 0) {
+        return {
+          success: false,
+          error: "No export types selected",
+          recordCount: 0,
+        };
       }
-      totalRecords += data.employees.length;
-    }
 
-    if (types.includes("attachments")) {
-      if (!params.start || !params.end) {
-        data.attachments = await db
-          .select()
-          .from(attachments)
-          .where(isNull(attachments.deletedAt));
-      } else {
-        data.attachments = await db
-          .select()
-          .from(attachments)
-          .where(
-            and(
-              isNull(attachments.deletedAt),
-              gte(attachments.createdAt, params.start.toISOString()),
-              lte(attachments.createdAt, params.end.toISOString())
-            )
-          );
+      const db = await getDb();
+      const params = getDateRangeParams(dateRange);
+
+      // Get data based on selected types
+      const data: Record<string, unknown[]> = {};
+      let totalRecords = 0;
+
+      if (types.includes("employees")) {
+        if (params.start && params.end) {
+          data.employees = await db
+            .select()
+            .from(employees)
+            .where(
+              and(
+                isNull(employees.deletedAt),
+                gte(employees.createdAt, params.start.toISOString()),
+                lte(employees.createdAt, params.end.toISOString())
+              )
+            );
+        } else {
+          data.employees = await db
+            .select()
+            .from(employees)
+            .where(isNull(employees.deletedAt));
+        }
+        totalRecords += data.employees.length;
       }
-      totalRecords += data.attachments.length;
-    }
 
-    if (types.includes("media")) {
-      if (!params.start || !params.end) {
-        data.media = await db
-          .select()
-          .from(media)
-          .where(isNull(media.deletedAt));
-      } else {
-        data.media = await db
-          .select()
-          .from(media)
-          .where(
-            and(
-              isNull(media.deletedAt),
-              gte(media.createdAt, params.start.toISOString()),
-              lte(media.createdAt, params.end.toISOString())
-            )
-          );
+      if (types.includes("attachments")) {
+        if (params.start && params.end) {
+          data.attachments = await db
+            .select()
+            .from(attachments)
+            .where(
+              and(
+                isNull(attachments.deletedAt),
+                gte(attachments.createdAt, params.start.toISOString()),
+                lte(attachments.createdAt, params.end.toISOString())
+              )
+            );
+        } else {
+          data.attachments = await db
+            .select()
+            .from(attachments)
+            .where(isNull(attachments.deletedAt));
+        }
+        totalRecords += data.attachments.length;
       }
-      totalRecords += data.media.length;
+
+      if (types.includes("media")) {
+        if (params.start && params.end) {
+          data.media = await db
+            .select()
+            .from(media)
+            .where(
+              and(
+                isNull(media.deletedAt),
+                gte(media.createdAt, params.start.toISOString()),
+                lte(media.createdAt, params.end.toISOString())
+              )
+            );
+        } else {
+          data.media = await db
+            .select()
+            .from(media)
+            .where(isNull(media.deletedAt));
+        }
+        totalRecords += data.media.length;
+      }
+
+      // Get export directory - use directory next to executable for network shared storage
+      const exportDir = path.join(getDataDir(), "exports");
+
+      // Create directory if it doesn't exist
+      if (!fs.existsSync(exportDir)) {
+        fs.mkdirSync(exportDir, { recursive: true });
+      }
+
+      // Generate filename
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .slice(0, 19);
+      const isMultiType = types.length > 1;
+
+      let filePath: string;
+      let extension: string;
+
+      if (format === "csv") {
+        extension = getCsvExtension(isMultiType);
+        filePath = path.join(exportDir, `export-${timestamp}.${extension}`);
+        await writeCsvToFile(data, filePath, isMultiType);
+      } else if (format === "xlsx") {
+        extension = getExcelExtension();
+        filePath = path.join(exportDir, `export-${timestamp}.${extension}`);
+        await writeExcelToFile(data, filePath);
+      } else {
+        return {
+          success: false,
+          error: "Invalid export format",
+          recordCount: 0,
+        };
+      }
+
+      // Save to history
+      await _addExportToHistory({
+        types,
+        format,
+        recordCount: totalRecords,
+        filePath,
+      });
+
+      return { success: true, filePath, recordCount: totalRecords };
+    } catch (error) {
+      console.error("Error in exportData:", error);
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { success: false, error: message, recordCount: 0 };
     }
-
-    // Get export directory - use directory next to executable for network shared storage
-    const inDevelopment = process.env.NODE_ENV === "development";
-    const baseDir = inDevelopment ? process.cwd() : path.dirname(process.execPath);
-    const exportDir = path.join(baseDir, "exports");
-
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(exportDir)) {
-      fs.mkdirSync(exportDir, { recursive: true });
-    }
-
-    // Generate filename
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-    const isMultiType = types.length > 1;
-
-    let filePath: string;
-    let extension: string;
-
-    if (format === "csv") {
-      extension = getCsvExtension(isMultiType);
-      filePath = path.join(exportDir, `export-${timestamp}.${extension}`);
-      await writeCsvToFile(data, filePath, isMultiType);
-    } else if (format === "xlsx") {
-      extension = getExcelExtension();
-      filePath = path.join(exportDir, `export-${timestamp}.${extension}`);
-      await writeExcelToFile(data, filePath);
-    } else {
-      return { success: false, error: "Invalid export format", recordCount: 0 };
-    }
-
-    // Save to history
-    await _addExportToHistory({
-      types,
-      format,
-      recordCount: totalRecords,
-      filePath,
-    });
-
-    return { success: true, filePath, recordCount: totalRecords };
-  } catch (error) {
-    console.error("Error in exportData:", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return { success: false, error: message, recordCount: 0 };
   }
-});
+);
 
 // ============================================================
 // Open exported file
 // ============================================================
 
-export const openExportedFile = os.handler(async ({ input }: { input: { filePath: string } }) => {
-  try {
-    const { shell } = await import("electron");
-    await shell.openPath(input.filePath);
-    return { success: true };
-  } catch (error) {
-    console.error("Error in openExportedFile:", error);
-    throw error;
+export const openExportedFile = os.handler(
+  async ({ input }: { input: { filePath: string } }) => {
+    try {
+      const { shell } = await import("electron");
+      await shell.openPath(input.filePath);
+      return { success: true };
+    } catch (error) {
+      console.error("Error in openExportedFile:", error);
+      throw error;
+    }
   }
-});
+);
 
 // ============================================================
 // Open export folder
 // ============================================================
 
-export const openExportFolder = os.handler(async ({ input }: { input: { filePath: string } }) => {
-  try {
-    const { shell } = await import("electron");
-    shell.showItemInFolder(input.filePath);
-    return { success: true };
-  } catch (error) {
-    console.error("Error in openExportFolder:", error);
-    throw error;
+export const openExportFolder = os.handler(
+  async ({ input }: { input: { filePath: string } }) => {
+    try {
+      const { shell } = await import("electron");
+      shell.showItemInFolder(input.filePath);
+      return { success: true };
+    } catch (error) {
+      console.error("Error in openExportFolder:", error);
+      throw error;
+    }
   }
-});
+);
 
 // Re-export export history handlers as ORPC handlers
 export const getExportHistory = os.handler(async () => {

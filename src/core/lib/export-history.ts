@@ -1,7 +1,7 @@
 import { os } from "@orpc/server";
-import { app } from "electron";
 import * as fs from "fs";
 import * as path from "path";
+import { getDataDir } from "@@/db";
 
 export type ExportType = "employees" | "attachments" | "media";
 export type ExportFormat = "csv" | "xlsx" | "pdf";
@@ -16,8 +16,8 @@ export interface ExportHistoryRecord {
 }
 
 export const getHistoryPath = (): string => {
-  const userDataPath = app.getPath("userData");
-  return path.join(userDataPath, "exports-history.json");
+  // Use data directory next to executable for portable storage
+  return path.join(getDataDir(), "exports-history.json");
 };
 
 export const loadHistory = (): ExportHistoryRecord[] => {
@@ -52,7 +52,16 @@ export const getExportHistory = os.handler(async () => {
 });
 
 export const addExportToHistory = os.handler(
-  async ({ input }: { input: { types: ExportType[]; format: ExportFormat; recordCount: number; filePath: string } }) => {
+  async ({
+    input,
+  }: {
+    input: {
+      types: ExportType[];
+      format: ExportFormat;
+      recordCount: number;
+      filePath: string;
+    };
+  }) => {
     const history = loadHistory();
 
     const record: ExportHistoryRecord = {

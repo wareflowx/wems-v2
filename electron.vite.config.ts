@@ -8,6 +8,7 @@ export default defineConfig({
     resolve: {
       alias: {
         "@": resolve(import.meta.dirname, "src"),
+        "@@": resolve(import.meta.dirname, "src/core"),
       },
     },
     build: {
@@ -20,6 +21,7 @@ export default defineConfig({
     resolve: {
       alias: {
         "@": resolve(import.meta.dirname, "src"),
+        "@@": resolve(import.meta.dirname, "src/core"),
       },
     },
     build: {

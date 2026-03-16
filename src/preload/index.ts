@@ -11,6 +11,9 @@ import { IPC_CHANNELS } from "../core/constants";
 const lockCallbacks: ((writeMode: boolean) => void)[] = [];
 let lastWriteMode: boolean | null = null;
 
+// Store for update status
+const updateCallbacks: ((status: string) => void)[] = [];
+
 // ============================================
 // SYSTEM - Window Controls (always available)
 // ============================================
@@ -42,6 +45,13 @@ contextBridge.exposeInMainWorld("electron", {
       callback(lastWriteMode);
     }
   },
+
+  // ============================================
+  // UPDATE STATUS - Event-based updates
+  // ============================================
+  onUpdateStatusChanged: (callback: (status: string) => void) => {
+    updateCallbacks.push(callback);
+  },
 });
 
 // Listen for lock status changes from main
@@ -52,6 +62,12 @@ ipcRenderer.on(
     lockCallbacks.forEach((cb) => cb(writeMode));
   }
 );
+
+// Listen for update status changes from main
+ipcRenderer.on(IPC_CHANNELS.UPDATE_STATUS, (_event, data: { status: string }) => {
+  console.log("[PRELOAD] Update status received:", data.status);
+  updateCallbacks.forEach((cb) => cb(data.status));
+});
 
 // Listen for MAIN_READY and forward to renderer via postMessage
 // This ensures renderer initializes IPC only after preload is ready

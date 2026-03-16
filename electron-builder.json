@@ -15,14 +15,7 @@
   "asar": true,
   "asarUnpack": ["node_modules/better-sqlite3/**"],
   "win": {
-    "target": ["nsis"],
+    "target": ["portable"],
     "icon": "build/icon.ico"
-  },
-  "nsis": {
-    "oneClick": false,
-    "allowToChangeInstallationDirectory": true,
-    "perMachine": false,
-    "createDesktopShortcut": true,
-    "createStartMenuShortcut": true
   }
 }

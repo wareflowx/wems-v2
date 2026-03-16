@@ -1,9 +1,8 @@
+import { Lock } from "@@/lib/lock";
+import { isSuccess } from "@@/lib/result";
 import path from "node:path";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { app } from "electron";
-import { Lock } from "@/core/lib/lock";
-import { isSuccess } from "@/core/lib/result";
 
 // Lazy database initialization to avoid Vite bundling issues with native modules
 let db: ReturnType<typeof drizzle> | null = null;

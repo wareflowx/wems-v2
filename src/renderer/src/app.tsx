@@ -6,11 +6,12 @@ import { RouterProvider } from "@tanstack/react-router";
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { useTranslation } from "react-i18next";
+import { migrateAddNotesTable } from "@/actions/database";
 import { updateAppLanguage } from "@/actions/language";
 import { syncWithLocalTheme } from "@/actions/theme";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { UpdateStatusDialog } from "@/components/update-status-dialog";
 import { router } from "./utils/routes";
-import { migrateAddNotesTable } from "@/actions/database";
 import "./localization/i18n";
 
 // Track if initial migration has been run
@@ -71,6 +72,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <UpdateStatusDialog />
         <RouterProvider router={router} />
       </TooltipProvider>
       {process.env.NODE_ENV === "development" && (

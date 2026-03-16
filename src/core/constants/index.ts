@@ -16,4 +16,6 @@ export const IPC_CHANNELS = {
   GET_WRITE_MODE: "get-write-mode",
   // Lock status
   LOCK_STATUS_CHANGED: "lock-status-changed",
+  // Update status
+  UPDATE_STATUS: "update-status",
 } as const;

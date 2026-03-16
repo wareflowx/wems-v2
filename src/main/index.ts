@@ -1,11 +1,11 @@
+import { ipcContext } from "@@/ipc/context";
+import { Lock } from "@@/lib/lock";
+import { configure, logger } from "@@/lib/logger";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow } from "electron";
 import { ipcMain, MessageChannelMain } from "electron/main";
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
-import { ipcContext } from "@/core/ipc/context";
-import { Lock } from "@/core/lib/lock";
-import { configure, logger } from "@/core/lib/logger";
 import { IPC_CHANNELS } from "../core/constants";
 import {
   getDb,
@@ -72,12 +72,23 @@ async function installExtensions() {
 }
 
 function checkForUpdates() {
+  // Notify renderer that update check is starting
+  mainWindow?.webContents.send(IPC_CHANNELS.UPDATE_STATUS, { status: "checking" });
+
   updateElectronApp({
     updateSource: {
       type: UpdateSourceType.ElectronPublicUpdateService,
       repo: "wareflowx/wems-v2",
     },
-  });
+  })
+    .then(() => {
+      mainWindow?.webContents.send(IPC_CHANNELS.UPDATE_STATUS, { status: "up-to-date" });
+    })
+    .catch((error) => {
+      // Don't show error to user - just log it
+      console.log("Update check complete:", error?.message || "no update available");
+      mainWindow?.webContents.send(IPC_CHANNELS.UPDATE_STATUS, { status: "up-to-date" });
+    });
 }
 
 async function setupORPC() {

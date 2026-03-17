@@ -20,7 +20,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AddDocumentDialog } from "@/components/documents/AddDocumentDialog";
 import { DeleteDocumentDialog } from "@/components/documents/DeleteDocumentDialog";

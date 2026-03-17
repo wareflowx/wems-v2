@@ -1,7 +1,13 @@
 "use client";
 
-import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "cmdk";
 import {
   AlertTriangle,
   Briefcase,
@@ -20,7 +26,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "cmdk";
+import * as React from "react";
 import { useDialogStore } from "@/stores/dialog-store";
 
 interface QuickAction {
@@ -212,17 +218,16 @@ export function QuickActionsDialog({
     },
   ];
 
-  const groupedActions = quickActions.reduce<{ heading?: string; items: QuickAction[] }[]>(
-    (acc, item) => {
-      if ("heading" in item && item.heading) {
-        acc.push({ heading: item.heading, items: [] });
-      } else if (acc.length > 0) {
-        acc[acc.length - 1].items.push(item);
-      }
-      return acc;
-    },
-    []
-  );
+  const groupedActions = quickActions.reduce<
+    { heading?: string; items: QuickAction[] }[]
+  >((acc, item) => {
+    if ("heading" in item && item.heading) {
+      acc.push({ heading: item.heading, items: [] });
+    } else if (acc.length > 0) {
+      acc[acc.length - 1].items.push(item);
+    }
+    return acc;
+  }, []);
 
   const handleCommandSelect = (callback: () => void) => {
     callback();
@@ -232,7 +237,9 @@ export function QuickActionsDialog({
   const [searchValue, setSearchValue] = React.useState("");
 
   const filteredGroups = React.useMemo(() => {
-    if (!searchValue) return groupedActions;
+    if (!searchValue) {
+      return groupedActions;
+    }
 
     const searchLower = searchValue.toLowerCase();
     return groupedActions
@@ -247,7 +254,9 @@ export function QuickActionsDialog({
       .filter((group) => group.items.length > 0);
   }, [groupedActions, searchValue]);
 
-  if (!open) return null;
+  if (!open) {
+    return null;
+  }
 
   const flatItems = filteredGroups.flatMap((group) =>
     group.items.map((item) => ({
@@ -260,23 +269,26 @@ export function QuickActionsDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
-      <div className="fixed inset-0 bg-black/50" onClick={() => onOpenChange(false)} />
+      <div
+        className="fixed inset-0 bg-black/50"
+        onClick={() => onOpenChange(false)}
+      />
       <Command className="relative z-10 w-full max-w-[500px] overflow-hidden rounded-xl border border-border/50 bg-background shadow-2xl">
-        <div className="flex items-center border-b border-border/50 px-3 py-2">
+        <div className="flex items-center border-border/50 border-b px-3 py-2">
           <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
           <Command.Input
+            autoFocus
             className="flex h-8 w-full rounded-md bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            onValueChange={setSearchValue}
             placeholder="Search actions..."
             value={searchValue}
-            onValueChange={setSearchValue}
-            autoFocus
           />
-          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-medium font-mono text-[10px] text-muted-foreground opacity-100">
             ESC
           </kbd>
         </div>
         <CommandList className="max-h-[320px] overflow-y-auto p-1">
-          <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
+          <CommandEmpty className="py-6 text-center text-muted-foreground text-sm">
             No actions found.
           </CommandEmpty>
           <CommandGroup>
@@ -286,7 +298,7 @@ export function QuickActionsDialog({
               return (
                 <React.Fragment key={item.id}>
                   {showSeparator && item.groupHeading && (
-                    <div className="text-xs font-medium text-muted-foreground px-2 py-1.5">
+                    <div className="px-2 py-1.5 font-medium text-muted-foreground text-xs">
                       {item.groupHeading}
                     </div>
                   )}
@@ -294,10 +306,12 @@ export function QuickActionsDialog({
                     className="flex cursor-default items-center gap-2 rounded-md px-2 py-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
                     onSelect={() => handleCommandSelect(item.action)}
                   >
-                    {item.icon && <item.icon className="h-4 w-4 text-muted-foreground" />}
+                    {item.icon && (
+                      <item.icon className="h-4 w-4 text-muted-foreground" />
+                    )}
                     <span className="flex-1">{item.title}</span>
                     {item.shortcut && (
-                      <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                      <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-medium font-mono text-[10px] text-muted-foreground opacity-100">
                         {item.shortcut}
                       </kbd>
                     )}

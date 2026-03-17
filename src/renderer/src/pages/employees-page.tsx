@@ -1,4 +1,3 @@
-import type { Employee } from "@@/db/schema/employees";
 import { useQueryClient } from "@tanstack/react-query";
 import { Edit, Filter, Sparkles, UserPlus, Users } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -13,9 +12,9 @@ import { EmployeesTable } from "@/components/employees/employees-table";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
-import { Button } from "@/components/ui/button";
 import {
   useAgencies,
+  useAllDrivingAuthorizationStatuses,
   useContracts,
   useCreateEmployee,
   useDeleteEmployee,
@@ -24,7 +23,6 @@ import {
   usePositions,
   useUpdateEmployee,
   useWorkLocations,
-  useAllDrivingAuthorizationStatuses,
 } from "@/hooks";
 
 export function EmployeesPage() {
@@ -55,7 +53,7 @@ export function EmployeesPage() {
   const authorizationStatuses = useMemo(() => {
     const map = new Map<
       number,
-      import("@/core/lib/driving-authorization").DrivingAuthorizationStatusResult
+      import("@@/lib/driving-authorization").DrivingAuthorizationStatusResult
     >();
     for (const item of authorizationStatusesData) {
       map.set(item.employeeId, item.status);
@@ -147,7 +145,7 @@ export function EmployeesPage() {
         <ErrorDisplay
           message={t(
             "employees.errorLoadingMessage",
-            "Make sure the application is running correctly. If the problem persists, please restart.",
+            "Make sure the application is running correctly. If the problem persists, please restart."
           )}
           onRetry={() =>
             queryClient.invalidateQueries({ queryKey: ["employees"] })
@@ -180,8 +178,7 @@ export function EmployeesPage() {
                 title: t("employees.active"),
                 value: kpis.activeEmployees,
                 description: `${(
-                  (kpis.activeEmployees / kpis.totalEmployees) *
-                  100
+                  (kpis.activeEmployees / kpis.totalEmployees) * 100
                 ).toFixed(0)}${t("common.ofTotal")}`,
                 icon: <Edit className="h-4 w-4" />,
               },
@@ -189,8 +186,7 @@ export function EmployeesPage() {
                 title: t("employees.onLeave"),
                 value: kpis.onLeaveEmployees,
                 description: `${(
-                  (kpis.onLeaveEmployees / kpis.totalEmployees) *
-                  100
+                  (kpis.onLeaveEmployees / kpis.totalEmployees) * 100
                 ).toFixed(0)}${t("common.ofTotal")}`,
                 icon: <Filter className="h-4 w-4" />,
               },
@@ -235,16 +231,16 @@ export function EmployeesPage() {
         open={isDeleteDialogOpen}
       />
       <EditEmployeeDialog
-        employee={employeeToEdit}
+        agencies={agencies}
         contract={
           employeeToEdit
             ? contracts.find(
-                (c: any) => c.employeeId === employeeToEdit.id && c.isActive,
+                (c: any) => c.employeeId === employeeToEdit.id && c.isActive
               )
             : undefined
         }
         departments={departments}
-        agencies={agencies}
+        employee={employeeToEdit}
         onEdit={handleEditSubmit}
         onOpenChange={(open) => !open && setEmployeeToEdit(null)}
         open={!!employeeToEdit}

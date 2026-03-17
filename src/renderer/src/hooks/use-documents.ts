@@ -41,25 +41,41 @@ export interface DocumentFilters {
 
 // Convert bytes to human-readable size
 function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return bytes + " B";
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  if (bytes < 1024) {
+    return bytes + " B";
+  }
+  if (bytes < 1024 * 1024) {
+    return (bytes / 1024).toFixed(1) + " KB";
+  }
   return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
 
 // Get category from mime type
 function getCategoryFromMimeType(mimeType: string): string {
-  if (mimeType === "application/pdf") return "pdf";
-  if (mimeType.startsWith("image/")) return "image";
-  if (mimeType.startsWith("video/")) return "video";
-  if (mimeType.startsWith("audio/")) return "audio";
+  if (mimeType === "application/pdf") {
+    return "pdf";
+  }
+  if (mimeType.startsWith("image/")) {
+    return "image";
+  }
+  if (mimeType.startsWith("video/")) {
+    return "video";
+  }
+  if (mimeType.startsWith("audio/")) {
+    return "audio";
+  }
   return "document";
 }
 
 // Get type from original name or mime type
 function getDocumentType(originalName: string): string {
   const ext = originalName.split(".").pop()?.toLowerCase();
-  if (ext === "pdf") return "Contrat";
-  if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext || "")) return "Identification";
+  if (ext === "pdf") {
+    return "Contrat";
+  }
+  if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext || "")) {
+    return "Identification";
+  }
   return "Document";
 }
 
@@ -86,7 +102,10 @@ function enrichDocumentsWithEmployee(
 }
 
 // Filter documents based on filters
-function filterDocuments(documents: Document[], filters?: DocumentFilters): Document[] {
+function filterDocuments(
+  documents: Document[],
+  filters?: DocumentFilters
+): Document[] {
   let filtered = [...documents];
 
   if (filters?.search) {
@@ -125,7 +144,10 @@ export function useDocuments(filters?: DocumentFilters) {
         db.getAttachmentsByType("document"),
         db.getEmployees(),
       ]);
-      const enriched = enrichDocumentsWithEmployee(attachmentsData, employeesData);
+      const enriched = enrichDocumentsWithEmployee(
+        attachmentsData,
+        employeesData
+      );
       return filterDocuments(enriched, filters);
     },
     enabled: orpcReady,
@@ -144,7 +166,9 @@ export function useDocument(id: string) {
         db.getEmployees(),
       ]);
       const attachment = attachmentsData.find((a) => a.id === id);
-      if (!attachment) return null;
+      if (!attachment) {
+        return null;
+      }
       const enriched = enrichDocumentsWithEmployee([attachment], employeesData);
       return enriched[0];
     },

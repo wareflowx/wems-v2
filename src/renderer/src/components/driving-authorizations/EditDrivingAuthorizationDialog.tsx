@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +44,18 @@ interface EditDrivingAuthorizationDialogProps {
   } | null;
 }
 
-const LICENSE_CATEGORIES = ["B", "C", "D", "BE", "CE", "DE", "C1", "C1E", "D1", "D1E"];
+const LICENSE_CATEGORIES = [
+  "B",
+  "C",
+  "D",
+  "BE",
+  "CE",
+  "DE",
+  "C1",
+  "C1E",
+  "D1",
+  "D1E",
+];
 
 export function EditDrivingAuthorizationDialog({
   open,
@@ -67,7 +78,9 @@ export function EditDrivingAuthorizationDialog({
   }, [authorization]);
 
   const handleSubmit = () => {
-    if (!authorization) return;
+    if (!authorization) {
+      return;
+    }
     onEdit?.({
       id: authorization.id,
       licenseCategory,
@@ -88,7 +101,7 @@ export function EditDrivingAuthorizationDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{t("drivingAuthorizations.edit")}</DialogTitle>
@@ -98,10 +111,14 @@ export function EditDrivingAuthorizationDialog({
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="category">{t("drivingAuthorizations.category")}</Label>
-            <Select value={licenseCategory} onValueChange={setLicenseCategory}>
+            <Label htmlFor="category">
+              {t("drivingAuthorizations.category")}
+            </Label>
+            <Select onValueChange={setLicenseCategory} value={licenseCategory}>
               <SelectTrigger>
-                <SelectValue placeholder={t("drivingAuthorizations.selectCategory")} />
+                <SelectValue
+                  placeholder={t("drivingAuthorizations.selectCategory")}
+                />
               </SelectTrigger>
               <SelectContent>
                 {LICENSE_CATEGORIES.map((cat) => (
@@ -113,29 +130,33 @@ export function EditDrivingAuthorizationDialog({
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="dateObtained">{t("drivingAuthorizations.dateObtained")}</Label>
+            <Label htmlFor="dateObtained">
+              {t("drivingAuthorizations.dateObtained")}
+            </Label>
             <Input
               id="dateObtained"
+              onChange={(e) => setDateObtained(e.target.value)}
               type="date"
               value={dateObtained}
-              onChange={(e) => setDateObtained(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="expirationDate">{t("drivingAuthorizations.expirationDate")}</Label>
+            <Label htmlFor="expirationDate">
+              {t("drivingAuthorizations.expirationDate")}
+            </Label>
             <Input
               id="expirationDate"
+              onChange={(e) => setExpirationDate(e.target.value)}
               type="date"
               value={expirationDate}
-              onChange={(e) => setExpirationDate(e.target.value)}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>
+          <Button onClick={() => handleOpenChange(false)} variant="outline">
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!isFormValid}>
+          <Button disabled={!isFormValid} onClick={handleSubmit}>
             {t("common.save")}
           </Button>
         </DialogFooter>

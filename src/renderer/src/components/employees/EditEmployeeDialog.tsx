@@ -211,28 +211,32 @@ export function EditEmployeeDialog({
         <div className="space-y-4 py-2">
           {/* Personal Info Section */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <div className="flex items-center gap-2 font-medium text-muted-foreground text-sm">
               <User className="h-4 w-4" />
               {t("employeeDetail.personalInfo")}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="firstName">{t("employeeDetail.firstName")} *</Label>
+                <Label htmlFor="firstName">
+                  {t("employeeDetail.firstName")} *
+                </Label>
                 <Input
                   id="firstName"
-                  value={formData.firstName}
                   onChange={(e) => updateFormData("firstName", e.target.value)}
                   placeholder={t("employeeDetail.firstName")}
+                  value={formData.firstName}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">{t("employeeDetail.lastName")} *</Label>
+                <Label htmlFor="lastName">
+                  {t("employeeDetail.lastName")} *
+                </Label>
                 <Input
                   id="lastName"
-                  value={formData.lastName}
                   onChange={(e) => updateFormData("lastName", e.target.value)}
                   placeholder={t("employeeDetail.lastName")}
+                  value={formData.lastName}
                 />
               </div>
             </div>
@@ -241,10 +245,10 @@ export function EditEmployeeDialog({
               <Label htmlFor="email">{t("employeeDetail.email")} *</Label>
               <Input
                 id="email"
-                type="email"
-                value={formData.email}
                 onChange={(e) => updateFormData("email", e.target.value)}
                 placeholder={t("employeeDetail.email")}
+                type="email"
+                value={formData.email}
               />
             </div>
 
@@ -252,17 +256,17 @@ export function EditEmployeeDialog({
               <Label htmlFor="phone">{t("employeeDetail.phone")}</Label>
               <Input
                 id="phone"
-                type="tel"
-                value={formData.phone}
                 onChange={(e) => updateFormData("phone", e.target.value)}
                 placeholder={t("employeeDetail.phone")}
+                type="tel"
+                value={formData.phone}
               />
             </div>
           </div>
 
           {/* Professional Info Section */}
           <div className="space-y-3 pt-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <div className="flex items-center gap-2 font-medium text-muted-foreground text-sm">
               <Briefcase className="h-4 w-4" />
               {t("employeeDetail.jobAndContract")}
             </div>
@@ -270,18 +274,27 @@ export function EditEmployeeDialog({
             <div className="space-y-2">
               <Label htmlFor="status">{t("employeeDetail.status")}</Label>
               <Select
-                value={formData.status}
                 onValueChange={(value) =>
-                  updateFormData("status", value as "active" | "on_leave" | "terminated")
+                  updateFormData(
+                    "status",
+                    value as "active" | "on_leave" | "terminated"
+                  )
                 }
+                value={formData.status}
               >
                 <SelectTrigger id="status">
                   <SelectValue placeholder={t("employeeDetail.status")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">{t("employeeDetail.statusActive")}</SelectItem>
-                  <SelectItem value="on_leave">{t("employeeDetail.statusOnLeave")}</SelectItem>
-                  <SelectItem value="terminated">{t("employeeDetail.statusTerminated")}</SelectItem>
+                  <SelectItem value="active">
+                    {t("employeeDetail.statusActive")}
+                  </SelectItem>
+                  <SelectItem value="on_leave">
+                    {t("employeeDetail.statusOnLeave")}
+                  </SelectItem>
+                  <SelectItem value="terminated">
+                    {t("employeeDetail.statusTerminated")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -289,13 +302,18 @@ export function EditEmployeeDialog({
             <div className="space-y-2">
               <Label htmlFor="position">{t("employeeDetail.position")}</Label>
               <Select
-                value={formData.positionId?.toString() || ""}
                 onValueChange={(value) =>
-                  updateFormData("positionId", value ? parseInt(value) : undefined)
+                  updateFormData(
+                    "positionId",
+                    value ? Number.parseInt(value) : undefined
+                  )
                 }
+                value={formData.positionId?.toString() || ""}
               >
                 <SelectTrigger id="position">
-                  <SelectValue placeholder={t("employeeDetail.selectPosition")} />
+                  <SelectValue
+                    placeholder={t("employeeDetail.selectPosition")}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {positions.map((pos) => (
@@ -308,15 +326,22 @@ export function EditEmployeeDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="workLocation">{t("employeeDetail.workLocation")}</Label>
+              <Label htmlFor="workLocation">
+                {t("employeeDetail.workLocation")}
+              </Label>
               <Select
-                value={formData.workLocationId?.toString() || ""}
                 onValueChange={(value) =>
-                  updateFormData("workLocationId", value ? parseInt(value) : undefined)
+                  updateFormData(
+                    "workLocationId",
+                    value ? Number.parseInt(value) : undefined
+                  )
                 }
+                value={formData.workLocationId?.toString() || ""}
               >
                 <SelectTrigger id="workLocation">
-                  <SelectValue placeholder={t("employeeDetail.selectWorkLocation")} />
+                  <SelectValue
+                    placeholder={t("employeeDetail.selectWorkLocation")}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {workLocations.map((loc) => (
@@ -331,13 +356,13 @@ export function EditEmployeeDialog({
             <div className="space-y-2">
               <Label htmlFor="agency">{t("employees.agency")}</Label>
               <Select
-                value={formData.agencyId?.toString() || ""}
                 onValueChange={(value) =>
                   updateFormData(
                     "agencyId",
                     value ? Number.parseInt(value, 10) : null
                   )
                 }
+                value={formData.agencyId?.toString() || ""}
               >
                 <SelectTrigger id="agency">
                   <SelectValue placeholder={t("employees.selectAgency")} />
@@ -360,13 +385,17 @@ export function EditEmployeeDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="department">{t("employeeDetail.department")}</Label>
+              <Label htmlFor="department">
+                {t("employeeDetail.department")}
+              </Label>
               <Select
-                value={formData.department || ""}
                 onValueChange={(value) => updateFormData("department", value)}
+                value={formData.department || ""}
               >
                 <SelectTrigger id="department">
-                  <SelectValue placeholder={t("employeeDetail.selectDepartment")} />
+                  <SelectValue
+                    placeholder={t("employeeDetail.selectDepartment")}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {departments.map((dept) => (
@@ -380,12 +409,14 @@ export function EditEmployeeDialog({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="hireDate">{t("employeeDetail.hireDate")} *</Label>
+                <Label htmlFor="hireDate">
+                  {t("employeeDetail.hireDate")} *
+                </Label>
                 <Input
                   id="hireDate"
+                  onChange={(e) => updateFormData("hireDate", e.target.value)}
                   type="date"
                   value={formData.hireDate}
-                  onChange={(e) => updateFormData("hireDate", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -394,11 +425,14 @@ export function EditEmployeeDialog({
                 </Label>
                 <Input
                   id="terminationDate"
+                  onChange={(e) =>
+                    updateFormData(
+                      "terminationDate",
+                      e.target.value || undefined
+                    )
+                  }
                   type="date"
                   value={formData.terminationDate}
-                  onChange={(e) =>
-                    updateFormData("terminationDate", e.target.value || undefined)
-                  }
                 />
               </div>
             </div>

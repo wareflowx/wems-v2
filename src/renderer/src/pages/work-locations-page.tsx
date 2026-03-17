@@ -1,9 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Edit, Plus, Search, Sparkles, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 import { AnimatedEmpty } from "@/components/ui/animated-empty";
+import { Button } from "@/components/ui/button";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { Input } from "@/components/ui/input";
 import { MetricsSection } from "@/components/ui/metrics-section";
@@ -219,16 +219,22 @@ export function WorkLocationsPage() {
             {filteredLocations.length === 0 ? (
               <div className="flex w-full items-center justify-center">
                 <AnimatedEmpty
-                  title={t("workLocations.noWorkLocations", "No work locations yet")}
+                  action={{
+                    label: t(
+                      "workLocations.addWorkLocation",
+                      "Add Work Location"
+                    ),
+                    onClick: () => setIsCreateDialogOpen(true),
+                  }}
                   description={t(
                     "workLocations.noWorkLocationsDescription",
                     "Create your first work location to get started"
                   )}
                   icons={[Sparkles, Sparkles, Sparkles]}
-                  action={{
-                    label: t("workLocations.addWorkLocation", "Add Work Location"),
-                    onClick: () => setIsCreateDialogOpen(true),
-                  }}
+                  title={t(
+                    "workLocations.noWorkLocations",
+                    "No work locations yet"
+                  )}
                 />
               </div>
             ) : (
@@ -242,9 +248,7 @@ export function WorkLocationsPage() {
                       <TableHead className="px-4">
                         {t("workLocations.name")}
                       </TableHead>
-                      <TableHead className="px-4">
-                        Color
-                      </TableHead>
+                      <TableHead className="px-4">Color</TableHead>
                       <TableHead className="px-4">
                         {t("workLocations.status")}
                       </TableHead>
@@ -266,7 +270,9 @@ export function WorkLocationsPage() {
                         </TableCell>
                         <TableCell className="px-4">
                           <span className="inline-flex items-center rounded-md border border-border bg-muted/50 px-2 py-0.5 font-medium text-xs">
-                            <span className={`mr-1.5 h-2 w-2 rounded-full ${location.color}`} />
+                            <span
+                              className={`mr-1.5 h-2 w-2 rounded-full ${location.color}`}
+                            />
                             {getColorName(location.color)}
                           </span>
                         </TableCell>

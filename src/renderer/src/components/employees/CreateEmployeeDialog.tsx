@@ -402,9 +402,7 @@ export function CreateEmployeeDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="agency">
-                    {t("employees.agency")}
-                  </Label>
+                  <Label htmlFor="agency">{t("employees.agency")}</Label>
                   <Select
                     onValueChange={(value) =>
                       updateFormData(

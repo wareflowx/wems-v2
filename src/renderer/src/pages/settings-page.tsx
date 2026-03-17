@@ -1,8 +1,13 @@
 import { useState } from "react";
-import { Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -42,26 +47,29 @@ export function SettingsPage() {
     key: string,
     value: boolean | number | string
   ) => {
-    updateSettings.mutate({ [key]: value }, {
-      onError: () => {
-        toast({
-          title: "Failed to save",
-          description: "Could not save settings. Please try again.",
-          variant: "destructive",
-        });
-      },
-    });
+    updateSettings.mutate(
+      { [key]: value },
+      {
+        onError: () => {
+          toast({
+            title: "Failed to save",
+            description: "Could not save settings. Please try again.",
+            variant: "destructive",
+          });
+        },
+      }
+    );
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-4 ">
+    <div className="flex flex-1 flex-col gap-4">
       <div className="min-h-full space-y-4">
         <div className="flex h-13 items-center border-b px-4">
-          <span className="text-sm font-medium">Settings</span>
+          <span className="font-medium text-sm">Settings</span>
 
           <div className="ml-6 flex gap-1">
             <button
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+              className={`rounded-md px-3 py-1 text-sm transition-colors ${
                 activeTab === "backup"
                   ? "bg-secondary text-secondary-foreground"
                   : "text-muted-foreground hover:text-foreground"
@@ -71,7 +79,7 @@ export function SettingsPage() {
               Backup
             </button>
             <button
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+              className={`rounded-md px-3 py-1 text-sm transition-colors ${
                 activeTab === "alerts"
                   ? "bg-secondary text-secondary-foreground"
                   : "text-muted-foreground hover:text-foreground"
@@ -81,7 +89,7 @@ export function SettingsPage() {
               Alerts
             </button>
             <button
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+              className={`rounded-md px-3 py-1 text-sm transition-colors ${
                 activeTab === "system"
                   ? "bg-secondary text-secondary-foreground"
                   : "text-muted-foreground hover:text-foreground"
@@ -101,7 +109,9 @@ export function SettingsPage() {
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle>{t("settingsBackup.manualBackup")}</CardTitle>
-                  <CardDescription>{t("settingsBackup.manualBackupDesc")}</CardDescription>
+                  <CardDescription>
+                    {t("settingsBackup.manualBackupDesc")}
+                  </CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Button>{t("settingsBackup.createBackup")}</Button>
@@ -114,10 +124,14 @@ export function SettingsPage() {
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle>{t("settingsBackup.restoration")}</CardTitle>
-                  <CardDescription>{t("settingsBackup.restorationDesc")}</CardDescription>
+                  <CardDescription>
+                    {t("settingsBackup.restorationDesc")}
+                  </CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
-                  <Button variant="outline">{t("settingsBackup.selectBackupFile")}</Button>
+                  <Button variant="outline">
+                    {t("settingsBackup.selectBackupFile")}
+                  </Button>
                 </div>
               </CardHeader>
             </Card>
@@ -127,13 +141,17 @@ export function SettingsPage() {
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle>{t("settingsBackup.automaticBackup")}</CardTitle>
-                  <CardDescription>A backup will be created automatically when you log in</CardDescription>
+                  <CardDescription>
+                    A backup will be created automatically when you log in
+                  </CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Switch
                     checked={autoBackup}
-                    onCheckedChange={(checked) => handleSettingChange("autoBackup", checked)}
                     disabled={isLoading}
+                    onCheckedChange={(checked) =>
+                      handleSettingChange("autoBackup", checked)
+                    }
                   />
                 </div>
               </CardHeader>
@@ -149,26 +167,37 @@ export function SettingsPage() {
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle>{t("settingsAlerts.cacesExpiryAlerts")}</CardTitle>
-                  <CardDescription>{t("settingsAlerts.enableExpiryAlerts")}</CardDescription>
+                  <CardDescription>
+                    {t("settingsAlerts.enableExpiryAlerts")}
+                  </CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Switch
                     checked={cacesAlerts}
-                    onCheckedChange={(checked) => handleSettingChange("cacesAlerts", checked)}
                     disabled={isLoading}
+                    onCheckedChange={(checked) =>
+                      handleSettingChange("cacesAlerts", checked)
+                    }
                   />
                 </div>
               </CardHeader>
               {cacesAlerts && (
                 <CardContent>
                   <div className="flex items-center gap-4">
-                    <Label htmlFor="cacesDays">{t("settingsAlerts.daysBeforeExpiry")}</Label>
+                    <Label htmlFor="cacesDays">
+                      {t("settingsAlerts.daysBeforeExpiry")}
+                    </Label>
                     <Input
-                      id="cacesDays"
-                      type="number"
                       className="w-24"
+                      id="cacesDays"
+                      onChange={(e) =>
+                        handleSettingChange(
+                          "cacesDays",
+                          Number.parseInt(e.target.value) || 30
+                        )
+                      }
+                      type="number"
                       value={cacesDays}
-                      onChange={(e) => handleSettingChange("cacesDays", parseInt(e.target.value) || 30)}
                     />
                   </div>
                 </CardContent>
@@ -179,27 +208,40 @@ export function SettingsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
-                  <CardTitle>{t("settingsAlerts.medicalVisitAlerts")}</CardTitle>
-                  <CardDescription>{t("settingsAlerts.enableVisitAlerts")}</CardDescription>
+                  <CardTitle>
+                    {t("settingsAlerts.medicalVisitAlerts")}
+                  </CardTitle>
+                  <CardDescription>
+                    {t("settingsAlerts.enableVisitAlerts")}
+                  </CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Switch
                     checked={medicalAlerts}
-                    onCheckedChange={(checked) => handleSettingChange("medicalAlerts", checked)}
                     disabled={isLoading}
+                    onCheckedChange={(checked) =>
+                      handleSettingChange("medicalAlerts", checked)
+                    }
                   />
                 </div>
               </CardHeader>
               {medicalAlerts && (
                 <CardContent>
                   <div className="flex items-center gap-4">
-                    <Label htmlFor="medicalDays">{t("settingsAlerts.daysBeforeVisit")}</Label>
+                    <Label htmlFor="medicalDays">
+                      {t("settingsAlerts.daysBeforeVisit")}
+                    </Label>
                     <Input
-                      id="medicalDays"
-                      type="number"
                       className="w-24"
+                      id="medicalDays"
+                      onChange={(e) =>
+                        handleSettingChange(
+                          "medicalDays",
+                          Number.parseInt(e.target.value) || 7
+                        )
+                      }
+                      type="number"
                       value={medicalDays}
-                      onChange={(e) => handleSettingChange("medicalDays", parseInt(e.target.value) || 7)}
                     />
                   </div>
                 </CardContent>
@@ -211,13 +253,17 @@ export function SettingsPage() {
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle>Contract expiry alerts</CardTitle>
-                  <CardDescription>Get notified when employee contracts are expiring</CardDescription>
+                  <CardDescription>
+                    Get notified when employee contracts are expiring
+                  </CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Switch
                     checked={contractAlerts}
-                    onCheckedChange={(checked) => handleSettingChange("contractAlerts", checked)}
                     disabled={isLoading}
+                    onCheckedChange={(checked) =>
+                      handleSettingChange("contractAlerts", checked)
+                    }
                   />
                 </div>
               </CardHeader>
@@ -235,15 +281,19 @@ export function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Version</span>
+                  <span className="text-muted-foreground text-sm">Version</span>
                   <span className="text-sm">2.1.1</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Data directory</span>
-                  <span className="text-sm font-mono">./data</span>
+                  <span className="text-muted-foreground text-sm">
+                    Data directory
+                  </span>
+                  <span className="font-mono text-sm">./data</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Database size</span>
+                  <span className="text-muted-foreground text-sm">
+                    Database size
+                  </span>
                   <span className="text-sm">--</span>
                 </div>
               </CardContent>
@@ -258,14 +308,16 @@ export function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>Theme</Label>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Choose your preferred theme
                     </p>
                   </div>
                   <Select
-                    value={theme}
-                    onValueChange={(value: "light" | "dark" | "system") => handleSettingChange("theme", value)}
                     disabled={isLoading}
+                    onValueChange={(value: "light" | "dark" | "system") =>
+                      handleSettingChange("theme", value)
+                    }
+                    value={theme}
                   >
                     <SelectTrigger className="w-32">
                       <SelectValue />
@@ -280,14 +332,16 @@ export function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>Language</Label>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Select application language
                     </p>
                   </div>
                   <Select
-                    value={language}
-                    onValueChange={(value: "fr" | "en") => handleSettingChange("language", value)}
                     disabled={isLoading}
+                    onValueChange={(value: "fr" | "en") =>
+                      handleSettingChange("language", value)
+                    }
+                    value={language}
                   >
                     <SelectTrigger className="w-32">
                       <SelectValue />
@@ -306,13 +360,17 @@ export function SettingsPage() {
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle>Read-only mode</CardTitle>
-                  <CardDescription>Disable all database write operations</CardDescription>
+                  <CardDescription>
+                    Disable all database write operations
+                  </CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Switch
                     checked={readOnlyMode}
-                    onCheckedChange={(checked) => handleSettingChange("readOnlyMode", checked)}
                     disabled={isLoading}
+                    onCheckedChange={(checked) =>
+                      handleSettingChange("readOnlyMode", checked)
+                    }
                   />
                 </div>
               </CardHeader>
@@ -323,7 +381,9 @@ export function SettingsPage() {
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle>Clear cache</CardTitle>
-                  <CardDescription>Clear cached data to free up space</CardDescription>
+                  <CardDescription>
+                    Clear cached data to free up space
+                  </CardDescription>
                 </div>
                 <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
                   <Button variant="outline">Clear cache</Button>

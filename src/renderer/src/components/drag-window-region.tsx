@@ -56,7 +56,7 @@ export default function DragWindowRegion({ title }: DragWindowRegionProps) {
 
 function WindowButtons() {
   return (
-    <div className="flex no-drag">
+    <div className="no-drag flex">
       <button
         className="p-2 hover:bg-slate-300"
         onClick={minimizeWindow}

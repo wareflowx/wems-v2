@@ -94,9 +94,9 @@ export function CreateContractTypeDialog({
               <Label htmlFor="ct-name">{t("contractTypes.name")}</Label>
               <Input
                 id="ct-name"
-                value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="CDI"
+                value={name}
               />
             </div>
             <div className="grid gap-2">

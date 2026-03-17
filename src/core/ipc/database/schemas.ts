@@ -123,7 +123,10 @@ export const createMediaInputSchema = z.object({
   type: z.enum(["logo", "template", "document", "other"]),
   fileName: z.string().optional(),
   mimeType: z.enum(ALLOWED_MIME_TYPES).optional(),
-  size: z.number().max(MAX_FILE_SIZE, "File size exceeds maximum allowed size of 50MB").optional(),
+  size: z
+    .number()
+    .max(MAX_FILE_SIZE, "File size exceeds maximum allowed size of 50MB")
+    .optional(),
   fileData: z.string().optional(), // base64 encoded file
 });
 
@@ -144,11 +147,21 @@ export const createAttachmentInputSchema = z.object({
   id: z.string().optional(),
   employeeId: z.number(),
   employeeName: z.string().optional(), // For slugified folder path
-  entityType: z.enum(["contract", "caces", "document", "medical_visit", "driving_authorization", "online_training"]),
+  entityType: z.enum([
+    "contract",
+    "caces",
+    "document",
+    "medical_visit",
+    "driving_authorization",
+    "online_training",
+  ]),
   entityId: z.number().optional(),
   originalName: z.string(),
   mimeType: z.enum(ALLOWED_ATTACHMENT_MIME_TYPES).optional(),
-  size: z.number().max(MAX_FILE_SIZE, "File size exceeds maximum allowed size of 50MB").optional(),
+  size: z
+    .number()
+    .max(MAX_FILE_SIZE, "File size exceeds maximum allowed size of 50MB")
+    .optional(),
   fileData: z.string(), // base64 encoded file
 });
 
@@ -162,7 +175,16 @@ export const getAttachmentInputSchema = z.object({
 
 export const getAttachmentsInputSchema = z.object({
   employeeId: z.number().optional(),
-  entityType: z.enum(["contract", "caces", "document", "medical_visit", "driving_authorization", "online_training"]).optional(),
+  entityType: z
+    .enum([
+      "contract",
+      "caces",
+      "document",
+      "medical_visit",
+      "driving_authorization",
+      "online_training",
+    ])
+    .optional(),
 });
 
 // Department schemas
@@ -250,7 +272,9 @@ export const createMedicalVisitInputSchema = z.object({
   type: z.enum(["periodique", "reprise", "initiale", "embauche"]),
   scheduledDate: z.string().min(1, "Scheduled date is required"),
   actualDate: z.string().optional(),
-  status: z.enum(["scheduled", "completed", "overdue", "cancelled"]).default("scheduled"),
+  status: z
+    .enum(["scheduled", "completed", "overdue", "cancelled"])
+    .default("scheduled"),
   fitnessStatus: z.enum(["Apt", "Apt partiel", "Inapte"]).optional(),
   attachmentId: z.string().optional(),
 });
@@ -304,7 +328,10 @@ export const createOnlineTrainingInputSchema = z.object({
 export const updateOnlineTrainingInputSchema = z.object({
   id: z.number(),
   trainingName: z.string().min(1, "Training name is required").optional(),
-  trainingProvider: z.string().min(1, "Training provider is required").optional(),
+  trainingProvider: z
+    .string()
+    .min(1, "Training provider is required")
+    .optional(),
   completionDate: z.string().min(1, "Completion date is required").optional(),
   expirationDate: z.string().optional().nullable(),
   status: z.enum(["in_progress", "completed", "expired"]).optional(),

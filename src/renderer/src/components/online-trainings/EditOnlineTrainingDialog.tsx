@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -67,7 +67,9 @@ export function EditOnlineTrainingDialog({
   }, [training]);
 
   const handleSubmit = () => {
-    if (!training) return;
+    if (!training) {
+      return;
+    }
     onEdit?.({
       id: training.id,
       trainingName,
@@ -78,7 +80,11 @@ export function EditOnlineTrainingDialog({
     });
   };
 
-  const isFormValid = trainingName && trainingProvider && completionDate && (!hasExpiration || expirationDate);
+  const isFormValid =
+    trainingName &&
+    trainingProvider &&
+    completionDate &&
+    (!hasExpiration || expirationDate);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -93,7 +99,7 @@ export function EditOnlineTrainingDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{t("onlineTrainings.edit")}</DialogTitle>
@@ -103,68 +109,82 @@ export function EditOnlineTrainingDialog({
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="trainingName">{t("onlineTrainings.trainingName")}</Label>
+            <Label htmlFor="trainingName">
+              {t("onlineTrainings.trainingName")}
+            </Label>
             <Input
               id="trainingName"
-              value={trainingName}
               onChange={(e) => setTrainingName(e.target.value)}
+              value={trainingName}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="trainingProvider">{t("onlineTrainings.provider")}</Label>
+            <Label htmlFor="trainingProvider">
+              {t("onlineTrainings.provider")}
+            </Label>
             <Input
               id="trainingProvider"
-              value={trainingProvider}
               onChange={(e) => setTrainingProvider(e.target.value)}
+              value={trainingProvider}
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="status">{t("onlineTrainings.status")}</Label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select onValueChange={setStatus} value={status}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="in_progress">{t("onlineTrainings.inProgress")}</SelectItem>
-                <SelectItem value="completed">{t("onlineTrainings.completed")}</SelectItem>
+                <SelectItem value="in_progress">
+                  {t("onlineTrainings.inProgress")}
+                </SelectItem>
+                <SelectItem value="completed">
+                  {t("onlineTrainings.completed")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="completionDate">{t("onlineTrainings.completionDate")}</Label>
+            <Label htmlFor="completionDate">
+              {t("onlineTrainings.completionDate")}
+            </Label>
             <Input
               id="completionDate"
+              onChange={(e) => setCompletionDate(e.target.value)}
               type="date"
               value={completionDate}
-              onChange={(e) => setCompletionDate(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-2">
             <input
-              type="checkbox"
-              id="hasExpiration"
               checked={hasExpiration}
+              id="hasExpiration"
               onChange={(e) => setHasExpiration(e.target.checked)}
+              type="checkbox"
             />
-            <Label htmlFor="hasExpiration">{t("onlineTrainings.hasExpiration")}</Label>
+            <Label htmlFor="hasExpiration">
+              {t("onlineTrainings.hasExpiration")}
+            </Label>
           </div>
           {hasExpiration && (
             <div className="grid gap-2">
-              <Label htmlFor="expirationDate">{t("onlineTrainings.expirationDate")}</Label>
+              <Label htmlFor="expirationDate">
+                {t("onlineTrainings.expirationDate")}
+              </Label>
               <Input
                 id="expirationDate"
+                onChange={(e) => setExpirationDate(e.target.value)}
                 type="date"
                 value={expirationDate}
-                onChange={(e) => setExpirationDate(e.target.value)}
               />
             </div>
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>
+          <Button onClick={() => handleOpenChange(false)} variant="outline">
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!isFormValid}>
+          <Button disabled={!isFormValid} onClick={handleSubmit}>
             {t("common.save")}
           </Button>
         </DialogFooter>

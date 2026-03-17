@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Briefcase, Edit, Plus, Search, SearchX, Sparkles, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Briefcase, Edit, Plus, Search, Sparkles, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CreatePositionDialog } from "@/components/positions/CreatePositionDialog";
 import { DeletePositionDialog } from "@/components/positions/DeletePositionDialog";
@@ -65,18 +65,19 @@ export function PositionsPage() {
   });
 
   // KPIs - calculated dynamically (only count non-deleted positions)
-  const kpis = useMemo(
-    () => {
-      const activePositions = allPositions.filter((p: any) => !p.deletedAt && p.isActive);
-      const inactivePositions = allPositions.filter((p: any) => !p.deletedAt && !p.isActive);
-      return {
-        totalPositions: allPositions.filter((p: any) => !p.deletedAt).length,
-        activePositions: activePositions.length,
-        inactivePositions: inactivePositions.length,
-      };
-    },
-    [allPositions]
-  );
+  const kpis = useMemo(() => {
+    const activePositions = allPositions.filter(
+      (p: any) => !p.deletedAt && p.isActive
+    );
+    const inactivePositions = allPositions.filter(
+      (p: any) => !(p.deletedAt || p.isActive)
+    );
+    return {
+      totalPositions: allPositions.filter((p: any) => !p.deletedAt).length,
+      activePositions: activePositions.length,
+      inactivePositions: inactivePositions.length,
+    };
+  }, [allPositions]);
 
   // Get positions to display based on showDeleted toggle
   const displayPositions = showDeleted ? deletedPositions : positions;
@@ -221,10 +222,12 @@ export function PositionsPage() {
                 </SelectContent>
               </Select>
               <Button
-                variant={showDeleted ? "default" : "outline"}
                 onClick={() => setShowDeleted(!showDeleted)}
+                variant={showDeleted ? "default" : "outline"}
               >
-                {showDeleted ? t("positions.active", "Active") : t("positions.showDeleted", "Show Deleted")}
+                {showDeleted
+                  ? t("positions.active", "Active")
+                  : t("positions.showDeleted", "Show Deleted")}
               </Button>
               <Button
                 className="ml-auto gap-2"
@@ -239,16 +242,16 @@ export function PositionsPage() {
             {filteredPositions.length === 0 ? (
               <div className="flex w-full items-center justify-center">
                 <AnimatedEmpty
-                  title={t("positions.noPositions", "No positions yet")}
+                  action={{
+                    label: t("positions.addPosition", "Add Position"),
+                    onClick: () => setIsCreateDialogOpen(true),
+                  }}
                   description={t(
                     "positions.noPositionsDescription",
                     "Create your first position to get started"
                   )}
                   icons={[Briefcase, Briefcase, Briefcase]}
-                  action={{
-                    label: t("positions.addPosition", "Add Position"),
-                    onClick: () => setIsCreateDialogOpen(true),
-                  }}
+                  title={t("positions.noPositions", "No positions yet")}
                 />
               </div>
             ) : (
@@ -262,9 +265,7 @@ export function PositionsPage() {
                       <TableHead className="px-4">
                         {t("positions.name")}
                       </TableHead>
-                      <TableHead className="px-4">
-                        Color
-                      </TableHead>
+                      <TableHead className="px-4">Color</TableHead>
                       <TableHead className="px-4">
                         {t("positions.status")}
                       </TableHead>
@@ -283,74 +284,93 @@ export function PositionsPage() {
                     {filteredPositions.map((position: any) => {
                       const isDeleted = !!position.deletedAt;
                       return (
-                      <TableRow className={`hover:bg-muted/50 ${isDeleted ? "opacity-50" : ""}`} key={position.id}>
-                        <TableCell className="px-4">
-                          <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
-                            {position.code}
-                          </span>
-                        </TableCell>
-                        <TableCell className={`max-w-[300px] truncate px-4 font-medium ${isDeleted ? "line-through" : ""}`}>
-                          {position.name}
-                        </TableCell>
-                        <TableCell className="px-4">
-                          <span className="inline-flex items-center rounded-md border border-border bg-muted/50 px-2 py-0.5 font-medium text-xs">
-                            <span className={`mr-1.5 h-2 w-2 rounded-full ${position.color}`} />
-                            {getColorName(position.color)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="px-4">
-                          {isDeleted ? (
-                            <span className="inline-flex items-center rounded-md border border-red-500/25 bg-red-500/15 px-2 py-0.5 font-medium text-red-600 text-xs">
-                              {t("positions.deleted", "Deleted")}
+                        <TableRow
+                          className={`hover:bg-muted/50 ${isDeleted ? "opacity-50" : ""}`}
+                          key={position.id}
+                        >
+                          <TableCell className="px-4">
+                            <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+                              {position.code}
                             </span>
-                          ) : position.isActive ? (
-                            <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-2 py-0.5 font-medium text-green-600 text-xs">
-                              {t("positions.active")}
+                          </TableCell>
+                          <TableCell
+                            className={`max-w-[300px] truncate px-4 font-medium ${isDeleted ? "line-through" : ""}`}
+                          >
+                            {position.name}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            <span className="inline-flex items-center rounded-md border border-border bg-muted/50 px-2 py-0.5 font-medium text-xs">
+                              <span
+                                className={`mr-1.5 h-2 w-2 rounded-full ${position.color}`}
+                              />
+                              {getColorName(position.color)}
                             </span>
-                          ) : (
-                            <span className="inline-flex items-center rounded-md border border-gray-500/25 bg-gray-500/15 px-2 py-0.5 font-medium text-gray-600 text-xs">
-                              {t("positions.inactive")}
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="px-4 text-muted-foreground text-xs">
-                          {position.createdAt ? new Date(position.createdAt).toLocaleDateString() : "-"}
-                        </TableCell>
-                        <TableCell className="px-4 text-muted-foreground text-xs">
-                          {position.updatedAt ? new Date(position.updatedAt).toLocaleDateString() : "-"}
-                        </TableCell>
-                        <TableCell className="px-4">
-                          <div className="flex items-center justify-end gap-2">
+                          </TableCell>
+                          <TableCell className="px-4">
                             {isDeleted ? (
-                              <Button
-                                onClick={() => restorePosition.mutate({ id: position.id })}
-                                size="icon"
-                                variant="ghost"
-                              >
-                                <Trash2 className="h-4 w-4 text-green-600" />
-                              </Button>
+                              <span className="inline-flex items-center rounded-md border border-red-500/25 bg-red-500/15 px-2 py-0.5 font-medium text-red-600 text-xs">
+                                {t("positions.deleted", "Deleted")}
+                              </span>
+                            ) : position.isActive ? (
+                              <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-2 py-0.5 font-medium text-green-600 text-xs">
+                                {t("positions.active")}
+                              </span>
                             ) : (
-                              <>
-                                <Button
-                                  onClick={() => setEditingPosition(position)}
-                                  size="icon"
-                                  variant="ghost"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  onClick={() => setDeletingPosition(position)}
-                                  size="icon"
-                                  variant="ghost"
-                                >
-                                  <Trash2 className="h-4 w-4 text-red-600" />
-                                </Button>
-                              </>
+                              <span className="inline-flex items-center rounded-md border border-gray-500/25 bg-gray-500/15 px-2 py-0.5 font-medium text-gray-600 text-xs">
+                                {t("positions.inactive")}
+                              </span>
                             )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
+                          </TableCell>
+                          <TableCell className="px-4 text-muted-foreground text-xs">
+                            {position.createdAt
+                              ? new Date(
+                                  position.createdAt
+                                ).toLocaleDateString()
+                              : "-"}
+                          </TableCell>
+                          <TableCell className="px-4 text-muted-foreground text-xs">
+                            {position.updatedAt
+                              ? new Date(
+                                  position.updatedAt
+                                ).toLocaleDateString()
+                              : "-"}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            <div className="flex items-center justify-end gap-2">
+                              {isDeleted ? (
+                                <Button
+                                  onClick={() =>
+                                    restorePosition.mutate({ id: position.id })
+                                  }
+                                  size="icon"
+                                  variant="ghost"
+                                >
+                                  <Trash2 className="h-4 w-4 text-green-600" />
+                                </Button>
+                              ) : (
+                                <>
+                                  <Button
+                                    onClick={() => setEditingPosition(position)}
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    onClick={() =>
+                                      setDeletingPosition(position)
+                                    }
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-600" />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
                     })}
                   </TableBody>
                 </Table>

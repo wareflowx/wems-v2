@@ -1,8 +1,14 @@
 "use client";
 
+import { queryKeys } from "@@/lib/query-keys";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { RotateCcw, SearchX, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { RotateCcw, SearchX, Trash2 } from "lucide-react";
+import * as db from "@/actions/database";
+import { Button } from "@/components/ui/button";
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
+import { Input } from "@/components/ui/input";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import {
   Table,
@@ -12,16 +18,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/utils/toast";
-import { queryKeys } from "@@/lib/query-keys";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import * as db from "@/actions/database";
 import { useORPCReady } from "@/hooks";
-import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
+import { useToast } from "@/utils/toast";
 
-type DeletedItemType = "employee" | "position" | "workLocation" | "department" | "contractType";
+type DeletedItemType =
+  | "employee"
+  | "position"
+  | "workLocation"
+  | "department"
+  | "contractType";
 
 interface DeletedItem {
   id: number;
@@ -75,10 +80,18 @@ export function TrashPage() {
   const restoreEmployee = useMutation({
     mutationFn: (id: number) => db.restoreEmployee(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.employees.lists() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.employees.lists() });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedEmployees() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedEmployees() });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.employees.lists(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.employees.lists(),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedEmployees(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.trash.deletedEmployees(),
+      });
       toast({ title: t("trash.restoreSuccess") });
     },
     onError: (error) => {
@@ -89,10 +102,18 @@ export function TrashPage() {
   const restorePosition = useMutation({
     mutationFn: (id: number) => db.restorePosition({ id }),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.positions.lists() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.positions.lists() });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedPositions() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedPositions() });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.positions.lists(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.positions.lists(),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedPositions(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.trash.deletedPositions(),
+      });
       toast({ title: t("trash.restoreSuccess") });
     },
     onError: (error) => {
@@ -103,10 +124,18 @@ export function TrashPage() {
   const restoreWorkLocation = useMutation({
     mutationFn: (id: number) => db.restoreWorkLocation(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.workLocations.lists() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.workLocations.lists() });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedWorkLocations() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedWorkLocations() });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.workLocations.lists(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.workLocations.lists(),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedWorkLocations(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.trash.deletedWorkLocations(),
+      });
       toast({ title: t("trash.restoreSuccess") });
     },
     onError: (error) => {
@@ -117,10 +146,18 @@ export function TrashPage() {
   const restoreDepartment = useMutation({
     mutationFn: (id: number) => db.restoreDepartment(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.departments.lists() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.departments.lists() });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedDepartments() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedDepartments() });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.departments.lists(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.departments.lists(),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedDepartments(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.trash.deletedDepartments(),
+      });
       toast({ title: t("trash.restoreSuccess") });
     },
     onError: (error) => {
@@ -131,10 +168,18 @@ export function TrashPage() {
   const restoreContractType = useMutation({
     mutationFn: (id: number) => db.restoreContractType(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.contractTypes.lists() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.contractTypes.lists() });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedContractTypes() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedContractTypes() });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.contractTypes.lists(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.contractTypes.lists(),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedContractTypes(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.trash.deletedContractTypes(),
+      });
       toast({ title: t("trash.restoreSuccess") });
     },
     onError: (error) => {
@@ -146,8 +191,12 @@ export function TrashPage() {
   const permanentDeleteEmployee = useMutation({
     mutationFn: (id: number) => db.permanentDeleteEmployee(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedEmployees() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedEmployees() });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedEmployees(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.trash.deletedEmployees(),
+      });
       toast({ title: t("trash.deleteSuccess") });
     },
     onError: (error) => {
@@ -158,8 +207,12 @@ export function TrashPage() {
   const permanentDeletePosition = useMutation({
     mutationFn: (id: number) => db.permanentDeletePosition(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedPositions() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedPositions() });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedPositions(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.trash.deletedPositions(),
+      });
       toast({ title: t("trash.deleteSuccess") });
     },
     onError: (error) => {
@@ -170,8 +223,12 @@ export function TrashPage() {
   const permanentDeleteWorkLocation = useMutation({
     mutationFn: (id: number) => db.permanentDeleteWorkLocation(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedWorkLocations() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedWorkLocations() });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedWorkLocations(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.trash.deletedWorkLocations(),
+      });
       toast({ title: t("trash.deleteSuccess") });
     },
     onError: (error) => {
@@ -182,8 +239,12 @@ export function TrashPage() {
   const permanentDeleteDepartment = useMutation({
     mutationFn: (id: number) => db.permanentDeleteDepartment(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedDepartments() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedDepartments() });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedDepartments(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.trash.deletedDepartments(),
+      });
       toast({ title: t("trash.deleteSuccess") });
     },
     onError: (error) => {
@@ -194,8 +255,12 @@ export function TrashPage() {
   const permanentDeleteContractType = useMutation({
     mutationFn: (id: number) => db.permanentDeleteContractType(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedContractTypes() });
-      await queryClient.refetchQueries({ queryKey: queryKeys.trash.deletedContractTypes() });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedContractTypes(),
+      });
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.trash.deletedContractTypes(),
+      });
       toast({ title: t("trash.deleteSuccess") });
     },
     onError: (error) => {
@@ -346,12 +411,12 @@ export function TrashPage() {
         <div className="flex flex-wrap gap-2 border-b">
           {tabs.map((tab) => (
             <button
-              key={tab.key}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
+              className={`px-4 py-2 font-medium text-sm transition-colors ${
                 activeTab === tab.key
-                  ? "border-b-2 border-primary text-primary"
+                  ? "border-primary border-b-2 text-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`}
+              key={tab.key}
               onClick={() => setActiveTab(tab.key)}
             >
               {tab.label}
@@ -393,9 +458,7 @@ export function TrashPage() {
                       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                         <SearchX className="h-8 w-8 opacity-50" />
                       </div>
-                      <p className="font-medium text-lg">
-                        {t("trash.empty")}
-                      </p>
+                      <p className="font-medium text-lg">{t("trash.empty")}</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -411,19 +474,19 @@ export function TrashPage() {
                     <TableCell className="px-4">
                       <div className="flex items-center justify-end gap-2">
                         <Button
+                          className="gap-1"
                           onClick={() => setRestoringItem(item)}
                           size="sm"
                           variant="outline"
-                          className="gap-1"
                         >
                           <RotateCcw className="h-4 w-4" />
                           {t("trash.restore")}
                         </Button>
                         <Button
+                          className="gap-1 border border-destructive/20"
                           onClick={() => setDeletingItem(item)}
                           size="sm"
                           variant="destructive"
-                          className="gap-1 border border-destructive/20"
                         >
                           <Trash2 className="h-4 w-4" />
                           {t("trash.delete")}

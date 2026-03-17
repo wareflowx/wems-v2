@@ -1,6 +1,6 @@
-import path from "node:path";
 import fs from "node:fs";
-import { getDataDir, ensureDataDir } from "@/core/db";
+import path from "node:path";
+import { ensureDataDir, getDataDir } from "@@/db";
 
 /**
  * Get the files directory path
@@ -33,7 +33,10 @@ export function saveFile(buffer: Buffer, relativePath: string): string {
   // CRITICAL: Verify the resolved path is within filesDir (prevent path traversal)
   const normalizedPath = path.normalize(fullPath);
   const normalizedFilesDir = path.normalize(filesDir);
-  if (!normalizedPath.startsWith(normalizedFilesDir + path.sep) && normalizedPath !== normalizedFilesDir) {
+  if (
+    !normalizedPath.startsWith(normalizedFilesDir + path.sep) &&
+    normalizedPath !== normalizedFilesDir
+  ) {
     throw new Error("Invalid file path: path traversal detected");
   }
 
@@ -60,7 +63,10 @@ export function deleteFile(relativePath: string): boolean {
   // CRITICAL: Verify the resolved path is within filesDir (prevent path traversal)
   const normalizedPath = path.normalize(fullPath);
   const normalizedFilesDir = path.normalize(filesDir);
-  if (!normalizedPath.startsWith(normalizedFilesDir + path.sep) && normalizedPath !== normalizedFilesDir) {
+  if (
+    !normalizedPath.startsWith(normalizedFilesDir + path.sep) &&
+    normalizedPath !== normalizedFilesDir
+  ) {
     throw new Error("Invalid file path: path traversal detected");
   }
 
@@ -85,7 +91,10 @@ export function readFile(relativePath: string): Buffer | null {
   // CRITICAL: Verify the resolved path is within filesDir (prevent path traversal)
   const normalizedPath = path.normalize(fullPath);
   const normalizedFilesDir = path.normalize(filesDir);
-  if (!normalizedPath.startsWith(normalizedFilesDir + path.sep) && normalizedPath !== normalizedFilesDir) {
+  if (
+    !normalizedPath.startsWith(normalizedFilesDir + path.sep) &&
+    normalizedPath !== normalizedFilesDir
+  ) {
     throw new Error("Invalid file path: path traversal detected");
   }
 
@@ -116,7 +125,10 @@ export function fileExists(relativePath: string): boolean {
 /**
  * Generate a unique filename with UUID prefix
  */
-export function generateStoredFileName(uuid: string, originalName: string): string {
+export function generateStoredFileName(
+  uuid: string,
+  originalName: string
+): string {
   const ext = path.extname(originalName);
   const baseName = path.basename(originalName, ext);
   // Replace spaces and special chars in base name

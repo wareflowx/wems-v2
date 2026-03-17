@@ -1,11 +1,7 @@
 import { Download, Plus, Search } from "lucide-react";
 import * as React from "react";
 import { Button } from "./ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "./ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 interface AppHeaderProps {
   onQuickActionsClick?: () => void;
@@ -34,13 +30,15 @@ export const AppHeader = ({ onQuickActionsClick }: AppHeaderProps) => {
           variant="outline"
         >
           <Search className="size-4 text-muted-foreground" />
-          <span className="flex-1 text-left text-xs text-muted-foreground">Search...</span>
+          <span className="flex-1 text-left text-muted-foreground text-xs">
+            Search...
+          </span>
         </Button>
       </div>
       <div className="flex items-center gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button size="icon" variant="outline">
               <Plus className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
@@ -49,7 +47,7 @@ export const AppHeader = ({ onQuickActionsClick }: AppHeaderProps) => {
         <div className="h-6 w-px bg-border" />
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" className="gap-2">
+            <Button className="gap-2" variant="outline">
               <Download className="h-4 w-4" />
               Export
             </Button>

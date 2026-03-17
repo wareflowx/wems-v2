@@ -56,7 +56,11 @@ export async function getNotes(): Promise<Note[]> {
   return client.database.getNotes();
 }
 
-export async function createNote(data: { title: string; description?: string; badges?: NoteBadge[] }): Promise<Note | null> {
+export async function createNote(data: {
+  title: string;
+  description?: string;
+  badges?: NoteBadge[];
+}): Promise<Note | null> {
   const client = getClient();
   if (!client) {
     return null;
@@ -87,7 +91,9 @@ export async function deleteNote(id: number): Promise<boolean | null> {
 }
 
 // Migration: Add notes table
-export async function migrateAddNotesTable(): Promise<{ success: boolean } | null> {
+export async function migrateAddNotesTable(): Promise<{
+  success: boolean;
+} | null> {
   const client = getClient();
   if (!client) {
     return null;
@@ -286,7 +292,9 @@ export async function deleteContract(id: number) {
 }
 
 // Media
-export async function getAllMedia(type?: "logo" | "template" | "document" | "other") {
+export async function getAllMedia(
+  type?: "logo" | "template" | "document" | "other"
+) {
   const client = getClient();
   if (!client) {
     return [];
@@ -358,7 +366,13 @@ export async function createAttachment(data: {
   id?: string;
   employeeId: number;
   employeeName?: string;
-  entityType: "contract" | "caces" | "document" | "medical_visit" | "driving_authorization" | "online_training";
+  entityType:
+    | "contract"
+    | "caces"
+    | "document"
+    | "medical_visit"
+    | "driving_authorization"
+    | "online_training";
   entityId?: number;
   originalName: string;
   mimeType?: string;
@@ -397,7 +411,11 @@ export async function getDepartments() {
   return client.database.getDepartments();
 }
 
-export async function createDepartment(data: { name: string; code: string; isActive?: boolean }) {
+export async function createDepartment(data: {
+  name: string;
+  code: string;
+  isActive?: boolean;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -405,7 +423,12 @@ export async function createDepartment(data: { name: string; code: string; isAct
   return client.database.createDepartment(data);
 }
 
-export async function updateDepartment(data: { id: number; name: string; code: string; isActive: boolean }) {
+export async function updateDepartment(data: {
+  id: number;
+  name: string;
+  code: string;
+  isActive: boolean;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -430,7 +453,11 @@ export async function getAgencies() {
   return client.database.getAgencies();
 }
 
-export async function createAgency(data: { name: string; code?: string; isActive?: boolean }) {
+export async function createAgency(data: {
+  name: string;
+  code?: string;
+  isActive?: boolean;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -438,7 +465,12 @@ export async function createAgency(data: { name: string; code?: string; isActive
   return client.database.createAgency(data);
 }
 
-export async function updateAgency(data: { id: number; name?: string; code?: string; isActive?: boolean }) {
+export async function updateAgency(data: {
+  id: number;
+  name?: string;
+  code?: string;
+  isActive?: boolean;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -463,7 +495,11 @@ export async function getContractTypes() {
   return client.database.getContractTypes();
 }
 
-export async function createContractType(data: { name: string; code: string; isActive?: boolean }) {
+export async function createContractType(data: {
+  name: string;
+  code: string;
+  isActive?: boolean;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -471,7 +507,12 @@ export async function createContractType(data: { name: string; code: string; isA
   return client.database.createContractType(data);
 }
 
-export async function updateContractType(data: { id: number; name: string; code: string; isActive: boolean }) {
+export async function updateContractType(data: {
+  id: number;
+  name: string;
+  code: string;
+  isActive: boolean;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -504,7 +545,13 @@ export async function getCacesByEmployee(employeeId: number) {
   return client.database.getCacesByEmployee({ employeeId });
 }
 
-export async function createCace(data: { employeeId: number; category: string; dateObtained: string; expirationDate: string; attachmentId?: string }) {
+export async function createCace(data: {
+  employeeId: number;
+  category: string;
+  dateObtained: string;
+  expirationDate: string;
+  attachmentId?: string;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -512,7 +559,13 @@ export async function createCace(data: { employeeId: number; category: string; d
   return client.database.createCace(data);
 }
 
-export async function updateCace(data: { id: number; category?: string; dateObtained?: string; expirationDate?: string; attachmentId?: string | null }) {
+export async function updateCace(data: {
+  id: number;
+  category?: string;
+  dateObtained?: string;
+  expirationDate?: string;
+  attachmentId?: string | null;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -561,7 +614,13 @@ export async function getAllDrivingAuthorizationStatuses() {
   return client.database.getAllDrivingAuthorizationStatuses();
 }
 
-export async function createDrivingAuthorization(data: { employeeId: number; licenseCategory: string; dateObtained: string; expirationDate: string; attachmentId?: string }) {
+export async function createDrivingAuthorization(data: {
+  employeeId: number;
+  licenseCategory: string;
+  dateObtained: string;
+  expirationDate: string;
+  attachmentId?: string;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -569,7 +628,13 @@ export async function createDrivingAuthorization(data: { employeeId: number; lic
   return client.database.createDrivingAuthorization(data);
 }
 
-export async function updateDrivingAuthorization(data: { id: number; licenseCategory?: string; dateObtained?: string; expirationDate?: string; attachmentId?: string | null }) {
+export async function updateDrivingAuthorization(data: {
+  id: number;
+  licenseCategory?: string;
+  dateObtained?: string;
+  expirationDate?: string;
+  attachmentId?: string | null;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -602,7 +667,15 @@ export async function getOnlineTrainingsByEmployee(employeeId: number) {
   return client.database.getOnlineTrainingsByEmployee({ employeeId });
 }
 
-export async function createOnlineTraining(data: { employeeId: number; trainingName: string; trainingProvider: string; completionDate: string; expirationDate?: string; status?: "in_progress" | "completed" | "expired"; attachmentId?: string }) {
+export async function createOnlineTraining(data: {
+  employeeId: number;
+  trainingName: string;
+  trainingProvider: string;
+  completionDate: string;
+  expirationDate?: string;
+  status?: "in_progress" | "completed" | "expired";
+  attachmentId?: string;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -610,7 +683,15 @@ export async function createOnlineTraining(data: { employeeId: number; trainingN
   return client.database.createOnlineTraining(data);
 }
 
-export async function updateOnlineTraining(data: { id: number; trainingName?: string; trainingProvider?: string; completionDate?: string; expirationDate?: string | null; status?: "in_progress" | "completed" | "expired"; attachmentId?: string | null }) {
+export async function updateOnlineTraining(data: {
+  id: number;
+  trainingName?: string;
+  trainingProvider?: string;
+  completionDate?: string;
+  expirationDate?: string | null;
+  status?: "in_progress" | "completed" | "expired";
+  attachmentId?: string | null;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -627,7 +708,16 @@ export async function deleteOnlineTraining(id: number) {
 }
 
 // Attachment by entity actions
-export async function getAttachmentsByEntity(entityType: "contract" | "caces" | "document" | "medical_visit" | "driving_authorization" | "online_training", entityId: number) {
+export async function getAttachmentsByEntity(
+  entityType:
+    | "contract"
+    | "caces"
+    | "document"
+    | "medical_visit"
+    | "driving_authorization"
+    | "online_training",
+  entityId: number
+) {
   const client = getClient();
   if (!client) {
     return [];
@@ -635,7 +725,15 @@ export async function getAttachmentsByEntity(entityType: "contract" | "caces" | 
   return client.database.getAttachmentsByEntity({ entityType, entityId });
 }
 
-export async function getAttachmentsByType(entityType: "contract" | "caces" | "document" | "medical_visit" | "driving_authorization" | "online_training") {
+export async function getAttachmentsByType(
+  entityType:
+    | "contract"
+    | "caces"
+    | "document"
+    | "medical_visit"
+    | "driving_authorization"
+    | "online_training"
+) {
   const client = getClient();
   if (!client) {
     return [];
@@ -668,7 +766,15 @@ export async function getMedicalVisitsByEmployee(employeeId: number) {
   return client.database.getMedicalVisitsByEmployee({ employeeId });
 }
 
-export async function createMedicalVisit(data: { employeeId: number; type: "periodique" | "reprise" | "initiale" | "embauche"; scheduledDate: string; actualDate?: string; status?: "scheduled" | "completed" | "overdue" | "cancelled"; fitnessStatus?: "Apt" | "Apt partiel" | "Inapte"; attachmentId?: string }) {
+export async function createMedicalVisit(data: {
+  employeeId: number;
+  type: "periodique" | "reprise" | "initiale" | "embauche";
+  scheduledDate: string;
+  actualDate?: string;
+  status?: "scheduled" | "completed" | "overdue" | "cancelled";
+  fitnessStatus?: "Apt" | "Apt partiel" | "Inapte";
+  attachmentId?: string;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -676,7 +782,15 @@ export async function createMedicalVisit(data: { employeeId: number; type: "peri
   return client.database.createMedicalVisit(data);
 }
 
-export async function updateMedicalVisit(data: { id: number; type?: "periodique" | "reprise" | "initiale" | "embauche"; scheduledDate?: string; actualDate?: string | null; status?: "scheduled" | "completed" | "overdue" | "cancelled"; fitnessStatus?: "Apt" | "Apt partiel" | "Inapte" | null; attachmentId?: string | null }) {
+export async function updateMedicalVisit(data: {
+  id: number;
+  type?: "periodique" | "reprise" | "initiale" | "embauche";
+  scheduledDate?: string;
+  actualDate?: string | null;
+  status?: "scheduled" | "completed" | "overdue" | "cancelled";
+  fitnessStatus?: "Apt" | "Apt partiel" | "Inapte" | null;
+  attachmentId?: string | null;
+}) {
   const client = getClient();
   if (!client) {
     return null;
@@ -836,9 +950,9 @@ export async function restoreContractType(id: number) {
 // Export functions
 // ============================================================
 
-export type ExportType = 'employees' | 'attachments' | 'media';
-export type ExportFormat = 'csv' | 'xlsx' | 'pdf';
-export type DateRange = 'today' | '7days' | '30days' | 'all';
+export type ExportType = "employees" | "attachments" | "media";
+export type ExportFormat = "csv" | "xlsx" | "pdf";
+export type DateRange = "today" | "7days" | "30days" | "all";
 
 export interface ExportOptions {
   types: ExportType[];
@@ -872,15 +986,19 @@ export async function previewExport(
   return client.database.previewExport({ types, dateRange });
 }
 
-export async function exportData(options: ExportOptions): Promise<ExportResult> {
+export async function exportData(
+  options: ExportOptions
+): Promise<ExportResult> {
   const client = getClient();
   if (!client) {
-    return { success: false, error: 'ORPC not ready', recordCount: 0 };
+    return { success: false, error: "ORPC not ready", recordCount: 0 };
   }
   return client.database.exportData(options);
 }
 
-export async function openExportedFile(filePath: string): Promise<{ success: boolean }> {
+export async function openExportedFile(
+  filePath: string
+): Promise<{ success: boolean }> {
   const client = getClient();
   if (!client) {
     return { success: false };
@@ -888,7 +1006,9 @@ export async function openExportedFile(filePath: string): Promise<{ success: boo
   return client.database.openExportedFile({ filePath });
 }
 
-export async function openExportFolder(filePath: string): Promise<{ success: boolean }> {
+export async function openExportFolder(
+  filePath: string
+): Promise<{ success: boolean }> {
   const client = getClient();
   if (!client) {
     return { success: false };
@@ -914,7 +1034,9 @@ export async function getExportHistory(): Promise<ExportHistoryRecord[]> {
   return client.database.getExportHistory();
 }
 
-export async function deleteExportFromHistory(id: string): Promise<{ success: boolean }> {
+export async function deleteExportFromHistory(
+  id: string
+): Promise<{ success: boolean }> {
   const client = getClient();
   if (!client) {
     return { success: false };

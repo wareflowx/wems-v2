@@ -81,7 +81,9 @@ export function CacesFileUpload({
   };
 
   const handleDownload = () => {
-    if (!value) return;
+    if (!value) {
+      return;
+    }
     // Create a data URL for download
     const dataUrl = `data:${value.mimeType};base64,${value.data}`;
     const link = window.document.createElement("a");

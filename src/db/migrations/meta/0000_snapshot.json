@@ -93,12 +93,8 @@
           "name": "attachments_employee_id_employees_id_fk",
           "tableFrom": "attachments",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -175,12 +171,8 @@
           "name": "caces_employee_id_employees_id_fk",
           "tableFrom": "caces",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -188,12 +180,8 @@
           "name": "caces_attachment_id_attachments_id_fk",
           "tableFrom": "caces",
           "tableTo": "attachments",
-          "columnsFrom": [
-            "attachment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["attachment_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -271,12 +259,8 @@
           "name": "contracts_employee_id_employees_id_fk",
           "tableFrom": "contracts",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -344,9 +328,7 @@
       "indexes": {
         "contract_types_code_unique": {
           "name": "contract_types_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -414,9 +396,7 @@
       "indexes": {
         "departments_code_unique": {
           "name": "departments_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -526,9 +506,7 @@
       "indexes": {
         "employees_email_unique": {
           "name": "employees_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -537,12 +515,8 @@
           "name": "employees_position_id_positions_id_fk",
           "tableFrom": "employees",
           "tableTo": "positions",
-          "columnsFrom": [
-            "position_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["position_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -550,12 +524,8 @@
           "name": "employees_work_location_id_work_locations_id_fk",
           "tableFrom": "employees",
           "tableTo": "work_locations",
-          "columnsFrom": [
-            "work_location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["work_location_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -647,12 +617,8 @@
           "name": "medical_visits_employee_id_employees_id_fk",
           "tableFrom": "medical_visits",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -660,12 +626,8 @@
           "name": "medical_visits_attachment_id_attachments_id_fk",
           "tableFrom": "medical_visits",
           "tableTo": "attachments",
-          "columnsFrom": [
-            "attachment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["attachment_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -733,9 +695,7 @@
       "indexes": {
         "positions_code_unique": {
           "name": "positions_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -834,9 +794,7 @@
       "indexes": {
         "work_locations_code_unique": {
           "name": "work_locations_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },

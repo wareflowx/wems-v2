@@ -51,7 +51,10 @@ export function useCreateNote() {
 
     onError: (err, _variables, context) => {
       if (context?.previousNotes) {
-        queryClient.setQueryData(queryKeys.notes.lists(), context.previousNotes);
+        queryClient.setQueryData(
+          queryKeys.notes.lists(),
+          context.previousNotes
+        );
       }
 
       toast({
@@ -87,9 +90,7 @@ export function useUpdateNote() {
       queryClient.setQueriesData(
         { queryKey: queryKeys.notes.lists() },
         (old: db.Note[] = []) =>
-          old.map((note) =>
-            note.id === id ? { ...note, ...updates } : note
-          )
+          old.map((note) => (note.id === id ? { ...note, ...updates } : note))
       );
 
       return { previousNotes };
@@ -97,7 +98,10 @@ export function useUpdateNote() {
 
     onError: (err, _variables, context) => {
       if (context?.previousNotes) {
-        queryClient.setQueryData(queryKeys.notes.lists(), context.previousNotes);
+        queryClient.setQueryData(
+          queryKeys.notes.lists(),
+          context.previousNotes
+        );
       }
 
       toast({
@@ -138,7 +142,10 @@ export function useDeleteNote() {
 
     onError: (err, _variables, context) => {
       if (context?.previousNotes) {
-        queryClient.setQueryData(queryKeys.notes.lists(), context.previousNotes);
+        queryClient.setQueryData(
+          queryKeys.notes.lists(),
+          context.previousNotes
+        );
       }
 
       toast({

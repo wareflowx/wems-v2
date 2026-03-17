@@ -3,6 +3,8 @@
 import { Maximize, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { Note } from "@/actions/database";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -10,15 +12,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-type BadgeColor = "blue" | "green" | "yellow" | "orange" | "red" | "teal" | "gray" | "purple" | "cyan" | "violet" | "indigo" | "emerald" | "amber" | "rose";
+type BadgeColor =
+  | "blue"
+  | "green"
+  | "yellow"
+  | "orange"
+  | "red"
+  | "teal"
+  | "gray"
+  | "purple"
+  | "cyan"
+  | "violet"
+  | "indigo"
+  | "emerald"
+  | "amber"
+  | "rose";
 
 const getBadgeColorClass = (color: string) => {
   const colorMap: Record<string, string> = {
@@ -46,17 +60,21 @@ interface NotesListProps {
   onDeleteNote?: (noteId: number) => void;
 }
 
-export function NotesList({ notes, onToggleComplete, onDeleteNote }: NotesListProps) {
+export function NotesList({
+  notes,
+  onToggleComplete,
+  onDeleteNote,
+}: NotesListProps) {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
   return (
     <>
       <div className="flex flex-col">
         {notes.map((note, index) => (
-          <div key={note.id} className="flex flex-col">
+          <div className="flex flex-col" key={note.id}>
             <div className="group flex flex-col gap-1 px-4 py-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 flex-1">
+                <div className="flex flex-1 items-center gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Checkbox
@@ -68,19 +86,27 @@ export function NotesList({ notes, onToggleComplete, onDeleteNote }: NotesListPr
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{note.isCompleted ? "Mark as incomplete" : "Mark as complete"}</TooltipContent>
+                    <TooltipContent>
+                      {note.isCompleted
+                        ? "Mark as incomplete"
+                        : "Mark as complete"}
+                    </TooltipContent>
                   </Tooltip>
-                  <p className={`text-sm font-medium ${note.isCompleted ? "line-through text-muted-foreground" : ""}`}>{note.title}</p>
+                  <p
+                    className={`font-medium text-sm ${note.isCompleted ? "text-muted-foreground line-through" : ""}`}
+                  >
+                    {note.title}
+                  </p>
                 </div>
                 <div className="flex items-center gap-1">
                   {onDeleteNote && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant="ghost"
-                          size="icon-sm"
                           className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
                           onClick={() => onDeleteNote(note.id)}
+                          size="icon-sm"
+                          variant="ghost"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -91,10 +117,10 @@ export function NotesList({ notes, onToggleComplete, onDeleteNote }: NotesListPr
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        variant="ghost"
-                        size="icon-sm"
                         className="h-6 w-6 shrink-0 text-muted-foreground"
                         onClick={() => setSelectedNote(note)}
+                        size="icon-sm"
+                        variant="ghost"
                       >
                         <Maximize className="h-3 w-3" />
                       </Button>
@@ -103,15 +129,17 @@ export function NotesList({ notes, onToggleComplete, onDeleteNote }: NotesListPr
                   </Tooltip>
                 </div>
               </div>
-              <p className={`text-xs text-muted-foreground ${note.isCompleted ? "line-through" : ""}`}>
+              <p
+                className={`text-muted-foreground text-xs ${note.isCompleted ? "line-through" : ""}`}
+              >
                 {note.description || "No description"}
               </p>
               {note.badges && note.badges.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {note.badges.map((badge, idx) => (
                     <span
+                      className={`inline-flex items-center rounded-md border px-2 py-0.5 font-medium text-xs ${getBadgeColorClass(badge.color)}`}
                       key={idx}
-                      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${getBadgeColorClass(badge.color)}`}
                     >
                       {badge.name}
                     </span>
@@ -124,7 +152,7 @@ export function NotesList({ notes, onToggleComplete, onDeleteNote }: NotesListPr
         ))}
       </div>
 
-      <Dialog open={!!selectedNote} onOpenChange={() => setSelectedNote(null)}>
+      <Dialog onOpenChange={() => setSelectedNote(null)} open={!!selectedNote}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{selectedNote?.title}</DialogTitle>
@@ -136,8 +164,8 @@ export function NotesList({ notes, onToggleComplete, onDeleteNote }: NotesListPr
             <div className="flex flex-wrap gap-2">
               {selectedNote.badges.map((badge, idx) => (
                 <span
+                  className={`inline-flex items-center rounded-md border px-2 py-0.5 font-medium text-xs ${getBadgeColorClass(badge.color)}`}
                   key={idx}
-                  className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${getBadgeColorClass(badge.color)}`}
                 >
                   {badge.name}
                 </span>

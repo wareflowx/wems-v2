@@ -1,5 +1,5 @@
+import { PanelLeftIcon, PanelRightIcon } from "lucide-react";
 import DragWindowRegion from "@/components/drag-window-region";
-import { PanelRightIcon, PanelLeftIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
@@ -21,23 +21,23 @@ export function SiteHeader({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant="ghost"
-              size="icon"
               className="no-drag"
               onClick={onToggleSidebar}
+              size="icon"
+              variant="ghost"
             >
               <PanelLeftIcon className="size-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">Toggle sidebar</TooltipContent>
         </Tooltip>
-        <span className="select-none text-sm text-muted-foreground">WEMS</span>
+        <span className="select-none text-muted-foreground text-sm">WEMS</span>
       </div>
       {/* Right side - not draggable */}
       <div className="no-drag flex items-center gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={onToggleRightSidebar}>
+            <Button onClick={onToggleRightSidebar} size="icon" variant="ghost">
               <PanelRightIcon className="size-4" />
             </Button>
           </TooltipTrigger>

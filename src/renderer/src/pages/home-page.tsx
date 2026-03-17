@@ -1,10 +1,10 @@
 import { ShieldAlert, Sparkles } from "lucide-react";
-import { AnimatedEmpty } from "@/components/ui/animated-empty";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AlertsFilters } from "@/components/home/alerts-filters";
 import { AlertsKPIs } from "@/components/home/alerts-kpis";
 import { AlertsTable } from "@/components/home/alerts-table";
-import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { useAlerts, useEmployees } from "@/hooks";
 
@@ -64,10 +64,10 @@ export function HomePage() {
   // Calculate KPIs dynamically from alerts data
   const kpis = useMemo(() => {
     const criticalAlerts = allAlerts.filter(
-      (a) => a.severity === "critical",
+      (a) => a.severity === "critical"
     ).length;
     const warningAlerts = allAlerts.filter(
-      (a) => a.severity === "warning",
+      (a) => a.severity === "warning"
     ).length;
     const infoAlerts = allAlerts.filter((a) => a.severity === "info").length;
 
@@ -172,18 +172,18 @@ export function HomePage() {
 
       {/* Search and Filters */}
       <AlertsFilters
-        search={search}
-        onSearchChange={setSearch}
-        typeFilter={typeFilter}
-        onTypeFilterChange={setTypeFilter}
-        severityFilter={severityFilter}
-        onSeverityFilterChange={setSeverityFilter}
-        employeeFilter={employeeFilter}
-        onEmployeeFilterChange={setEmployeeFilter}
         detailFilter={detailFilter}
+        employeeFilter={employeeFilter}
         onDetailFilterChange={setDetailFilter}
-        uniqueEmployees={uniqueEmployees}
+        onEmployeeFilterChange={setEmployeeFilter}
+        onSearchChange={setSearch}
+        onSeverityFilterChange={setSeverityFilter}
+        onTypeFilterChange={setTypeFilter}
+        search={search}
+        severityFilter={severityFilter}
+        typeFilter={typeFilter}
         uniqueDetails={uniqueDetails}
+        uniqueEmployees={uniqueEmployees}
       />
 
       {/* Table or Empty State */}
@@ -191,12 +191,12 @@ export function HomePage() {
         <div className="flex w-full items-center justify-center">
           <AnimatedEmpty
             className="bg-card"
-            title={t("dashboard.allGood", "All good!")}
             description={t(
               "dashboard.noAlertsDescription",
-              "No alerts at this time. Everything is in order.",
+              "No alerts at this time. Everything is in order."
             )}
             icons={[ShieldAlert, ShieldAlert, ShieldAlert]}
+            title={t("dashboard.allGood", "All good!")}
           />
         </div>
       ) : (

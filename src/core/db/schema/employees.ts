@@ -1,8 +1,8 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { agencies } from "./agencies";
 import { timestampsWithSoftDelete } from "./columns.helpers";
 import { positions } from "./positions";
 import { workLocations } from "./work-locations";
-import { agencies } from "./agencies";
 
 export const employees = sqliteTable("employees", {
   id: integer("id").primaryKey({ autoIncrement: true }),

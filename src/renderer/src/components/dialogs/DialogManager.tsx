@@ -1,20 +1,19 @@
 "use client";
 
-import { useDialogStore } from "@/stores/dialog-store";
-import { CreateEmployeeDialog } from "@/components/employees/CreateEmployeeDialog";
-import { AddDocumentDialog } from "@/components/documents/AddDocumentDialog";
 import { AddCacesDialog } from "@/components/caces/AddCacesDialog";
-import { AddMedicalVisitDialog } from "@/components/medical-visits/AddMedicalVisitDialog";
-import { AddDrivingAuthorizationDialog } from "@/components/driving-authorizations/AddDrivingAuthorizationDialog";
-import { AddOnlineTrainingDialog } from "@/components/online-trainings/AddOnlineTrainingDialog";
+import { CreateContractTypeDialog } from "@/components/contract-types/CreateContractTypeDialog";
 import { CreateContractDialog } from "@/components/contracts/CreateContractDialog";
+import { CreateDepartmentDialog } from "@/components/departments/CreateDepartmentDialog";
+import { AddDocumentDialog } from "@/components/documents/AddDocumentDialog";
+import { AddDrivingAuthorizationDialog } from "@/components/driving-authorizations/AddDrivingAuthorizationDialog";
+import { CreateEmployeeDialog } from "@/components/employees/CreateEmployeeDialog";
+import { AddMedicalVisitDialog } from "@/components/medical-visits/AddMedicalVisitDialog";
+import { AddOnlineTrainingDialog } from "@/components/online-trainings/AddOnlineTrainingDialog";
 import { CreatePositionDialog } from "@/components/positions/CreatePositionDialog";
 import { CreateWorkLocationDialog } from "@/components/work-locations/CreateWorkLocationDialog";
-import { CreateDepartmentDialog } from "@/components/departments/CreateDepartmentDialog";
-import { CreateContractTypeDialog } from "@/components/contract-types/CreateContractTypeDialog";
-
 import {
   useAgencies,
+  useContractTypes,
   useCreateCaces,
   useCreateContract,
   useCreateContractType,
@@ -30,8 +29,8 @@ import {
   useEmployees,
   usePositions,
   useWorkLocations,
-  useContractTypes,
 } from "@/hooks";
+import { useDialogStore } from "@/stores/dialog-store";
 
 export function DialogManager() {
   const activeDialog = useDialogStore((state) => state.activeDialog);
@@ -69,106 +68,86 @@ export function DialogManager() {
     case "create-employee":
       return (
         <CreateEmployeeDialog
-          open
-          onOpenChange={handleOpenChange}
-          onCreate={(data) => createEmployee.mutate(data)}
+          agencies={agencies}
           departments={departments}
+          onCreate={(data) => createEmployee.mutate(data)}
+          onOpenChange={handleOpenChange}
+          open
           positions={positions}
           workLocations={workLocations}
-          agencies={agencies}
         />
       );
 
     case "create-document":
       return (
         <AddDocumentDialog
-          open
-          onOpenChange={handleOpenChange}
           onAdd={(data) => createDocument.mutate(data)}
+          onOpenChange={handleOpenChange}
+          open
         />
       );
 
     case "create-caces":
       return (
         <AddCacesDialog
-          open
-          onOpenChange={handleOpenChange}
-          onAdd={(data) => createCaces.mutate(data)}
           employees={employees}
+          onAdd={(data) => createCaces.mutate(data)}
+          onOpenChange={handleOpenChange}
+          open
         />
       );
 
     case "create-medical-visit":
       return (
         <AddMedicalVisitDialog
-          open
-          onOpenChange={handleOpenChange}
           onAdd={(data) => createMedicalVisit.mutate(data)}
+          onOpenChange={handleOpenChange}
+          open
         />
       );
 
     case "create-driving-authorization":
       return (
         <AddDrivingAuthorizationDialog
-          open
-          onOpenChange={handleOpenChange}
-          onAdd={(data) => createDrivingAuthorization.mutate(data)}
           employees={employees}
+          onAdd={(data) => createDrivingAuthorization.mutate(data)}
+          onOpenChange={handleOpenChange}
+          open
         />
       );
 
     case "create-online-training":
       return (
         <AddOnlineTrainingDialog
-          open
-          onOpenChange={handleOpenChange}
-          onAdd={(data) => createOnlineTraining.mutate(data)}
           employees={employees}
+          onAdd={(data) => createOnlineTraining.mutate(data)}
+          onOpenChange={handleOpenChange}
+          open
         />
       );
 
     case "create-contract":
       return (
         <CreateContractDialog
-          open
-          onOpenChange={handleOpenChange}
-          onCreate={(data) => createContract.mutate(data)}
-          employees={employees}
           contractTypes={contractTypes}
+          employees={employees}
+          onCreate={(data) => createContract.mutate(data)}
+          onOpenChange={handleOpenChange}
+          open
         />
       );
 
     case "create-position":
-      return (
-        <CreatePositionDialog
-          open
-          onOpenChange={handleOpenChange}
-        />
-      );
+      return <CreatePositionDialog onOpenChange={handleOpenChange} open />;
 
     case "create-work-location":
-      return (
-        <CreateWorkLocationDialog
-          open
-          onOpenChange={handleOpenChange}
-        />
-      );
+      return <CreateWorkLocationDialog onOpenChange={handleOpenChange} open />;
 
     case "create-department":
-      return (
-        <CreateDepartmentDialog
-          open
-          onClose={closeDialog}
-        />
-      );
+      return <CreateDepartmentDialog onClose={closeDialog} open />;
 
     case "create-contract-type":
-      return (
-        <CreateContractTypeDialog
-          open
-          onOpenChange={handleOpenChange}
-        />
-      );
+      return <CreateContractTypeDialog onOpenChange={handleOpenChange} open />;
 
     default:
       return null;

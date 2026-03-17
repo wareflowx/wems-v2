@@ -15,12 +15,11 @@ import {
   ShieldAlert,
   Sparkles,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import * as db from "@/actions/database";
 import { AddCacesDialog } from "@/components/caces/AddCacesDialog";
 import { EditCacesDialog } from "@/components/caces/EditCacesDialog";
-import * as db from "@/actions/database";
-import { useToast } from "@/utils/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MetricsSection } from "@/components/ui/metrics-section";
@@ -53,6 +52,7 @@ import {
   useEmployees,
   useUpdateCaces,
 } from "@/hooks";
+import { useToast } from "@/utils/toast";
 
 export function CacesPage() {
   const { t } = useTranslation();
@@ -101,7 +101,10 @@ export function CacesPage() {
     const employees = new Map<number, string>();
     caces.forEach((c) => {
       if (c.employee) {
-        employees.set(c.employee.id, `${c.employee.firstName} ${c.employee.lastName}`);
+        employees.set(
+          c.employee.id,
+          `${c.employee.firstName} ${c.employee.lastName}`
+        );
       }
     });
     return Array.from(employees.entries()).map(([id, name]) => ({ id, name }));
@@ -110,7 +113,9 @@ export function CacesPage() {
   // Filter CACES
   const filteredCaces = useMemo(() => {
     return caces.filter((cace) => {
-      const employeeName = cace.employee ? `${cace.employee.firstName} ${cace.employee.lastName}` : "";
+      const employeeName = cace.employee
+        ? `${cace.employee.firstName} ${cace.employee.lastName}`
+        : "";
 
       const matchesSearch =
         search === "" ||
@@ -610,7 +615,9 @@ export function CacesPage() {
                             className="text-gray-700 underline transition-opacity hover:opacity-80"
                             to={`/employees_/${cacesItem.employeeId}`}
                           >
-                            {cacesItem.employee ? `${cacesItem.employee.firstName} ${cacesItem.employee.lastName}` : "-"}
+                            {cacesItem.employee
+                              ? `${cacesItem.employee.firstName} ${cacesItem.employee.lastName}`
+                              : "-"}
                           </Link>
                         </TableCell>
                         <TableCell className="px-4">

@@ -4,22 +4,21 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ChevronUp,
   ChevronsLeft,
   ChevronsRight,
+  ChevronUp,
   Edit,
   Filter,
   Plus,
-  Search,
   SearchX,
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import * as db from "@/actions/database";
 import { AddOnlineTrainingDialog } from "@/components/online-trainings/AddOnlineTrainingDialog";
 import { EditOnlineTrainingDialog } from "@/components/online-trainings/EditOnlineTrainingDialog";
-import { useToast } from "@/utils/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MetricsSection } from "@/components/ui/metrics-section";
@@ -46,13 +45,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  useOnlineTrainings,
   useCreateOnlineTraining,
   useDeleteOnlineTraining,
-  useUpdateOnlineTraining,
   useEmployees,
+  useOnlineTrainings,
+  useUpdateOnlineTraining,
 } from "@/hooks";
-import * as db from "@/actions/database";
+import { useToast } from "@/utils/toast";
 
 export function OnlineTrainingsPage() {
   const { t } = useTranslation();
@@ -84,10 +83,15 @@ export function OnlineTrainingsPage() {
       if (training.status !== "in_progress" && training.expirationDate) {
         const expDate = new Date(training.expirationDate);
         expDate.setHours(0, 0, 0, 0);
-        const daysLeft = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const daysLeft = Math.ceil(
+          (expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
 
-        if (daysLeft < 0) status = "expired";
-        else if (daysLeft <= 30) status = "warning";
+        if (daysLeft < 0) {
+          status = "expired";
+        } else if (daysLeft <= 30) {
+          status = "warning";
+        }
       }
 
       return { ...training, computedStatus: status };
@@ -98,9 +102,18 @@ export function OnlineTrainingsPage() {
   const kpis = useMemo(
     () => ({
       totalTrainings: trainingsWithStatus.length,
-      inProgressTrainings: trainingsWithStatus.filter((t: any) => t.status === "in_progress").length,
-      completedTrainings: trainingsWithStatus.filter((t: any) => t.status === "completed" && t.computedStatus !== "expired" && t.computedStatus !== "warning").length,
-      expiredTrainings: trainingsWithStatus.filter((t: any) => t.computedStatus === "expired").length,
+      inProgressTrainings: trainingsWithStatus.filter(
+        (t: any) => t.status === "in_progress"
+      ).length,
+      completedTrainings: trainingsWithStatus.filter(
+        (t: any) =>
+          t.status === "completed" &&
+          t.computedStatus !== "expired" &&
+          t.computedStatus !== "warning"
+      ).length,
+      expiredTrainings: trainingsWithStatus.filter(
+        (t: any) => t.computedStatus === "expired"
+      ).length,
     }),
     [trainingsWithStatus]
   );
@@ -114,7 +127,10 @@ export function OnlineTrainingsPage() {
         employeeMap.set(emp.id, `${emp.firstName} ${emp.lastName}`);
       }
     });
-    return Array.from(employeeMap.entries()).map(([id, name]) => ({ id, name }));
+    return Array.from(employeeMap.entries()).map(([id, name]) => ({
+      id,
+      name,
+    }));
   }, [trainings, employees]);
 
   // Filter
@@ -129,8 +145,10 @@ export function OnlineTrainingsPage() {
         training.trainingName.toLowerCase().includes(search.toLowerCase()) ||
         training.trainingProvider.toLowerCase().includes(search.toLowerCase());
 
-      const matchesStatus = statusFilter === "all" || training.computedStatus === statusFilter;
-      const matchesEmployee = employeeFilter === "all" || employeeName === employeeFilter;
+      const matchesStatus =
+        statusFilter === "all" || training.computedStatus === statusFilter;
+      const matchesEmployee =
+        employeeFilter === "all" || employeeName === employeeFilter;
 
       return matchesSearch && matchesStatus && matchesEmployee;
     });
@@ -152,8 +170,12 @@ export function OnlineTrainingsPage() {
         bValue = b[sortColumn];
       }
 
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      if (aValue < bValue) {
+        return sortDirection === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortDirection === "asc" ? 1 : -1;
+      }
       return 0;
     });
     return sorted;
@@ -308,13 +330,17 @@ export function OnlineTrainingsPage() {
   };
 
   const getDaysBadge = (expirationDate: string | null) => {
-    if (!expirationDate) return null;
+    if (!expirationDate) {
+      return null;
+    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const expDate = new Date(expirationDate);
     expDate.setHours(0, 0, 0, 0);
-    const daysLeft = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const daysLeft = Math.ceil(
+      (expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     let dotColor: string;
     let text: string;
@@ -405,35 +431,55 @@ export function OnlineTrainingsPage() {
           />
 
           <div className="flex flex-wrap gap-2">
-            <div className="flex-1 min-w-[200px]">
+            <div className="min-w-[200px] flex-1">
               <Input
-                placeholder={t("onlineTrainings.search")}
-                value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
                   setCurrentPage(1);
                 }}
+                placeholder={t("onlineTrainings.search")}
+                value={search}
               />
             </div>
-            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setCurrentPage(1); }}>
+            <Select
+              onValueChange={(v) => {
+                setStatusFilter(v);
+                setCurrentPage(1);
+              }}
+              value={statusFilter}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t("onlineTrainings.status")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("common.all")}</SelectItem>
-                <SelectItem value="in_progress">{t("onlineTrainings.inProgress")}</SelectItem>
-                <SelectItem value="completed">{t("onlineTrainings.completed")}</SelectItem>
-                <SelectItem value="expired">{t("onlineTrainings.expired")}</SelectItem>
+                <SelectItem value="in_progress">
+                  {t("onlineTrainings.inProgress")}
+                </SelectItem>
+                <SelectItem value="completed">
+                  {t("onlineTrainings.completed")}
+                </SelectItem>
+                <SelectItem value="expired">
+                  {t("onlineTrainings.expired")}
+                </SelectItem>
               </SelectContent>
             </Select>
-            <Select value={employeeFilter} onValueChange={(v) => { setEmployeeFilter(v); setCurrentPage(1); }}>
+            <Select
+              onValueChange={(v) => {
+                setEmployeeFilter(v);
+                setCurrentPage(1);
+              }}
+              value={employeeFilter}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t("onlineTrainings.employee")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("common.all")}</SelectItem>
                 {uniqueEmployees.map((emp: any) => (
-                  <SelectItem key={emp.id} value={emp.name}>{emp.name}</SelectItem>
+                  <SelectItem key={emp.id} value={emp.name}>
+                    {emp.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -447,55 +493,93 @@ export function OnlineTrainingsPage() {
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4" onClick={() => handleSort("employee")}>
-                    <div className="flex items-center gap-1 cursor-pointer">
+                  <TableHead
+                    className="px-4"
+                    onClick={() => handleSort("employee")}
+                  >
+                    <div className="flex cursor-pointer items-center gap-1">
                       {t("onlineTrainings.employee")}
-                      {sortColumn === "employee" && (
-                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortColumn === "employee" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </TableHead>
-                  <TableHead className="px-4" onClick={() => handleSort("trainingName")}>
-                    <div className="flex items-center gap-1 cursor-pointer">
+                  <TableHead
+                    className="px-4"
+                    onClick={() => handleSort("trainingName")}
+                  >
+                    <div className="flex cursor-pointer items-center gap-1">
                       {t("onlineTrainings.trainingName")}
-                      {sortColumn === "trainingName" && (
-                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortColumn === "trainingName" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </TableHead>
-                  <TableHead className="px-4" onClick={() => handleSort("trainingProvider")}>
-                    <div className="flex items-center gap-1 cursor-pointer">
+                  <TableHead
+                    className="px-4"
+                    onClick={() => handleSort("trainingProvider")}
+                  >
+                    <div className="flex cursor-pointer items-center gap-1">
                       {t("onlineTrainings.provider")}
-                      {sortColumn === "trainingProvider" && (
-                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortColumn === "trainingProvider" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </TableHead>
-                  <TableHead className="px-4" onClick={() => handleSort("completionDate")}>
-                    <div className="flex items-center gap-1 cursor-pointer">
+                  <TableHead
+                    className="px-4"
+                    onClick={() => handleSort("completionDate")}
+                  >
+                    <div className="flex cursor-pointer items-center gap-1">
                       {t("onlineTrainings.completionDate")}
-                      {sortColumn === "completionDate" && (
-                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortColumn === "completionDate" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </TableHead>
-                  <TableHead className="px-4" onClick={() => handleSort("expirationDate")}>
-                    <div className="flex items-center gap-1 cursor-pointer">
+                  <TableHead
+                    className="px-4"
+                    onClick={() => handleSort("expirationDate")}
+                  >
+                    <div className="flex cursor-pointer items-center gap-1">
                       {t("onlineTrainings.expirationDate")}
-                      {sortColumn === "expirationDate" && (
-                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortColumn === "expirationDate" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </TableHead>
-                  <TableHead className="px-4" onClick={() => handleSort("status")}>
-                    <div className="flex items-center gap-1 cursor-pointer">
+                  <TableHead
+                    className="px-4"
+                    onClick={() => handleSort("status")}
+                  >
+                    <div className="flex cursor-pointer items-center gap-1">
                       {t("onlineTrainings.status")}
-                      {sortColumn === "status" && (
-                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortColumn === "status" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </TableHead>
-                  <TableHead className="px-4 text-right">{t("onlineTrainings.actions")}</TableHead>
+                  <TableHead className="px-4 text-right">
+                    {t("onlineTrainings.actions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -506,25 +590,37 @@ export function OnlineTrainingsPage() {
                         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                           <SearchX className="h-8 w-8 opacity-50" />
                         </div>
-                        <p className="font-medium text-lg">{t("onlineTrainings.empty")}</p>
+                        <p className="font-medium text-lg">
+                          {t("onlineTrainings.empty")}
+                        </p>
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : (
                   paginatedTrainings.map((training: any) => {
-                    const emp = employees.find((e) => e.id === training.employeeId);
+                    const emp = employees.find(
+                      (e) => e.id === training.employeeId
+                    );
                     return (
                       <TableRow className="hover:bg-muted/50" key={training.id}>
                         <TableCell className="px-4 font-medium">
                           {emp ? `${emp.firstName} ${emp.lastName}` : "Unknown"}
                         </TableCell>
-                        <TableCell className="px-4">{training.trainingName}</TableCell>
-                        <TableCell className="px-4 text-muted-foreground">{training.trainingProvider || "-"}</TableCell>
+                        <TableCell className="px-4">
+                          {training.trainingName}
+                        </TableCell>
                         <TableCell className="px-4 text-muted-foreground">
-                          {new Date(training.completionDate).toLocaleDateString()}
+                          {training.trainingProvider || "-"}
+                        </TableCell>
+                        <TableCell className="px-4 text-muted-foreground">
+                          {new Date(
+                            training.completionDate
+                          ).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="px-4">
-                          {training.expirationDate ? getDaysBadge(training.expirationDate) : "-"}
+                          {training.expirationDate
+                            ? getDaysBadge(training.expirationDate)
+                            : "-"}
                         </TableCell>
                         <TableCell className="px-4">
                           {getStatusBadge(training.computedStatus)}
@@ -533,19 +629,31 @@ export function OnlineTrainingsPage() {
                           <div className="flex items-center justify-end gap-2">
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" onClick={() => setEditingTraining(training)}>
+                                <Button
+                                  onClick={() => setEditingTraining(training)}
+                                  size="icon"
+                                  variant="ghost"
+                                >
                                   <Edit className="h-4 w-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>{t("onlineTrainings.edit")}</TooltipContent>
+                              <TooltipContent>
+                                {t("onlineTrainings.edit")}
+                              </TooltipContent>
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" onClick={() => handleDelete(training.id)}>
+                                <Button
+                                  onClick={() => handleDelete(training.id)}
+                                  size="icon"
+                                  variant="ghost"
+                                >
                                   <Trash2 className="h-4 w-4 text-destructive" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>{t("onlineTrainings.delete")}</TooltipContent>
+                              <TooltipContent>
+                                {t("onlineTrainings.delete")}
+                              </TooltipContent>
                             </Tooltip>
                           </div>
                         </TableCell>
@@ -559,21 +667,45 @@ export function OnlineTrainingsPage() {
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                {t("common.showing")} {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, sortedTrainings.length)} {t("common.of")} {sortedTrainings.length}
+              <div className="text-muted-foreground text-sm">
+                {t("common.showing")} {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                {Math.min(currentPage * itemsPerPage, sortedTrainings.length)}{" "}
+                {t("common.of")} {sortedTrainings.length}
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+                <Button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(1)}
+                  size="sm"
+                  variant="outline"
+                >
                   <ChevronsLeft className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+                <Button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  size="sm"
+                  variant="outline"
+                >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-sm">{currentPage} / {totalPages}</span>
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
+                <span className="text-sm">
+                  {currentPage} / {totalPages}
+                </span>
+                <Button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  size="sm"
+                  variant="outline"
+                >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
+                <Button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(totalPages)}
+                  size="sm"
+                  variant="outline"
+                >
                   <ChevronsRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -583,15 +715,15 @@ export function OnlineTrainingsPage() {
       </div>
 
       <AddOnlineTrainingDialog
-        open={isAddDialogOpen}
-        onOpenChange={setIsAddDialogOpen}
-        onAdd={handleAdd}
         employees={employees}
+        onAdd={handleAdd}
+        onOpenChange={setIsAddDialogOpen}
+        open={isAddDialogOpen}
       />
       <EditOnlineTrainingDialog
-        open={!!editingTraining}
-        onOpenChange={(open) => !open && setEditingTraining(null)}
         onEdit={handleEdit}
+        onOpenChange={(open) => !open && setEditingTraining(null)}
+        open={!!editingTraining}
         training={editingTraining}
       />
     </>

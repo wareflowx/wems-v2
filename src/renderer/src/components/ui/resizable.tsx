@@ -20,11 +20,14 @@ function ResizablePanelGroup({
   );
 }
 
-function ResizablePanel({ className, ...props }: ResizablePrimitive.PanelProps) {
+function ResizablePanel({
+  className,
+  ...props
+}: ResizablePrimitive.PanelProps) {
   return (
     <ResizablePrimitive.Panel
-      data-slot="resizable-panel"
       className={cn("min-w-0", className)}
+      data-slot="resizable-panel"
       {...props}
     />
   );

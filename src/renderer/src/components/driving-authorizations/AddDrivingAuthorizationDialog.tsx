@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  CacesFileUpload,
+  type FileData,
+} from "@/components/caces/CacesFileUpload";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CacesFileUpload, type FileData } from "@/components/caces/CacesFileUpload";
 
 interface Employee {
   id: number;
@@ -39,7 +42,18 @@ interface AddDrivingAuthorizationDialogProps {
   employees?: Employee[];
 }
 
-const LICENSE_CATEGORIES = ["B", "C", "D", "BE", "CE", "DE", "C1", "C1E", "D1", "D1E"];
+const LICENSE_CATEGORIES = [
+  "B",
+  "C",
+  "D",
+  "BE",
+  "CE",
+  "DE",
+  "C1",
+  "C1E",
+  "D1",
+  "D1E",
+];
 
 export function AddDrivingAuthorizationDialog({
   open,
@@ -56,7 +70,7 @@ export function AddDrivingAuthorizationDialog({
 
   const handleSubmit = () => {
     onAdd?.({
-      employeeId: parseInt(employeeId, 10),
+      employeeId: Number.parseInt(employeeId, 10),
       licenseCategory,
       dateObtained,
       expirationDate,
@@ -66,7 +80,8 @@ export function AddDrivingAuthorizationDialog({
     onOpenChange?.(false);
   };
 
-  const isFormValid = employeeId && licenseCategory && dateObtained && expirationDate;
+  const isFormValid =
+    employeeId && licenseCategory && dateObtained && expirationDate;
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -80,7 +95,7 @@ export function AddDrivingAuthorizationDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{t("drivingAuthorizations.add")}</DialogTitle>
@@ -90,10 +105,14 @@ export function AddDrivingAuthorizationDialog({
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="employee">{t("drivingAuthorizations.employee")}</Label>
-            <Select value={employeeId} onValueChange={setEmployeeId}>
+            <Label htmlFor="employee">
+              {t("drivingAuthorizations.employee")}
+            </Label>
+            <Select onValueChange={setEmployeeId} value={employeeId}>
               <SelectTrigger>
-                <SelectValue placeholder={t("drivingAuthorizations.selectEmployee")} />
+                <SelectValue
+                  placeholder={t("drivingAuthorizations.selectEmployee")}
+                />
               </SelectTrigger>
               <SelectContent>
                 {employees.map((emp) => (
@@ -105,10 +124,14 @@ export function AddDrivingAuthorizationDialog({
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="category">{t("drivingAuthorizations.category")}</Label>
-            <Select value={licenseCategory} onValueChange={setLicenseCategory}>
+            <Label htmlFor="category">
+              {t("drivingAuthorizations.category")}
+            </Label>
+            <Select onValueChange={setLicenseCategory} value={licenseCategory}>
               <SelectTrigger>
-                <SelectValue placeholder={t("drivingAuthorizations.selectCategory")} />
+                <SelectValue
+                  placeholder={t("drivingAuthorizations.selectCategory")}
+                />
               </SelectTrigger>
               <SelectContent>
                 {LICENSE_CATEGORIES.map((cat) => (
@@ -120,34 +143,38 @@ export function AddDrivingAuthorizationDialog({
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="dateObtained">{t("drivingAuthorizations.dateObtained")}</Label>
+            <Label htmlFor="dateObtained">
+              {t("drivingAuthorizations.dateObtained")}
+            </Label>
             <Input
               id="dateObtained"
+              onChange={(e) => setDateObtained(e.target.value)}
               type="date"
               value={dateObtained}
-              onChange={(e) => setDateObtained(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="expirationDate">{t("drivingAuthorizations.expirationDate")}</Label>
+            <Label htmlFor="expirationDate">
+              {t("drivingAuthorizations.expirationDate")}
+            </Label>
             <Input
               id="expirationDate"
+              onChange={(e) => setExpirationDate(e.target.value)}
               type="date"
               value={expirationDate}
-              onChange={(e) => setExpirationDate(e.target.value)}
             />
           </div>
           <CacesFileUpload
-            value={document}
-            onChange={setDocument}
             label={t("drivingAuthorizations.document")}
+            onChange={setDocument}
+            value={document}
           />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>
+          <Button onClick={() => handleOpenChange(false)} variant="outline">
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!isFormValid}>
+          <Button disabled={!isFormValid} onClick={handleSubmit}>
             {t("common.add")}
           </Button>
         </DialogFooter>

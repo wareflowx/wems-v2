@@ -1,9 +1,23 @@
 "use client";
 
+import { queryKeys } from "@@/lib/query-keys";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Download, File, FolderOpen, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FolderOpen, File, Trash2, Download } from "lucide-react";
+import type { ExportHistoryRecord } from "@/actions/database";
+import * as db from "@/actions/database";
+import { Button } from "@/components/ui/button";
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
+import { Input } from "@/components/ui/input";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -12,22 +26,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/utils/toast";
-import { queryKeys } from "@@/lib/query-keys";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import * as db from "@/actions/database";
 import { useORPCReady } from "@/hooks";
-import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
-import type { ExportHistoryRecord } from "@/actions/database";
+import { useToast } from "@/utils/toast";
 
 export function ExportsPage() {
   const { t } = useTranslation();
@@ -36,7 +36,8 @@ export function ExportsPage() {
   const orpcReady = useORPCReady();
   const [search, setSearch] = useState("");
   const [formatFilter, setFormatFilter] = useState<string>("all");
-  const [deletingRecord, setDeletingRecord] = useState<ExportHistoryRecord | null>(null);
+  const [deletingRecord, setDeletingRecord] =
+    useState<ExportHistoryRecord | null>(null);
 
   // Fetch export history
   const { data: history = [], isLoading } = useQuery({
@@ -99,7 +100,9 @@ export function ExportsPage() {
       const matchesSearch =
         record.filePath.toLowerCase().includes(searchLower) ||
         record.types.some((type) => type.toLowerCase().includes(searchLower));
-      if (!matchesSearch) return false;
+      if (!matchesSearch) {
+        return false;
+      }
     }
 
     // Format filter
@@ -137,21 +140,29 @@ export function ExportsPage() {
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <PageHeaderCard title={t("exports.title", "Export History")} description={t("exports.description", "View and manage your exported files")}>
+    <div className="space-y-4 p-6">
+      <PageHeaderCard
+        description={t(
+          "exports.description",
+          "View and manage your exported files"
+        )}
+        title={t("exports.title", "Export History")}
+      >
         <div className="flex gap-2">
           <Input
+            className="max-w-xs"
+            onChange={(e) => setSearch(e.target.value)}
             placeholder={t("exports.search", "Search...")}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="max-w-xs"
           />
-          <Select value={formatFilter} onValueChange={setFormatFilter}>
+          <Select onValueChange={setFormatFilter} value={formatFilter}>
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder={t("exports.filter.format", "Format")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("exports.filter.all", "All")}</SelectItem>
+              <SelectItem value="all">
+                {t("exports.filter.all", "All")}
+              </SelectItem>
               <SelectItem value="csv">CSV</SelectItem>
               <SelectItem value="xlsx">Excel</SelectItem>
               <SelectItem value="pdf">PDF</SelectItem>
@@ -161,14 +172,14 @@ export function ExportsPage() {
       </PageHeaderCard>
 
       {isLoading ? (
-        <div className="text-center py-8 text-muted-foreground">
-          Loading...
-        </div>
+        <div className="py-8 text-center text-muted-foreground">Loading...</div>
       ) : filteredHistory.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          <Download className="mx-auto h-12 w-12 mb-4 opacity-50" />
+        <div className="py-8 text-center text-muted-foreground">
+          <Download className="mx-auto mb-4 h-12 w-12 opacity-50" />
           <p>{t("exports.empty.title", "No exports yet")}</p>
-          <p className="text-sm">{t("exports.empty.description", "Your exports will appear here")}</p>
+          <p className="text-sm">
+            {t("exports.empty.description", "Your exports will appear here")}
+          </p>
         </div>
       ) : (
         <div className="rounded-md border">
@@ -180,7 +191,9 @@ export function ExportsPage() {
                 <TableHead>{t("exports.columns.format", "Format")}</TableHead>
                 <TableHead>{t("exports.columns.records", "Records")}</TableHead>
                 <TableHead>{t("exports.columns.path", "Path")}</TableHead>
-                <TableHead className="text-right">{t("exports.columns.actions", "Actions")}</TableHead>
+                <TableHead className="text-right">
+                  {t("exports.columns.actions", "Actions")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -193,8 +206,8 @@ export function ExportsPage() {
                     <div className="flex gap-1">
                       {record.types.map((type) => (
                         <span
+                          className="inline-flex items-center rounded bg-muted px-2 py-0.5 font-medium text-xs"
                           key={type}
-                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-muted"
                         >
                           {type}
                         </span>
@@ -203,7 +216,7 @@ export function ExportsPage() {
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getFormatBadgeColor(
+                      className={`inline-flex items-center rounded px-2 py-0.5 font-medium text-xs ${getFormatBadgeColor(
                         record.format
                       )}`}
                     >
@@ -211,32 +224,35 @@ export function ExportsPage() {
                     </span>
                   </TableCell>
                   <TableCell>{record.recordCount}</TableCell>
-                  <TableCell className="max-w-xs truncate" title={record.filePath}>
-                    <span className="text-xs font-mono">{record.filePath}</span>
+                  <TableCell
+                    className="max-w-xs truncate"
+                    title={record.filePath}
+                  >
+                    <span className="font-mono text-xs">{record.filePath}</span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex gap-1 justify-end">
+                    <div className="flex justify-end gap-1">
                       <Button
-                        variant="ghost"
-                        size="icon"
                         onClick={() => handleOpenFile(record.filePath)}
+                        size="icon"
                         title={t("exports.actions.openFile", "Open file")}
+                        variant="ghost"
                       >
                         <File className="h-4 w-4" />
                       </Button>
                       <Button
-                        variant="ghost"
-                        size="icon"
                         onClick={() => handleOpenFolder(record.filePath)}
+                        size="icon"
                         title={t("exports.actions.openFolder", "Open folder")}
+                        variant="ghost"
                       >
                         <FolderOpen className="h-4 w-4" />
                       </Button>
                       <Button
-                        variant="ghost"
-                        size="icon"
                         onClick={() => setDeletingRecord(record)}
+                        size="icon"
                         title={t("exports.actions.delete", "Delete")}
+                        variant="ghost"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -250,13 +266,18 @@ export function ExportsPage() {
       )}
 
       <DeleteConfirmDialog
-        open={!!deletingRecord}
-        onOpenChange={(open) => !open && setDeletingRecord(null)}
-        onConfirm={() => deletingRecord && deleteMutation.mutate(deletingRecord.id)}
-        title={t("exports.deleteConfirm.title", "Delete export?")}
-        description={t("exports.deleteConfirm.description", "This will remove the export from history. The file will not be deleted.")}
-        confirmText={t("exports.deleteConfirm.confirm", "Delete")}
         cancelText={t("exports.deleteConfirm.cancel", "Cancel")}
+        confirmText={t("exports.deleteConfirm.confirm", "Delete")}
+        description={t(
+          "exports.deleteConfirm.description",
+          "This will remove the export from history. The file will not be deleted."
+        )}
+        onConfirm={() =>
+          deletingRecord && deleteMutation.mutate(deletingRecord.id)
+        }
+        onOpenChange={(open) => !open && setDeletingRecord(null)}
+        open={!!deletingRecord}
+        title={t("exports.deleteConfirm.title", "Delete export?")}
       />
     </div>
   );

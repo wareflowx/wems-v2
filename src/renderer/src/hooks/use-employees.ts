@@ -79,7 +79,8 @@ export function useCreateEmployee() {
       }
 
       // Check for UNIQUE constraint error (email already exists)
-      const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred";
       const isDuplicateEmail =
         errorMessage.includes("UNIQUE constraint failed") &&
         errorMessage.includes("email");
@@ -201,7 +202,9 @@ export function useDeleteEmployee() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.employees.lists() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedEmployees() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedEmployees(),
+      });
     },
   });
 }

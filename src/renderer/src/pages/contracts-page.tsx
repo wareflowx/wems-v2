@@ -13,14 +13,14 @@ import { ErrorDisplay } from "@/components/ui/error-display";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import {
-  useContractTypes,
   useContracts,
+  useContractTypes,
   useCreateContract,
   useDeleteContract,
   useUpdateContract,
 } from "@/hooks";
-import { useEmployees } from "@/hooks/use-employees";
 import { useAgencies } from "@/hooks/use-agencies";
+import { useEmployees } from "@/hooks/use-employees";
 
 // Transform database contract to table contract
 function transformContract(

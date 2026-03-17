@@ -1,7 +1,7 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { attachments } from "./attachments";
 import { timestampsWithSoftDelete } from "./columns.helpers";
 import { employees } from "./employees";
-import { attachments } from "./attachments";
 
 export const medicalVisits = sqliteTable("medical_visits", {
   id: integer("id").primaryKey({ autoIncrement: true }),

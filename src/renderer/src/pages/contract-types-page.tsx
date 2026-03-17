@@ -1,7 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { FileText, Plus, Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ContractTypesTable } from "@/components/contract-types/ContractTypesTable";
+import { CreateContractTypeDialog } from "@/components/contract-types/CreateContractTypeDialog";
+import { DeleteContractTypeDialog } from "@/components/contract-types/DeleteContractTypeDialog";
+import { EditContractTypeDialog } from "@/components/contract-types/EditContractTypeDialog";
 import { Button } from "@/components/ui/button";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { Input } from "@/components/ui/input";
@@ -15,13 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
-import { ContractTypesTable } from "@/components/contract-types/ContractTypesTable";
-import { CreateContractTypeDialog } from "@/components/contract-types/CreateContractTypeDialog";
-import { DeleteContractTypeDialog } from "@/components/contract-types/DeleteContractTypeDialog";
-import { EditContractTypeDialog } from "@/components/contract-types/EditContractTypeDialog";
-import {
-  useContractTypes,
-} from "@/hooks";
+import { useContractTypes } from "@/hooks";
 
 export function ContractTypesPage() {
   const { t } = useTranslation();
@@ -81,7 +79,10 @@ export function ContractTypesPage() {
           onRetry={() =>
             queryClient.invalidateQueries({ queryKey: ["contract-types"] })
           }
-          title={t("contractTypes.errorLoading", "Failed to load contract types")}
+          title={t(
+            "contractTypes.errorLoading",
+            "Failed to load contract types"
+          )}
         />
       </div>
     );
@@ -165,9 +166,9 @@ export function ContractTypesPage() {
             {/* Table */}
             <ContractTypesTable
               contractTypes={filteredContractTypes}
-              onEdit={setEditingContractType}
-              onDelete={setDeletingContractType}
               onAdd={() => setIsCreateDialogOpen(true)}
+              onDelete={setDeletingContractType}
+              onEdit={setEditingContractType}
             />
           </div>
         </div>

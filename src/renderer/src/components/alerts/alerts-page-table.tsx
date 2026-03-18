@@ -301,6 +301,12 @@ export function AlertsPageTable({
                   </Button>
                 </TableHead>
                 <TableHead className="px-4">
+                  {t("alerts.category")}
+                </TableHead>
+                <TableHead className="px-4">
+                  {t("alerts.daysLeft")}
+                </TableHead>
+                <TableHead className="px-4">
                   <Button
                     className="-ml-4 h-8 font-medium hover:bg-muted"
                     onClick={() => handleSort("date")}
@@ -318,7 +324,7 @@ export function AlertsPageTable({
             <TableBody>
               {paginatedAlerts.length === 0 ? (
                 <TableRow>
-                  <TableCell className="h-64" colSpan={4}>
+                  <TableCell className="h-64" colSpan={6}>
                     <div className="flex h-full flex-col items-center justify-center p-8 text-muted-foreground">
                       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                         <SearchX className="h-8 w-8 opacity-50" />
@@ -354,6 +360,30 @@ export function AlertsPageTable({
                     </TableCell>
                     <TableCell className="px-4">
                       {getSeverityBadge(alert.severity)}
+                    </TableCell>
+                    <TableCell className="px-4">
+                      {alert.category || alert.visitType || "-"}
+                    </TableCell>
+                    <TableCell className="px-4">
+                      {alert.daysLeft !== undefined ? (
+                        <span
+                          className={`inline-flex items-center rounded-md px-2 py-0.5 font-medium text-xs ${
+                            alert.daysLeft < 0
+                              ? "bg-red-500/15 border border-red-500/25 text-red-700"
+                              : alert.daysLeft <= 7
+                                ? "bg-red-500/15 border border-red-500/25 text-red-700"
+                                : alert.daysLeft <= 30
+                                  ? "bg-yellow-600/15 border border-yellow-600/25 text-yellow-700"
+                                  : "bg-green-500/15 border border-green-500/25 text-green-700"
+                          }`}
+                        >
+                          {alert.daysLeft < 0
+                            ? `${Math.abs(alert.daysLeft)}d overdue`
+                            : `${alert.daysLeft}d`}
+                        </span>
+                      ) : (
+                        "-"
+                      )}
                     </TableCell>
                     <TableCell className="px-4 text-gray-700">
                       {alert.date}

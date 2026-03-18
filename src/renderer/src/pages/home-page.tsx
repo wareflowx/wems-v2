@@ -1,65 +1,21 @@
-import { ShieldAlert, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Sparkles } from "lucide-react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertsKPIs } from "@/components/home/alerts-kpis";
-import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
-import { useAlerts, useEmployees } from "@/hooks";
+import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AlertsKPIs } from "@/components/home/alerts-kpis";
 import { AlertsPageTable } from "@/components/alerts/alerts-page-table";
-
+import { useAlerts, useEmployees } from "@/hooks";
 
 export function HomePage() {
   const { t } = useTranslation();
-  const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [severityFilter, setSeverityFilter] = useState<string>("all");
-  const [employeeFilter, setEmployeeFilter] = useState<string>("all");
-  const [detailFilter, setDetailFilter] = useState<string>("all");
 
-  // Use TanStack Query hook for alerts
-  const { data: allAlerts = [], isLoading } = useAlerts({
-    search,
-    severity: severityFilter,
-    type: typeFilter === "all" ? undefined : typeFilter,
-  });
+  // Use TanStack Query hooks
+  const { data: allAlerts = [], isLoading: isAlertsLoading } = useAlerts({});
+  const { data: employees = [], isLoading: isEmployeesLoading } = useEmployees();
 
-  // Use TanStack Query hook for employees
-  const { data: employees = [] } = useEmployees();
-
-  // Client-side filtering for employee and detail filters only
-  // (search, severity, and type are already filtered by API)
-  const recentAlerts = useMemo(() => {
-    return allAlerts.filter((alert) => {
-      const matchesEmployee =
-        employeeFilter === "all" || alert.employee === employeeFilter;
-
-      const matchesDetail =
-        detailFilter === "all" ||
-        (alert.category && detailFilter === `CACES ${alert.category}`) ||
-        (alert.visitType && detailFilter === alert.visitType);
-
-      return matchesEmployee && matchesDetail;
-    });
-  }, [allAlerts, employeeFilter, detailFilter]);
-
-  // Get unique employees and details
-  const uniqueEmployees = useMemo(() => {
-    const employees = new Set(allAlerts.map((a) => a.employee));
-    return Array.from(employees);
-  }, [allAlerts]);
-
-  const uniqueDetails = useMemo(() => {
-    const details = new Set<string>();
-    allAlerts.forEach((a) => {
-      if (a.category) {
-        details.add(`CACES ${a.category}`);
-      }
-      if (a.visitType) {
-        details.add(a.visitType);
-      }
-    });
-    return Array.from(details);
-  }, [allAlerts]);
+  const isLoading = isAlertsLoading || isEmployeesLoading;
 
   // Calculate KPIs dynamically from alerts data
   const kpis = useMemo(() => {
@@ -83,34 +39,32 @@ export function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-4 p-4">
-        <PageHeaderCard
-          description={t("dashboard.description")}
-          icon={<Sparkles className="h-4 w-4 text-gray-600" />}
-          title={t("dashboard.title")}
-        />
-        <div className="flex items-center justify-center p-8">
-          <p className="text-muted-foreground">Loading...</p>
+      <TooltipProvider>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+          <PageHeaderSkeleton metricsCount={4} showMetrics />
         </div>
-      </div>
+      </TooltipProvider>
     );
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-2 p-4">
-      {/* Header */}
-      <PageHeaderCard
-        description={t("dashboard.description")}
-        icon={<Sparkles className="h-4 w-4 text-gray-600" />}
-        title={t("dashboard.title")}
-      />
+    <TooltipProvider>
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+        <div className="min-h-full space-y-3">
+          {/* Header */}
+          <PageHeaderCard
+            description={t("dashboard.description")}
+            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+            title={t("dashboard.title")}
+          />
 
-      {/* Key Metrics */}
-      <AlertsKPIs kpis={kpis} />
+          {/* KPIs */}
+          <AlertsKPIs kpis={kpis} />
 
-
-      {/* Table */}
-      <AlertsPageTable />
-    </div>
+          {/* Table */}
+          <AlertsPageTable />
+        </div>
+      </div>
+    </TooltipProvider>
   );
 }

@@ -275,9 +275,6 @@ export function AlertsPageTable({
                   </Button>
                 </TableHead>
                 <TableHead className="px-4">
-                  {t("common.employeeId")}
-                </TableHead>
-                <TableHead className="px-4">
                   <Button
                     className="-ml-4 h-8 font-medium hover:bg-muted"
                     onClick={() => handleSort("type")}
@@ -321,7 +318,7 @@ export function AlertsPageTable({
             <TableBody>
               {paginatedAlerts.length === 0 ? (
                 <TableRow>
-                  <TableCell className="h-64" colSpan={5}>
+                  <TableCell className="h-64" colSpan={4}>
                     <div className="flex h-full flex-col items-center justify-center p-8 text-muted-foreground">
                       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                         <SearchX className="h-8 w-8 opacity-50" />
@@ -340,16 +337,17 @@ export function AlertsPageTable({
                   <TableRow className="hover:bg-muted/50" key={alert.id}>
                     <TableCell className="px-4 font-medium">
                       <span className="text-gray-700">
-                        {alert.employee}
+                        <Link
+                          className="text-gray-700 underline transition-opacity hover:opacity-80"
+                          to={`/employees/${alert.employeeId}`}
+                        >
+                          {alert.employee}
+                        </Link>
+                        <p className="mt-0.5 text-gray-500 text-sm">
+                          {t("common.employeeId")}
+                          {alert.employeeId.toString().padStart(4, "0")}
+                        </p>
                       </span>
-                    </TableCell>
-                    <TableCell className="px-4">
-                      <Link
-                        className="text-gray-700 underline transition-opacity hover:opacity-80"
-                        to={`/employees/${alert.employeeId}`}
-                      >
-                        #{alert.employeeId.toString().padStart(4, "0")}
-                      </Link>
                     </TableCell>
                     <TableCell className="px-4">
                       {getTypeBadge(alert.type)}

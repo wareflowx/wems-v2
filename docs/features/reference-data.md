@@ -4,6 +4,8 @@
 
 Reference data (Données de référence) are the foundational lookup tables and configuration values that support the core functionality of WEMS. This document outlines the essential reference data entities needed for warehouse employee management, including locations, positions, categories, and system configuration.
 
+> **Important:** This system serves French 3PL and logistics companies, requiring specific compliance with CCN (Convention Collective), C2P (pénibilité), and French labor law.
+
 ## Current State
 
 - Basic reference data exists in the database
@@ -23,6 +25,7 @@ Physical locations where employees work within the warehouse/logistics facility.
 | code | string | Short code (e.g., "ZA", "SHP") |
 | type | LocationType | Type of location |
 | parentId | UUID | Parent location (for hierarchical structure) |
+| clientId | UUID | **3PL: Client/Business Unit** |
 | address | string | Full address if off-site |
 | isActive | boolean | Whether location is active |
 | createdAt | Date | Creation timestamp |
@@ -40,7 +43,20 @@ Physical locations where employees work within the warehouse/logistics facility.
 | SHIPPING | Expédition | Shipping area |
 | RECEIVING | Réception | Receiving area |
 
-### 2. Departments (Départements)
+### 2. Clients / Business Units (3PL)
+
+For third-party logistics, track which client each zone/employee is dedicated to.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Unique identifier |
+| name | string | Client name |
+| code | string | Short code |
+| isActive | boolean | Whether client is active |
+| createdAt | Date | Creation timestamp |
+| updatedAt | Date | Last update timestamp |
+
+### 3. Departments (Départements)
 
 Organizational units within the company.
 
@@ -56,9 +72,9 @@ Organizational units within the company.
 | createdAt | Date | Creation timestamp |
 | updatedAt | Date | Last update timestamp |
 
-### 3. Job Positions (Postes)
+### 4. Job Positions (Postes)
 
-Employee job titles and positions.
+Employee job titles and positions with French labor compliance fields.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -67,10 +83,16 @@ Employee job titles and positions.
 | nameEn | string | English name |
 | code | string | Short code |
 | category | PositionCategory | Position category |
+| coefficientId | UUID | **Link to Salary Grid (CCN)** |
+| isExecutive | boolean | **Cadre / Non-Cadre status** |
+| isPosteARisque | boolean | **Triggers mandatory SIR medical** |
 | description | string | Job description |
 | departmentId | UUID | Associated department |
-| requiredCertifications | string[] | Required CACES/certifications |
+| requiredCertifications | string[] | Required certifications |
 | requiredTraining | string[] | Required training modules |
+| requiredDocuments | string[] | Required document types |
+| hardshipFactors | string[] | **C2P: Pénibilité factors** |
+| maxWorkHoursWeekly | number | Standard hours (35 or 39) |
 | isActive | boolean | Whether position is active |
 | createdAt | Date | Creation timestamp |
 | updatedAt | Date | Last update timestamp |
@@ -88,7 +110,79 @@ Employee job titles and positions.
 | ADMIN | Administratif | Office staff |
 | MAINTENANCE | Maintenance | Maintenance technician |
 
-### 4. Alert Types (Types d'alertes)
+### 5. Salary Coefficients (Grille de Salaire)
+
+> **Critical:** Each position must be linked to a coefficient that determines the legal minimum salary under the CCN.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Unique identifier |
+| ccnId | UUID | Link to Collective Agreement |
+| code | string | Coefficient code (e.g., "138M", "150M") |
+| level | string | Level (e.g., "Echelon 1") |
+| echelon | number | Echelon number |
+| minimumSalary | number | Monthly minimum |
+| seniorityBonusPercent | number | Seniority bonus % per year |
+| isActive | boolean | Whether coefficient is active |
+
+### 6. Hardship Factors (Facteurs de Pénibilité - C2P)
+
+> **Critical:** For French C2P (Compte Professionnel de Prévention), track exposure to hardship factors.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Unique identifier |
+| code | string | Factor code |
+| name | string | French name |
+| nameEn | string | English name |
+| description | string | Description |
+| category | PenibiliteCategory | Category |
+| pointsPerYear | number | C2P points per year of exposure |
+| isActive | boolean | Whether factor is active |
+
+#### Hardship Categories
+
+| Category | French | Examples |
+|----------|--------|----------|
+| WORK_SCHEDULE | Travail en équipes | Shift work |
+| NIGHT_WORK | Travail de nuit | Night hours |
+| REPETITIVE | Gestes répétitifs | >15 actions/minute |
+| MANUAL_HANDLING | Manutention manuelle | Carrying >10kg |
+| POSTURES | Postures douloureuses | Kneeling, crouching |
+| VIBRATIONS | Vibrations | Heavy machinery |
+| TEMPERATURES | Températures extremes | Cold storage |
+| NOISE | Bruit | >80 dB |
+| CHEMICAL | Produits chimiques | Hazardous materials |
+| LOAD | Charges lourdes | Regular heavy lifting |
+
+### 7. Professional Certifications (Certifications Professionnelles)
+
+> **Expanded:** Beyond CACES - includes electrical, driving, safety certifications.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Unique identifier |
+| type | CertificationType | Type (CACES, ELECTRIC, SAFETY, DRIVING) |
+| recommendation | string | R489, R486, B0, B1V, etc. |
+| category | string | Category number/letter (e.g., "3", "1A") |
+| name | string | French name |
+| nameEn | string | English name |
+| description | string | Description |
+| validForMonths | number | Validity period in months |
+| requiresMedical | boolean | Requires medical clearance |
+| requiresTraining | boolean | Requires prior training |
+| isActive | boolean | Whether certification is active |
+
+#### Certification Types
+
+| Type | French | Examples |
+|------|--------|----------|
+| CACES | CACES | R489, R486, R482, R485 |
+| ELECTRIC | Habilitation électrique | B0, B1V, B2V, BC |
+| SAFETY | Sécurité | SST, Incendie |
+| DRIVING | Permis | FIMO, FCO, Permis B |
+
+### 8. Alert Types (Types d'alertes)
 
 Categories of alerts generated by the system.
 
@@ -125,23 +219,7 @@ Categories of alerts generated by the system.
 | WARNING | Avertissement | Orange | Action needed soon |
 | INFO | Information | Blue | Informational |
 
-### 5. CACES Categories
-
-Equipment certification categories based on R489 standard.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | UUID | Unique identifier |
-| recommendation | string | R489, R486, etc. |
-| category | string | Category number/letter (e.g., "3", "1A") |
-| name | string | French name |
-| nameEn | string | English name |
-| description | string | Description |
-| validForMonths | number | Validity period in months |
-| requiresMedical | boolean | Requires medical clearance |
-| isActive | boolean | Whether category is active |
-
-### 6. Contract Types
+### 9. Contract Types
 
 Employment contract types supported by the system.
 
@@ -157,9 +235,22 @@ Employment contract types supported by the system.
 | defaultProbationDays | number | Default probation period |
 | isActive | boolean | Whether type is active |
 
-### 7. Document Types
+### 10. Motif de Recours
 
-Types of documents that can be stored.
+Legal reasons for CDD/Interim contracts with carence calculation.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | UUID | Unique identifier |
+| code | string | Motif code |
+| name | string | French name |
+| description | string | Description |
+| carenceMultiplier | number | **1/3 or 1/2 of duration** |
+| isActive | boolean | Whether motif is active |
+
+### 11. Document Types
+
+Types of documents that can be stored with DPAE requirements.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -171,12 +262,13 @@ Types of documents that can be stored.
 | retentionMonths | number | Retention period |
 | expires | boolean | Does document expire |
 | isRequired | boolean | Is mandatory for employees |
+| isPreHireRequirement | boolean | **Required for DPAE** |
 | isPII | boolean | Contains personally identifiable info |
 | requiresDualApproval | boolean | Requires dual approval |
 | autoDeleteMonths | number | Auto-delete after departure |
 | isActive | boolean | Whether type is active |
 
-### 8. Training Categories
+### 12. Training Categories
 
 Categories for training modules.
 
@@ -190,7 +282,7 @@ Categories for training modules.
 | color | string | Display color |
 | isActive | boolean | Whether category is active |
 
-### 9. Medical Visit Types
+### 13. Medical Visit Types
 
 Types of medical visits in France.
 
@@ -205,19 +297,7 @@ Types of medical visits in France.
 | requiresDoctor | boolean | Requires doctor visit |
 | isActive | boolean | Whether type is active |
 
-### 10. Motif de Recours
-
-Legal reasons for CDD/Interim contracts.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | UUID | Unique identifier |
-| code | string | Motif code |
-| name | string | French name |
-| description | string | Description |
-| isActive | boolean | Whether motif is active |
-
-### 11. Collective Agreements
+### 14. Collective Agreements
 
 French collective agreements (CCN).
 
@@ -229,7 +309,7 @@ French collective agreements (CCN).
 | shortName | string | Short name |
 | isActive | boolean | Whether agreement is active |
 
-### 12. System Configuration
+### 15. System Configuration
 
 Global system settings and configuration.
 
@@ -242,7 +322,7 @@ Global system settings and configuration.
 | isEditable | boolean | Whether editable via UI |
 | updatedAt | Date | Last update timestamp |
 
-#### Configuration Categories
+#### Required Configuration Keys
 
 | Key | Description | Default |
 |-----|-------------|---------|
@@ -254,6 +334,41 @@ Global system settings and configuration.
 | alertCriticalDays | Days before critical alert | 30 |
 | alertWarningDays | Days before warning alert | 60 |
 | alertInfoDays | Days before info alert | 90 |
+| **standardWeeklyHours** | Standard legal hours | **35** |
+| **nightWorkStart** | Start of night shift | **21:00** |
+| **nightWorkEnd** | End of night shift | **06:00** |
+| **dpaeLeadTime** | Hours before hire to send DPAE | **48** |
+
+## Cross-Reference Logic
+
+### Position → Certifications/Training/Documents
+
+> **Gap Analysis Matrix:** Define what is required for each position.
+
+- [ ] Position defines required certifications
+- [ ] Position defines required training modules
+- [ ] Position defines required document types
+
+### Medical ↔ Position
+
+> **Logic:** If Position `isPosteARisque: true`, restrict Medical Visit Type to `isSIR: true`.
+
+- [ ] Auto-enforce SIR for risky positions
+- [ ] Warning if non-SIR visit assigned to risky position
+
+### Contract ↔ Motif de Recours
+
+> **Logic:** CDI = No motif required. CDD/Interim = Motif required.
+
+- [ ] Hide Motif dropdown for CDI
+- [ ] Require Motif for CDD/Interim
+
+### Contract ↔ Coefficient
+
+> **Logic:** Contract must be linked to position with valid coefficient.
+
+- [ ] Auto-link coefficient from position
+- [ ] Warning if salary below minimum
 
 ## Desired Features
 
@@ -265,31 +380,38 @@ Global system settings and configuration.
 - [ ] Version history for changes
 - [ ] Audit trail
 
-### 2. Hierarchical Structures
+### 2. Gap Analysis Matrix
+
+- [ ] View Position vs Required Certifications
+- [ ] View Position vs Required Training
+- [ ] View Position vs Required Documents
+- [ ] Toggle required items per position
+
+### 3. Salary Grid Bulk Update
+
+- [ ] Bulk update minimum salaries
+- [ ] Flag employees below new minimum
+- [ ] Generate compliance report
+
+### 4. Hierarchical Structures
 
 - [ ] Location hierarchy (Company → Site → Zone → Area)
 - [ ] Department hierarchy
 - [ ] Position hierarchy
 
-### 3. Dependencies
-
-- [ ] Define which positions require which CACES
-- [ ] Define which positions require which training
-- [ ] Define which positions require which document types
-- [ ] Cascade updates when reference data changes
-
-### 4. Validation Rules
+### 5. Validation Rules
 
 - [ ] Prevent deletion of referenced entities
 - [ ] Warn on deactivation if in use
 - [ ] Require at least one active option for dropdowns
+- [ ] Cross-reference validation
 
-### 5. Localization
+### 6. Localization
 
 - [ ] Support French and English names
 - [ ] Easy to add more languages
 
-### 6. Soft Deletes
+### 7. Soft Deletes
 
 - [ ] Soft delete with archive
 - [ ] Restore functionality
@@ -298,6 +420,16 @@ Global system settings and configuration.
 ## Data Model
 
 ```typescript
+// Client / Business Unit (3PL)
+interface Client {
+  id: string;
+  name: string;
+  code: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Location
 interface Location {
   id: string;
@@ -305,6 +437,7 @@ interface Location {
   code: string;
   type: LocationType;
   parentId?: string;
+  clientId?: string;  // 3PL: Client/Business Unit
   address?: string;
   description?: string;
   isActive: boolean;
@@ -322,18 +455,45 @@ enum LocationType {
   RECEIVING = "receiving",
 }
 
-// Department
-interface Department {
+// Salary Coefficient (CCN)
+interface SalaryCoefficient {
   id: string;
-  name: string;
-  code: string;
-  managerId?: string;
-  parentId?: string;
-  locationId?: string;
-  description?: string;
+  ccnId: string;
+  code: string;          // e.g., "138M", "150M"
+  level: string;
+  echelon: number;
+  minimumSalary: number;
+  seniorityBonusPercent: number;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Hardship Factors (C2P)
+interface HardshipFactor {
+  id: string;
+  code: string;
+  name: string;
+  nameEn: string;
+  description?: string;
+  category: PenibiliteCategory;
+  pointsPerYear: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+enum PenibiliteCategory {
+  WORK_SCHEDULE = "work_schedule",
+  NIGHT_WORK = "night_work",
+  REPETITIVE = "repetitive",
+  MANUAL_HANDLING = "manual_handling",
+  POSTURES = "postures",
+  VIBRATIONS = "vibrations",
+  TEMPERATURES = "temperatures",
+  NOISE = "noise",
+  CHEMICAL = "chemical",
+  LOAD = "load",
 }
 
 // Job Position
@@ -343,10 +503,16 @@ interface Position {
   nameEn: string;
   code: string;
   category: PositionCategory;
+  coefficientId?: string;      // Link to Salary Grid
+  isExecutive: boolean;       // Cadre / Non-Cadre
+  isPosteARisque: boolean;     // Triggers mandatory SIR
   description?: string;
   departmentId?: string;
   requiredCertifications: string[];
   requiredTraining: string[];
+  requiredDocuments: string[];
+  hardshipFactors: string[];   // C2P factors
+  maxWorkHoursWeekly: number;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -361,6 +527,30 @@ enum PositionCategory {
   MANAGER = "manager",
   ADMIN = "admin",
   MAINTENANCE = "maintenance",
+}
+
+// Professional Certification
+interface ProfessionalCertification {
+  id: string;
+  type: CertificationType;
+  recommendation: string;
+  category: string;
+  name: string;
+  nameEn: string;
+  description?: string;
+  validForMonths: number;
+  requiresMedical: boolean;
+  requiresTraining: boolean;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+enum CertificationType {
+  CACES = "caces",
+  ELECTRIC = "electric",
+  SAFETY = "safety",
+  DRIVING = "driving",
 }
 
 // Alert Type
@@ -394,21 +584,6 @@ enum Severity {
   INFO = "info",
 }
 
-// CACES Category
-interface CacesCategory {
-  id: string;
-  recommendation: string;
-  category: string;
-  name: string;
-  nameEn: string;
-  description?: string;
-  validForMonths: number;
-  requiresMedical: boolean;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 // Contract Type
 interface ContractType {
   id: string;
@@ -425,6 +600,18 @@ interface ContractType {
   updatedAt: Date;
 }
 
+// Motif de Recours (with carence)
+interface MotifRecours {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  carenceMultiplier: number;   // 0.33 or 0.5
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Document Type
 interface DocumentType {
   id: string;
@@ -435,6 +622,7 @@ interface DocumentType {
   retentionMonths?: number;
   expires: boolean;
   isRequired: boolean;
+  isPreHireRequirement: boolean;  // Required for DPAE
   isPII: boolean;
   requiresDualApproval: boolean;
   autoDeleteMonths?: number;
@@ -475,17 +663,6 @@ interface MedicalVisitType {
   validForMonths: number;
   isSIR: boolean;
   requiresDoctor: boolean;
-  description?: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Motif de Recours
-interface MotifRecours {
-  id: string;
-  code: string;
-  name: string;
   description?: string;
   isActive: boolean;
   createdAt: Date;
@@ -541,15 +718,16 @@ interface ReferenceDataAudit {
 - Links to entity types for alert context
 
 ### Employee Module
-- Uses Positions for job assignments
+- Uses Positions for job assignments (with coefficient, pénibilité)
 - Uses Departments for organization
-- Uses Locations for work assignments
+- Uses Locations (with client filter for 3PL)
 
-### CACES Module
-- Uses CacesCategories for certification types
+### CACES/Professional Certifications Module
+- Uses ProfessionalCertifications for all types
 
 ### Medical Module
 - Uses MedicalVisitTypes for visit categories
+- Enforces SIR for `isPosteARisque` positions
 
 ### Training Module
 - Uses TrainingCategories for organization
@@ -557,10 +735,12 @@ interface ReferenceDataAudit {
 ### Contracts Module
 - Uses ContractTypes for employment types
 - Uses CollectiveAgreements for CCN
-- Uses MotifRecours for legal reasons
+- Uses MotifRecours for legal reasons (with carence)
+- Links coefficient from position
 
 ### Documents Module
 - Uses DocumentTypes for categorization
+- Enforces `isPreHireRequirement` for DPAE
 
 ## UI Components
 
@@ -571,8 +751,18 @@ interface ReferenceDataAudit {
 - Import/Export buttons
 - Version history access
 
+### Gap Analysis Matrix
+- Grid view: Position vs Certifications/Training/Documents
+- Toggle checkboxes to define requirements
+- Export matrix
+
+### Salary Grid Manager
+- List all coefficients per CCN
+- Bulk update minimum salaries
+- Flag employees below threshold
+
 ### Hierarchy Viewer
-- Visual tree for locations
+- Visual tree for locations (with client grouping)
 - Visual tree for departments
 - Drag-and-drop reordering
 
@@ -587,12 +777,14 @@ interface ReferenceDataAudit {
 - [ ] All changes require audit trail
 - [ ] Soft deletes preserve history
 - [ ] Export before major changes
+- [ ] Cross-reference validation
 
 ### Data Quality
 - [ ] Required fields validation
 - [ ] Unique constraints
 - [ ] Foreign key integrity
 - [ ] Orphan detection
+- [ ] Minimum one active option for dropdowns
 
 ## Future Enhancements
 
@@ -601,3 +793,4 @@ interface ReferenceDataAudit {
 - Custom fields for reference entities
 - Workflow for approval of changes
 - Scheduled imports from external systems
+- Integration with payroll systems

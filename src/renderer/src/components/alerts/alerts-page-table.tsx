@@ -52,11 +52,12 @@ export function AlertsPageTable({
   const itemsPerPage = initialItemsPerPage;
 
   // Use TanStack Query hook for alerts with internal filters
-  const { data: alerts = [], isLoading } = useAlerts({
+  const { data: alerts = [], isLoading, error } = useAlerts({
     search: search || undefined,
-    severity: severityFilter === "all" ? undefined : severityFilter,
+    severity: severityFilter,
     type: typeFilter === "all" ? undefined : typeFilter,
   });
+
 
   // Get unique types from alerts
   const uniqueTypes = useMemo(() => {
@@ -183,6 +184,14 @@ export function AlertsPageTable({
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-red-500">Error: {String(error)}</p>
       </div>
     );
   }

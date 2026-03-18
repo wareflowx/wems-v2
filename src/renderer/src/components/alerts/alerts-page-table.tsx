@@ -52,15 +52,11 @@ export function AlertsPageTable({
   const itemsPerPage = initialItemsPerPage;
 
   // Use TanStack Query hook for alerts with internal filters
-  const result = useAlerts({
+  const { data: alerts = [], isLoading, error } = useAlerts({
     search: search || undefined,
     severity: severityFilter,
     type: typeFilter,
   });
-
-  console.log("AlertsPageTable:", result);
-
-  const { data: alerts = [], isLoading, error } = result;
 
 
   // Get unique types from alerts

@@ -312,6 +312,9 @@ export function AlertsPageTable({
                   </Button>
                 </TableHead>
                 <TableHead className="px-4">
+                  {t("alerts.category")}
+                </TableHead>
+                <TableHead className="px-4">
                   <Button
                     className="-ml-4 h-8 font-medium hover:bg-muted"
                     onClick={() => handleSort("severity")}
@@ -323,9 +326,6 @@ export function AlertsPageTable({
                       {getSortIcon("severity")}
                     </div>
                   </Button>
-                </TableHead>
-                <TableHead className="px-4">
-                  {t("alerts.category")}
                 </TableHead>
                 <TableHead className="px-4">
                   {t("alerts.daysLeft")}
@@ -383,10 +383,10 @@ export function AlertsPageTable({
                       {getTypeBadge(alert.type)}
                     </TableCell>
                     <TableCell className="px-4">
-                      {getSeverityBadge(alert.severity)}
+                      {getCategoryBadge(alert.category, alert.visitType)}
                     </TableCell>
                     <TableCell className="px-4">
-                      {getCategoryBadge(alert.category, alert.visitType)}
+                      {getSeverityBadge(alert.severity)}
                     </TableCell>
                     <TableCell className="px-4">
                       {alert.daysLeft !== undefined ? (

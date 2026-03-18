@@ -37,12 +37,39 @@ Employment contracts (Contrats de travail) are fundamental to managing warehouse
 ### Key Requirements
 
 - Written contract required for all non-CDI contracts
-- Contract must include: start date, duration, job description, compensation
-- Probation period: CDI (2-4 months), CDD (varies)
-- Notice period required for termination
+- **Motif de Recours** (legal reason) is MANDATORY for all CDD/Interim
+- DPAE (Déclaration Préalable à l'Embauche) required BEFORE employee starts
+- Written contract must be given within 2 days of starting
 - Records must be kept for duration of employment + 5 years
 
 ## Contract Terms & Conditions
+
+### Motif de Recours (Legal Reason for CDD/Interim)
+
+> **CRITICAL:** A CDD or Interim contract without a valid legal reason is NULL and can be reclassified as CDI.
+
+| Motif | French | Description |
+|-------|--------|-------------|
+| REMPLACEMENT | Remplacement d'un salarié | Must link to specific absent employee |
+| ACCROISSEMENT | Accroissement temporaire d'activité | Peak season, Black Friday, etc. |
+| SAISONNIER | Travail saisonnier | Agricultural or seasonal work |
+| USAGE | Contrat d'usage | Repeated needs (long-term temp) |
+| URGENCE | Travaux urgents sécurité | Emergency safety work |
+
+### Délai de Carence (Waiting Period)
+
+> **CRITICAL:** Cannot chain CDD/Interim on same workstation without waiting period.
+
+| Previous Contract Duration | Waiting Period (1/3 of duration) |
+|--------------------------|----------------------------------|
+| 1 month | 10 days |
+| 3 months | 1 month |
+| 6 months | 2 months |
+| 12 months | 4 months |
+
+- [ ] **Carence Calculator** - Auto-calculate based on previous contract
+- [ ] **Block/Warn** if trying to create new contract during carence period
+- [ ] Check applies to SAME workstation
 
 ### Probation Period (Période d'Essai)
 
@@ -53,6 +80,20 @@ Employment contracts (Contrats de travail) are fundamental to managing warehouse
 | CDD > 6 months | 2 months | Once |
 | Intérim | Per mission | Based on umbrella |
 
+### Probation Notice (Délai de Prévenance)
+
+> Employer must give notice to terminate probation:
+
+| Seniority | Notice Period |
+|-----------|---------------|
+| < 8 days | 24 hours |
+| 8 days - 1 month | 48 hours |
+| 1 - 3 months | 2 weeks |
+| > 3 months | 1 month |
+
+- [ ] **Alert triggers X days BEFORE end** of probation
+- [ ] Calculates based on seniority to ensure notice can be given
+
 ### Working Time
 
 | Type | French | Hours/Week |
@@ -61,6 +102,56 @@ Employment contracts (Contrats de travail) are fundamental to managing warehouse
 | Temps Partiel | Part-time | < 35 hours |
 | Forfait Jours | Day package | 218 days/year |
 | Forfait Heures | Hour package | Per contract |
+
+### Working Schedule (Logistics-Specific)
+
+> Critical for warehouse operations:
+
+| Schedule Type | French | Description |
+|---------------|--------|-------------|
+| Fixe | Horaire fixe | Same hours every day |
+| Variable | Horaire variable | Hours change weekly |
+| Posté | Travail en équipe | Shift work (2x8, 3x8) |
+
+### Night Work (Travail de Nuit)
+
+- Hours between 21:00 and 06:00
+- Triggers specific legal protections
+- Requires medical surveillance
+- [ ] Toggle for night work
+- [ ] Link to specific medical requirements
+
+### Pénibilité (Hardship Factors - C2P)
+
+> Warehouse tasks may expose employees to hardship factors:
+
+| Factor | French | Description |
+|--------|--------|-------------|
+| Manutention manuelle | Manual handling | Carrying >10kg regularly |
+| Gestes répétitifs | Repetitive movements | >15 actions/minute |
+| Postures douloureuses | Painful postures | Kneeling, crouching |
+| Vibrations | Vibrations | Heavy machinery |
+| Températures extrêmes | Extreme temperatures | Cold storage, heat |
+| bruit | Noise | >80 dB |
+
+- [ ] Track pénibilité factors per contract
+- [ ] Link to C2P (Compte Professionnel de Prévention)
+- [ ] Impact on retirement points
+
+### Convention Collective (CCN)
+
+> Warehouse contracts governed by specific collective agreements:
+
+| CCN | Name | Application |
+|-----|------|-------------|
+| CCN 3001 | Transport et Logistique | Most warehouses |
+| CCN 3105 | Commerce de Gros | Wholesale |
+| CCN 3044 | Activités de manutention | Stevedoring |
+
+- [ ] **Coefficient** tracking (e.g., 138M, 150M)
+- [ ] **Salary grid** compliance check
+- [ ] Notice periods per CCN
+- [ ] Specific probation periods per CCN
 
 ### Contract Clauses
 
@@ -77,18 +168,40 @@ Employment contracts (Contrats de travail) are fundamental to managing warehouse
 ### 1. Contract Types Management
 
 - [ ] Support for all French contract types
-- [ ] Predefined contract templates
+- [ ] Predefined contract templates per CCN
 - [ ] Custom contract creation
-- [ ] Contract type descriptions and requirements
-- [ ] Legal requirements per type
+- [ ] Contract type descriptions and legal requirements
+- [ ] **Mandatory Motif de Recours** for CDD/Interim
 
-### 2. Contract Records
+### 2. DPAE Tracker
+
+> **CRITICAL:** DPAE (Déclaration Préalable à l'Embauche) is mandatory before employee starts.
+
+- [ ] DPAE submission tracking
+- [ ] **Block employee activation** if DPAE not confirmed
+- [ ] DPAE date must be before or on start date
+- [ ] URSSAF declaration confirmation
+
+### 3. Délai de Carence Calculator
+
+- [ ] Auto-calculate waiting period from previous contract
+- [ ] Check against previous contracts on SAME workstation
+- [ ] Block or warn if carence not respected
+- [ ] Display remaining days until carence ends
+
+### 4. Contract Records
 
 - [ ] Store contract details:
   - Contract type
+  - **Motif de Recours** (mandatory for CDD/Interim)
+  - **Replaced Employee ID** (if motif is Remplacement)
   - Start date
   - End date (for fixed-term)
+  - **Coefficient** (CCN salary grid)
   - Probation period
+  - **Working Schedule** (fixe, variable, posté)
+  - **Night Work** toggle
+  - **Pénibilité** factors
   - Working time (full/part-time)
   - Job position
   - Work location
@@ -97,39 +210,47 @@ Employment contracts (Contrats de travail) are fundamental to managing warehouse
   - Special clauses
 - [ ] Document upload (signed contract)
 - [ ] Amendment tracking
+- [ ] **DPAE confirmation checkbox**
 
-### 3. Contract Status Tracking
+### 5. Probation Tracking with Notice Period
+
+- [ ] Probation start/end dates
+- [ ] **Calculate Délai de Prévenance** based on seniority
+- [ ] Alert X days BEFORE end (not on last day)
+- [ ] Probation evaluation dates
+- [ ] Probation completion status
+- [ ] Probation extension tracking
+
+### 6. Contract Status Tracking
 
 - [ ] Active contracts
 - [ ] Contracts nearing end
 - [ ] Expired contracts
 - [ ] Contracts in probation
 - [ ] Contracts under renewal
+- [ ] **DPAE pending** status
 
-### 4. Renewal Management
+### 7. Renewal Management
 
 - [ ] Automatic renewal alerts
 - [ ] Renewal workflow
+- [ ] **Successive contracts tracking** - is this renewal or new?
 - [ ] CDI conversion tracking (CDD → CDI)
 - [ ] Contract amendment tracking
 - [ ] Renewal history
+- [ ] **CDD to CDI reclassification risk check**
 
-### 5. Probation Tracking
-
-- [ ] Probation start/end dates
-- [ ] Probation evaluation dates
-- [ ] Probation completion status
-- [ ] Probation extension tracking
-
-### 6. Employee Contract Profile
+### 8. Employee Contract Profile
 
 - [ ] Complete contract history per employee
 - [ ] Current contract details
+- [ ] **Succession timeline** (Mission 1 → Mission 2 → CDD → CDI)
+- [ ] Total seniority calculation
 - [ ] Previous contracts
 - [ ] Contract evolution timeline
 - [ ] Export contract records
 
-### 7. Contract Registry
+### 9. Contract Registry
 
 - [ ] Dedicated page listing all contracts
 - [ ] Filter by:
@@ -138,26 +259,32 @@ Employment contracts (Contrats de travail) are fundamental to managing warehouse
   - Status (active, expired, pending)
   - Work location
   - End date
+  - Motif de Recours
 - [ ] Sort by various fields
 - [ ] Export functionality (CSV/PDF)
 
-### 8. Compliance Dashboard
+### 10. Compliance Dashboard
 
 - [ ] Widget showing:
   - Total active contracts
   - Contracts expiring this month
   - Contracts in probation
   - CDD conversion eligible
+  - **DPAE pending**
+  - **Carence violations**
 - [ ] Department/team breakdown
 - [ ] Contract type distribution
+- [ ] **"Pyramid" view** - CDD/Interim vs CDI ratio
 
-### 9. Temporary Staff (Intérimaires) Management
+### 11. Temporary Staff (Intérimaires) Management
 
 - [ ] Track temp worker assignments
 - [ ] Mission start/end dates
+- [ ] **Motif de Recours** for each mission
 - [ ] End-of-mission reports
 - [ ] Temp agency management
 - [ ] Renewal tracking per mission
+- [ ] **Carence check** between missions
 
 ## Data Model
 
@@ -168,28 +295,50 @@ interface EmploymentContract {
   contractType: ContractType;
   status: ContractStatus;
 
+  // French Legal Requirements
+  motifRecours?: MotifRecours;           // MANDATORY for CDD/Interim
+  replacedEmployeeId?: string;          // If motif is REMPLACEMENT
+  coefficient?: string;                  // CCN salary grid (e.g., "150M")
+  collectiveAgreement?: string;          // CCN reference
+
+  // DPAE (CRITICAL)
+  dpaeSubmittedDate?: Date;
+  dpaeConfirmed: boolean;               // Must be true to activate
+
   // Dates
   startDate: Date;
-  endDate?: Date;              // For fixed-term contracts
+  endDate?: Date;                        // For fixed-term contracts
   probationEndDate?: Date;
-  noticeDate?: Date;          // Contractual notice period
+  noticeDate?: Date;                     // Contractual notice period
+
+  // Working Schedule (Logistics)
+  workingScheduleType: WorkingScheduleType;
+  weeklyHours?: number;
+  isNightWork: boolean;                  // 21:00 - 06:00
+
+  // Pénibilité (C2P)
+  penibiliteFactors: PenibiliteFactor[];
 
   // Work Details
   workingTime: WorkingTimeType;
-  weeklyHours?: number;
   jobPosition: string;
   workLocation: string;
+  workstation?: string;                  // Specific station (for carence)
   department?: string;
 
   // Compensation
   salary?: number;
   salaryType: 'hourly' | 'monthly' | 'annual';
-  collectiveAgreement?: string;
 
   // Additional
   contractTemplateId?: string;
   documentUrl?: string;
   amendments: ContractAmendment[];
+
+  // Succession tracking
+  isSuccessive: boolean;                 // Is this chained to previous?
+  previousContractId?: string;
+  délaiDeCarenceEndDate?: Date;          // Calculated automatically
 
   // Probation
   probationPeriodDays?: number;
@@ -218,8 +367,17 @@ enum ContractType {
   PROFESSIONNALISATION = "Professionnalisation",
 }
 
+enum MotifRecours {
+  REMPLACEMENT = "Remplacement d'un salarié absent",
+  ACCROISSEMENT = "Accroissement temporaire d'activité",
+  SAISONNIER = "Travail saisonnier",
+  USAGE = "Contrat d'usage",
+  URGENCE = "Travaux urgents par mesure de sécurité",
+}
+
 enum ContractStatus {
   DRAFT = "draft",
+  DPAE_PENDING = "dpae_pending",         // Waiting for DPAE
   PENDING = "pending",
   ACTIVE = "active",
   PROBATION = "probation",
@@ -228,11 +386,28 @@ enum ContractStatus {
   RENEWED = "renewed",
 }
 
+enum WorkingScheduleType {
+  FIXE = "fixe",
+  VARIABLE = "variable",
+  POSTE = "posté",                       // 2x8, 3x8 shifts
+}
+
 enum WorkingTimeType {
   TEMPS_PLEIN = "temps_plein",
   TEMPS_PARTIEL = "temps_partiel",
   FORFAIT_JOURS = "forfait_jours",
   FORFAIT_HEURES = "forfait_heures",
+}
+
+enum PenibiliteFactor {
+  MANUAL_HANDLING = "manutention_manuelle",
+  REPETITIVE_MOVEMENTS = "gestes_répétitifs",
+  PAINFUL_POSTURES = "postures_douloureuses",
+  VIBRATIONS = "vibrations",
+  EXTREME_TEMPERATURES = "températures_extrêmes",
+  NOISE = "bruit",
+  CHEMICAL = "produits_chimiques",
+  NIGHT_WORK = "travail_de_nuit",
 }
 
 interface ContractAmendment {
@@ -251,6 +426,7 @@ enum AmendmentType {
   POSITION = "position",
   LOCATION = "location",
   DURATION = "duration",
+  SCHEDULE = "schedule",
   OTHER = "other",
 }
 
@@ -268,11 +444,11 @@ interface TempAgency {
 
 interface TempAssignment {
   id: string;
-  contractId: string;          // The interim contract
+  contractId: string;                    // The interim contract
   tempAgencyId: string;
   missionStartDate: Date;
   missionEndDate: Date;
-  missionReason: string;      // Reason for temporary work
+  missionReason: MotifRecours;           // Use MotifRecours enum
   workstation?: string;
   supervisorName?: string;
   endOfMissionReport?: string;
@@ -287,8 +463,10 @@ interface TempAssignment {
 ### Alerts System
 - Generate alert when contract is nearing end (30, 60, 90 days)
 - Generate alert when contract expires
-- Generate alert for probation evaluation
+- Generate alert for **probation end with notice period**
 - Generate alert for CDD → CDI conversion eligibility
+- **Generate alert for DPAE pending**
+- **Generate alert for Délai de Carence violation risk**
 - Include employee name, contract type, end date
 
 ### CACES Module
@@ -298,66 +476,90 @@ interface TempAssignment {
 ### Medical Visits Module
 - Link to employment fitness requirements
 - Contract may require specific medical clearance
+- **Night work** triggers additional medical surveillance
 
 ### Employee Profile
 - Display current contract status
-- Show contract history
+- Display **DPAE status**
+- Show contract history with timeline
 - Contract type affects benefits/rights
+- Show **succession history**
 
 ### Documents
 - Store signed contracts
 - Store amendments
 - Store end-of-mission reports
+- **Auto-expiry** for sensitive documents after 5 years
 
 ## UI Components
 
 ### Contracts Page
-- Table view with columns: Employee, Contract Type, Start Date, End Date, Status, Work Location
+- Table view with columns: Employee, Contract Type, Motif, Start Date, End Date, Status, DPAE, Work Location
 - Quick actions: View, Edit, Download contract, Generate renewal
-- Filter by status, type, location
+- Filter by status, type, location, motif
+- **Carence warning indicators**
 - Export functionality
 
 ### Employee Detail - Contract Tab
-- Current contract details
+- Current contract details with DPAE status
 - Contract history timeline
+- **Succession visualization** (Interim → CDD → CDI)
 - Amendment history
 - Document access
+
+### Contract Creation Wizard
+- Step 1: Select contract type
+- Step 2: **Select Motif de Recours** (if CDD/Interim)
+- Step 3: Enter dates and details
+- Step 4: **Carence check** - warn if applicable
+- Step 5: **DPAE confirmation**
+- Step 6: Upload document
 
 ### Temporary Work Page
 - List of all interim assignments
 - Agency information
-- Mission tracking
+- Mission tracking with **Motif**
 - End-of-mission reports
+- **Carence status** per mission
 
 ### Dashboard Widget
 - Contracts expiring soon
 - Active contracts count
 - CDD conversion eligible
+- **DPAE pending count**
 - Probation evaluations due
+- **Carence violations**
+- **"Pyramid" view** - contract type distribution
 - Quick link to full contracts page
 
 ### Alerts Configuration
+- DPAE: On start date if not confirmed
 - Warning: 60 days before end
 - Critical: 30 days before end
 - Expired: Past end date
-- Probation: 1 week before evaluation
+- Probation: Based on seniority notice period (not last day)
 
 ## Contract Workflows
 
 ### New Employee Contract
 1. Select contract type
-2. Fill contract details
-3. Upload signed document
-4. Set probation period
-5. Set renewal reminders (if applicable)
-6. Link to employee profile
+2. **Select Motif de Recours** (if CDD/Interim)
+3. Fill contract details
+4. **Carence check** against previous contracts
+5. **Submit DPAE to URSSAF**
+6. **Confirm DPAE** in system (blocking until done)
+7. Upload signed document
+8. Set probation period with notice calculation
+9. Set renewal reminders (if applicable)
+10. Link to employee profile
 
 ### Contract Renewal
 1. Alert at configured interval
-2. Review contract terms
-3. Create amendment or new contract
-4. Update status
-5. Generate new document
+2. **Check Carence** - can we renew?
+3. Review contract terms
+4. Create amendment or new contract
+5. Update status
+6. Generate new document
 
 ### CDD to CDI Conversion
 1. Alert when CDD is near end
@@ -367,11 +569,13 @@ interface TempAssignment {
 5. Update employee status
 
 ### Temporary Assignment
-1. Create interim contract
-2. Record temp agency
-3. Track mission dates
-4. Monitor end-of-mission
-5. Generate report if needed
+1. **Check Carence** - can we assign?
+2. Create interim contract
+3. Select **Motif de Recours**
+4. Record temp agency
+5. Track mission dates
+6. Monitor end-of-mission
+7. Generate report if needed
 
 ## Legal Compliance
 
@@ -379,24 +583,40 @@ interface TempAssignment {
 
 - [ ] Full names of parties
 - [ ] Start date
+- [ ] **Motif de Recours** (for CDD/Interim)
 - [ ] Contract type
 - [ ] Job position/duties
-- [ ] Work location
-- [ ] Working hours
-- [ ] Compensation
+- [ ] Work location + workstation
+- [ ] Working hours + schedule type
+- [ ] Compensation + coefficient
 - [ ] Paid leave entitlement
 - [ ] Notice periods
-- [ ] Collective agreement reference
+- [ ] **Collective agreement + coefficient**
+
+### DPAE Requirements
+
+- [ ] Submit to URSSAF BEFORE employee starts
+- [ ] Keep confirmation for inspection
+- [ ] **Block activation** if not confirmed
 
 ### Document Retention
 
 - Active contracts: Duration of employment
 - Expired contracts: 5 years minimum
 - End-of-mission reports: 5 years
+- DPAE confirmations: 5 years
+
+## GDPR & Document Deletion
+
+> Some documents must be deleted after retention period:
+
+- [ ] Identity documents: Delete after employment ends
+- [ ] End-of-mission reports: Auto-archive after 5 years
+- [ ] Deletion reminders for expired documents
 
 ## Future Considerations
 
-- Contract template editor
+- Contract template editor with CCN templates
 - Digital signature integration
 - Automatic contract generation
 - Integration with payroll systems
@@ -404,3 +624,4 @@ interface TempAssignment {
 - Contract analytics and reporting
 - Legal compliance checks
 - Contract cost tracking
+- Integration with URSSAF API

@@ -4,8 +4,7 @@ import { useTranslation } from "react-i18next";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AlertsKPIs } from "@/components/home/alerts-kpis";
-import { AlertsPageTable } from "@/components/alerts/alerts-page-table";
+import { Homepage } from "@/components/home";
 import { useAlerts, useEmployees } from "@/hooks";
 
 export function HomePage() {
@@ -59,10 +58,10 @@ export function HomePage() {
           />
 
           {/* KPIs */}
-          <AlertsKPIs kpis={kpis} />
+          <Homepage.KPIS kpis={kpis} />
 
           {/* Table */}
-          <AlertsPageTable />
+          <Homepage.Table />
         </div>
       </div>
     </TooltipProvider>

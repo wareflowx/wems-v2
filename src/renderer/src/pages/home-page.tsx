@@ -5,6 +5,7 @@ import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Homepage } from "@/components/home";
+import { Page } from "@/components/pages";
 import { useAlerts, useEmployees } from "@/hooks";
 
 export function HomePage() {
@@ -12,17 +13,18 @@ export function HomePage() {
 
   // Use TanStack Query hooks
   const { data: allAlerts = [], isLoading: isAlertsLoading } = useAlerts({});
-  const { data: employees = [], isLoading: isEmployeesLoading } = useEmployees();
+  const { data: employees = [], isLoading: isEmployeesLoading } =
+    useEmployees();
 
   const isLoading = isAlertsLoading || isEmployeesLoading;
 
   // Calculate KPIs dynamically from alerts data
   const kpis = useMemo(() => {
     const criticalAlerts = allAlerts.filter(
-      (a) => a.severity === "critical"
+      (a) => a.severity === "critical",
     ).length;
     const warningAlerts = allAlerts.filter(
-      (a) => a.severity === "warning"
+      (a) => a.severity === "warning",
     ).length;
     const infoAlerts = allAlerts.filter((a) => a.severity === "info").length;
 
@@ -50,18 +52,17 @@ export function HomePage() {
     <TooltipProvider>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
         <div className="min-h-full space-y-3">
-          {/* Header */}
           <PageHeaderCard
             description={t("dashboard.description")}
             icon={<Sparkles className="h-4 w-4 text-gray-600" />}
             title={t("dashboard.title")}
           />
 
-          {/* KPIs */}
-          <Homepage.KPIS kpis={kpis} />
+          <Page.Content>
+            <Homepage.KPIS kpis={kpis} />
 
-          {/* Table */}
-          <Homepage.Table />
+            <Homepage.Table />
+          </Page.Content>
         </div>
       </div>
     </TooltipProvider>

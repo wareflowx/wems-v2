@@ -1,12 +1,12 @@
 import { ShieldAlert, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertsFilters } from "@/components/home/alerts-filters";
 import { AlertsKPIs } from "@/components/home/alerts-kpis";
-import { AlertsTable } from "@/components/home/alerts-table";
 import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { useAlerts, useEmployees } from "@/hooks";
+import { AlertsPageTable } from "@/components/alerts/alerts-page-table";
+
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -81,68 +81,6 @@ export function HomePage() {
     };
   }, [allAlerts, employees]);
 
-  const getAlertBadge = (severity: string, _daysLeft?: number) => {
-    if (severity === "critical") {
-      return (
-        <span className="inline-flex items-center rounded-md border border-red-500/20 bg-red-500/10 px-2 py-0.5 font-medium text-red-500 text-xs">
-          {t("alerts.critical")}
-        </span>
-      );
-    }
-    if (severity === "warning") {
-      return (
-        <span className="inline-flex items-center rounded-md border border-yellow-500/20 bg-yellow-500/10 px-2 py-0.5 font-medium text-xs text-yellow-500">
-          {t("alerts.warning")}
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-medium text-blue-500 text-xs">
-        {t("alerts.info")}
-      </span>
-    );
-  };
-
-  const getTypeBadge = (type: string) => {
-    if (type.includes("CACES")) {
-      return (
-        <span className="inline-flex items-center rounded-md border border-purple-500/20 bg-purple-500/10 px-2 py-0.5 font-medium text-purple-500 text-xs">
-          {t("caces.title")}
-        </span>
-      );
-    }
-    if (type.includes("Visite")) {
-      return (
-        <span className="inline-flex items-center rounded-md border border-teal-500/20 bg-teal-500/10 px-2 py-0.5 font-medium text-teal-500 text-xs">
-          {t("medicalVisits.title")}
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center rounded-md border border-gray-500/20 bg-gray-500/10 px-2 py-0.5 font-medium text-gray-500 text-xs">
-        {type}
-      </span>
-    );
-  };
-
-  const getDetailBadge = (category?: string, visitType?: string) => {
-    if (category) {
-      return (
-        <span className="inline-flex items-center rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-medium text-indigo-500 text-xs">
-          CACES {category}
-        </span>
-      );
-    }
-    if (visitType) {
-      return (
-        <span className="inline-flex items-center rounded-md border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 font-medium text-cyan-500 text-xs">
-          {visitType}
-        </span>
-      );
-    }
-    return <span className="text-gray-400">-</span>;
-  };
-
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4">
@@ -170,21 +108,6 @@ export function HomePage() {
       {/* Key Metrics */}
       <AlertsKPIs kpis={kpis} />
 
-      {/* Search and Filters */}
-      <AlertsFilters
-        detailFilter={detailFilter}
-        employeeFilter={employeeFilter}
-        onDetailFilterChange={setDetailFilter}
-        onEmployeeFilterChange={setEmployeeFilter}
-        onSearchChange={setSearch}
-        onSeverityFilterChange={setSeverityFilter}
-        onTypeFilterChange={setTypeFilter}
-        search={search}
-        severityFilter={severityFilter}
-        typeFilter={typeFilter}
-        uniqueDetails={uniqueDetails}
-        uniqueEmployees={uniqueEmployees}
-      />
 
       {/* Table or Empty State */}
       {recentAlerts.length === 0 ? (
@@ -200,12 +123,7 @@ export function HomePage() {
           />
         </div>
       ) : (
-        <AlertsTable
-          alerts={recentAlerts}
-          getAlertBadge={getAlertBadge}
-          getDetailBadge={getDetailBadge}
-          getTypeBadge={getTypeBadge}
-        />
+        <AlertsPageTable />
       )}
     </div>
   );

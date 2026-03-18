@@ -54,7 +54,7 @@ export function AlertsPageTable({
   // Use TanStack Query hook for alerts with internal filters
   const { data: alerts = [], isLoading, error } = useAlerts({
     search: search || undefined,
-    severity: severityFilter,
+    severity: severityFilter === "all" ? undefined : severityFilter,
     type: typeFilter === "all" ? undefined : typeFilter,
   });
 

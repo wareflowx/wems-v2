@@ -162,6 +162,30 @@ export function AlertsPageTable({
     );
   };
 
+  const getCategoryBadge = (category?: string, visitType?: string) => {
+    if (!category && !visitType) {
+      return <span className="text-gray-400">-</span>;
+    }
+
+    const label = category || visitType;
+    let dotColor: string;
+
+    if (label?.includes("CACES") || category) {
+      dotColor = "bg-indigo-600";
+    } else if (label?.includes("Visite") || visitType) {
+      dotColor = "bg-cyan-600";
+    } else {
+      dotColor = "bg-gray-600";
+    }
+
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
+        <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
+        {label}
+      </span>
+    );
+  };
+
   const getTypeBadge = (type: string) => {
     let dotColor: string;
 
@@ -362,7 +386,7 @@ export function AlertsPageTable({
                       {getSeverityBadge(alert.severity)}
                     </TableCell>
                     <TableCell className="px-4">
-                      {alert.category || alert.visitType || "-"}
+                      {getCategoryBadge(alert.category, alert.visitType)}
                     </TableCell>
                     <TableCell className="px-4">
                       {alert.daysLeft !== undefined ? (

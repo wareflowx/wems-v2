@@ -109,22 +109,8 @@ export function HomePage() {
       <AlertsKPIs kpis={kpis} />
 
 
-      {/* Table or Empty State */}
-      {recentAlerts.length === 0 ? (
-        <div className="flex w-full items-center justify-center">
-          <AnimatedEmpty
-            className="bg-card"
-            description={t(
-              "dashboard.noAlertsDescription",
-              "No alerts at this time. Everything is in order."
-            )}
-            icons={[ShieldAlert, ShieldAlert, ShieldAlert]}
-            title={t("dashboard.allGood", "All good!")}
-          />
-        </div>
-      ) : (
-        <AlertsPageTable />
-      )}
+      {/* Table */}
+      <AlertsPageTable />
     </div>
   );
 }

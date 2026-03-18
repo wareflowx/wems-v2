@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { Homepage } from "@/components/home";
 import { Page } from "@/components/pages";
 import { useAlerts, useEmployees } from "@/hooks";
@@ -40,31 +39,25 @@ export function HomePage() {
 
   if (isLoading) {
     return (
-      <TooltipProvider>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-          <PageHeaderSkeleton metricsCount={4} showMetrics />
-        </div>
-      </TooltipProvider>
+      <Page.Root>
+        <PageHeaderSkeleton metricsCount={4} showMetrics />
+      </Page.Root>
     );
   }
 
   return (
-    <TooltipProvider>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-        <div className="min-h-full space-y-3">
-          <PageHeaderCard
-            description={t("dashboard.description")}
-            icon={<Sparkles className="h-4 w-4 text-gray-600" />}
-            title={t("dashboard.title")}
-          />
+    <Page.Root>
+      <PageHeaderCard
+        description={t("dashboard.description")}
+        icon={<Sparkles className="h-4 w-4 text-gray-600" />}
+        title={t("dashboard.title")}
+      />
 
-          <Page.Content>
-            <Homepage.KPIS kpis={kpis} />
+      <Page.Content>
+        <Homepage.KPIS kpis={kpis} />
 
-            <Homepage.Table />
-          </Page.Content>
-        </div>
-      </div>
-    </TooltipProvider>
+        <Homepage.Table />
+      </Page.Content>
+    </Page.Root>
   );
 }

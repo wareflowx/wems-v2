@@ -54,7 +54,7 @@ export function AddCacesDialog({
 
   const handleSubmit = () => {
     onAdd?.({
-      employeeId: parseInt(employeeId, 10),
+      employeeId: Number.parseInt(employeeId, 10),
       category,
       dateObtained: issueDate,
       expirationDate: expiryDate,

@@ -1,6 +1,4 @@
 // Centralized API exports (deprecated - using @/actions/database instead)
-// Still used: alerts, caces, medical-visits (Phase 3-4)
+// Still used: alerts
 
 export * from "./alerts";
-export * from "./caces";
-export * from "./medical-visits";

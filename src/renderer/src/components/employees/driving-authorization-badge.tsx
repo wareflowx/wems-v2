@@ -1,4 +1,5 @@
-import { CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import type { DrivingAuthorizationStatusResult } from "@@/lib/driving-authorization";
+import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   Tooltip,
@@ -6,7 +7,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { DrivingAuthorizationStatusResult } from "@/core/lib/driving-authorization";
 
 interface DrivingAuthorizationBadgeProps {
   status: DrivingAuthorizationStatusResult | null;
@@ -31,8 +31,7 @@ export function DrivingAuthorizationBadge({
   if (!status) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
-        <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
-        -
+        <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />-
       </span>
     );
   }
@@ -47,18 +46,18 @@ export function DrivingAuthorizationBadge({
         iconColor: "text-green-600",
       }
     : partial
-    ? {
-        icon: AlertTriangle,
-        label: t("employees.partialAuthorization"),
-        color: "bg-yellow-500/15 border border-yellow-500/25 text-yellow-600",
-        iconColor: "text-yellow-600",
-      }
-    : {
-        icon: XCircle,
-        label: t("employees.notAuthorizedToDrive"),
-        color: "bg-red-500/15 border border-red-500/25 text-red-600",
-        iconColor: "text-red-600",
-      };
+      ? {
+          icon: AlertTriangle,
+          label: t("employees.partialAuthorization"),
+          color: "bg-yellow-500/15 border border-yellow-500/25 text-yellow-600",
+          iconColor: "text-yellow-600",
+        }
+      : {
+          icon: XCircle,
+          label: t("employees.notAuthorizedToDrive"),
+          color: "bg-red-500/15 border border-red-500/25 text-red-600",
+          iconColor: "text-red-600",
+        };
 
   const StatusIcon = statusConfig.icon;
 
@@ -135,8 +134,8 @@ export function DrivingAuthorizationBadge({
             {authorized
               ? t("employees.authorized")
               : partial
-              ? t("employees.partial")
-              : t("employees.notAuthorized")}
+                ? t("employees.partial")
+                : t("employees.notAuthorized")}
           </span>
         </TooltipTrigger>
         <TooltipContent>{tooltipContent}</TooltipContent>

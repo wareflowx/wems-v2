@@ -1,11 +1,20 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2, Edit, Plus, Search, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 import { AnimatedEmpty } from "@/components/ui/animated-empty";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import {
@@ -25,20 +34,11 @@ import {
 } from "@/components/ui/table";
 import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
 import {
+  useAgencies,
   useCreateAgency,
   useDeleteAgency,
-  useAgencies,
   useUpdateAgency,
 } from "@/hooks";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 
 export function AgenciesPage() {
   const { t } = useTranslation();
@@ -71,7 +71,8 @@ export function AgenciesPage() {
       const matchesSearch =
         search === "" ||
         agency.name.toLowerCase().includes(search.toLowerCase()) ||
-        (agency.code && agency.code.toLowerCase().includes(search.toLowerCase()));
+        (agency.code &&
+          agency.code.toLowerCase().includes(search.toLowerCase()));
 
       const matchesStatus =
         statusFilter === "all" ||
@@ -103,14 +104,11 @@ export function AgenciesPage() {
 
   const handleDeleteAgency = () => {
     if (deletingAgency) {
-      deleteAgency.mutate(
-        deletingAgency.id,
-        {
-          onSuccess: () => {
-            setDeletingAgency(null);
-          },
-        }
-      );
+      deleteAgency.mutate(deletingAgency.id, {
+        onSuccess: () => {
+          setDeletingAgency(null);
+        },
+      });
     }
   };
 
@@ -197,9 +195,7 @@ export function AgenciesPage() {
                   <SelectItem value="all">
                     {t("agencies.allStatuses")}
                   </SelectItem>
-                  <SelectItem value="active">
-                    {t("agencies.active")}
-                  </SelectItem>
+                  <SelectItem value="active">{t("agencies.active")}</SelectItem>
                   <SelectItem value="inactive">
                     {t("agencies.inactive")}
                   </SelectItem>
@@ -218,16 +214,16 @@ export function AgenciesPage() {
             {filteredAgencies.length === 0 ? (
               <div className="flex w-full items-center justify-center">
                 <AnimatedEmpty
-                  title={t("agencies.noAgencies", "No agencies yet")}
+                  action={{
+                    label: t("agencies.addAgency", "Add Agency"),
+                    onClick: () => setIsCreateDialogOpen(true),
+                  }}
                   description={t(
                     "agencies.noAgenciesDescription",
                     "Create your first agency to get started"
                   )}
                   icons={[Building2, Building2, Building2]}
-                  action={{
-                    label: t("agencies.addAgency", "Add Agency"),
-                    onClick: () => setIsCreateDialogOpen(true),
-                  }}
+                  title={t("agencies.noAgencies", "No agencies yet")}
                 />
               </div>
             ) : (
@@ -325,9 +321,7 @@ export function AgenciesPage() {
 
       {/* Create Dialog */}
       {isCreateDialogOpen && (
-        <CreateAgencyDialog
-          onClose={() => setIsCreateDialogOpen(false)}
-        />
+        <CreateAgencyDialog onClose={() => setIsCreateDialogOpen(false)} />
       )}
 
       {/* Edit Dialog */}
@@ -359,11 +353,7 @@ function generateCode(name: string): string {
     .replace(/[^A-Z0-9]/g, "_");
 }
 
-function CreateAgencyDialog({
-  onClose,
-}: {
-  onClose: () => void;
-}) {
+function CreateAgencyDialog({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const createAgency = useCreateAgency();
   const [name, setName] = useState("");
@@ -377,7 +367,7 @@ function CreateAgencyDialog({
   };
 
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog onOpenChange={onClose} open>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("agencies.addAgency")}</DialogTitle>
@@ -387,26 +377,26 @@ function CreateAgencyDialog({
             <Label htmlFor="name">{t("agencies.name")}</Label>
             <Input
               id="name"
-              value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("agencies.namePlaceholder")}
+              value={name}
             />
           </div>
           <div className="flex items-center gap-2">
             <input
-              type="checkbox"
-              id="isActive"
               checked={isActive}
+              id="isActive"
               onChange={(e) => setIsActive(e.target.checked)}
+              type="checkbox"
             />
             <Label htmlFor="isActive">{t("agencies.active")}</Label>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button onClick={onClose} variant="outline">
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!name}>
+          <Button disabled={!name} onClick={handleSubmit}>
             {t("common.save")}
           </Button>
         </DialogFooter>
@@ -435,7 +425,7 @@ function EditAgencyDialog({
   };
 
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog onOpenChange={onClose} open>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("agencies.editAgency")}</DialogTitle>
@@ -445,33 +435,33 @@ function EditAgencyDialog({
             <Label htmlFor="edit-name">{t("agencies.name")}</Label>
             <Input
               id="edit-name"
-              value={name}
               onChange={(e) => setName(e.target.value)}
+              value={name}
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="edit-code">{t("agencies.code")}</Label>
             <Input
               id="edit-code"
-              value={code}
               onChange={(e) => setCode(e.target.value)}
+              value={code}
             />
           </div>
           <div className="flex items-center gap-2">
             <input
-              type="checkbox"
-              id="edit-isActive"
               checked={isActive}
+              id="edit-isActive"
               onChange={(e) => setIsActive(e.target.checked)}
+              type="checkbox"
             />
             <Label htmlFor="edit-isActive">{t("agencies.active")}</Label>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button onClick={onClose} variant="outline">
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!name}>
+          <Button disabled={!name} onClick={handleSubmit}>
             {t("common.save")}
           </Button>
         </DialogFooter>
@@ -494,7 +484,7 @@ function DeleteAgencyDialog({
   const isDeleting = deleteAgency.isPending;
 
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog onOpenChange={onClose} open>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("agencies.deleteAgency")}</DialogTitle>
@@ -505,13 +495,13 @@ function DeleteAgencyDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button onClick={onClose} variant="outline">
             {t("common.cancel")}
           </Button>
           <Button
-            variant="destructive"
-            onClick={onConfirm}
             disabled={isDeleting}
+            onClick={onConfirm}
+            variant="destructive"
           >
             {isDeleting ? t("common.deleting") : t("common.delete")}
           </Button>

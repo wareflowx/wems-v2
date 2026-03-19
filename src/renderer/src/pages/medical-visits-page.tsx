@@ -17,7 +17,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AddMedicalVisitDialog } from "@/components/medical-visits/AddMedicalVisitDialog";
 import { DeleteMedicalVisitDialog } from "@/components/medical-visits/DeleteMedicalVisitDialog";

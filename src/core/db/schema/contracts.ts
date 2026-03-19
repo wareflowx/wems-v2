@@ -1,6 +1,6 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { timestampsWithSoftDelete } from "./columns.helpers";
 import { agencies } from "./agencies";
+import { timestampsWithSoftDelete } from "./columns.helpers";
 import { employees } from "./employees";
 
 export const contracts = sqliteTable("contracts", {

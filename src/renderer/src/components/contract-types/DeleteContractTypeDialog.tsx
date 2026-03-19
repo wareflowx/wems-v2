@@ -52,9 +52,9 @@ export function DeleteContractTypeDialog({
             {t("common.cancel")}
           </Button>
           <Button
-            variant="destructive"
-            onClick={handleConfirm}
             disabled={isDeleting}
+            onClick={handleConfirm}
+            variant="destructive"
           >
             {isDeleting ? t("common.deleting") : t("common.delete")}
           </Button>

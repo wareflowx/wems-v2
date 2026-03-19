@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useCreateDepartment } from "@/hooks";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useCreateDepartment } from "@/hooks";
 
 const COLORS = [
   { name: "Red", value: "bg-red-500" },
@@ -46,7 +46,10 @@ interface CreateDepartmentDialogProps {
   onClose?: () => void;
 }
 
-export function CreateDepartmentDialog({ open, onClose }: CreateDepartmentDialogProps) {
+export function CreateDepartmentDialog({
+  open,
+  onClose,
+}: CreateDepartmentDialogProps) {
   const { t } = useTranslation();
   const createDepartment = useCreateDepartment();
   const [name, setName] = useState("");
@@ -55,11 +58,13 @@ export function CreateDepartmentDialog({ open, onClose }: CreateDepartmentDialog
   const handleSubmit = () => {
     createDepartment.mutate(
       { name, code: generateCode(name), color: selectedColor, isActive: true },
-      { onSuccess: () => {
-        setName("");
-        setSelectedColor(COLORS[0].value);
-        onClose?.();
-      }}
+      {
+        onSuccess: () => {
+          setName("");
+          setSelectedColor(COLORS[0].value);
+          onClose?.();
+        },
+      }
     );
   };
 
@@ -70,7 +75,7 @@ export function CreateDepartmentDialog({ open, onClose }: CreateDepartmentDialog
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("departments.addDepartment")}</DialogTitle>
@@ -83,9 +88,9 @@ export function CreateDepartmentDialog({ open, onClose }: CreateDepartmentDialog
             <Label htmlFor="name">{t("departments.name")}</Label>
             <Input
               id="name"
-              value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Production"
+              value={name}
             />
           </div>
           <div className="grid gap-2">
@@ -108,10 +113,10 @@ export function CreateDepartmentDialog({ open, onClose }: CreateDepartmentDialog
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button onClick={onClose} variant="outline">
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!name}>
+          <Button disabled={!name} onClick={handleSubmit}>
             {t("common.create")}
           </Button>
         </DialogFooter>

@@ -21,7 +21,9 @@ export interface Alert {
 
 // Helper to get IPC client
 function getClient() {
-  if (!ipc.isReady()) return null;
+  if (!ipc.isReady()) {
+    return null;
+  }
   return ipc.client;
 }
 
@@ -39,6 +41,8 @@ export const alertsApi = {
   // Note: getById is not implemented on backend as alerts are generated dynamically
   // The frontend should filter from getAll results if needed
   getById: async (_id: number): Promise<Alert> => {
-    throw new Error("getById is not supported for dynamically generated alerts");
+    throw new Error(
+      "getById is not supported for dynamically generated alerts"
+    );
   },
 };

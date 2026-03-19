@@ -515,6 +515,8 @@
     "type": "Type",
     "date": "Date",
     "severity": "Sévérité",
+    "category": "Catégorie",
+    "daysLeft": "Jours",
     "actions": "Actions",
     "view": "Voir",
     "cacesExpiring": "CACES expirants",

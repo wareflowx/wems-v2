@@ -29,7 +29,13 @@ export interface MedicalVisit extends MedicalVisitFromDB {
 }
 
 // Calculate daysUntil and auto-update status based on scheduledDate
-function calculateVisitStatus(scheduledDate: string, currentStatus: string): { daysUntil: number; status: "scheduled" | "completed" | "overdue" | "cancelled" } {
+function calculateVisitStatus(
+  scheduledDate: string,
+  currentStatus: string
+): {
+  daysUntil: number;
+  status: "scheduled" | "completed" | "overdue" | "cancelled";
+} {
   if (currentStatus === "completed" || currentStatus === "cancelled") {
     return { daysUntil: 0, status: currentStatus };
   }
@@ -59,13 +65,23 @@ function enrichVisitsWithStatus(
 ): MedicalVisit[] {
   return visits.map((visit) => {
     const employee = employees?.find((e) => e.id === visit.employeeId);
-    const { daysUntil, status } = calculateVisitStatus(visit.scheduledDate, visit.status);
+    const { daysUntil, status } = calculateVisitStatus(
+      visit.scheduledDate,
+      visit.status
+    );
     return {
       ...visit,
       daysUntil,
-      status: visit.status === "completed" || visit.status === "cancelled" ? visit.status : status,
+      status:
+        visit.status === "completed" || visit.status === "cancelled"
+          ? visit.status
+          : status,
       employee: employee
-        ? { id: employee.id, firstName: employee.firstName, lastName: employee.lastName }
+        ? {
+            id: employee.id,
+            firstName: employee.firstName,
+            lastName: employee.lastName,
+          }
         : undefined,
     };
   });
@@ -117,7 +133,9 @@ export function useMedicalVisit(id: number) {
         db.getEmployees(),
       ]);
       const visit = visitsData.find((v) => v.id === id);
-      if (!visit) return null;
+      if (!visit) {
+        return null;
+      }
       return enrichVisitsWithStatus([visit], employeesData)[0];
     },
     enabled: orpcReady && !!id,
@@ -230,7 +248,9 @@ export function useUpdateMedicalVisit() {
         { queryKey: queryKeys.medicalVisits.lists() },
         (old: MedicalVisit[] = []) =>
           old.map((visit) => {
-            if (visit.id !== updatedVisit.id) return visit;
+            if (visit.id !== updatedVisit.id) {
+              return visit;
+            }
             const updated = { ...visit, ...updatedVisit };
             // Recalculate status if scheduledDate changed
             if (updatedVisit.scheduledDate) {

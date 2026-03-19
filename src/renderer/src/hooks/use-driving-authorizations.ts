@@ -1,9 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { DrivingAuthorizationStatusResult } from "@@/lib/driving-authorization";
 import { queryKeys } from "@@/lib/query-keys";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as db from "@/actions/database";
 import { useORPCReady } from "@/hooks";
 import { useToast } from "@/utils/toast";
-import type { DrivingAuthorizationStatusResult } from "@/core/lib/driving-authorization";
 
 // Driving Authorizations
 export function useDrivingAuthorizations() {
@@ -48,7 +48,8 @@ export function useCreateDrivingAuthorization() {
     onError: (error) => {
       toast({
         title: "Failed to create driving authorization",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     },
@@ -77,7 +78,8 @@ export function useUpdateDrivingAuthorization() {
     onError: (error) => {
       toast({
         title: "Failed to update driving authorization",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     },
@@ -102,8 +104,7 @@ export function useDeleteDrivingAuthorization() {
 
       queryClient.setQueryData(
         queryKeys.drivingAuthorizations.lists(),
-        (old: db.DrivingAuthorization[] = []) =>
-          old.filter((a) => a.id !== id)
+        (old: db.DrivingAuthorization[] = []) => old.filter((a) => a.id !== id)
       );
 
       return { previousAuthorizations };
@@ -145,7 +146,9 @@ export function useDrivingAuthorizationStatus(employeeId: number) {
 export function useAllDrivingAuthorizationStatuses() {
   const orpcReady = useORPCReady();
 
-  return useQuery<Array<{ employeeId: number; status: DrivingAuthorizationStatusResult }>>({
+  return useQuery<
+    Array<{ employeeId: number; status: DrivingAuthorizationStatusResult }>
+  >({
     queryKey: queryKeys.drivingAuthorizationStatus.all,
     queryFn: () => db.getAllDrivingAuthorizationStatuses(),
     enabled: orpcReady,

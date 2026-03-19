@@ -1,13 +1,20 @@
-import { ShieldX, TestTubes, Users, FileText, Car, GraduationCap, FileSignature } from "lucide-react";
 import { useParams } from "@tanstack/react-router";
+import {
+  Car,
+  FileSignature,
+  FileText,
+  GraduationCap,
+  TestTubes,
+  Users,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EditEmployeeDialog } from "@/components/employees/EditEmployeeDialog";
+import { AnimatedEmpty } from "@/components/ui/animated-empty";
+import { StatusBadge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
-import { Card } from "@/components/ui/card";
-import { StatusBadge } from "@/components/ui/badge";
-import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import {
   Table,
   TableBody,
@@ -23,25 +30,26 @@ import {
   useDepartments,
   useDrivingAuthorizations,
   useEmployee,
+  useEmployees,
   useMedicalVisits,
   useOnlineTrainings,
   usePositions,
   useUpdateEmployee,
   useWorkLocations,
-  useEmployees,
 } from "@/hooks";
 
 export function EmployeeDetailPage() {
   const { t } = useTranslation();
   const { employeeId } = useParams({ from: "/employees/$employeeId" });
-  const parsedEmployeeId = parseInt(employeeId, 10);
+  const parsedEmployeeId = Number.parseInt(employeeId, 10);
 
   // Fetch employee data
   const { data: employee, isLoading, error } = useEmployee(parsedEmployeeId);
 
   // Fetch all employees to find the employee if useEmployee doesn't work
   const { data: employees = [] } = useEmployees();
-  const employeeData = employee || employees.find((e) => e.id === parsedEmployeeId);
+  const employeeData =
+    employee || employees.find((e) => e.id === parsedEmployeeId);
 
   // Fetch related data
   const { data: positions = [] } = usePositions();
@@ -57,7 +65,9 @@ export function EmployeeDetailPage() {
 
   // Get employee's current contract
   const currentContract = useMemo(() => {
-    if (!employeeData) return undefined;
+    if (!employeeData) {
+      return undefined;
+    }
     const now = new Date();
     return contracts.find((c) => {
       if (c.employeeId !== employeeData.id || !c.isActive) {
@@ -72,44 +82,65 @@ export function EmployeeDetailPage() {
 
   // Get employee's data
   const employeeCaces = useMemo(() => {
-    if (!employeeData) return [];
+    if (!employeeData) {
+      return [];
+    }
     return caces.filter((c) => c.employeeId === employeeData.id);
   }, [caces, employeeData]);
 
   const employeeMedicalVisits = useMemo(() => {
-    if (!employeeData) return [];
+    if (!employeeData) {
+      return [];
+    }
     return medicalVisits.filter((m) => m.employeeId === employeeData.id);
   }, [medicalVisits, employeeData]);
 
   const employeeDrivingAuthorizations = useMemo(() => {
-    if (!employeeData) return [];
-    return drivingAuthorizations.filter((d) => d.employeeId === employeeData.id);
+    if (!employeeData) {
+      return [];
+    }
+    return drivingAuthorizations.filter(
+      (d) => d.employeeId === employeeData.id
+    );
   }, [drivingAuthorizations, employeeData]);
 
   const employeeTrainings = useMemo(() => {
-    if (!employeeData) return [];
+    if (!employeeData) {
+      return [];
+    }
     return onlineTrainings.filter((t) => t.employeeId === employeeData.id);
   }, [onlineTrainings, employeeData]);
 
   // Get all contracts for the employee
   const employeeContracts = useMemo(() => {
-    if (!employeeData) return [];
+    if (!employeeData) {
+      return [];
+    }
     return contracts.filter((c) => c.employeeId === employeeData.id);
   }, [contracts, employeeData]);
 
   // Get position and work location
-  const position = employeeData ? positions.find((p) => p.id === employeeData.positionId) : undefined;
-  const workLocation = employeeData ? workLocations.find((w) => w.id === employeeData.workLocationId) : undefined;
+  const position = employeeData
+    ? positions.find((p) => p.id === employeeData.positionId)
+    : undefined;
+  const workLocation = employeeData
+    ? workLocations.find((w) => w.id === employeeData.workLocationId)
+    : undefined;
 
   // Check if certifications are valid (not expired)
   const now = new Date();
 
   // Valid CACES: at least one not expired
-  const validCaces = employeeCaces.some((c: any) => c.expirationDate && new Date(c.expirationDate) > now);
+  const validCaces = employeeCaces.some(
+    (c: any) => c.expirationDate && new Date(c.expirationDate) > now
+  );
 
   // Valid medical visit: at least one not expired and completed
   const validMedicalVisit = employeeMedicalVisits.some(
-    (m: any) => m.status === "completed" && m.expirationDate && new Date(m.expirationDate) > now
+    (m: any) =>
+      m.status === "completed" &&
+      m.expirationDate &&
+      new Date(m.expirationDate) > now
   );
 
   // Valid driving authorization: at least one not expired
@@ -118,20 +149,54 @@ export function EmployeeDetailPage() {
   );
 
   // Valid training: at least one completed
-  const validTraining = employeeTrainings.some((t: any) => t.status === "completed");
+  const validTraining = employeeTrainings.some(
+    (t: any) => t.status === "completed"
+  );
 
   // Can drive: all 4 conditions met
-  const canDrive = validCaces && validMedicalVisit && validDrivingAuth && validTraining;
-  const partialDriving = (validCaces ? 1 : 0) + (validMedicalVisit ? 1 : 0) + (validDrivingAuth ? 1 : 0) + (validTraining ? 1 : 0);
+  const canDrive =
+    validCaces && validMedicalVisit && validDrivingAuth && validTraining;
+  const partialDriving =
+    (validCaces ? 1 : 0) +
+    (validMedicalVisit ? 1 : 0) +
+    (validDrivingAuth ? 1 : 0) +
+    (validTraining ? 1 : 0);
 
   // Tab state for document types
-  const [activeTab, setActiveTab] = useState<"caces" | "medicalVisits" | "drivingAuthorizations" | "trainings">("caces");
+  const [activeTab, setActiveTab] = useState<
+    "caces" | "medicalVisits" | "drivingAuthorizations" | "trainings"
+  >("caces");
 
-  const tabs: { key: "caces" | "medicalVisits" | "drivingAuthorizations" | "trainings"; label: string; count: number; valid?: boolean }[] = [
-    { key: "caces", label: "CACES", count: employeeCaces.length, valid: validCaces },
-    { key: "medicalVisits", label: "Medical Visits", count: employeeMedicalVisits.length, valid: validMedicalVisit },
-    { key: "drivingAuthorizations", label: "Driving Authorizations", count: employeeDrivingAuthorizations.length, valid: validDrivingAuth },
-    { key: "trainings", label: "Trainings", count: employeeTrainings.length, valid: validTraining },
+  const tabs: {
+    key: "caces" | "medicalVisits" | "drivingAuthorizations" | "trainings";
+    label: string;
+    count: number;
+    valid?: boolean;
+  }[] = [
+    {
+      key: "caces",
+      label: "CACES",
+      count: employeeCaces.length,
+      valid: validCaces,
+    },
+    {
+      key: "medicalVisits",
+      label: "Medical Visits",
+      count: employeeMedicalVisits.length,
+      valid: validMedicalVisit,
+    },
+    {
+      key: "drivingAuthorizations",
+      label: "Driving Authorizations",
+      count: employeeDrivingAuthorizations.length,
+      valid: validDrivingAuth,
+    },
+    {
+      key: "trainings",
+      label: "Trainings",
+      count: employeeTrainings.length,
+      valid: validTraining,
+    },
   ];
 
   // Loading state
@@ -163,7 +228,7 @@ export function EmployeeDetailPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 overflow-y-auto">
+    <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4 pt-6">
       <div className="min-h-full space-y-6">
         {/* Header */}
         <div className="border-b pb-4">
@@ -174,7 +239,9 @@ export function EmployeeDetailPage() {
               employeeData.status === "active" ? (
                 <StatusBadge color="green">{t("employees.active")}</StatusBadge>
               ) : employeeData.status === "on_leave" ? (
-                <StatusBadge color="yellow">{t("employees.onLeave")}</StatusBadge>
+                <StatusBadge color="yellow">
+                  {t("employees.onLeave")}
+                </StatusBadge>
               ) : (
                 <StatusBadge color="gray">{employeeData.status}</StatusBadge>
               )
@@ -185,10 +252,10 @@ export function EmployeeDetailPage() {
           {/* Action Buttons */}
           <div className="mt-4 flex gap-2">
             <EditEmployeeDialog
-              employee={employeeData}
+              agencies={agencies}
               contract={currentContract}
               departments={departments}
-              agencies={agencies}
+              employee={employeeData}
               onEdit={(data) => updateEmployee.mutate(data)}
               onOpenChange={() => {}}
               open={false}
@@ -211,7 +278,7 @@ export function EmployeeDetailPage() {
               <p className="text-muted-foreground text-xs">
                 {t("employees.position")}
               </p>
-              <p className="mt-0.5 text-sm font-medium">
+              <p className="mt-0.5 font-medium text-sm">
                 {position?.name || "-"}
               </p>
             </Card>
@@ -219,17 +286,13 @@ export function EmployeeDetailPage() {
               <p className="text-muted-foreground text-xs">
                 {t("employees.workLocation")}
               </p>
-              <p className="mt-0.5 text-sm">
-                {workLocation?.name || "-"}
-              </p>
+              <p className="mt-0.5 text-sm">{workLocation?.name || "-"}</p>
             </Card>
             <Card className="p-3">
               <p className="text-muted-foreground text-xs">
                 {t("employeeDetail.startDate")}
               </p>
-              <p className="mt-0.5 text-sm">
-                {employeeData.hireDate}
-              </p>
+              <p className="mt-0.5 text-sm">{employeeData.hireDate}</p>
             </Card>
             <Card className="p-3">
               <p className="text-muted-foreground text-xs">
@@ -237,22 +300,26 @@ export function EmployeeDetailPage() {
               </p>
               <p className="mt-0.5 text-sm">
                 {currentContract ? (
-                  <span className="font-medium">{currentContract.contractType}</span>
-                ) : "-"}
+                  <span className="font-medium">
+                    {currentContract.contractType}
+                  </span>
+                ) : (
+                  "-"
+                )}
               </p>
             </Card>
           </div>
 
           {/* Contracts Table (separate section) */}
           <div className="mt-4">
-            <h3 className="text-sm font-medium mb-2">Contracts History</h3>
+            <h3 className="mb-2 font-medium text-sm">Contracts History</h3>
             <div className="overflow-x-auto rounded-lg border bg-card">
               {employeeContracts.length === 0 ? (
                 <AnimatedEmpty
                   bordered={false}
-                  title="No contracts"
                   description="This employee has no contracts on file."
                   icons={[FileSignature, FileSignature, FileSignature]}
+                  title="No contracts"
                 />
               ) : (
                 <Table>
@@ -266,12 +333,21 @@ export function EmployeeDetailPage() {
                   </TableHeader>
                   <TableBody>
                     {employeeContracts.map((contract: any) => {
-                      const isActive = contract.isActive && (!contract.endDate || new Date(contract.endDate) >= new Date());
+                      const isActive =
+                        contract.isActive &&
+                        (!contract.endDate ||
+                          new Date(contract.endDate) >= new Date());
                       return (
                         <TableRow key={contract.id}>
-                          <TableCell className="px-4 font-medium">{contract.contractType}</TableCell>
-                          <TableCell className="px-4">{contract.startDate}</TableCell>
-                          <TableCell className="px-4">{contract.endDate || "-"}</TableCell>
+                          <TableCell className="px-4 font-medium">
+                            {contract.contractType}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {contract.startDate}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {contract.endDate || "-"}
+                          </TableCell>
                           <TableCell className="px-4">
                             {isActive ? (
                               <StatusBadge color="green">Active</StatusBadge>
@@ -298,7 +374,7 @@ export function EmployeeDetailPage() {
                 Authorized to drive
               </span>
             ) : partialDriving > 0 ? (
-              <span className="inline-flex items-center rounded-md border border-yellow-500/25 bg-yellow-500/15 px-3 py-1.5 font-medium text-yellow-600 text-xs">
+              <span className="inline-flex items-center rounded-md border border-yellow-500/25 bg-yellow-500/15 px-3 py-1.5 font-medium text-xs text-yellow-600">
                 Partial ({partialDriving}/4)
               </span>
             ) : (
@@ -312,12 +388,12 @@ export function EmployeeDetailPage() {
           <div className="flex flex-wrap gap-2 border-b">
             {tabs.map((tab) => (
               <button
-                key={tab.key}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                className={`px-4 py-2 font-medium text-sm transition-colors ${
                   activeTab === tab.key
-                    ? "border-b-2 border-primary text-primary"
+                    ? "border-primary border-b-2 text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
+                key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
               >
                 {tab.label}
@@ -327,7 +403,10 @@ export function EmployeeDetailPage() {
                   </span>
                 )}
                 {tab.valid !== undefined && (
-                  <StatusBadge color={tab.valid ? "green" : "red"} className="ml-2">
+                  <StatusBadge
+                    className="ml-2"
+                    color={tab.valid ? "green" : "red"}
+                  >
                     {tab.valid ? "Valid" : "Invalid"}
                   </StatusBadge>
                 )}
@@ -341,9 +420,9 @@ export function EmployeeDetailPage() {
               {employeeCaces.length === 0 ? (
                 <AnimatedEmpty
                   bordered={false}
-                  title="No CACES records"
                   description="This employee has no CACES certificates on file."
                   icons={[TestTubes, TestTubes, TestTubes]}
+                  title="No CACES records"
                 />
               ) : (
                 <Table>
@@ -357,12 +436,19 @@ export function EmployeeDetailPage() {
                   </TableHeader>
                   <TableBody>
                     {employeeCaces.map((c: any) => {
-                      const isExpired = c.expirationDate && new Date(c.expirationDate) < now;
+                      const isExpired =
+                        c.expirationDate && new Date(c.expirationDate) < now;
                       return (
                         <TableRow key={c.id}>
-                          <TableCell className="px-4 font-medium">{c.category}</TableCell>
-                          <TableCell className="px-4">{c.dateObtained}</TableCell>
-                          <TableCell className="px-4">{c.expirationDate}</TableCell>
+                          <TableCell className="px-4 font-medium">
+                            {c.category}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {c.dateObtained}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {c.expirationDate}
+                          </TableCell>
                           <TableCell className="px-4">
                             {isExpired ? (
                               <StatusBadge color="red">Expired</StatusBadge>
@@ -385,9 +471,9 @@ export function EmployeeDetailPage() {
               {employeeMedicalVisits.length === 0 ? (
                 <AnimatedEmpty
                   bordered={false}
-                  title="No medical visits"
                   description="This employee has no medical visits on file."
                   icons={[FileText, FileText, FileText]}
+                  title="No medical visits"
                 />
               ) : (
                 <Table>
@@ -402,13 +488,22 @@ export function EmployeeDetailPage() {
                   </TableHeader>
                   <TableBody>
                     {employeeMedicalVisits.map((m: any) => {
-                      const isExpired = m.expirationDate && new Date(m.expirationDate) < now;
+                      const isExpired =
+                        m.expirationDate && new Date(m.expirationDate) < now;
                       return (
                         <TableRow key={m.id}>
-                          <TableCell className="px-4 font-medium">{m.type}</TableCell>
-                          <TableCell className="px-4">{m.scheduledDate || "-"}</TableCell>
-                          <TableCell className="px-4">{m.actualDate || "-"}</TableCell>
-                          <TableCell className="px-4">{m.fitnessStatus || "-"}</TableCell>
+                          <TableCell className="px-4 font-medium">
+                            {m.type}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {m.scheduledDate || "-"}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {m.actualDate || "-"}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {m.fitnessStatus || "-"}
+                          </TableCell>
                           <TableCell className="px-4">
                             {m.status === "completed" ? (
                               isExpired ? (
@@ -421,7 +516,9 @@ export function EmployeeDetailPage() {
                             ) : m.status === "overdue" ? (
                               <StatusBadge color="orange">Overdue</StatusBadge>
                             ) : (
-                              <span className="text-muted-foreground">{m.status}</span>
+                              <span className="text-muted-foreground">
+                                {m.status}
+                              </span>
                             )}
                           </TableCell>
                         </TableRow>
@@ -439,9 +536,9 @@ export function EmployeeDetailPage() {
               {employeeDrivingAuthorizations.length === 0 ? (
                 <AnimatedEmpty
                   bordered={false}
-                  title="No driving authorizations"
                   description="This employee has no driving authorizations on file."
                   icons={[Car, Car, Car]}
+                  title="No driving authorizations"
                 />
               ) : (
                 <Table>
@@ -455,12 +552,19 @@ export function EmployeeDetailPage() {
                   </TableHeader>
                   <TableBody>
                     {employeeDrivingAuthorizations.map((d: any) => {
-                      const isExpired = d.expirationDate && new Date(d.expirationDate) < now;
+                      const isExpired =
+                        d.expirationDate && new Date(d.expirationDate) < now;
                       return (
                         <TableRow key={d.id}>
-                          <TableCell className="px-4 font-medium">{d.licenseCategory}</TableCell>
-                          <TableCell className="px-4">{d.dateObtained}</TableCell>
-                          <TableCell className="px-4">{d.expirationDate}</TableCell>
+                          <TableCell className="px-4 font-medium">
+                            {d.licenseCategory}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {d.dateObtained}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {d.expirationDate}
+                          </TableCell>
                           <TableCell className="px-4">
                             {isExpired ? (
                               <StatusBadge color="red">Expired</StatusBadge>
@@ -483,9 +587,9 @@ export function EmployeeDetailPage() {
               {employeeTrainings.length === 0 ? (
                 <AnimatedEmpty
                   bordered={false}
-                  title="No trainings"
                   description="This employee has no trainings on file."
                   icons={[GraduationCap, GraduationCap, GraduationCap]}
+                  title="No trainings"
                 />
               ) : (
                 <Table>
@@ -500,22 +604,37 @@ export function EmployeeDetailPage() {
                   </TableHeader>
                   <TableBody>
                     {employeeTrainings.map((t: any) => {
-                      const isExpired = t.expirationDate && new Date(t.expirationDate) < now;
+                      const isExpired =
+                        t.expirationDate && new Date(t.expirationDate) < now;
                       return (
                         <TableRow key={t.id}>
-                          <TableCell className="px-4 font-medium">{t.trainingName}</TableCell>
-                          <TableCell className="px-4">{t.trainingProvider || "-"}</TableCell>
-                          <TableCell className="px-4">{t.completionDate}</TableCell>
-                          <TableCell className="px-4">{t.expirationDate || "-"}</TableCell>
+                          <TableCell className="px-4 font-medium">
+                            {t.trainingName}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {t.trainingProvider || "-"}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {t.completionDate}
+                          </TableCell>
+                          <TableCell className="px-4">
+                            {t.expirationDate || "-"}
+                          </TableCell>
                           <TableCell className="px-4">
                             {t.status === "completed" ? (
                               isExpired ? (
-                                <StatusBadge color="orange">Expired</StatusBadge>
+                                <StatusBadge color="orange">
+                                  Expired
+                                </StatusBadge>
                               ) : (
-                                <StatusBadge color="green">Completed</StatusBadge>
+                                <StatusBadge color="green">
+                                  Completed
+                                </StatusBadge>
                               )
                             ) : t.status === "in_progress" ? (
-                              <StatusBadge color="blue">In Progress</StatusBadge>
+                              <StatusBadge color="blue">
+                                In Progress
+                              </StatusBadge>
                             ) : (
                               <StatusBadge color="red">{t.status}</StatusBadge>
                             )}

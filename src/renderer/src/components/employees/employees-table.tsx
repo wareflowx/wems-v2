@@ -3,7 +3,7 @@ import type { Contract } from "@@/db/schema/contracts";
 import type { Employee } from "@@/db/schema/employees";
 import type { Position } from "@@/db/schema/positions";
 import type { WorkLocation } from "@@/db/schema/work-locations";
-import type { DrivingAuthorizationStatusResult } from "@/core/lib/driving-authorization";
+import type { DrivingAuthorizationStatusResult } from "@@/lib/driving-authorization";
 import { Link } from "@tanstack/react-router";
 import {
   type ColumnDef,
@@ -216,9 +216,7 @@ export function EmployeesTable({
           const contract = getEmployeeContract(employee.id);
           const agencyId = contract?.agencyId ?? null;
           if (!agencyId) {
-            return (
-              <span className="text-muted-foreground text-xs">-</span>
-            );
+            return <span className="text-muted-foreground text-xs">-</span>;
           }
           const agency = agencies?.find((a) => a.id === agencyId);
           return (
@@ -277,7 +275,7 @@ export function EmployeesTable({
         cell: ({ row }) => {
           const employee = row.original;
           const contract = getEmployeeContract(employee.id);
-          if (!contract || !contract.endDate) {
+          if (!(contract && contract.endDate)) {
             return <span className="text-muted-foreground text-xs">-</span>;
           }
           return (
@@ -440,7 +438,11 @@ export function EmployeesTable({
             ) : (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  className={onRowClick ? "cursor-pointer hover:bg-muted/50" : "hover:bg-muted/50"}
+                  className={
+                    onRowClick
+                      ? "cursor-pointer hover:bg-muted/50"
+                      : "hover:bg-muted/50"
+                  }
                   key={row.id}
                   onClick={() => onRowClick?.(row.original)}
                 >

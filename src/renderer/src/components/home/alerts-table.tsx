@@ -67,9 +67,7 @@ export function AlertsTable({
               <TableCell>
                 {getDetailBadge(alert.category, alert.visitType)}
               </TableCell>
-              <TableCell className="text-gray-700">
-                {alert.date}
-              </TableCell>
+              <TableCell className="text-gray-700">{alert.date}</TableCell>
               <TableCell>{getAlertBadge(alert.severity)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">

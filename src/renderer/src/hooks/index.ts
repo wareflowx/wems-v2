@@ -11,5 +11,8 @@ export * from "./use-medical-visits";
 export * from "./use-online-trainings";
 export * from "./use-orpc-ready";
 export * from "./use-positions-worklocations";
+export {
+  useContractTypes,
+  useDepartments,
+} from "./use-positions-worklocations";
 export * from "./use-settings";
-export { useDepartments, useContractTypes } from "./use-positions-worklocations";

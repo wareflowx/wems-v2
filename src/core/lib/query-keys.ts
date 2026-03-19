@@ -56,7 +56,8 @@ export const queryKeys = {
   drivingAuthorizations: {
     all: ["driving-authorizations"] as const,
     lists: () => ["driving-authorizations", "list"] as const,
-    list: (filters: string) => ["driving-authorizations", "list", filters] as const,
+    list: (filters: string) =>
+      ["driving-authorizations", "list", filters] as const,
     details: () => ["driving-authorizations", "detail"] as const,
     detail: (id: number) => ["driving-authorizations", "detail", id] as const,
     byEmployee: (employeeId: number) =>

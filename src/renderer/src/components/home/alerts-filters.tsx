@@ -42,8 +42,8 @@ export function AlertsFilters({
 
   return (
     <div className="flex flex-wrap gap-2">
-      <div className="relative min-w-[120px] sm:min-w-[150px] lg:min-w-[200px] flex-1 max-w-full">
-        <Search className="absolute top-1/2 left-2 sm:left-3 h-3 sm:h-4 w-3 sm:w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="relative min-w-[120px] max-w-full flex-1 sm:min-w-[150px] lg:min-w-[200px]">
+        <Search className="absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2 text-muted-foreground sm:left-3 sm:h-4 sm:w-4" />
         <Input
           className="pl-7 sm:pl-9"
           onChange={(e) => onSearchChange(e.target.value)}
@@ -58,9 +58,7 @@ export function AlertsFilters({
         <SelectContent>
           <SelectItem value="all">{t("dashboard.allTypes")}</SelectItem>
           <SelectItem value="caces">{t("caces.title")}</SelectItem>
-          <SelectItem value="medical">
-            {t("medicalVisits.title")}
-          </SelectItem>
+          <SelectItem value="medical">{t("medicalVisits.title")}</SelectItem>
         </SelectContent>
       </Select>
       <Select onValueChange={onSeverityFilterChange} value={severityFilter}>
@@ -68,9 +66,7 @@ export function AlertsFilters({
           <SelectValue placeholder={t("dashboard.filterBySeverity")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">
-            {t("dashboard.allSeverities")}
-          </SelectItem>
+          <SelectItem value="all">{t("dashboard.allSeverities")}</SelectItem>
           <SelectItem value="critical">{t("alerts.critical")}</SelectItem>
           <SelectItem value="warning">{t("alerts.warning")}</SelectItem>
           <SelectItem value="info">{t("alerts.info")}</SelectItem>

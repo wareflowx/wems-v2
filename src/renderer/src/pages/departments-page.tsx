@@ -1,9 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2, Edit, Plus, Search, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
+import { CreateDepartmentDialog } from "@/components/departments/CreateDepartmentDialog";
 import { AnimatedEmpty } from "@/components/ui/animated-empty";
+import { Button } from "@/components/ui/button";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { Input } from "@/components/ui/input";
 import { MetricsSection } from "@/components/ui/metrics-section";
@@ -30,7 +31,6 @@ import {
   useDepartments,
   useUpdateDepartment,
 } from "@/hooks";
-import { CreateDepartmentDialog } from "@/components/departments/CreateDepartmentDialog";
 
 const getColorName = (color: string) => {
   return color.replace("bg-", "").replace("-500", "").toUpperCase();
@@ -214,16 +214,16 @@ export function DepartmentsPage() {
             {filteredDepartments.length === 0 ? (
               <div className="flex w-full items-center justify-center">
                 <AnimatedEmpty
-                  title={t("departments.noDepartments", "No departments yet")}
+                  action={{
+                    label: t("departments.addDepartment", "Add Department"),
+                    onClick: () => setIsCreateDialogOpen(true),
+                  }}
                   description={t(
                     "departments.noDepartmentsDescription",
                     "Create your first department to get started"
                   )}
                   icons={[Building2, Building2, Building2]}
-                  action={{
-                    label: t("departments.addDepartment", "Add Department"),
-                    onClick: () => setIsCreateDialogOpen(true),
-                  }}
+                  title={t("departments.noDepartments", "No departments yet")}
                 />
               </div>
             ) : (
@@ -237,9 +237,7 @@ export function DepartmentsPage() {
                       <TableHead className="px-4">
                         {t("departments.name")}
                       </TableHead>
-                      <TableHead className="px-4">
-                        Color
-                      </TableHead>
+                      <TableHead className="px-4">Color</TableHead>
                       <TableHead className="px-4">
                         {t("departments.status")}
                       </TableHead>
@@ -250,7 +248,10 @@ export function DepartmentsPage() {
                   </TableHeader>
                   <TableBody>
                     {filteredDepartments.map((department) => (
-                      <TableRow className="hover:bg-muted/50" key={department.id}>
+                      <TableRow
+                        className="hover:bg-muted/50"
+                        key={department.id}
+                      >
                         <TableCell className="px-4">
                           <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
                             {department.code}
@@ -261,7 +262,9 @@ export function DepartmentsPage() {
                         </TableCell>
                         <TableCell className="px-4">
                           <span className="inline-flex items-center rounded-md border border-border bg-muted/50 px-2 py-0.5 font-medium text-xs">
-                            <span className={`mr-1.5 h-2 w-2 rounded-full ${department.color}`} />
+                            <span
+                              className={`mr-1.5 h-2 w-2 rounded-full ${department.color}`}
+                            />
                             {getColorName(department.color)}
                           </span>
                         </TableCell>
@@ -306,9 +309,7 @@ export function DepartmentsPage() {
 
       {/* Create Dialog */}
       {isCreateDialogOpen && (
-        <CreateDepartmentDialog
-          onClose={() => setIsCreateDialogOpen(false)}
-        />
+        <CreateDepartmentDialog onClose={() => setIsCreateDialogOpen(false)} />
       )}
 
       {/* Edit Dialog */}
@@ -376,7 +377,9 @@ function EditDepartmentDialog({
   const { t } = useTranslation();
   const updateDepartment = useUpdateDepartment();
   const [name, setName] = useState(department.name);
-  const [selectedColor, setSelectedColor] = useState(department.color || COLORS[0].value);
+  const [selectedColor, setSelectedColor] = useState(
+    department.color || COLORS[0].value
+  );
   const [isActive, setIsActive] = useState(department.isActive);
 
   const handleSubmit = () => {
@@ -384,7 +387,7 @@ function EditDepartmentDialog({
   };
 
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog onOpenChange={onClose} open>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("departments.editDepartment")}</DialogTitle>
@@ -394,8 +397,8 @@ function EditDepartmentDialog({
             <Label htmlFor="edit-name">{t("departments.name")}</Label>
             <Input
               id="edit-name"
-              value={name}
               onChange={(e) => setName(e.target.value)}
+              value={name}
             />
           </div>
           <div className="grid gap-2">
@@ -418,19 +421,19 @@ function EditDepartmentDialog({
           </div>
           <div className="flex items-center gap-2">
             <input
-              type="checkbox"
-              id="edit-isActive"
               checked={isActive}
+              id="edit-isActive"
               onChange={(e) => setIsActive(e.target.checked)}
+              type="checkbox"
             />
             <Label htmlFor="edit-isActive">{t("departments.active")}</Label>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button onClick={onClose} variant="outline">
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!name}>
+          <Button disabled={!name} onClick={handleSubmit}>
             {t("common.save")}
           </Button>
         </DialogFooter>
@@ -453,7 +456,7 @@ function DeleteDepartmentDialog({
   const isDeleting = deleteDepartment.isPending;
 
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog onOpenChange={onClose} open>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("departments.deleteDepartment")}</DialogTitle>
@@ -464,13 +467,13 @@ function DeleteDepartmentDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button onClick={onClose} variant="outline">
             {t("common.cancel")}
           </Button>
           <Button
-            variant="destructive"
-            onClick={onConfirm}
             disabled={isDeleting}
+            onClick={onConfirm}
+            variant="destructive"
           >
             {isDeleting ? t("common.deleting") : t("common.delete")}
           </Button>

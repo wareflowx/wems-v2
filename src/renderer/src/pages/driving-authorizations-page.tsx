@@ -1,28 +1,25 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
 import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ChevronUp,
   ChevronsLeft,
   ChevronsRight,
-  Download,
+  ChevronUp,
   Edit,
   Filter,
   Plus,
-  Search,
   SearchX,
   ShieldAlert,
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import * as db from "@/actions/database";
 import { AddDrivingAuthorizationDialog } from "@/components/driving-authorizations/AddDrivingAuthorizationDialog";
 import { EditDrivingAuthorizationDialog } from "@/components/driving-authorizations/EditDrivingAuthorizationDialog";
-import { useToast } from "@/utils/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MetricsSection } from "@/components/ui/metrics-section";
@@ -49,13 +46,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  useDrivingAuthorizations,
   useCreateDrivingAuthorization,
   useDeleteDrivingAuthorization,
-  useUpdateDrivingAuthorization,
+  useDrivingAuthorizations,
   useEmployees,
+  useUpdateDrivingAuthorization,
 } from "@/hooks";
-import * as db from "@/actions/database";
+import { useToast } from "@/utils/toast";
 
 export function DrivingAuthorizationsPage() {
   const { t } = useTranslation();
@@ -86,11 +83,16 @@ export function DrivingAuthorizationsPage() {
     return authorizations.map((auth: any) => {
       const expDate = new Date(auth.expirationDate);
       expDate.setHours(0, 0, 0, 0);
-      const daysLeft = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const daysLeft = Math.ceil(
+        (expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
 
       let status = "valid";
-      if (daysLeft < 0) status = "expired";
-      else if (daysLeft <= 30) status = "warning";
+      if (daysLeft < 0) {
+        status = "expired";
+      } else if (daysLeft <= 30) {
+        status = "warning";
+      }
 
       return { ...auth, status, daysLeft };
     });
@@ -100,16 +102,24 @@ export function DrivingAuthorizationsPage() {
   const kpis = useMemo(
     () => ({
       totalAuthorizations: authorizationsWithStatus.length,
-      expiredAuthorizations: authorizationsWithStatus.filter((a: any) => a.status === "expired").length,
-      warningAuthorizations: authorizationsWithStatus.filter((a: any) => a.status === "warning").length,
-      validAuthorizations: authorizationsWithStatus.filter((a: any) => a.status === "valid").length,
+      expiredAuthorizations: authorizationsWithStatus.filter(
+        (a: any) => a.status === "expired"
+      ).length,
+      warningAuthorizations: authorizationsWithStatus.filter(
+        (a: any) => a.status === "warning"
+      ).length,
+      validAuthorizations: authorizationsWithStatus.filter(
+        (a: any) => a.status === "valid"
+      ).length,
     }),
     [authorizationsWithStatus]
   );
 
   // Get unique categories and employees
   const uniqueCategories = useMemo(() => {
-    const categories = new Set(authorizations.map((a: any) => a.licenseCategory));
+    const categories = new Set(
+      authorizations.map((a: any) => a.licenseCategory)
+    );
     return Array.from(categories);
   }, [authorizations]);
 
@@ -121,7 +131,10 @@ export function DrivingAuthorizationsPage() {
         employeeMap.set(emp.id, `${emp.firstName} ${emp.lastName}`);
       }
     });
-    return Array.from(employeeMap.entries()).map(([id, name]) => ({ id, name }));
+    return Array.from(employeeMap.entries()).map(([id, name]) => ({
+      id,
+      name,
+    }));
   }, [authorizations, employees]);
 
   // Filter authorizations
@@ -137,13 +150,23 @@ export function DrivingAuthorizationsPage() {
 
       const matchesCategory =
         categoryFilter === "all" || auth.licenseCategory === categoryFilter;
-      const matchesStatus = statusFilter === "all" || auth.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || auth.status === statusFilter;
       const matchesEmployee =
         employeeFilter === "all" || employeeName === employeeFilter;
 
-      return matchesSearch && matchesCategory && matchesStatus && matchesEmployee;
+      return (
+        matchesSearch && matchesCategory && matchesStatus && matchesEmployee
+      );
     });
-  }, [authorizationsWithStatus, search, categoryFilter, statusFilter, employeeFilter, employees]);
+  }, [
+    authorizationsWithStatus,
+    search,
+    categoryFilter,
+    statusFilter,
+    employeeFilter,
+    employees,
+  ]);
 
   // Sort authorizations
   const sortedAuthorizations = useMemo(() => {
@@ -164,8 +187,12 @@ export function DrivingAuthorizationsPage() {
         bValue = b[sortColumn];
       }
 
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      if (aValue < bValue) {
+        return sortDirection === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortDirection === "asc" ? 1 : -1;
+      }
       return 0;
     });
     return sorted;
@@ -309,16 +336,16 @@ export function DrivingAuthorizationsPage() {
 
   const getCategoryBadge = (category: string) => {
     const categoryColors: { [key: string]: string } = {
-      "B": "bg-blue-500",
-      "C": "bg-green-500",
-      "D": "bg-purple-500",
-      "BE": "bg-orange-500",
-      "CE": "bg-red-500",
-      "DE": "bg-pink-500",
-      "C1": "bg-teal-500",
-      "C1E": "bg-cyan-500",
-      "D1": "bg-indigo-500",
-      "D1E": "bg-violet-500",
+      B: "bg-blue-500",
+      C: "bg-green-500",
+      D: "bg-purple-500",
+      BE: "bg-orange-500",
+      CE: "bg-red-500",
+      DE: "bg-pink-500",
+      C1: "bg-teal-500",
+      C1E: "bg-cyan-500",
+      D1: "bg-indigo-500",
+      D1E: "bg-violet-500",
     };
     const dotColor = categoryColors[category] || "bg-gray-500";
 
@@ -432,46 +459,78 @@ export function DrivingAuthorizationsPage() {
 
           {/* Filters */}
           <div className="flex flex-wrap gap-2">
-            <div className="flex-1 min-w-[200px]">
+            <div className="min-w-[200px] flex-1">
               <Input
-                placeholder={t("drivingAuthorizations.search")}
-                value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
                   setCurrentPage(1);
                 }}
+                placeholder={t("drivingAuthorizations.search")}
+                value={search}
               />
             </div>
-            <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setCurrentPage(1); }}>
+            <Select
+              onValueChange={(v) => {
+                setCategoryFilter(v);
+                setCurrentPage(1);
+              }}
+              value={categoryFilter}
+            >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t("drivingAuthorizations.category")} />
+                <SelectValue
+                  placeholder={t("drivingAuthorizations.category")}
+                />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("common.all")}</SelectItem>
                 {uniqueCategories.map((cat: any) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setCurrentPage(1); }}>
+            <Select
+              onValueChange={(v) => {
+                setStatusFilter(v);
+                setCurrentPage(1);
+              }}
+              value={statusFilter}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t("drivingAuthorizations.status")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("common.all")}</SelectItem>
-                <SelectItem value="valid">{t("drivingAuthorizations.valid")}</SelectItem>
-                <SelectItem value="warning">{t("drivingAuthorizations.warning")}</SelectItem>
-                <SelectItem value="expired">{t("drivingAuthorizations.expired")}</SelectItem>
+                <SelectItem value="valid">
+                  {t("drivingAuthorizations.valid")}
+                </SelectItem>
+                <SelectItem value="warning">
+                  {t("drivingAuthorizations.warning")}
+                </SelectItem>
+                <SelectItem value="expired">
+                  {t("drivingAuthorizations.expired")}
+                </SelectItem>
               </SelectContent>
             </Select>
-            <Select value={employeeFilter} onValueChange={(v) => { setEmployeeFilter(v); setCurrentPage(1); }}>
+            <Select
+              onValueChange={(v) => {
+                setEmployeeFilter(v);
+                setCurrentPage(1);
+              }}
+              value={employeeFilter}
+            >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t("drivingAuthorizations.employee")} />
+                <SelectValue
+                  placeholder={t("drivingAuthorizations.employee")}
+                />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("common.all")}</SelectItem>
                 {uniqueEmployees.map((emp: any) => (
-                  <SelectItem key={emp.id} value={emp.name}>{emp.name}</SelectItem>
+                  <SelectItem key={emp.id} value={emp.name}>
+                    {emp.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -486,44 +545,74 @@ export function DrivingAuthorizationsPage() {
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4" onClick={() => handleSort("employee")} >
-                    <div className="flex items-center gap-1 cursor-pointer">
+                  <TableHead
+                    className="px-4"
+                    onClick={() => handleSort("employee")}
+                  >
+                    <div className="flex cursor-pointer items-center gap-1">
                       {t("drivingAuthorizations.employee")}
-                      {sortColumn === "employee" && (
-                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortColumn === "employee" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </TableHead>
-                  <TableHead className="px-4" onClick={() => handleSort("licenseCategory")}>
-                    <div className="flex items-center gap-1 cursor-pointer">
+                  <TableHead
+                    className="px-4"
+                    onClick={() => handleSort("licenseCategory")}
+                  >
+                    <div className="flex cursor-pointer items-center gap-1">
                       {t("drivingAuthorizations.category")}
-                      {sortColumn === "licenseCategory" && (
-                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortColumn === "licenseCategory" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </TableHead>
-                  <TableHead className="px-4" onClick={() => handleSort("dateObtained")}>
-                    <div className="flex items-center gap-1 cursor-pointer">
+                  <TableHead
+                    className="px-4"
+                    onClick={() => handleSort("dateObtained")}
+                  >
+                    <div className="flex cursor-pointer items-center gap-1">
                       {t("drivingAuthorizations.dateObtained")}
-                      {sortColumn === "dateObtained" && (
-                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortColumn === "dateObtained" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </TableHead>
-                  <TableHead className="px-4" onClick={() => handleSort("expirationDate")}>
-                    <div className="flex items-center gap-1 cursor-pointer">
+                  <TableHead
+                    className="px-4"
+                    onClick={() => handleSort("expirationDate")}
+                  >
+                    <div className="flex cursor-pointer items-center gap-1">
                       {t("drivingAuthorizations.expirationDate")}
-                      {sortColumn === "expirationDate" && (
-                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortColumn === "expirationDate" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </TableHead>
-                  <TableHead className="px-4" onClick={() => handleSort("daysLeft")}>
-                    <div className="flex items-center gap-1 cursor-pointer">
+                  <TableHead
+                    className="px-4"
+                    onClick={() => handleSort("daysLeft")}
+                  >
+                    <div className="flex cursor-pointer items-center gap-1">
                       {t("drivingAuthorizations.status")}
-                      {sortColumn === "daysLeft" && (
-                        sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
-                      )}
+                      {sortColumn === "daysLeft" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-3 w-3" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3" />
+                        ))}
                     </div>
                   </TableHead>
                   <TableHead className="px-4 text-right">
@@ -573,26 +662,30 @@ export function DrivingAuthorizationsPage() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
+                                  onClick={() => setEditingAuthorization(auth)}
                                   size="icon"
                                   variant="ghost"
-                                  onClick={() => setEditingAuthorization(auth)}
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>{t("drivingAuthorizations.edit")}</TooltipContent>
+                              <TooltipContent>
+                                {t("drivingAuthorizations.edit")}
+                              </TooltipContent>
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
+                                  onClick={() => handleDelete(auth.id)}
                                   size="icon"
                                   variant="ghost"
-                                  onClick={() => handleDelete(auth.id)}
                                 >
                                   <Trash2 className="h-4 w-4 text-destructive" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>{t("drivingAuthorizations.delete")}</TooltipContent>
+                              <TooltipContent>
+                                {t("drivingAuthorizations.delete")}
+                              </TooltipContent>
                             </Tooltip>
                           </div>
                         </TableCell>
@@ -607,23 +700,28 @@ export function DrivingAuthorizationsPage() {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                {t("common.showing")} {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, sortedAuthorizations.length)} {t("common.of")} {sortedAuthorizations.length}
+              <div className="text-muted-foreground text-sm">
+                {t("common.showing")} {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                {Math.min(
+                  currentPage * itemsPerPage,
+                  sortedAuthorizations.length
+                )}{" "}
+                {t("common.of")} {sortedAuthorizations.length}
               </div>
               <div className="flex items-center gap-2">
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(1)}
                   disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(1)}
+                  size="sm"
+                  variant="outline"
                 >
                   <ChevronsLeft className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage - 1)}
                   disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  size="sm"
+                  variant="outline"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -631,18 +729,18 @@ export function DrivingAuthorizationsPage() {
                   {currentPage} / {totalPages}
                 </span>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  size="sm"
+                  variant="outline"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(totalPages)}
                   disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(totalPages)}
+                  size="sm"
+                  variant="outline"
                 >
                   <ChevronsRight className="h-4 w-4" />
                 </Button>
@@ -654,17 +752,17 @@ export function DrivingAuthorizationsPage() {
 
       {/* Dialogs */}
       <AddDrivingAuthorizationDialog
-        open={isAddDialogOpen}
-        onOpenChange={setIsAddDialogOpen}
-        onAdd={handleAdd}
         employees={employees}
+        onAdd={handleAdd}
+        onOpenChange={setIsAddDialogOpen}
+        open={isAddDialogOpen}
       />
       <EditDrivingAuthorizationDialog
-        open={!!editingAuthorization}
-        onOpenChange={(open) => !open && setEditingAuthorization(null)}
-        onEdit={handleEdit}
-        employees={employees}
         authorization={editingAuthorization}
+        employees={employees}
+        onEdit={handleEdit}
+        onOpenChange={(open) => !open && setEditingAuthorization(null)}
+        open={!!editingAuthorization}
       />
     </>
   );

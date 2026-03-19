@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  CacesFileUpload,
+  type FileData,
+} from "@/components/caces/CacesFileUpload";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CacesFileUpload, type FileData } from "@/components/caces/CacesFileUpload";
 
 interface Employee {
   id: number;
@@ -59,7 +62,7 @@ export function AddOnlineTrainingDialog({
 
   const handleSubmit = () => {
     onAdd?.({
-      employeeId: parseInt(employeeId, 10),
+      employeeId: Number.parseInt(employeeId, 10),
       trainingName,
       trainingProvider,
       completionDate,
@@ -71,7 +74,11 @@ export function AddOnlineTrainingDialog({
     onOpenChange?.(false);
   };
 
-  const isFormValid = employeeId && trainingName && completionDate && (!hasExpiration || expirationDate);
+  const isFormValid =
+    employeeId &&
+    trainingName &&
+    completionDate &&
+    (!hasExpiration || expirationDate);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -88,7 +95,7 @@ export function AddOnlineTrainingDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{t("onlineTrainings.add")}</DialogTitle>
@@ -99,9 +106,11 @@ export function AddOnlineTrainingDialog({
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="employee">{t("onlineTrainings.employee")}</Label>
-            <Select value={employeeId} onValueChange={setEmployeeId}>
+            <Select onValueChange={setEmployeeId} value={employeeId}>
               <SelectTrigger>
-                <SelectValue placeholder={t("onlineTrainings.selectEmployee")} />
+                <SelectValue
+                  placeholder={t("onlineTrainings.selectEmployee")}
+                />
               </SelectTrigger>
               <SelectContent>
                 {employees.map((emp) => (
@@ -113,75 +122,89 @@ export function AddOnlineTrainingDialog({
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="trainingName">{t("onlineTrainings.trainingName")}</Label>
+            <Label htmlFor="trainingName">
+              {t("onlineTrainings.trainingName")}
+            </Label>
             <Input
               id="trainingName"
-              value={trainingName}
               onChange={(e) => setTrainingName(e.target.value)}
               placeholder={t("onlineTrainings.trainingNamePlaceholder")}
+              value={trainingName}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="trainingProvider">{t("onlineTrainings.provider")}</Label>
+            <Label htmlFor="trainingProvider">
+              {t("onlineTrainings.provider")}
+            </Label>
             <Input
               id="trainingProvider"
-              value={trainingProvider}
               onChange={(e) => setTrainingProvider(e.target.value)}
               placeholder={t("onlineTrainings.providerPlaceholder")}
+              value={trainingProvider}
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="status">{t("onlineTrainings.status")}</Label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select onValueChange={setStatus} value={status}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="in_progress">{t("onlineTrainings.inProgress")}</SelectItem>
-                <SelectItem value="completed">{t("onlineTrainings.completed")}</SelectItem>
+                <SelectItem value="in_progress">
+                  {t("onlineTrainings.inProgress")}
+                </SelectItem>
+                <SelectItem value="completed">
+                  {t("onlineTrainings.completed")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="completionDate">{t("onlineTrainings.completionDate")}</Label>
+            <Label htmlFor="completionDate">
+              {t("onlineTrainings.completionDate")}
+            </Label>
             <Input
               id="completionDate"
+              onChange={(e) => setCompletionDate(e.target.value)}
               type="date"
               value={completionDate}
-              onChange={(e) => setCompletionDate(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-2">
             <input
-              type="checkbox"
-              id="hasExpiration"
               checked={hasExpiration}
+              id="hasExpiration"
               onChange={(e) => setHasExpiration(e.target.checked)}
+              type="checkbox"
             />
-            <Label htmlFor="hasExpiration">{t("onlineTrainings.hasExpiration")}</Label>
+            <Label htmlFor="hasExpiration">
+              {t("onlineTrainings.hasExpiration")}
+            </Label>
           </div>
           {hasExpiration && (
             <div className="grid gap-2">
-              <Label htmlFor="expirationDate">{t("onlineTrainings.expirationDate")}</Label>
+              <Label htmlFor="expirationDate">
+                {t("onlineTrainings.expirationDate")}
+              </Label>
               <Input
                 id="expirationDate"
+                onChange={(e) => setExpirationDate(e.target.value)}
                 type="date"
                 value={expirationDate}
-                onChange={(e) => setExpirationDate(e.target.value)}
               />
             </div>
           )}
           <CacesFileUpload
-            value={document}
-            onChange={setDocument}
             label={t("onlineTrainings.document")}
+            onChange={setDocument}
+            value={document}
           />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>
+          <Button onClick={() => handleOpenChange(false)} variant="outline">
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!isFormValid}>
+          <Button disabled={!isFormValid} onClick={handleSubmit}>
             {t("common.add")}
           </Button>
         </DialogFooter>

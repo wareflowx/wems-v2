@@ -28,7 +28,10 @@ export interface Cace extends CaceFromDB {
 }
 
 // Calculate daysLeft and status from expirationDate
-function calculateCaceStatus(expirationDate: string): { daysLeft: number; status: "valid" | "warning" | "expired" } {
+function calculateCaceStatus(expirationDate: string): {
+  daysLeft: number;
+  status: "valid" | "warning" | "expired";
+} {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const expiration = new Date(expirationDate);
@@ -50,13 +53,22 @@ function calculateCaceStatus(expirationDate: string): { daysLeft: number; status
 }
 
 // Add calculated fields to CACES data
-function enrichCacesWithStatus(caces: CaceFromDB[], employees?: { id: number; firstName: string; lastName: string }[]): Cace[] {
+function enrichCacesWithStatus(
+  caces: CaceFromDB[],
+  employees?: { id: number; firstName: string; lastName: string }[]
+): Cace[] {
   return caces.map((cace) => {
     const employee = employees?.find((e) => e.id === cace.employeeId);
     return {
       ...cace,
       ...calculateCaceStatus(cace.expirationDate),
-      employee: employee ? { id: employee.id, firstName: employee.firstName, lastName: employee.lastName } : undefined,
+      employee: employee
+        ? {
+            id: employee.id,
+            firstName: employee.firstName,
+            lastName: employee.lastName,
+          }
+        : undefined,
     };
   });
 }
@@ -101,7 +113,9 @@ export function useCace(id: number) {
     queryFn: async () => {
       const data = await db.getCaces();
       const cace = data.find((c) => c.id === id);
-      if (!cace) return null;
+      if (!cace) {
+        return null;
+      }
       return enrichCacesWithStatus([cace])[0];
     },
     enabled: orpcReady && !!id,
@@ -203,11 +217,15 @@ export function useUpdateCaces() {
         { queryKey: queryKeys.caces.lists() },
         (old: Cace[] = []) =>
           old.map((c) => {
-            if (c.id !== updatedCace.id) return c;
+            if (c.id !== updatedCace.id) {
+              return c;
+            }
             const updated = { ...c, ...updatedCace };
             // Recalculate status if expirationDate changed
             if (updatedCace.expirationDate) {
-              const { daysLeft, status } = calculateCaceStatus(updated.expirationDate);
+              const { daysLeft, status } = calculateCaceStatus(
+                updated.expirationDate
+              );
               return { ...updated, daysLeft, status };
             }
             return updated;

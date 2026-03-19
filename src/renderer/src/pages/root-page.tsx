@@ -1,37 +1,44 @@
 import { Outlet } from "@tanstack/react-router";
+import { Lock, Pen } from "lucide-react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { DialogManager } from "@/components/dialogs/DialogManager";
+import { QuickActionsDialog } from "@/components/quick-actions-dialog";
 import { RightSidebar } from "@/components/right-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { useState, useEffect, useSyncExternalStore } from "react";
-import { QuickActionsDialog } from "@/components/quick-actions-dialog";
-import { Lock, Pen } from "lucide-react";
-
 
 const SIDEBAR_STORAGE_KEY = "wems-sidebar-open";
 const RIGHT_SIDEBAR_STORAGE_KEY = "wems-right-sidebar-open";
 
 // Read localStorage synchronously on client
 function getStoredSidebarState(): boolean {
-  if (typeof window === "undefined") return true;
+  if (typeof window === "undefined") {
+    return true;
+  }
   const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-  if (stored === null) return true;
+  if (stored === null) {
+    return true;
+  }
   return stored === "true";
 }
 
 function getStoredRightSidebarState(): boolean {
-  if (typeof window === "undefined") return true;
+  if (typeof window === "undefined") {
+    return true;
+  }
   const stored = localStorage.getItem(RIGHT_SIDEBAR_STORAGE_KEY);
-  if (stored === null) return true;
+  if (stored === null) {
+    return true;
+  }
   return stored === "true";
 }
 
 // External store for sidebar state
 const sidebarStore = (() => {
   let value = typeof window !== "undefined" ? getStoredSidebarState() : true;
-  let listeners: Set<() => void> = new Set();
+  const listeners: Set<() => void> = new Set();
 
   return {
     getSnapshot: () => value,
@@ -50,8 +57,9 @@ const sidebarStore = (() => {
 
 // External store for right sidebar state
 const rightSidebarStore = (() => {
-  let value = typeof window !== "undefined" ? getStoredRightSidebarState() : true;
-  let listeners: Set<() => void> = new Set();
+  let value =
+    typeof window !== "undefined" ? getStoredRightSidebarState() : true;
+  const listeners: Set<() => void> = new Set();
 
   return {
     getSnapshot: () => value,
@@ -73,13 +81,13 @@ export function RootPage() {
   const sidebarOpen = useSyncExternalStore(
     sidebarStore.subscribe,
     sidebarStore.getSnapshot,
-    sidebarStore.getServerSnapshot,
+    sidebarStore.getServerSnapshot
   );
 
   const rightSidebarOpen = useSyncExternalStore(
     rightSidebarStore.subscribe,
     rightSidebarStore.getSnapshot,
-    rightSidebarStore.getServerSnapshot,
+    rightSidebarStore.getServerSnapshot
   );
 
   const [quickActionsOpen, setQuickActionsOpen] = useState(false);
@@ -101,26 +109,28 @@ export function RootPage() {
   return (
     <div className="[--header-height:calc(--spacing(8))]">
       <QuickActionsDialog
-        open={quickActionsOpen}
         onOpenChange={setQuickActionsOpen}
+        open={quickActionsOpen}
       />
       <DialogManager />
       <SidebarProvider
         className="flex flex-col"
-        open={sidebarOpen}
         onOpenChange={sidebarStore.setValue}
+        open={sidebarOpen}
       >
         <SiteHeader
-              onToggleSidebar={() => sidebarStore.setValue(!sidebarOpen)}
-              onToggleRightSidebar={() => rightSidebarStore.setValue(!rightSidebarOpen)}
-              rightSidebarOpen={rightSidebarOpen}
-            />
+          onToggleRightSidebar={() =>
+            rightSidebarStore.setValue(!rightSidebarOpen)
+          }
+          onToggleSidebar={() => sidebarStore.setValue(!sidebarOpen)}
+          rightSidebarOpen={rightSidebarOpen}
+        />
         <div className="flex flex-1">
           <AppSidebar onQuickActionsClick={() => setQuickActionsOpen(true)} />
           <SidebarInset className="flex flex-1 flex-col overflow-y-auto">
             <Outlet />
-            <footer className="mt-auto border-t bg-card sticky bottom-0">
-              <div className="container flex h-7 items-center justify-between px-4 text-xs text-muted-foreground">
+            <footer className="sticky bottom-0 mt-auto border-t bg-card">
+              <div className="container flex h-7 items-center justify-between px-4 text-muted-foreground text-xs">
                 <div className="flex items-center gap-3">
                   <span>© 2026 WEMS</span>
                 </div>
@@ -135,8 +145,8 @@ export function RootPage() {
                   <div
                     className={`flex items-center gap-1.5 rounded-md px-2 py-0.5 ${
                       canWrite
-                        ? "bg-green-500/10 text-green-600 border border-green-500/20"
-                        : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                        ? "border border-green-500/20 bg-green-500/10 text-green-600"
+                        : "border border-amber-500/20 bg-amber-500/10 text-amber-600"
                     }`}
                   >
                     {canWrite ? (
@@ -151,7 +161,7 @@ export function RootPage() {
             </footer>
           </SidebarInset>
           <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+            className={`overflow-hidden transition-all duration-300 ease-in-out ${
               rightSidebarOpen ? "w-auto opacity-100" : "w-0 opacity-0"
             }`}
           >

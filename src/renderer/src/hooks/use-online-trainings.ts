@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@@/lib/query-keys";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as db from "@/actions/database";
 import { useORPCReady } from "@/hooks";
 import { useToast } from "@/utils/toast";
@@ -49,7 +49,8 @@ export function useCreateOnlineTraining() {
     onError: (error) => {
       toast({
         title: "Failed to create online training",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     },
@@ -80,7 +81,8 @@ export function useUpdateOnlineTraining() {
     onError: (error) => {
       toast({
         title: "Failed to update online training",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     },
@@ -105,8 +107,7 @@ export function useDeleteOnlineTraining() {
 
       queryClient.setQueryData(
         queryKeys.onlineTrainings.lists(),
-        (old: db.OnlineTraining[] = []) =>
-          old.filter((t) => t.id !== id)
+        (old: db.OnlineTraining[] = []) => old.filter((t) => t.id !== id)
       );
 
       return { previousTrainings };

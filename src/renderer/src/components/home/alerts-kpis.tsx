@@ -1,9 +1,4 @@
-import {
-  AlertTriangle,
-  Bell,
-  ShieldAlert,
-  Users,
-} from "lucide-react";
+import { AlertTriangle, Bell, ShieldAlert, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -80,7 +75,9 @@ export function AlertsKPIs({ kpis }: AlertsKPIsProps) {
         </CardHeader>
         <CardContent className="p-0">
           <div className="font-bold text-2xl">{kpis.totalAlerts}</div>
-          <p className="text-muted-foreground text-xs">{t("dashboard.totalAlerts")}</p>
+          <p className="text-muted-foreground text-xs">
+            {t("dashboard.totalAlerts")}
+          </p>
         </CardContent>
       </Card>
     </div>

@@ -315,7 +315,8 @@ export function useCreatePosition() {
         );
       }
       // ORPC might wrap the error, try to get the message from different sources
-      const errorMessage = err?.message || err?.error?.message || "An error occurred";
+      const errorMessage =
+        err?.message || err?.error?.message || "An error occurred";
       toast({
         title: "Failed to create position",
         description: errorMessage,
@@ -385,7 +386,9 @@ export function useDeletePosition() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.positions.lists() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedPositions() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedPositions(),
+      });
     },
   });
 }
@@ -399,13 +402,16 @@ export function useRestorePosition() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.positions.lists() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.trash.deletedPositions() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.trash.deletedPositions(),
+      });
       toast({ title: "Position restored successfully" });
     },
     onError: (error) => {
       toast({
         title: "Failed to restore position",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     },

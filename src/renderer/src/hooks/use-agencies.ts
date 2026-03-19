@@ -76,7 +76,8 @@ export function useCreateAgency() {
 
       toast({
         title: "Échec de la création de l'agence",
-        description: err instanceof Error ? err.message : "Une erreur est survenue",
+        description:
+          err instanceof Error ? err.message : "Une erreur est survenue",
         variant: "destructive",
       });
     },
@@ -93,8 +94,12 @@ export function useUpdateAgency() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (data: { id: number; name?: string; code?: string; isActive?: boolean }) =>
-      db.updateAgency(data),
+    mutationFn: (data: {
+      id: number;
+      name?: string;
+      code?: string;
+      isActive?: boolean;
+    }) => db.updateAgency(data),
 
     onMutate: async ({ id, ...updates }) => {
       await queryClient.cancelQueries({
@@ -129,7 +134,8 @@ export function useUpdateAgency() {
 
       toast({
         title: "Échec de la mise à jour de l'agence",
-        description: err instanceof Error ? err.message : "Une erreur est survenue",
+        description:
+          err instanceof Error ? err.message : "Une erreur est survenue",
         variant: "destructive",
       });
     },
@@ -178,7 +184,8 @@ export function useDeleteAgency() {
 
       toast({
         title: "Échec de la suppression de l'agence",
-        description: err instanceof Error ? err.message : "Une erreur est survenue",
+        description:
+          err instanceof Error ? err.message : "Une erreur est survenue",
         variant: "destructive",
       });
     },

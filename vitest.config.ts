@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src/renderer/src"),
+      "@@": path.resolve(import.meta.dirname, "./src/core"),
     },
   },
   test: {

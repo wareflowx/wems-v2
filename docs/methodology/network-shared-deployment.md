@@ -2,24 +2,42 @@
 
 ## Overview
 
-WEMS v2 is designed to be deployed on a shared network drive, allowing multiple users to access the same application and database simultaneously. This document describes the architectural decisions and mechanisms that enable this deployment model.
+WEMS v2 is designed to be deployed in a shared network environment where the application is installed locally on each workstation, while the data (database, logs) is stored on a shared network drive. This document describes the architectural decisions and mechanisms that enable this deployment model.
 
 ## Deployment Model
 
-### Portable Executable
-
-The application is built as a **portable Windows executable** (`.exe`) that does not require installation. Users can run the application directly from a shared network drive.
+### Architecture
 
 ```
-\\server\shared\wems\
-├── WEMS.exe          # Main application
-└── data/             # Data directory (created on first run)
-    ├── database.db   # SQLite database
-    ├── .write.lock   # Lock file for multi-instance coordination
-    └── debug.log     # Application logs
+\\server\shared\
+├── wems-data/              # Shared data directory
+│   ├── database.db        # SQLite database
+│   ├── .write.lock        # Lock file for multi-instance coordination
+│   └── debug.log          # Application logs
+│
+C:\Program Files\WEMS\     # Local installation (per workstation)
+└── WEMS.exe               # Application installed locally
 ```
 
-### Data Directory Resolution
+### Why Local Installation?
+
+Running the application from a shared network drive (portable executable) causes performance issues due to:
+- Network latency on every file access
+- Slow application startup
+- Poor reactivity during database operations
+
+By installing the application locally on each workstation, users get:
+- Fast application startup
+- Responsive database operations
+- Better overall user experience
+
+While still sharing:
+- Single source of truth (database on network)
+- Centralized data and backups
+
+## Data Directory Resolution
+
+### Current Implementation
 
 The data directory is resolved relative to the executable location:
 
@@ -34,10 +52,56 @@ export function getDataDir(): string {
 }
 ```
 
+### Required Change
+
+The data directory should be configurable to point to a network share:
+
+```typescript
+export function getDataDir(): string {
+  // Option 1: Network share path (configurable)
+  const networkPath = process.env.WEMS_DATA_PATH;
+  if (networkPath) {
+    return networkPath;
+  }
+
+  // Option 2: Default to local data directory
+  const baseDir = inDevelopment
+    ? process.cwd()
+    : path.dirname(process.execPath);
+
+  return path.join(baseDir, "data");
+}
+```
+
+Configuration methods:
+1. **Environment variable**: `WEMS_DATA_PATH=\\server\shared\wems-data`
+2. **Configuration file**: `config.json` in the data directory
+3. **First-run wizard**: Prompt user to select data location
+
+## First-Run Setup
+
+### Welcome Dialog
+
+On first launch, show a dialog asking the user to configure the data location:
+
+```
+┌─────────────────────────────────────────┐
+│  Welcome to WEMS                        │
+│                                         │
+│  Select data location:                  │
+│  ┌─────────────────────────────────┐   │
+│  │ \\server\shared\wems-data     │   │
+│  └─────────────────────────────────┘   │
+│  [ ] Use default (local)                │
+│                                         │
+│  [Cancel]                     [Continue]│
+└─────────────────────────────────────────┘
+```
+
 This ensures:
-- All users access the same data directory
-- No data is stored in user-specific profile directories
-- The database stays with the application installation
+- First user creates the data directory
+- Subsequent users connect to existing data
+- No manual configuration required
 
 ## Multi-Instance Coordination
 
@@ -51,7 +115,7 @@ WEMS implements a custom file-based lock system with the following characteristi
 
 #### Lock File Structure
 
-The lock file (`.write.lock`) contains:
+The lock file (`.write.lock`) is stored in the shared data directory:
 
 ```typescript
 interface LockData {
@@ -67,13 +131,14 @@ interface LockData {
 
 ```
 1. Application starts
-2. Check if lock file exists
-3. If lock exists:
+2. Connect to shared data directory
+3. Check if lock file exists in shared data
+4. If lock exists:
    a. If lock is stale (>5 min), remove it and acquire
    b. If lock is fresh and belongs to us, enable write mode
    c. If lock is fresh and belongs to another user, enable read-only mode
-4. If no lock exists, create lock and enable write mode
-5. Start heartbeat (update every 30 seconds)
+5. If no lock exists, create lock and enable write mode
+6. Start heartbeat (update every 30 seconds)
 ```
 
 #### Write Mode vs Read-Only Mode
@@ -97,7 +162,7 @@ This ensures locks are automatically released if a user closes the application u
 // src/core/lib/lock/index.ts
 export const Lock = {
   acquire: (): Result<boolean, LockAlreadyExistsError | LockFileError> => {
-    // Try to acquire write lock
+    // Try to acquire write lock in shared data directory
     // Return failure if another instance holds the lock
   },
 
@@ -145,16 +210,17 @@ This prevents any accidental writes and ensures data consistency.
 ### Startup Sequence
 
 ```
-1. Determine data directory (next to executable)
-2. Try to acquire write lock
-3. If lock acquired:
+1. Load configuration (data path from env/config)
+2. Connect to shared data directory
+3. Try to acquire write lock
+4. If lock acquired:
    - Open database in read-write mode
    - Run pending migrations (if any)
-4. If lock not acquired:
+5. If lock not acquired:
    - Open database in read-only mode
    - Skip migrations
-5. Initialize IPC handlers
-6. Show main window with appropriate UI state
+6. Initialize IPC handlers
+7. Show main window with appropriate UI state
 ```
 
 ### Lock Status Synchronization
@@ -174,6 +240,24 @@ When another user acquires or releases the lock, all instances are notified and 
 
 - **Write Mode**: Full application functionality
 - **Read-Only Mode**: Visual indicator showing who has write access, limited functionality for write operations
+
+### User Notification
+
+When another user has write access, show a clear message:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  ⚠️  Read-Only Mode                                     │
+│                                                         │
+│  User: john.doe                                         │
+│  Computer: WORKSTATION-01                               │
+│                                                         │
+│  You can view data but cannot make changes.             │
+│  Waiting for write access...                            │
+│                                                         │
+│                              [Switch to Read-Only View] │
+└─────────────────────────────────────────────────────────┘
+```
 
 ## Migrations in Multi-Instance Environment
 
@@ -212,7 +296,7 @@ This ensures:
 
 ### Debug Log Location
 
-All application logs are written to the data directory:
+All application logs are written to the shared data directory:
 
 ```typescript
 const logPath = path.join(getDataDir(), "debug.log");
@@ -229,27 +313,66 @@ This includes:
 - Logs are visible to all users (same directory)
 - Easier troubleshooting when multiple users experience issues
 
-## Configuration Files
+## Build Configuration
 
-### Build Configuration (electron-builder.json)
+### NSIS Installer (Instead of Portable)
 
 ```json
+// electron-builder.json
 {
-  "target": ["portable"],
-  "extraResources": [
-    {
-      "from": "src/core/db/migrations",
-      "to": "migrations"
-    }
-  ],
-  "asarUnpack": ["node_modules/better-sqlite3/**"]
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "build/icon.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "perMachine": false,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true
+  }
 }
 ```
 
 Key points:
-- **portable target**: Creates a single executable
-- **extraResources**: Includes migrations in the build
-- **asarUnpack**: Unpacks native modules to avoid ASAR issues
+- **NSIS target**: Creates a standard Windows installer
+- **User-level installation**: No admin rights required
+- **Customizable install directory**: Users can choose where to install
+
+## Configuration Management
+
+### Environment Variable
+
+Set the data path via environment variable:
+
+```batch
+:: Batch script to launch WEMS
+set WEMS_DATA_PATH=\\server\shared\wems-data
+"C:\Program Files\WEMS\WEMS.exe"
+```
+
+### Configuration File
+
+Store in user's app data directory:
+
+```json
+// %APPDATA%\wems\config.json
+{
+  "dataPath": "\\\\server\\shared\\wems-data"
+}
+```
+
+### First-Run Wizard
+
+On first launch, prompt user to:
+1. Select data location (default: next to executable for backward compatibility)
+2. Test connection to shared path
+3. Create data directory if needed
 
 ## Limitations and Considerations
 
@@ -265,29 +388,41 @@ Key points:
 - High latency may cause delayed lock detection
 - Consider local caching for frequently accessed data
 
-### File Locking on Network Shares
-
-- Some network file systems may have issues with file locking
-- Test thoroughly on the target network infrastructure
-- Consider SMB caching settings on the server
-
 ### User Permissions
 
-- All users need write access to the data directory
+- All users need write access to the shared data directory
 - This includes creating the lock file and database
 - Network administrators must configure appropriate share permissions
+
+### Backup Strategy
+
+Since the database is on a network share:
+- Schedule backups during off-peak hours
+- Ensure no users are writing during backup
+- Consider using SQLITE backup API for consistent backups
 
 ## Best Practices
 
 1. **Initial Setup**: First user to run the application should be available for a few minutes to complete migrations
-2. **Network Speed**: Ensure adequate network bandwidth for acceptable performance
+2. **Network Speed**: Ensure adequate network bandwidth (minimum 100Mbps recommended)
 3. **Backup**: Regular backups of the database file (copy while no one is writing)
 4. **Monitoring**: Check debug.log if users report issues
 5. **Single Writer**: Encourage users to coordinate so only one person writes at a time for complex operations
+6. **Firewall**: Ensure Windows Firewall allows the application through for network share access
+
+## Migration from Portable Version
+
+If migrating from the portable version:
+
+1. **Backup existing data**: Copy the `data/` folder from the portable version to the new shared location
+2. **Update configuration**: Set the `WEMS_DATA_PATH` environment variable or use the first-run wizard
+3. **Install locally**: Deploy the NSIS installer to all workstations
+4. **Test**: Verify write access and data synchronization
 
 ## Future Improvements
 
 Potential enhancements for network deployment:
-- Redis-based locking for more robust coordination
-- WebSocket-based real-time sync between instances
-- Conflict resolution for simultaneous edits
+- Configuration UI in settings page to change data path
+- Connection status indicator (online/offline to shared drive)
+- Conflict resolution UI for simultaneous edits
+- Activity log showing recent changes by all users

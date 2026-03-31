@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateWorkLocation } from "@/hooks/use-positions-worklocations";
+import { generateCode } from "@@/lib/utils";
 
 const COLORS = [
   { name: "Cyan", value: "bg-cyan-500", hex: "#06b6d4" },
@@ -31,17 +32,6 @@ export interface CreateWorkLocationDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function generateCode(name: string): string {
-  return (
-    "SITE_" +
-    name
-      .toUpperCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^A-Z0-9]/g, "_")
-  );
-}
-
 export function CreateWorkLocationDialog({
   open,
   onOpenChange,
@@ -59,7 +49,7 @@ export function CreateWorkLocationDialog({
 
     createWorkLocation.mutate(
       {
-        code: generateCode(name),
+        code: generateCode(name, "SITE_"),
         name: name.trim(),
         color: selectedColor,
       },

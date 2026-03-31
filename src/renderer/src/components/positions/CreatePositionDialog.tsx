@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreatePosition } from "@/hooks/use-positions-worklocations";
+import { generateCode } from "@@/lib/utils";
 
 const COLORS = [
   { name: "Emerald", value: "bg-emerald-500", hex: "#10b981" },
@@ -29,14 +30,6 @@ const COLORS = [
 export interface CreatePositionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-function generateCode(name: string): string {
-  return name
-    .toUpperCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Z0-9]/g, "_");
 }
 
 export function CreatePositionDialog({

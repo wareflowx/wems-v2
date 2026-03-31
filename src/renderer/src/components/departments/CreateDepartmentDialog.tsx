@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateDepartment } from "@/hooks";
+import { generateCode } from "@@/lib/utils";
 
 const COLORS = [
   { name: "Red", value: "bg-red-500" },
@@ -32,14 +33,6 @@ const COLORS = [
   { name: "Pink", value: "bg-pink-500" },
   { name: "Rose", value: "bg-rose-500" },
 ];
-
-function generateCode(name: string): string {
-  return name
-    .toUpperCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Z0-9]/g, "_");
-}
 
 interface CreateDepartmentDialogProps {
   open?: boolean;

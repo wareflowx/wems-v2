@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { generateCode } from "@@/lib/utils";
 
 const COLORS = [
   { name: "Cyan", value: "bg-cyan-500" },
@@ -24,17 +25,6 @@ const COLORS = [
   { name: "Orange", value: "bg-orange-500" },
   { name: "Indigo", value: "bg-indigo-500" },
 ];
-
-function generateCode(name: string): string {
-  return (
-    "SITE_" +
-    name
-      .toUpperCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^A-Z0-9]/g, "_")
-  );
-}
 
 interface WorkLocation {
   id: number;
@@ -71,7 +61,7 @@ export function EditWorkLocationDialog({
   // Auto-generate code when name changes
   useEffect(() => {
     if (name.trim()) {
-      setCode(generateCode(name));
+      setCode(generateCode(name, "SITE_"));
     }
   }, [name]);
 

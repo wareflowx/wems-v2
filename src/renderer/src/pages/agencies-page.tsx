@@ -39,6 +39,8 @@ import {
   useDeleteAgency,
   useUpdateAgency,
 } from "@/hooks";
+import { generateCode } from "@@/lib/utils";
+import { queryKeys } from "@@/lib/query-keys";
 
 export function AgenciesPage() {
   const { t } = useTranslation();
@@ -129,7 +131,7 @@ export function AgenciesPage() {
             "Make sure the application is running correctly. If the problem persists, please restart."
           )}
           onRetry={() =>
-            queryClient.invalidateQueries({ queryKey: ["agencies"] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.agencies.lists() })
           }
           title={t("agencies.errorLoading", "Failed to load agencies")}
         />
@@ -343,14 +345,6 @@ export function AgenciesPage() {
       )}
     </>
   );
-}
-
-function generateCode(name: string): string {
-  return name
-    .toUpperCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Z0-9]/g, "_");
 }
 
 function CreateAgencyDialog({ onClose }: { onClose: () => void }) {

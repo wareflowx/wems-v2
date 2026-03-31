@@ -1,5 +1,10 @@
 // Centralized hooks exports
 
+// Generic ORPC hooks
+export * from "./use-query";
+export * from "./use-mutation";
+
+// Entity-specific hooks
 export * from "./use-agencies";
 export * from "./use-alerts";
 export * from "./use-caces";

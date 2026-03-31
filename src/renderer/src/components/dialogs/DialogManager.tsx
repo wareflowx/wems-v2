@@ -32,6 +32,13 @@ import {
 } from "@/hooks";
 import { useDialogStore } from "@/stores/dialog-store";
 
+// Agency dialogs
+import {
+  CreateAgencyDialog,
+  EditAgencyDialog,
+  DeleteAgencyDialog,
+} from "@/components/agencies";
+
 export function DialogManager() {
   const activeDialog = useDialogStore((state) => state.activeDialog);
   const closeDialog = useDialogStore((state) => state.closeDialog);
@@ -148,6 +155,15 @@ export function DialogManager() {
 
     case "create-contract-type":
       return <CreateContractTypeDialog onOpenChange={handleOpenChange} open />;
+
+    case "create-agency":
+      return <CreateAgencyDialog />;
+
+    case "edit-agency":
+      return <EditAgencyDialog />;
+
+    case "delete-agency":
+      return <DeleteAgencyDialog />;
 
     default:
       return null;

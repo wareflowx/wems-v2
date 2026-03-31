@@ -3,6 +3,7 @@
 // Generic ORPC hooks
 export * from "./use-query";
 export * from "./use-mutation";
+export * from "./use-dialog";
 
 // Entity-specific hooks
 export * from "./use-agencies";

@@ -5,6 +5,10 @@ export * from "./use-query";
 export * from "./use-mutation";
 export * from "./use-dialog";
 
+// Data processing hooks
+export * from "./use-filtered-data";
+export * from "./use-metrics";
+
 // Entity-specific hooks
 export * from "./use-agencies";
 export * from "./use-alerts";

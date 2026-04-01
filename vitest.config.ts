@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   test: {
-    dir: "./src/tests/unit",
+    dirs: ["./src/tests/hooks", "./src/tests/components", "./src/tests/pages"],
     globals: true,
     environment: "jsdom",
     setupFiles: "./src/tests/unit/setup.ts",

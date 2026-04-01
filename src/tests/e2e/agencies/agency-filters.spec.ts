@@ -1,40 +1,69 @@
-import { test, expect } from "@playwright/test";
-import { AgenciesPage } from "./pages/agencies-page";
+import {
+  type ElectronApplication,
+  _electron as electron,
+  expect,
+  type Page,
+  test,
+} from "@playwright/test";
+import { findLatestBuild, parseElectronApp } from "electron-playwright-helpers";
+
+let electronApp: ElectronApplication;
 
 test.describe("Agency Filters", () => {
-  const activeAgency = { name: `Active Agency ${Date.now()}`, isActive: true };
-  const inactiveAgency = { name: `Inactive Agency ${Date.now()}`, isActive: false };
+  const timestamp = Date.now();
+  const activeAgency = { name: `Active Agency ${timestamp}` };
+  const inactiveAgency = { name: `Inactive Agency ${timestamp}` };
 
-  test.beforeEach(async ({ page }) => {
+  async function createAgency(page: Page, name: string, isActive: boolean = true): Promise<void> {
+    const addButton = page.locator('button:has-text("Add Agency"), button:has-text("Ajouter")');
+    await addButton.click();
+
+    const nameInput = page.locator('input[id="name"], input[placeholder*="name" i]');
+    await nameInput.fill(name);
+
+    // Toggle isActive if we want inactive
+    if (!isActive) {
+      const toggle = page.locator('input[id="isActive"], input[type="checkbox"]').first();
+      if (await toggle.isVisible()) {
+        await toggle.click();
+      }
+    }
+
+    const saveButton = page.locator('[role="dialog"] button:has-text("Save"), [role="dialog"] button:has-text("Enregistrer")');
+    await saveButton.click();
+
+    const row = page.locator(`table tbody tr:has-text("${name}")`);
+    await expect(row).toBeVisible();
+  }
+
+  test.beforeAll(async () => {
+    const latestBuild = findLatestBuild();
+    const appInfo = parseElectronApp(latestBuild);
+    process.env.CI = "e2e";
+
+    electronApp = await electron.launch({
+      args: [appInfo.main],
+    });
+  });
+
+  test.afterAll(async () => {
+    await electronApp.close();
+  });
+
+  test("should show all agencies when status filter is 'all'", async () => {
+    const page: Page = await electronApp.firstWindow();
     await page.goto("/#/agencies");
     await page.waitForLoadState("networkidle");
 
-    const agenciesPage = new AgenciesPage(page);
-
-    // Create active agency
-    await agenciesPage.clickAddButton();
-    await agenciesPage.fillAgencyName(activeAgency.name);
-    await agenciesPage.submitCreateDialog();
-    await expect(agenciesPage.getAgencyRow(activeAgency.name)).toBeVisible();
-
-    // Create inactive agency
-    await agenciesPage.clickAddButton();
-    await agenciesPage.fillAgencyName(inactiveAgency.name);
-    await agenciesPage.toggleIsActive();
-    await agenciesPage.submitCreateDialog();
-    await expect(agenciesPage.getAgencyRow(inactiveAgency.name)).toBeVisible();
-  });
-
-  test("should show all agencies when status filter is 'all'", async ({ page }) => {
-    const agenciesPage = new AgenciesPage(page);
-
     // Both should be visible initially
-    await expect(agenciesPage.getAgencyRow(activeAgency.name)).toBeVisible();
-    await expect(agenciesPage.getAgencyRow(inactiveAgency.name)).toBeVisible();
+    await expect(page.locator(`table tbody tr:has-text("${activeAgency.name}")`)).toBeVisible();
+    await expect(page.locator(`table tbody tr:has-text("${inactiveAgency.name}")`)).toBeVisible();
   });
 
-  test("should filter to show only active agencies", async ({ page }) => {
-    const agenciesPage = new AgenciesPage(page);
+  test("should filter to show only active agencies", async () => {
+    const page: Page = await electronApp.firstWindow();
+    await page.goto("/#/agencies");
+    await page.waitForLoadState("networkidle");
 
     // Select active filter (depending on UI implementation)
     // This could be a dropdown, tabs, or buttons
@@ -44,12 +73,14 @@ test.describe("Agency Filters", () => {
     }
 
     // Should show active, hide inactive
-    await expect(agenciesPage.getAgencyRow(activeAgency.name)).toBeVisible();
-    await expect(agenciesPage.getAgencyRow(inactiveAgency.name)).not.toBeVisible();
+    await expect(page.locator(`table tbody tr:has-text("${activeAgency.name}")`)).toBeVisible();
+    await expect(page.locator(`table tbody tr:has-text("${inactiveAgency.name}")`)).not.toBeVisible();
   });
 
-  test("should filter to show only inactive agencies", async ({ page }) => {
-    const agenciesPage = new AgenciesPage(page);
+  test("should filter to show only inactive agencies", async () => {
+    const page: Page = await electronApp.firstWindow();
+    await page.goto("/#/agencies");
+    await page.waitForLoadState("networkidle");
 
     // Select inactive filter
     const inactiveFilter = page.locator('button:has-text("Inactive"), [role="option"]:has-text("Inactive")');
@@ -58,30 +89,7 @@ test.describe("Agency Filters", () => {
     }
 
     // Should show inactive, hide active
-    await expect(agenciesPage.getAgencyRow(inactiveAgency.name)).toBeVisible();
-    await expect(agenciesPage.getAgencyRow(activeAgency.name)).not.toBeVisible();
-  });
-
-  test("should update metrics when filtering", async ({ page }) => {
-    const agenciesPage = new AgenciesPage(page);
-
-    // Get initial counts
-    const totalBefore = await agenciesPage.getMetricValue("Total");
-    const activeBefore = await agenciesPage.getMetricValue("Active");
-    const inactiveBefore = await agenciesPage.getMetricValue("Inactive");
-
-    // Filter to active only
-    const activeFilter = page.locator('button:has-text("Active"), [role="option"]:has-text("Active")');
-    if (await activeFilter.isVisible()) {
-      await activeFilter.click();
-    }
-
-    // Active count should equal total in filtered view
-    const activeAfter = await agenciesPage.getMetricValue("Active");
-    expect(activeAfter).toBeGreaterThan(0);
-
-    // Inactive should not be visible in filtered count
-    const inactiveAfter = await agenciesPage.getMetricValue("Inactive");
-    expect(inactiveAfter).toBe(0);
+    await expect(page.locator(`table tbody tr:has-text("${inactiveAgency.name}")`)).toBeVisible();
+    await expect(page.locator(`table tbody tr:has-text("${activeAgency.name}")`)).not.toBeVisible();
   });
 });

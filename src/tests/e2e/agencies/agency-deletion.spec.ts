@@ -29,7 +29,7 @@ test.describe("Agency Deletion", () => {
   }
 
   test.beforeAll(async () => {
-    const latestBuild = findLatestBuild();
+    const latestBuild = findLatestBuild("dist");
     const appInfo = parseElectronApp(latestBuild);
     process.env.CI = "e2e";
 

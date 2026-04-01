@@ -1,29 +1,13 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2, Edit, Plus, Search, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -35,83 +19,51 @@ import {
 import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
 import {
   useAgencies,
-  useCreateAgency,
-  useDeleteAgency,
-  useUpdateAgency,
+  useDialogState,
+  useFilteredData,
+  useMetrics,
 } from "@/hooks";
-import { generateCode } from "@@/lib/utils";
 import { queryKeys } from "@@/lib/query-keys";
+import type { Agency } from "@/hooks/use-agencies";
 
 export function AgenciesPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingAgency, setEditingAgency] = useState<any>(null);
-  const [deletingAgency, setDeletingAgency] = useState<any>(null);
 
-  // Use TanStack Query hooks
+  // Dialog state using useDialog
+  const createDialog = useDialogState("create-agency");
+  const editDialog = useDialogState("edit-agency");
+  const deleteDialog = useDialogState("delete-agency");
+
+  // Fetch agencies
   const { data: agencies = [], isLoading, error } = useAgencies();
-  const createAgency = useCreateAgency();
-  const updateAgency = useUpdateAgency();
-  const deleteAgency = useDeleteAgency();
 
-  // KPIs - calculated dynamically
-  const kpis = useMemo(
-    () => ({
-      totalAgencies: agencies.length,
-      activeAgencies: agencies.filter((a) => a.isActive).length,
-      inactiveAgencies: agencies.filter((a) => !a.isActive).length,
-    }),
-    [agencies]
-  );
+  // Use useMetrics for KPIs
+  const metrics = useMetrics(agencies, {
+    totalAgencies: { value: (items) => items.length },
+    activeAgencies: { value: (items) => items.filter((a) => a.isActive).length },
+    inactiveAgencies: { value: (items) => items.filter((a) => !a.isActive).length },
+  });
 
-  // Filter agencies
-  const filteredAgencies = useMemo(() => {
-    return agencies.filter((agency) => {
-      const matchesSearch =
-        search === "" ||
-        agency.name.toLowerCase().includes(search.toLowerCase()) ||
-        (agency.code &&
-          agency.code.toLowerCase().includes(search.toLowerCase()));
+  // Use useFilteredData for filtering
+  const filteredAgencies = useFilteredData(agencies, {
+    search,
+    searchFields: ["name", "code"] as (keyof Agency)[],
+    filters: {
+      isActive:
+        search === "active" ? true : search === "inactive" ? false : undefined,
+    } as Partial<Record<keyof Agency, boolean | undefined>>,
+  });
 
-      const matchesStatus =
-        statusFilter === "all" ||
-        (statusFilter === "active" && agency.isActive) ||
-        (statusFilter === "inactive" && !agency.isActive);
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [agencies, search, statusFilter]);
-
-  const _handleCreateAgency = (data: any) => {
-    createAgency.mutate(data, {
-      onSuccess: () => {
-        setIsCreateDialogOpen(false);
-      },
-    });
+  // Handler to open edit dialog with agency data
+  const handleEditClick = (agency: Agency) => {
+    editDialog.open({ ...agency });
   };
 
-  const handleUpdateAgency = (data: any) => {
-    updateAgency.mutate(
-      { id: editingAgency.id, ...data },
-      {
-        onSuccess: () => {
-          setEditingAgency(null);
-        },
-      }
-    );
-  };
-
-  const handleDeleteAgency = () => {
-    if (deletingAgency) {
-      deleteAgency.mutate(deletingAgency.id, {
-        onSuccess: () => {
-          setDeletingAgency(null);
-        },
-      });
-    }
+  // Handler to open delete dialog with agency data
+  const handleDeleteClick = (agency: Agency) => {
+    deleteDialog.open({ id: agency.id, name: agency.name });
   };
 
   if (isLoading) {
@@ -156,21 +108,21 @@ export function AgenciesPage() {
             kpis={[
               {
                 title: t("agencies.totalAgencies"),
-                value: kpis.totalAgencies,
-                description: `${kpis.activeAgencies} ${t("agencies.active")}`,
+                value: metrics.totalAgencies,
+                description: `${metrics.activeAgencies} ${t("agencies.active")}`,
                 icon: <Building2 className="h-4 w-4" />,
               },
               {
                 title: t("agencies.active"),
-                value: kpis.activeAgencies,
-                description: `${((kpis.activeAgencies / kpis.totalAgencies) * 100 || 0).toFixed(0)}${t("common.ofTotal")}`,
+                value: metrics.activeAgencies,
+                description: `${((metrics.activeAgencies / metrics.totalAgencies) * 100 || 0).toFixed(0)}${t("common.ofTotal")}`,
                 icon: <Building2 className="h-4 w-4" />,
                 iconColor: "text-green-500",
               },
               {
                 title: t("agencies.inactive"),
-                value: kpis.inactiveAgencies,
-                description: `${((kpis.inactiveAgencies / kpis.totalAgencies) * 100 || 0).toFixed(0)}${t("common.ofTotal")}`,
+                value: metrics.inactiveAgencies,
+                description: `${((metrics.inactiveAgencies / metrics.totalAgencies) * 100 || 0).toFixed(0)}${t("common.ofTotal")}`,
                 icon: <Building2 className="h-4 w-4" />,
                 iconColor: "text-gray-500",
               },
@@ -189,23 +141,9 @@ export function AgenciesPage() {
                   value={search}
                 />
               </div>
-              <Select onValueChange={setStatusFilter} value={statusFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder={t("agencies.status")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    {t("agencies.allStatuses")}
-                  </SelectItem>
-                  <SelectItem value="active">{t("agencies.active")}</SelectItem>
-                  <SelectItem value="inactive">
-                    {t("agencies.inactive")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
               <Button
                 className="ml-auto gap-2"
-                onClick={() => setIsCreateDialogOpen(true)}
+                onClick={() => createDialog.open()}
               >
                 <Plus className="h-4 w-4" />
                 {t("agencies.addAgency")}
@@ -218,7 +156,7 @@ export function AgenciesPage() {
                 <AnimatedEmpty
                   action={{
                     label: t("agencies.addAgency", "Add Agency"),
-                    onClick: () => setIsCreateDialogOpen(true),
+                    onClick: () => createDialog.open(),
                   }}
                   description={t(
                     "agencies.noAgenciesDescription",
@@ -296,14 +234,14 @@ export function AgenciesPage() {
                         <TableCell className="px-4">
                           <div className="flex items-center justify-end gap-2">
                             <Button
-                              onClick={() => setEditingAgency(agency)}
+                              onClick={() => handleEditClick(agency)}
                               size="icon"
                               variant="ghost"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button
-                              onClick={() => setDeletingAgency(agency)}
+                              onClick={() => handleDeleteClick(agency)}
                               size="icon"
                               variant="ghost"
                             >
@@ -321,186 +259,7 @@ export function AgenciesPage() {
         </div>
       </div>
 
-      {/* Create Dialog */}
-      {isCreateDialogOpen && (
-        <CreateAgencyDialog onClose={() => setIsCreateDialogOpen(false)} />
-      )}
-
-      {/* Edit Dialog */}
-      {editingAgency && (
-        <EditAgencyDialog
-          agency={editingAgency}
-          onClose={() => setEditingAgency(null)}
-          onSave={handleUpdateAgency}
-        />
-      )}
-
-      {/* Delete Dialog */}
-      {deletingAgency && (
-        <DeleteAgencyDialog
-          agency={deletingAgency}
-          onClose={() => setDeletingAgency(null)}
-          onConfirm={handleDeleteAgency}
-        />
-      )}
+      {/* Dialogs are managed by DialogManager based on dialog store state */}
     </>
-  );
-}
-
-function CreateAgencyDialog({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation();
-  const createAgency = useCreateAgency();
-  const [name, setName] = useState("");
-  const [isActive, setIsActive] = useState(true);
-
-  const handleSubmit = () => {
-    createAgency.mutate(
-      { name, code: generateCode(name), isActive },
-      { onSuccess: onClose }
-    );
-  };
-
-  return (
-    <Dialog onOpenChange={onClose} open>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("agencies.addAgency")}</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">{t("agencies.name")}</Label>
-            <Input
-              id="name"
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t("agencies.namePlaceholder")}
-              value={name}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              checked={isActive}
-              id="isActive"
-              onChange={(e) => setIsActive(e.target.checked)}
-              type="checkbox"
-            />
-            <Label htmlFor="isActive">{t("agencies.active")}</Label>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button onClick={onClose} variant="outline">
-            {t("common.cancel")}
-          </Button>
-          <Button disabled={!name} onClick={handleSubmit}>
-            {t("common.save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function EditAgencyDialog({
-  agency,
-  onClose,
-  onSave,
-}: {
-  agency: any;
-  onClose: () => void;
-  onSave: (data: any) => void;
-}) {
-  const { t } = useTranslation();
-  const updateAgency = useUpdateAgency();
-  const [name, setName] = useState(agency.name);
-  const [code, setCode] = useState(agency.code || "");
-  const [isActive, setIsActive] = useState(agency.isActive);
-
-  const handleSubmit = () => {
-    onSave({ name, code: code || undefined, isActive });
-  };
-
-  return (
-    <Dialog onOpenChange={onClose} open>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("agencies.editAgency")}</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="edit-name">{t("agencies.name")}</Label>
-            <Input
-              id="edit-name"
-              onChange={(e) => setName(e.target.value)}
-              value={name}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="edit-code">{t("agencies.code")}</Label>
-            <Input
-              id="edit-code"
-              onChange={(e) => setCode(e.target.value)}
-              value={code}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              checked={isActive}
-              id="edit-isActive"
-              onChange={(e) => setIsActive(e.target.checked)}
-              type="checkbox"
-            />
-            <Label htmlFor="edit-isActive">{t("agencies.active")}</Label>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button onClick={onClose} variant="outline">
-            {t("common.cancel")}
-          </Button>
-          <Button disabled={!name} onClick={handleSubmit}>
-            {t("common.save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function DeleteAgencyDialog({
-  agency,
-  onClose,
-  onConfirm,
-}: {
-  agency: any;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  const { t } = useTranslation();
-  const deleteAgency = useDeleteAgency();
-  const isDeleting = deleteAgency.isPending;
-
-  return (
-    <Dialog onOpenChange={onClose} open>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("agencies.deleteAgency")}</DialogTitle>
-          <DialogDescription>
-            {t("agencies.deleteAgencyMessage", {
-              name: agency.name,
-            })}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button onClick={onClose} variant="outline">
-            {t("common.cancel")}
-          </Button>
-          <Button
-            disabled={isDeleting}
-            onClick={onConfirm}
-            variant="destructive"
-          >
-            {isDeleting ? t("common.deleting") : t("common.delete")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }

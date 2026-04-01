@@ -12,6 +12,7 @@ export default defineConfig({
   },
   test: {
     dirs: ["./src/tests/hooks", "./src/tests/components", "./src/tests/pages"],
+    exclude: ["src/tests/e2e/**", "**/node_modules/**"],
     globals: true,
     environment: "jsdom",
     setupFiles: "./src/tests/unit/setup.ts",
@@ -21,7 +22,7 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "json", "html"],
       include: ["src/**/*"],
-      exclude: [],
+      exclude: ["src/tests/e2e/**"],
     },
   },
 });

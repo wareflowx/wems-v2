@@ -1,4 +1,4 @@
-import { TIMING } from "@/core/constants";
+import { TIMING } from "@@/constants";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 

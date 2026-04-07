@@ -71,7 +71,7 @@ import {
   useNotes,
   useUpdateNote,
 } from "@/hooks/use-notes";
-import { TIMING } from "@/core/constants";
+import { TIMING } from "@@/constants";
 import { useDialogStore } from "@/stores/dialog-store";
 import { useToast } from "@/utils/toast";
 import { Checkbox } from "./ui/checkbox";

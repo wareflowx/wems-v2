@@ -1,5 +1,5 @@
 import { getDataDir, getDb } from "@@/db";
-import { LIMITS } from "@../../core/constants";
+import { LIMITS } from "@@/constants";
 import {
   agencies,
   attachments,

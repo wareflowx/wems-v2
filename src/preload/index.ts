@@ -64,10 +64,13 @@ ipcRenderer.on(
 );
 
 // Listen for update status changes from main
-ipcRenderer.on(IPC_CHANNELS.UPDATE_STATUS, (_event, data: { status: string }) => {
-  console.log("[PRELOAD] Update status received:", data.status);
-  updateCallbacks.forEach((cb) => cb(data.status));
-});
+ipcRenderer.on(
+  IPC_CHANNELS.UPDATE_STATUS,
+  (_event, data: { status: string }) => {
+    console.log("[PRELOAD] Update status received:", data.status);
+    updateCallbacks.forEach((cb) => cb(data.status));
+  }
+);
 
 // Listen for MAIN_READY and forward to renderer via postMessage
 // This ensures renderer initializes IPC only after preload is ready

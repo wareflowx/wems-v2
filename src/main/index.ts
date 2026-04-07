@@ -75,7 +75,9 @@ function checkForUpdates() {
   // Update check disabled for faster startup
   // TODO: Re-enable after optimizing update check
   console.log("[MAIN] Update check disabled");
-  mainWindow?.webContents.send(IPC_CHANNELS.UPDATE_STATUS, { status: "up-to-date" });
+  mainWindow?.webContents.send(IPC_CHANNELS.UPDATE_STATUS, {
+    status: "up-to-date",
+  });
 
   // Original code (disabled):
   // mainWindow?.webContents.send(IPC_CHANNELS.UPDATE_STATUS, { status: "checking" });

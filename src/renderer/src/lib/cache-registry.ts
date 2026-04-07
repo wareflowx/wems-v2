@@ -23,14 +23,22 @@ export const agencyCache = {
     create: {
       invalidate: [["agencies", "list"]] as QueryKey[],
       setQueryData: [["agencies", "list"]] as QueryKey[],
-      optimisticFn: (input: { name: string; code?: string; isActive?: boolean }) => ({
+      optimisticFn: (input: {
+        name: string;
+        code?: string;
+        isActive?: boolean;
+      }) => ({
         ...input,
         id: Date.now(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         deletedAt: null,
       }),
-    } as MutationCacheConfig<{ name: string; code?: string; isActive?: boolean }>,
+    } as MutationCacheConfig<{
+      name: string;
+      code?: string;
+      isActive?: boolean;
+    }>,
     update: {
       invalidate: [["agencies", "list"]] as QueryKey[],
       setQueryData: [["agencies", "list"]] as QueryKey[],
@@ -49,15 +57,24 @@ export const employeeCache = {
   },
   mutations: {
     create: {
-      invalidate: [["employees", "list"], ["contracts", "list"]] as QueryKey[],
+      invalidate: [
+        ["employees", "list"],
+        ["contracts", "list"],
+      ] as QueryKey[],
       setQueryData: [["employees", "list"]] as QueryKey[],
     } as MutationCacheConfig,
     update: {
-      invalidate: [["employees", "list"], ["contracts", "list"]] as QueryKey[],
+      invalidate: [
+        ["employees", "list"],
+        ["contracts", "list"],
+      ] as QueryKey[],
       setQueryData: [["employees", "list"]] as QueryKey[],
     } as MutationCacheConfig,
     delete: {
-      invalidate: [["employees", "list"], ["trash", "deleted-employees"]] as QueryKey[],
+      invalidate: [
+        ["employees", "list"],
+        ["trash", "deleted-employees"],
+      ] as QueryKey[],
       setQueryData: [["employees", "list"]] as QueryKey[],
     } as MutationCacheConfig<number>,
   },
@@ -70,11 +87,17 @@ export const contractCache = {
   },
   mutations: {
     create: {
-      invalidate: [["contracts", "list"], ["employees", "list"]] as QueryKey[],
+      invalidate: [
+        ["contracts", "list"],
+        ["employees", "list"],
+      ] as QueryKey[],
       setQueryData: [["contracts", "list"]] as QueryKey[],
     } as MutationCacheConfig,
     update: {
-      invalidate: [["contracts", "list"], ["employees", "list"]] as QueryKey[],
+      invalidate: [
+        ["contracts", "list"],
+        ["employees", "list"],
+      ] as QueryKey[],
       setQueryData: [["contracts", "list"]] as QueryKey[],
     } as MutationCacheConfig,
     delete: {

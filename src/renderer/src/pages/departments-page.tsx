@@ -1,3 +1,4 @@
+import { generateCode } from "@@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2, Edit, Plus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -31,7 +32,6 @@ import {
   useDepartments,
   useUpdateDepartment,
 } from "@/hooks";
-import { generateCode } from "@@/lib/utils";
 
 const getColorName = (color: string) => {
   return color.replace("bg-", "").replace("-500", "").toUpperCase();

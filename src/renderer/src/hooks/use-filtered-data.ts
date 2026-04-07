@@ -66,7 +66,9 @@ export function useFilteredData<TItem extends Record<string, unknown>>(
     if (filters) {
       (Object.keys(filters) as (keyof TItem)[]).forEach((key) => {
         const value = filters[key];
-        if (value === undefined) return;
+        if (value === undefined) {
+          return;
+        }
 
         result = result.filter((item) => {
           const itemValue = item[key];

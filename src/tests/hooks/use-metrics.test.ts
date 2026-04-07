@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { renderHook } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import { useMetrics, useStatusMetrics } from "@/hooks/use-metrics";
 
 interface TestItem {
@@ -62,7 +62,10 @@ describe("useMetrics", () => {
         total: { value: (items) => items.length },
         active: { value: (items) => items.filter((i) => i.isActive).length },
         inactive: { value: (items) => items.filter((i) => !i.isActive).length },
-        activePercentage: { value: (items) => (items.filter((i) => i.isActive).length / items.length) * 100 },
+        activePercentage: {
+          value: (items) =>
+            (items.filter((i) => i.isActive).length / items.length) * 100,
+        },
       })
     );
     expect(result.current.total).toBe(4);

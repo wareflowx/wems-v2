@@ -1,5 +1,11 @@
 "use client";
 
+// Agency dialogs
+import {
+  CreateAgencyDialog,
+  DeleteAgencyDialog,
+  EditAgencyDialog,
+} from "@/components/agencies";
 import { AddCacesDialog } from "@/components/caces/AddCacesDialog";
 import { CreateContractTypeDialog } from "@/components/contract-types/CreateContractTypeDialog";
 import { CreateContractDialog } from "@/components/contracts/CreateContractDialog";
@@ -31,13 +37,6 @@ import {
   useWorkLocations,
 } from "@/hooks";
 import { useDialogStore } from "@/stores/dialog-store";
-
-// Agency dialogs
-import {
-  CreateAgencyDialog,
-  EditAgencyDialog,
-  DeleteAgencyDialog,
-} from "@/components/agencies";
 
 export function DialogManager() {
   const activeDialog = useDialogStore((state) => state.activeDialog);

@@ -2,8 +2,8 @@
 // Provides a simpler API for opening/closing dialogs with optional data
 
 import { useCallback } from "react";
-import { useDialogStore } from "@/stores/dialog-store";
 import type { DialogId } from "@/stores/dialog-store";
+import { useDialogStore } from "@/stores/dialog-store";
 
 interface DialogData {
   [key: string]: unknown;
@@ -20,17 +20,25 @@ interface DialogData {
  * const { isOpen: isCreateOpen, open: openCreate } = useDialog("create-agency");
  * ```
  */
-export function useDialog<TData extends DialogData = DialogData>(dialogId?: DialogId) {
+export function useDialog<TData extends DialogData = DialogData>(
+  dialogId?: DialogId
+) {
   const store = useDialogStore();
 
   // Get current dialog state
-  const isOpen = dialogId ? store.isOpen(dialogId) : store.activeDialog !== null;
-  const data = dialogId && store.isOpen(dialogId) ? store.dialogData as TData : null;
+  const isOpen = dialogId
+    ? store.isOpen(dialogId)
+    : store.activeDialog !== null;
+  const data =
+    dialogId && store.isOpen(dialogId) ? (store.dialogData as TData) : null;
 
   // Open a specific dialog
   const open = useCallback(
     (id: DialogId, dialogData?: TData) => {
-      store.openDialog(id, dialogData as Parameters<typeof store.openDialog>[1]);
+      store.openDialog(
+        id,
+        dialogData as Parameters<typeof store.openDialog>[1]
+      );
     },
     [store]
   );
@@ -44,7 +52,10 @@ export function useDialog<TData extends DialogData = DialogData>(dialogId?: Dial
   const openCreate = useCallback(
     (data?: TData) => {
       if (dialogId) {
-        store.openDialog(dialogId, data as Parameters<typeof store.openDialog>[1]);
+        store.openDialog(
+          dialogId,
+          data as Parameters<typeof store.openDialog>[1]
+        );
       }
     },
     [store, dialogId]
@@ -53,7 +64,9 @@ export function useDialog<TData extends DialogData = DialogData>(dialogId?: Dial
   const openEdit = useCallback(
     (id: number, data?: Partial<TData>) => {
       if (dialogId) {
-        store.openDialog(dialogId, { ...data, id } as Parameters<typeof store.openDialog>[1]);
+        store.openDialog(dialogId, { ...data, id } as Parameters<
+          typeof store.openDialog
+        >[1]);
       }
     },
     [store, dialogId]
@@ -62,7 +75,9 @@ export function useDialog<TData extends DialogData = DialogData>(dialogId?: Dial
   const openDelete = useCallback(
     (id: number, data?: Partial<TData>) => {
       if (dialogId) {
-        store.openDialog(dialogId, { ...data, id } as Parameters<typeof store.openDialog>[1]);
+        store.openDialog(dialogId, { ...data, id } as Parameters<
+          typeof store.openDialog
+        >[1]);
       }
     },
     [store, dialogId]
@@ -93,7 +108,10 @@ export function useDialogState(dialogId: DialogId) {
 
   const open = useCallback(
     (dialogData?: DialogData) => {
-      store.openDialog(dialogId, dialogData as Parameters<typeof store.openDialog>[1]);
+      store.openDialog(
+        dialogId,
+        dialogData as Parameters<typeof store.openDialog>[1]
+      );
     },
     [store, dialogId]
   );
@@ -117,7 +135,9 @@ export function getDialogId<T extends DialogData>(
   data: T | null,
   key: keyof T
 ): number | undefined {
-  if (!data) return undefined;
+  if (!data) {
+    return undefined;
+  }
   const value = data[key];
   return typeof value === "number" ? value : undefined;
 }

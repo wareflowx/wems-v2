@@ -1,45 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { generateCode } from "@@/lib/utils";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { useCreateAgency } from "@/hooks";
 import { useDialogStore } from "@/stores/dialog-store";
-import { generateCode } from "@@/lib/utils";
 
 export function CreateAgencyDialog() {
   const { t } = useTranslation();
   const createAgency = useCreateAgency();
   const closeDialog = useDialogStore((state) => state.closeDialog);
+  const isOpen = useDialogStore(
+    (state) => state.activeDialog === "create-agency"
+  );
 
   const [name, setName] = useState("");
   const [isActive, setIsActive] = useState(true);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     createAgency.mutate(
       { name, code: generateCode(name), isActive },
       { onSuccess: () => closeDialog() }
     );
-  };
+  }, [createAgency, name, isActive, closeDialog]);
 
-  const handleClose = (open: boolean) => {
-    if (!open) {
-      closeDialog();
-    }
-  };
+  const handleClose = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        closeDialog();
+      }
+    },
+    [closeDialog]
+  );
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
-    <Dialog onOpenChange={handleClose} open>
+    <Dialog onOpenChange={handleClose} open={isOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("agencies.addAgency")}</DialogTitle>

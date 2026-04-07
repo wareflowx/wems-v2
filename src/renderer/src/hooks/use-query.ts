@@ -1,10 +1,13 @@
 // Generic useQuery hook for ORPC procedures
 // Usage: const { data } = useQuery(() => ipc.client.database.getAgencies(), { cacheKey: ['agencies', 'list'] })
 
+import type {
+  QueryKey,
+  UseQueryOptions,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import { useQuery as useRQQuery } from "@tanstack/react-query";
-import type { UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
 import { useORPCReady } from "./use-orpc-ready";
-import type { QueryKey } from "@tanstack/react-query";
 
 export type QueryFunction<T = unknown> = () => Promise<T>;
 

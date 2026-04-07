@@ -1,5 +1,5 @@
+import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { renderHook, act } from "@testing-library/react";
 import { useFilteredData } from "@/hooks/use-filtered-data";
 
 interface TestItem {
@@ -73,7 +73,11 @@ describe("useFilteredData", () => {
       })
     );
     expect(result.current).toHaveLength(2);
-    expect(result.current.every((item) => item.isActive && item.name.includes("Agency"))).toBe(true);
+    expect(
+      result.current.every(
+        (item) => item.isActive && item.name.includes("Agency")
+      )
+    ).toBe(true);
   });
 
   it("ignores undefined filter values", () => {

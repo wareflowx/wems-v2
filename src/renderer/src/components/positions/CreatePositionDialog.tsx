@@ -1,3 +1,4 @@
+import { generateCode } from "@@/lib/utils";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreatePosition } from "@/hooks/use-positions-worklocations";
-import { generateCode } from "@@/lib/utils";
 
 const COLORS = [
   { name: "Emerald", value: "bg-emerald-500", hex: "#10b981" },

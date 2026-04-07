@@ -1,3 +1,4 @@
+import { generateCode } from "@@/lib/utils";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateWorkLocation } from "@/hooks/use-positions-worklocations";
-import { generateCode } from "@@/lib/utils";
 
 const COLORS = [
   { name: "Cyan", value: "bg-cyan-500", hex: "#06b6d4" },

@@ -17,7 +17,8 @@ export type MetricsConfig<TItem, TKey extends string> = Record<
 
 // Pre-defined common metric definitions
 export const commonMetricFns = {
-  total: <TItem extends { length: number }>(items: TItem[]): number => items.length,
+  total: <TItem extends { length: number }>(items: TItem[]): number =>
+    items.length,
   active: <TItem extends { isActive?: boolean }>(items: TItem[]): number =>
     items.filter((i) => i.isActive === true).length,
   inactive: <TItem extends { isActive?: boolean }>(items: TItem[]): number =>
@@ -45,10 +46,7 @@ export const commonMetricFns = {
 export function useMetrics<
   TItem extends Record<string, unknown>,
   TKey extends string,
->(
-  data: TItem[],
-  config: MetricsConfig<TItem, TKey>
-): Record<TKey, number> {
+>(data: TItem[], config: MetricsConfig<TItem, TKey>): Record<TKey, number> {
   return useMemo(() => {
     const result = {} as Record<TKey, number>;
 

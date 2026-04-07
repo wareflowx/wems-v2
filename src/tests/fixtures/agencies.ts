@@ -14,10 +14,30 @@ export function createMockAgency(overrides: Partial<Agency> = {}): Agency {
 }
 
 export const mockAgencyList: Agency[] = [
-  createMockAgency({ id: 1, name: "Agency Alpha", code: "ALPHA", isActive: true }),
-  createMockAgency({ id: 2, name: "Agency Beta", code: "BETA", isActive: false }),
-  createMockAgency({ id: 3, name: "Agency Gamma", code: "GAMMA", isActive: true }),
-  createMockAgency({ id: 4, name: "Agency Delta", code: "DELTA", isActive: false }),
+  createMockAgency({
+    id: 1,
+    name: "Agency Alpha",
+    code: "ALPHA",
+    isActive: true,
+  }),
+  createMockAgency({
+    id: 2,
+    name: "Agency Beta",
+    code: "BETA",
+    isActive: false,
+  }),
+  createMockAgency({
+    id: 3,
+    name: "Agency Gamma",
+    code: "GAMMA",
+    isActive: true,
+  }),
+  createMockAgency({
+    id: 4,
+    name: "Agency Delta",
+    code: "DELTA",
+    isActive: false,
+  }),
 ];
 
 export const mockActiveAgencies = mockAgencyList.filter((a) => a.isActive);

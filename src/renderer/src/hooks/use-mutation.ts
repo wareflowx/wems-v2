@@ -10,13 +10,16 @@
 //     }
 //   );
 
-import {
-  useMutation as useRQMutation,
-  useQueryClient,
+import type {
+  MutationFunction,
+  QueryKey,
+  UseMutationResult,
 } from "@tanstack/react-query";
-import type { UseMutationResult, MutationFunction } from "@tanstack/react-query";
+import {
+  useQueryClient,
+  useMutation as useRQMutation,
+} from "@tanstack/react-query";
 import { useToast } from "@/utils/toast";
-import type { QueryKey } from "@tanstack/react-query";
 
 /**
  * Context returned from onMutate for rollback on error
@@ -91,7 +94,9 @@ export function useMutation<TInput, TOutput, TError = unknown>(
 
   // Apply optimistic update
   function applyOptimistic(input: TInput) {
-    if (!options?.setQueryData || !options?.optimisticFn) return;
+    if (!(options?.setQueryData && options?.optimisticFn)) {
+      return;
+    }
 
     const optimisticData = options.optimisticFn(input);
     options.setQueryData.forEach((key) => {

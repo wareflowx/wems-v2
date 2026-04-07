@@ -1,6 +1,8 @@
 "use client";
 
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,37 +11,44 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { useDeleteAgency } from "@/hooks";
 import { useDialogStore } from "@/stores/dialog-store";
 
 export function DeleteAgencyDialog() {
   const { t } = useTranslation();
   const deleteAgency = useDeleteAgency();
-  const { dialogData, closeDialog } = useDialogStore((state) => ({
-    dialogData: state.dialogData,
-    closeDialog: state.closeDialog,
-  }));
+
+  // Use individual selectors to avoid creating new objects on every getSnapshot call
+  const dialogData = useDialogStore((state) => state.dialogData);
+  const closeDialog = useDialogStore((state) => state.closeDialog);
+  const isOpen = useDialogStore(
+    (state) => state.activeDialog === "delete-agency"
+  );
 
   const agency = dialogData as { id: number; name: string } | null;
   const isDeleting = deleteAgency.isPending;
 
-  const handleConfirm = () => {
+  const handleConfirm = useCallback(() => {
     if (agency?.id) {
       deleteAgency.mutate(agency.id, { onSuccess: () => closeDialog() });
     }
-  };
+  }, [deleteAgency, agency, closeDialog]);
 
-  const handleClose = (open: boolean) => {
-    if (!open) {
-      closeDialog();
-    }
-  };
+  const handleClose = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        closeDialog();
+      }
+    },
+    [closeDialog]
+  );
 
-  if (!agency) return null;
+  if (!(isOpen && agency)) {
+    return null;
+  }
 
   return (
-    <Dialog onOpenChange={handleClose} open>
+    <Dialog onOpenChange={handleClose} open={isOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("agencies.deleteAgency")}</DialogTitle>

@@ -2,7 +2,7 @@
  * Date utility functions for export functionality
  */
 
-import { LIMITS } from "@../core/constants";
+import { LIMITS } from "@@/constants";
 
 export type DateRange = "today" | "7days" | "30days" | "all";
 

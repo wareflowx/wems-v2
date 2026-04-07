@@ -47,12 +47,6 @@ export function CreatePositionDialog({
       return;
     }
 
-    console.log("Submitting position:", {
-      code: generateCode(name),
-      name: name.trim(),
-      color: selectedColor,
-    });
-
     createPosition.mutate(
       {
         code: generateCode(name),
@@ -61,7 +55,6 @@ export function CreatePositionDialog({
       },
       {
         onSuccess: () => {
-          console.log("Position created successfully");
           setName("");
           setSelectedColor(COLORS[0].value);
           onOpenChange(false);

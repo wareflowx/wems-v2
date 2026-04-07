@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDeleteEmployee } from "@/hooks/use-employees";
 
 interface DeleteEmployeeDialogProps {
   open?: boolean;
@@ -30,13 +31,24 @@ export function DeleteEmployeeDialog({
 }: DeleteEmployeeDialogProps) {
   const { t } = useTranslation();
   const [confirmationName, setConfirmationName] = useState("");
+  const deleteEmployee = useDeleteEmployee();
 
   const handleDelete = () => {
-    // TODO: Implement backend logic
-    console.log(`Deleting employee: ${employeeId} - ${employeeName}`);
-    onConfirm?.();
-    onOpenChange?.(false);
-    setConfirmationName("");
+    if (!employeeId) {
+      return;
+    }
+    deleteEmployee.mutate(employeeId, {
+      onSuccess: () => {
+        onConfirm?.();
+        onOpenChange?.(false);
+        setConfirmationName("");
+      },
+      onError: () => {
+        // Error toast is handled by the hook
+        onOpenChange?.(false);
+        setConfirmationName("");
+      },
+    });
   };
 
   const isConfirmed = confirmationName === employeeName;
@@ -95,7 +107,7 @@ export function DeleteEmployeeDialog({
           </Button>
           <Button
             className="flex-1"
-            disabled={!isConfirmed}
+            disabled={!isConfirmed || deleteEmployee.isPending}
             onClick={handleDelete}
             type="button"
             variant="destructive"

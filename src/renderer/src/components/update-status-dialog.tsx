@@ -1,3 +1,4 @@
+import { TIMING } from "@/core/constants";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,7 +31,7 @@ export function useUpdateStatus() {
       if (status === "up-to-date" || status === "error") {
         setTimeout(() => {
           setUpdateStatus(null);
-        }, 3000);
+        }, TIMING.UPDATE_STATUS_DISPLAY_MS);
       }
     };
 

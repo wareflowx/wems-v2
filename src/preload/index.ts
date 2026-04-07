@@ -76,7 +76,7 @@ ipcRenderer.on(
 // This ensures renderer initializes IPC only after preload is ready
 ipcRenderer.on(IPC_CHANNELS.MAIN_READY, () => {
   console.log("[PRELOAD] MAIN_READY received, forwarding to renderer");
-  window.postMessage({ type: "main-ready" }, "*");
+  window.postMessage({ type: "main-ready" }, window.location.origin);
 });
 
 // ============================================
@@ -100,7 +100,7 @@ ipcRenderer.on(IPC_CHANNELS.ORPC_READY, (_event) => {
 
     // Forward to renderer via window.postMessage (NOT through contextBridge!)
     // This is the only reliable way to transfer MessagePort
-    window.postMessage({ type: "orpc-port-ready" }, "*", [port]);
+    window.postMessage({ type: "orpc-port-ready" }, window.location.origin, [port]);
   }
 });
 

@@ -193,7 +193,7 @@ export function SettingsPage() {
                       onChange={(e) =>
                         handleSettingChange(
                           "cacesDays",
-                          Number.parseInt(e.target.value) || 30
+                          Number.parseInt(e.target.value, 10) || 30
                         )
                       }
                       type="number"
@@ -237,7 +237,7 @@ export function SettingsPage() {
                       onChange={(e) =>
                         handleSettingChange(
                           "medicalDays",
-                          Number.parseInt(e.target.value) || 7
+                          Number.parseInt(e.target.value, 10) || 7
                         )
                       }
                       type="number"

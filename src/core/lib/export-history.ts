@@ -1,4 +1,5 @@
 import { getDataDir } from "@@/db";
+import { LIMITS } from "@@/constants";
 import { os } from "@orpc/server";
 import * as fs from "fs";
 import * as path from "path";
@@ -75,7 +76,7 @@ export const addExportToHistory = os.handler(
 
     // Add to beginning, keep only last 100
     history.unshift(record);
-    const trimmed = history.slice(0, 100);
+    const trimmed = history.slice(0, LIMITS.EXPORT_HISTORY_MAX_ENTRIES);
 
     saveHistory(trimmed);
 
@@ -111,7 +112,7 @@ export const _addExportToHistory = async (input: {
   };
 
   history.unshift(record);
-  const trimmed = history.slice(0, 100);
+  const trimmed = history.slice(0, LIMITS.EXPORT_HISTORY_MAX_ENTRIES);
 
   saveHistory(trimmed);
 

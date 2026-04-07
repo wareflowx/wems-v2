@@ -305,7 +305,7 @@ export function EditEmployeeDialog({
                 onValueChange={(value) =>
                   updateFormData(
                     "positionId",
-                    value ? Number.parseInt(value) : undefined
+                    value ? Number.parseInt(value, 10) : undefined
                   )
                 }
                 value={formData.positionId?.toString() || ""}
@@ -333,7 +333,7 @@ export function EditEmployeeDialog({
                 onValueChange={(value) =>
                   updateFormData(
                     "workLocationId",
-                    value ? Number.parseInt(value) : undefined
+                    value ? Number.parseInt(value, 10) : undefined
                   )
                 }
                 value={formData.workLocationId?.toString() || ""}

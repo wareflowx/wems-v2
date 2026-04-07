@@ -1,5 +1,5 @@
 import { createORPCClient, onError } from "@orpc/client";
-import { TIMING } from "@./../core/constants";
+import { TIMING } from "@@/constants";
 import { RPCLink } from "@orpc/client/message-port";
 import type { RouterClient } from "@orpc/server";
 import type { router } from "./router";

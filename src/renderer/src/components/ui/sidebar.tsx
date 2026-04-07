@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/utils/tailwind";
-import { LIMITS } from "@../../core/constants";
+import { LIMITS } from "@@/core/constants";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = LIMITS.SIDEBAR_COOKIE_MAX_AGE;

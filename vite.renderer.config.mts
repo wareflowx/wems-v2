@@ -21,6 +21,7 @@ export default defineConfig({
     preserveSymlinks: true,
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
+      "@@": path.resolve(import.meta.dirname, "./src/core"),
     },
   },
   server: {

@@ -68,7 +68,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/WEMS.Setup.*.exe
-            dist/WEMS.Setup.*.exe.blockmap
+            dist/*Setup*.exe
+            dist/*.blockmap
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

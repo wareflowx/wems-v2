@@ -49,6 +49,14 @@ jobs:
           Remove-Item -Recurse -Force out -ErrorAction SilentlyContinue
           Remove-Item -Recurse -Force "$env:LOCALAPPDATA/electron-builder/Cache" -ErrorAction SilentlyContinue
           Remove-Item -Recurse -Force "$env:TEMP/electron-builder-win-*" -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "$env:APPDATA/electron-builder" -ErrorAction SilentlyContinue
+
+      - name: Verify clean dist
+        run: |
+          Write-Output "Dist folder after clean:"
+          Get-ChildItem -Recurse dist -ErrorAction SilentlyContinue | Format-Table Name,Length -AutoSize
+          Write-Output "Current package.json version:"
+          Get-Content package.json | Select-String '"version"'
 
       - name: Build application
         run: npm run build
@@ -60,8 +68,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/*.exe
-            dist/*.zip
-            dist/**/*.blockmap
+            dist/WEMS.Setup.*.exe
+            dist/WEMS.Setup.*.exe.blockmap
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -43,8 +43,12 @@ jobs:
       - name: Rebuild native modules
         run: npm run rebuild
 
-      - name: Clean dist folder
-        run: Remove-Item -Recurse -Force dist -ErrorAction SilentlyContinue
+      - name: Clean build folders
+        run: |
+          Remove-Item -Recurse -Force dist -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force out -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "$env:LOCALAPPDATA/electron-builder/Cache" -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "$env:TEMP/electron-builder-win-*" -ErrorAction SilentlyContinue
 
       - name: Build application
         run: npm run build

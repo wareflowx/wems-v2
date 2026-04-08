@@ -53,12 +53,15 @@ export function AlertsPageTable({
   const itemsPerPage = initialItemsPerPage;
 
   // Use TanStack Query hook for alerts with internal filters
-  const { data: alerts = [], isLoading, error } = useAlerts({
+  const {
+    data: alerts = [],
+    isLoading,
+    error,
+  } = useAlerts({
     search: search || undefined,
     severity: severityFilter,
     type: typeFilter,
   });
-
 
   // Get unique types from alerts
   const uniqueTypes = useMemo(() => {
@@ -163,7 +166,7 @@ export function AlertsPageTable({
   };
 
   const getCategoryBadge = (category?: string, visitType?: string) => {
-    if (!category && !visitType) {
+    if (!(category || visitType)) {
       return <span className="text-gray-400">-</span>;
     }
 
@@ -249,12 +252,8 @@ export function AlertsPageTable({
               <SelectValue placeholder={t("alerts.severity")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">
-                {t("alerts.allSeverities")}
-              </SelectItem>
-              <SelectItem value="critical">
-                {t("alerts.critical")}
-              </SelectItem>
+              <SelectItem value="all">{t("alerts.allSeverities")}</SelectItem>
+              <SelectItem value="critical">{t("alerts.critical")}</SelectItem>
               <SelectItem value="warning">{t("alerts.warning")}</SelectItem>
               <SelectItem value="info">{t("alerts.info")}</SelectItem>
             </SelectContent>
@@ -311,9 +310,7 @@ export function AlertsPageTable({
                     </div>
                   </Button>
                 </TableHead>
-                <TableHead className="px-4">
-                  {t("alerts.category")}
-                </TableHead>
+                <TableHead className="px-4">{t("alerts.category")}</TableHead>
                 <TableHead className="px-4">
                   <Button
                     className="-ml-4 h-8 font-medium hover:bg-muted"
@@ -327,9 +324,7 @@ export function AlertsPageTable({
                     </div>
                   </Button>
                 </TableHead>
-                <TableHead className="px-4">
-                  {t("alerts.daysLeft")}
-                </TableHead>
+                <TableHead className="px-4">{t("alerts.daysLeft")}</TableHead>
                 <TableHead className="px-4">
                   <Button
                     className="-ml-4 h-8 font-medium hover:bg-muted"
@@ -393,12 +388,12 @@ export function AlertsPageTable({
                         <span
                           className={`inline-flex items-center rounded-md px-2 py-0.5 font-medium text-xs ${
                             alert.daysLeft < 0
-                              ? "bg-red-500/15 border border-red-500/25 text-red-700"
+                              ? "border border-red-500/25 bg-red-500/15 text-red-700"
                               : alert.daysLeft <= 7
-                                ? "bg-red-500/15 border border-red-500/25 text-red-700"
+                                ? "border border-red-500/25 bg-red-500/15 text-red-700"
                                 : alert.daysLeft <= 30
-                                  ? "bg-yellow-600/15 border border-yellow-600/25 text-yellow-700"
-                                  : "bg-green-500/15 border border-green-500/25 text-green-700"
+                                  ? "border border-yellow-600/25 bg-yellow-600/15 text-yellow-700"
+                                  : "border border-green-500/25 bg-green-500/15 text-green-700"
                           }`}
                         >
                           {alert.daysLeft < 0

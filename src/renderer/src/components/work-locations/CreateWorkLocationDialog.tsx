@@ -1,3 +1,4 @@
+import { generateCode } from "@@/lib/utils";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -31,17 +32,6 @@ export interface CreateWorkLocationDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function generateCode(name: string): string {
-  return (
-    "SITE_" +
-    name
-      .toUpperCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^A-Z0-9]/g, "_")
-  );
-}
-
 export function CreateWorkLocationDialog({
   open,
   onOpenChange,
@@ -59,7 +49,7 @@ export function CreateWorkLocationDialog({
 
     createWorkLocation.mutate(
       {
-        code: generateCode(name),
+        code: generateCode(name, "SITE_"),
         name: name.trim(),
         color: selectedColor,
       },

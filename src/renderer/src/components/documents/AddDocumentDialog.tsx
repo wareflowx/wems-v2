@@ -57,7 +57,7 @@ export function AddDocumentDialog({
     // For now, use placeholder values for file metadata
     // In a real implementation, the file upload would provide these
     onAdd?.({
-      employeeId: Number.parseInt(employeeId),
+      employeeId: Number.parseInt(employeeId, 10),
       originalName: finalName,
       storedName: `${Date.now()}-${document}`,
       mimeType: "application/pdf",

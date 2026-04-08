@@ -20,6 +20,7 @@ import {
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AddMedicalVisitDialog } from "@/components/medical-visits/AddMedicalVisitDialog";
+import { EditMedicalVisitDialog } from "@/components/medical-visits/EditMedicalVisitDialog";
 import { DeleteMedicalVisitDialog } from "@/components/medical-visits/DeleteMedicalVisitDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,7 @@ import {
   useCreateMedicalVisit,
   useDeleteMedicalVisit,
   useMedicalVisits,
+  useUpdateMedicalVisit,
 } from "@/hooks";
 
 interface MedicalVisit {
@@ -74,6 +76,7 @@ export function MedicalVisitsPage() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState<MedicalVisit | undefined>(
     undefined
@@ -83,6 +86,7 @@ export function MedicalVisitsPage() {
   // Use TanStack Query hooks
   const { data: visits = [], isLoading } = useMedicalVisits();
   const createMedicalVisit = useCreateMedicalVisit();
+  const updateMedicalVisit = useUpdateMedicalVisit();
   const deleteMedicalVisit = useDeleteMedicalVisit();
 
   // Get unique types, statuses and employees
@@ -275,14 +279,23 @@ export function MedicalVisitsPage() {
   };
 
   const handleEdit = (visit: MedicalVisit) => {
-    // TODO: Implement edit functionality
-    console.log("Edit visit:", visit);
+    setSelectedVisit(visit);
+    setEditDialogOpen(true);
   };
 
   const handleAddMedicalVisit = (data: any) => {
     createMedicalVisit.mutate(data, {
       onSuccess: () => {
         setAddDialogOpen(false);
+      },
+    });
+  };
+
+  const handleEditMedicalVisit = (data: any) => {
+    updateMedicalVisit.mutate(data, {
+      onSuccess: () => {
+        setEditDialogOpen(false);
+        setSelectedVisit(undefined);
       },
     });
   };
@@ -638,6 +651,12 @@ export function MedicalVisitsPage() {
         onAdd={handleAddMedicalVisit}
         onOpenChange={setAddDialogOpen}
         open={addDialogOpen}
+      />
+      <EditMedicalVisitDialog
+        onEdit={handleEditMedicalVisit}
+        onOpenChange={setEditDialogOpen}
+        open={editDialogOpen}
+        visit={selectedVisit}
       />
       <DeleteMedicalVisitDialog
         onConfirm={handleDeleteMedicalVisit}

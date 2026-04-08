@@ -1,3 +1,4 @@
+import { generateCode } from "@@/lib/utils";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -24,14 +25,6 @@ const COLORS = [
   { name: "Red", value: "bg-red-500" },
   { name: "Orange", value: "bg-orange-500" },
 ];
-
-function generateCode(name: string): string {
-  return name
-    .toUpperCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Z0-9]/g, "_");
-}
 
 interface Position {
   id: number;

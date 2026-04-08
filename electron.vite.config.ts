@@ -44,6 +44,7 @@ export default defineConfig({
       alias: {
         "@": resolve(import.meta.dirname, "src/renderer/src"),
         "@@": resolve(import.meta.dirname, "src/core"),
+        "@core": resolve(import.meta.dirname, "src/core"),
       },
     },
   },

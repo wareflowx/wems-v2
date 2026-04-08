@@ -1,3 +1,5 @@
+import { getDataDir, getDb } from "@@/db";
+import { LIMITS } from "@@/constants";
 import {
   agencies,
   attachments,
@@ -28,7 +30,6 @@ import {
 import { randomUUID } from "node:crypto";
 import { os } from "@orpc/server";
 import { and, desc, eq, gt, isNull, not } from "drizzle-orm";
-import { getDataDir, getDb } from "@@/db";
 import {
   createAgencyInputSchema,
   createAttachmentInputSchema,
@@ -3000,7 +3001,7 @@ export const exportData = os.handler(
       const timestamp = new Date()
         .toISOString()
         .replace(/[:.]/g, "-")
-        .slice(0, 19);
+        .slice(0, LIMITS.ISO_TIMESTAMP_LENGTH);
       const isMultiType = types.length > 1;
 
       let filePath: string;
@@ -3043,9 +3044,40 @@ export const exportData = os.handler(
 // Open exported file
 // ============================================================
 
+/**
+ * Validate that a file path is within the allowed directory (prevents path traversal)
+ */
+function validateFilePath(filePath: string, allowedDir: string): { valid: boolean; error?: string } {
+  const normalizedPath = path.normalize(filePath);
+  const normalizedDir = path.normalize(allowedDir);
+
+  // Check if path is within allowed directory
+  if (
+    !normalizedPath.startsWith(normalizedDir + path.sep) &&
+    normalizedPath !== normalizedDir
+  ) {
+    return { valid: false, error: "Invalid file path: path traversal detected" };
+  }
+
+  // Check if file exists
+  if (!fs.existsSync(normalizedPath)) {
+    return { valid: false, error: "File does not exist" };
+  }
+
+  return { valid: true };
+}
+
 export const openExportedFile = os.handler(
   async ({ input }: { input: { filePath: string } }) => {
     try {
+      // Get the exports directory as the allowed directory
+      const exportDir = path.join(getDataDir(), "exports");
+      const validation = validateFilePath(input.filePath, exportDir);
+
+      if (!validation.valid) {
+        throw new Error(validation.error);
+      }
+
       const { shell } = await import("electron");
       await shell.openPath(input.filePath);
       return { success: true };
@@ -3063,6 +3095,14 @@ export const openExportedFile = os.handler(
 export const openExportFolder = os.handler(
   async ({ input }: { input: { filePath: string } }) => {
     try {
+      // Get the exports directory as the allowed directory
+      const exportDir = path.join(getDataDir(), "exports");
+      const validation = validateFilePath(input.filePath, exportDir);
+
+      if (!validation.valid) {
+        throw new Error(validation.error);
+      }
+
       const { shell } = await import("electron");
       shell.showItemInFolder(input.filePath);
       return { success: true };

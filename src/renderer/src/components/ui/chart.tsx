@@ -8,6 +8,31 @@ import { cn } from "@/utils/tailwind";
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
 
+// Hex color validation regex: matches #RGB, #RRGGBB formats
+const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{3,6}$/;
+
+// Safe default color for invalid inputs
+const SAFE_DEFAULT_COLOR = "#808080";
+
+/**
+ * Validates if a string is a safe hex color format.
+ * Prevents CSS injection attacks by only allowing valid hex colors.
+ */
+function isValidHexColor(color: string | undefined): color is string {
+  return typeof color === "string" && HEX_COLOR_REGEX.test(color);
+}
+
+/**
+ * Sanitizes a color value, returning a safe default for invalid inputs.
+ * This prevents CSS injection attacks in chart styling.
+ */
+function sanitizeColor(color: unknown): string {
+  if (isValidHexColor(color as string)) {
+    return color as string;
+  }
+  return SAFE_DEFAULT_COLOR;
+}
+
 export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode;
@@ -90,7 +115,7 @@ ${colorConfig
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    return color ? `  --color-${key}: ${sanitizeColor(color)};` : null;
   })
   .join("\n")}
 }
@@ -215,8 +240,8 @@ function ChartTooltipContent({
                           )}
                           style={
                             {
-                              "--color-bg": indicatorColor,
-                              "--color-border": indicatorColor,
+                              "--color-bg": sanitizeColor(indicatorColor),
+                              "--color-border": sanitizeColor(indicatorColor),
                             } as React.CSSProperties
                           }
                         />
@@ -296,7 +321,7 @@ function ChartLegendContent({
                 <div
                   className="h-2 w-2 shrink-0 rounded-[2px]"
                   style={{
-                    backgroundColor: item.color,
+                    backgroundColor: sanitizeColor(item.color),
                   }}
                 />
               )}

@@ -1,3 +1,4 @@
+import { generateCode } from "@@/lib/utils";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -31,14 +32,6 @@ export interface CreatePositionDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function generateCode(name: string): string {
-  return name
-    .toUpperCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Z0-9]/g, "_");
-}
-
 export function CreatePositionDialog({
   open,
   onOpenChange,
@@ -54,12 +47,6 @@ export function CreatePositionDialog({
       return;
     }
 
-    console.log("Submitting position:", {
-      code: generateCode(name),
-      name: name.trim(),
-      color: selectedColor,
-    });
-
     createPosition.mutate(
       {
         code: generateCode(name),
@@ -68,7 +55,6 @@ export function CreatePositionDialog({
       },
       {
         onSuccess: () => {
-          console.log("Position created successfully");
           setName("");
           setSelectedColor(COLORS[0].value);
           onOpenChange(false);

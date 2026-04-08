@@ -42,6 +42,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DrivingAuthorizationBadge } from "./driving-authorization-badge";
+import { PAGINATION } from "@@/constants";
 
 interface EmployeesTableProps {
   employees: Employee[];
@@ -342,7 +343,7 @@ export function EmployeesTable({
     onGlobalFilterChange: setGlobalFilter,
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: PAGINATION.DEFAULT_PAGE_SIZE,
       },
     },
   });

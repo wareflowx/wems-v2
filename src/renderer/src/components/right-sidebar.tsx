@@ -71,6 +71,7 @@ import {
   useNotes,
   useUpdateNote,
 } from "@/hooks/use-notes";
+import { TIMING } from "@@/constants";
 import { useDialogStore } from "@/stores/dialog-store";
 import { useToast } from "@/utils/toast";
 import { Checkbox } from "./ui/checkbox";
@@ -222,7 +223,7 @@ export function RightSidebar({
       } finally {
         setIsPreviewing(false);
       }
-    }, 300);
+    }, TIMING.EXPORT_PREVIEW_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
   }, [selectedTypes, dateRange]);

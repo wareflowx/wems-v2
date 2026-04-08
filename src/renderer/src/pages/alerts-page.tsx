@@ -1,12 +1,10 @@
 import { AlertTriangle, Bell, ShieldAlert, Sparkles } from "lucide-react";
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
+import { AlertsPageTable } from "@/components/alerts/alerts-page-table";
 import { MetricsSection } from "@/components/ui/metrics-section";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
 import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AlertsPageTable } from "@/components/alerts/alerts-page-table";
 import { useAlerts } from "@/hooks";
 
 interface Alert {

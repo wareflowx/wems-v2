@@ -270,7 +270,6 @@ export function useUpdateDocument() {
     mutationFn: async (input: UpdateDocumentInput) => {
       // For documents, we can't really update much since they are file references
       // This is a placeholder for potential future updates
-      console.log("Update document:", input);
       return input;
     },
 

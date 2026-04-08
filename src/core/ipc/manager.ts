@@ -1,4 +1,5 @@
 import { createORPCClient, onError } from "@orpc/client";
+import { TIMING } from "@@/constants";
 import { RPCLink } from "@orpc/client/message-port";
 import type { RouterClient } from "@orpc/server";
 import type { router } from "./router";
@@ -42,7 +43,6 @@ class IPCManager {
       if (event.data?.type === "orpc-port-ready") {
         const [port] = event.ports;
         if (port) {
-          console.log("[IPC] Port received via postMessage!");
           this._handlePort(port);
         }
       }
@@ -67,8 +67,8 @@ class IPCManager {
    */
   private _pollForReady(): void {
     let attempts = 0;
-    const maxAttempts = 50; // 50 * 100ms = 5 seconds max wait
-    const pollInterval = 100;
+    const maxAttempts = TIMING.IPC_MAX_POLL_ATTEMPTS;
+    const pollInterval = TIMING.IPC_POLL_INTERVAL_MS;
 
     const checkReady = () => {
       if (this._client) {
@@ -96,12 +96,6 @@ class IPCManager {
   }
 
   private _handlePort(port: MessagePort) {
-    console.log("[IPC] Creating ORPC client with port...");
-    console.log("[IPC] port.constructor:", port.constructor?.name);
-    console.log(
-      "[IPC] typeof port.addEventListener:",
-      typeof port.addEventListener
-    );
 
     try {
       // Best Practice: Add client-side error interceptors

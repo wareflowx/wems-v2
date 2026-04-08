@@ -199,14 +199,12 @@ export async function deleteWorkLocation(data: { id: number }) {
 
 // Employees
 export async function getEmployees() {
-  console.log("[ACTION] getEmployees: calling ORPC client");
   const client = getClient();
   if (!client) {
     console.warn("[ACTION] getEmployees: client not ready");
     return [];
   }
   const result = await client.database.getEmployees();
-  console.log("[ACTION] getEmployees: got result:", result.length);
   return result;
 }
 

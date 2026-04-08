@@ -2,6 +2,8 @@
  * Date utility functions for export functionality
  */
 
+import { LIMITS } from "@@/constants";
+
 export type DateRange = "today" | "7days" | "30days" | "all";
 
 export interface DateRangeParams {
@@ -50,6 +52,6 @@ export const getExportDir = (): string => {
  * Generate export filename
  */
 export const generateExportFilename = (format: string): string => {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, LIMITS.ISO_TIMESTAMP_LENGTH);
   return `export-${timestamp}.${format}`;
 };

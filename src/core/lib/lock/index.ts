@@ -1,10 +1,10 @@
+import { getDataDir } from "@@/db";
 import { lockEvents } from "@@/lib/lock-events";
 import { configure, logger } from "@@/lib/logger";
 import { isSuccess, Result } from "@@/lib/result";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { getDataDir } from "@@/db";
 import {
   LockAlreadyExistsError,
   LockFileError,

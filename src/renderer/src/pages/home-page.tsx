@@ -1,10 +1,10 @@
 import { Sparkles } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { PageHeaderCard } from "@/components/ui/page-header-card";
-import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
 import { Homepage } from "@/components/home";
 import { Page } from "@/components/pages";
+import { PageHeaderCard } from "@/components/ui/page-header-card";
+import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
 import { useAlerts, useEmployees } from "@/hooks";
 
 export function HomePage() {
@@ -20,10 +20,10 @@ export function HomePage() {
   // Calculate KPIs dynamically from alerts data
   const kpis = useMemo(() => {
     const criticalAlerts = allAlerts.filter(
-      (a) => a.severity === "critical",
+      (a) => a.severity === "critical"
     ).length;
     const warningAlerts = allAlerts.filter(
-      (a) => a.severity === "warning",
+      (a) => a.severity === "warning"
     ).length;
     const infoAlerts = allAlerts.filter((a) => a.severity === "info").length;
 

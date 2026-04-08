@@ -33,7 +33,10 @@ export type DialogId =
   | "delete-department"
   | "create-contract-type"
   | "edit-contract-type"
-  | "delete-contract-type";
+  | "delete-contract-type"
+  | "create-agency"
+  | "edit-agency"
+  | "delete-agency";
 
 interface DialogData {
   // Employee
@@ -58,6 +61,8 @@ interface DialogData {
   departmentId?: number;
   // Contract Type
   contractTypeId?: number;
+  // Agency
+  agencyId?: number;
 }
 
 interface DialogState {

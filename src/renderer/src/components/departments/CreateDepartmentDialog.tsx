@@ -1,3 +1,4 @@
+import { generateCode } from "@@/lib/utils";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -32,14 +33,6 @@ const COLORS = [
   { name: "Pink", value: "bg-pink-500" },
   { name: "Rose", value: "bg-rose-500" },
 ];
-
-function generateCode(name: string): string {
-  return name
-    .toUpperCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Z0-9]/g, "_");
-}
 
 interface CreateDepartmentDialogProps {
   open?: boolean;

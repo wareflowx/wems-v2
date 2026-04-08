@@ -1,14 +1,12 @@
 import { QueryClient } from "@tanstack/react-query";
 
-// Create QueryClient with development-friendly configuration
+// Create QueryClient with performance-optimized defaults
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes - data considered fresh
-      gcTime: 1000 * 60 * 30, // 30 minutes - cache retention
-      retry: 1, // Retry failed requests once
+      staleTime: 30 * 1000, // 30 seconds - reduce refetches
+      gcTime: 10 * 60 * 1000, // 10 minutes - cache retention
       refetchOnWindowFocus: false, // Don't refetch on window focus
-      refetchOnMount: true, // Refetch on component mount to ensure fresh data
     },
     mutations: {
       retry: 1,

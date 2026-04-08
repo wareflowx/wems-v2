@@ -1,6 +1,6 @@
+import { ensureDataDir, getDataDir } from "@@/db";
 import fs from "node:fs";
 import path from "node:path";
-import { ensureDataDir, getDataDir } from "@@/db";
 
 /**
  * Get the files directory path

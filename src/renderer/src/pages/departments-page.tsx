@@ -1,3 +1,4 @@
+import { generateCode } from "@@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2, Edit, Plus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -356,14 +357,6 @@ const COLORS = [
   { name: "Red", value: "bg-red-500", hex: "#ef4444" },
   { name: "Orange", value: "bg-orange-500", hex: "#f97316" },
 ];
-
-function generateCode(name: string): string {
-  return name
-    .toUpperCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Z0-9]/g, "_");
-}
 
 function EditDepartmentDialog({
   department,

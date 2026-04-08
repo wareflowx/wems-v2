@@ -11,6 +11,7 @@ import { updateAppLanguage } from "@/actions/language";
 import { syncWithLocalTheme } from "@/actions/theme";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UpdateStatusDialog } from "@/components/update-status-dialog";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { router } from "./utils/routes";
 import "./localization/i18n";
 
@@ -37,7 +38,6 @@ window.addEventListener("message", async (event) => {
   }
 });
 
-// Also initialize if ipc was already ready (dev server reload)
 // Run migration BEFORE ipc.init()
 const initApp = async () => {
   if (!initialMigrationDone) {
@@ -70,15 +70,17 @@ export default function App() {
   }, [i18n]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <UpdateStatusDialog />
-        <RouterProvider router={router} />
-      </TooltipProvider>
-      {process.env.NODE_ENV === "development" && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )}
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <UpdateStatusDialog />
+          <RouterProvider router={router} />
+        </TooltipProvider>
+        {process.env.NODE_ENV === "development" && (
+          <ReactQueryDevtools initialIsOpen={false} />
+        )}
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -86,7 +88,7 @@ const container = document.getElementById("app");
 if (!container) {
   throw new Error('Root element with id "app" not found');
 }
-const root = createRoot(container);
+const root = createRoot(container!);
 root.render(
   <React.StrictMode>
     <App />

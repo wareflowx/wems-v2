@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { app, BrowserWindow } from "electron";
 import { ipcMain, MessageChannelMain } from "electron/main";
 // import { UpdateSourceType, updateElectronApp } from "update-electron-app"; // Disabled for faster startup
-import { IPC_CHANNELS } from "../core/constants";
+import { IPC_CHANNELS, TIMING, WINDOW } from "../core/constants";
 import {
   getDb,
   isWriteMode,
@@ -31,8 +31,10 @@ function createWindow() {
   // electron-vite 5.0: preload is in out/preload/, main is in out/main/
   const preload = path.join(__dirname, "../preload/index.js");
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: WINDOW.MIN_WIDTH,
+    height: WINDOW.MIN_HEIGHT,
+    show: false, // Don't show until ready
+    backgroundColor: "#1a1a2e", // Match app's dark background
     webPreferences: {
       devTools: inDevelopment,
       contextIsolation: true,
@@ -44,6 +46,11 @@ function createWindow() {
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "hidden",
     trafficLightPosition:
       process.platform === "darwin" ? { x: 5, y: 5 } : undefined,
+  });
+
+  // Show window when ready to prevent visual flash
+  mainWindow.once("ready-to-show", () => {
+    mainWindow?.show();
   });
   ipcContext.setMainWindow(mainWindow);
 
@@ -75,7 +82,9 @@ function checkForUpdates() {
   // Update check disabled for faster startup
   // TODO: Re-enable after optimizing update check
   console.log("[MAIN] Update check disabled");
-  mainWindow?.webContents.send(IPC_CHANNELS.UPDATE_STATUS, { status: "up-to-date" });
+  mainWindow?.webContents.send(IPC_CHANNELS.UPDATE_STATUS, {
+    status: "up-to-date",
+  });
 
   // Original code (disabled):
   // mainWindow?.webContents.send(IPC_CHANNELS.UPDATE_STATUS, { status: "checking" });
@@ -223,7 +232,7 @@ app.whenReady().then(async () => {
     logger.info("Starting lock watcher...", "main");
     startLockWatcher((writeMode) => {
       mainWindow?.webContents.send(IPC_CHANNELS.LOCK_STATUS_CHANGED, writeMode);
-    }, 2000);
+    }, TIMING.LOCK_WATCHER_INTERVAL_MS);
     logger.info("Lock watcher started", "main");
 
     await installExtensions();

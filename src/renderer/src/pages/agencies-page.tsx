@@ -1,116 +1,70 @@
+import { queryKeys } from "@@/lib/query-keys";
 import { useQueryClient } from "@tanstack/react-query";
-import { Building2, Edit, Plus, Search, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Building2 } from "lucide-react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  AgencyMetrics,
+  AgencySearchBar,
+  AgencyTable,
+} from "@/components/agencies";
 import { AnimatedEmpty } from "@/components/ui/animated-empty";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { ErrorDisplay } from "@/components/ui/error-display";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { MetricsSection } from "@/components/ui/metrics-section";
 import { PageHeaderCard } from "@/components/ui/page-header-card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { PageHeaderSkeleton } from "@/components/ui/table-skeleton";
-import {
-  useAgencies,
-  useCreateAgency,
-  useDeleteAgency,
-  useUpdateAgency,
-} from "@/hooks";
+import { useAgencies, useFilteredData, useMetrics } from "@/hooks";
+import type { Agency } from "@/hooks/use-agencies";
+import { useDialogStore } from "@/stores/dialog-store";
 
 export function AgenciesPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingAgency, setEditingAgency] = useState<any>(null);
-  const [deletingAgency, setDeletingAgency] = useState<any>(null);
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all");
 
-  // Use TanStack Query hooks
+  // Fetch agencies
   const { data: agencies = [], isLoading, error } = useAgencies();
-  const createAgency = useCreateAgency();
-  const updateAgency = useUpdateAgency();
-  const deleteAgency = useDeleteAgency();
 
-  // KPIs - calculated dynamically
-  const kpis = useMemo(
-    () => ({
-      totalAgencies: agencies.length,
-      activeAgencies: agencies.filter((a) => a.isActive).length,
-      inactiveAgencies: agencies.filter((a) => !a.isActive).length,
-    }),
-    [agencies]
-  );
+  // Use useMetrics for KPIs
+  const metrics = useMetrics(agencies, {
+    totalAgencies: { value: (items) => items.length },
+    activeAgencies: {
+      value: (items) => items.filter((a) => a.isActive).length,
+    },
+    inactiveAgencies: {
+      value: (items) => items.filter((a) => !a.isActive).length,
+    },
+  });
 
-  // Filter agencies
-  const filteredAgencies = useMemo(() => {
-    return agencies.filter((agency) => {
-      const matchesSearch =
-        search === "" ||
-        agency.name.toLowerCase().includes(search.toLowerCase()) ||
-        (agency.code &&
-          agency.code.toLowerCase().includes(search.toLowerCase()));
+  // Use useFilteredData for filtering
+  const filteredAgencies = useFilteredData(agencies, {
+    search,
+    searchFields: ["name", "code"] as (keyof Agency)[],
+    filters: {
+      isActive:
+        statusFilter === "all"
+          ? undefined
+          : statusFilter === "active"
+            ? true
+            : false,
+    } as Partial<Record<keyof Agency, boolean | undefined>>,
+  });
 
-      const matchesStatus =
-        statusFilter === "all" ||
-        (statusFilter === "active" && agency.isActive) ||
-        (statusFilter === "inactive" && !agency.isActive);
+  // Handler to open edit dialog with agency data
+  // Using store.getState() directly to avoid dependency on useDialogState's
+  // returned object which changes reference on every store update
+  const handleEditClick = useCallback((agency: Agency) => {
+    useDialogStore.getState().openDialog("edit-agency", { ...agency });
+  }, []);
 
-      return matchesSearch && matchesStatus;
-    });
-  }, [agencies, search, statusFilter]);
-
-  const _handleCreateAgency = (data: any) => {
-    createAgency.mutate(data, {
-      onSuccess: () => {
-        setIsCreateDialogOpen(false);
-      },
-    });
-  };
-
-  const handleUpdateAgency = (data: any) => {
-    updateAgency.mutate(
-      { id: editingAgency.id, ...data },
-      {
-        onSuccess: () => {
-          setEditingAgency(null);
-        },
-      }
-    );
-  };
-
-  const handleDeleteAgency = () => {
-    if (deletingAgency) {
-      deleteAgency.mutate(deletingAgency.id, {
-        onSuccess: () => {
-          setDeletingAgency(null);
-        },
-      });
-    }
-  };
+  // Handler to open delete dialog with agency data
+  const handleDeleteClick = useCallback((agency: Agency) => {
+    useDialogStore
+      .getState()
+      .openDialog("delete-agency", { id: agency.id, name: agency.name });
+  }, []);
 
   if (isLoading) {
     return (
@@ -129,7 +83,9 @@ export function AgenciesPage() {
             "Make sure the application is running correctly. If the problem persists, please restart."
           )}
           onRetry={() =>
-            queryClient.invalidateQueries({ queryKey: ["agencies"] })
+            queryClient.invalidateQueries({
+              queryKey: queryKeys.agencies.lists(),
+            })
           }
           title={t("agencies.errorLoading", "Failed to load agencies")}
         />
@@ -138,375 +94,83 @@ export function AgenciesPage() {
   }
 
   return (
-    <>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
-        <div className="min-h-full space-y-3">
-          {/* Header */}
-          <PageHeaderCard
-            description={t("agencies.description")}
-            icon={<Building2 className="h-4 w-4 text-gray-600" />}
-            title={t("agencies.title")}
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-6">
+      <div className="min-h-full space-y-3">
+        {/* Header */}
+        <PageHeaderCard
+          description={t("agencies.description")}
+          icon={<Building2 className="h-4 w-4 text-gray-600" />}
+          title={t("agencies.title")}
+        />
+
+        {/* Key Metrics */}
+        <AgencyMetrics
+          icon={<Building2 className="h-4 w-4" />}
+          labels={{
+            totalAgencies: t("agencies.totalAgencies"),
+            active: t("agencies.active"),
+            inactive: t("agencies.inactive"),
+            ofTotal: t("common.ofTotal"),
+          }}
+          metrics={metrics}
+        />
+
+        <div className="flex flex-col gap-2">
+          {/* Search and Filters */}
+          <AgencySearchBar
+            onAddClick={() =>
+              useDialogStore.getState().openDialog("create-agency")
+            }
+            onSearchChange={setSearch}
+            onStatusFilterChange={setStatusFilter}
+            search={search}
+            statusFilter={statusFilter}
           />
 
-          {/* Key Metrics */}
-          <MetricsSection
-            className="lg:grid-cols-3"
-            kpis={[
-              {
-                title: t("agencies.totalAgencies"),
-                value: kpis.totalAgencies,
-                description: `${kpis.activeAgencies} ${t("agencies.active")}`,
-                icon: <Building2 className="h-4 w-4" />,
-              },
-              {
-                title: t("agencies.active"),
-                value: kpis.activeAgencies,
-                description: `${((kpis.activeAgencies / kpis.totalAgencies) * 100 || 0).toFixed(0)}${t("common.ofTotal")}`,
-                icon: <Building2 className="h-4 w-4" />,
-                iconColor: "text-green-500",
-              },
-              {
-                title: t("agencies.inactive"),
-                value: kpis.inactiveAgencies,
-                description: `${((kpis.inactiveAgencies / kpis.totalAgencies) * 100 || 0).toFixed(0)}${t("common.ofTotal")}`,
-                icon: <Building2 className="h-4 w-4" />,
-                iconColor: "text-gray-500",
-              },
-            ]}
-          />
-
-          <div className="flex flex-col gap-2">
-            {/* Search and Filters */}
-            <div className="flex flex-wrap gap-2">
-              <div className="relative min-w-[200px] flex-1">
-                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  className="pl-9"
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={t("agencies.search")}
-                  value={search}
-                />
-              </div>
-              <Select onValueChange={setStatusFilter} value={statusFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder={t("agencies.status")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    {t("agencies.allStatuses")}
-                  </SelectItem>
-                  <SelectItem value="active">{t("agencies.active")}</SelectItem>
-                  <SelectItem value="inactive">
-                    {t("agencies.inactive")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                className="ml-auto gap-2"
-                onClick={() => setIsCreateDialogOpen(true)}
-              >
-                <Plus className="h-4 w-4" />
-                {t("agencies.addAgency")}
-              </Button>
-            </div>
-
-            {/* Table */}
-            {filteredAgencies.length === 0 ? (
-              <div className="flex w-full items-center justify-center">
+          {/* Table */}
+          {filteredAgencies.length === 0 ? (
+            <div className="flex w-full items-center justify-center">
+              {agencies.length === 0 ? (
                 <AnimatedEmpty
                   action={{
-                    label: t("agencies.addAgency", "Add Agency"),
-                    onClick: () => setIsCreateDialogOpen(true),
+                    label: t("agencies.addAgency"),
+                    onClick: () =>
+                      useDialogStore.getState().openDialog("create-agency"),
                   }}
                   description={t(
                     "agencies.noAgenciesDescription",
-                    "Create your first agency to get started"
+                    "Creez votre premiere agence pour commencer"
                   )}
                   icons={[Building2, Building2, Building2]}
-                  title={t("agencies.noAgencies", "No agencies yet")}
+                  title={t("agencies.noAgencies", "Aucune agence")}
                 />
-              </div>
-            ) : (
-              <div className="overflow-x-auto rounded-lg border bg-card">
-                <Table className="w-full">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="px-4">
-                        {t("agencies.code")}
-                      </TableHead>
-                      <TableHead className="px-4">
-                        {t("agencies.name")}
-                      </TableHead>
-                      <TableHead className="px-4">
-                        {t("agencies.status")}
-                      </TableHead>
-                      <TableHead className="px-4">
-                        {t("agencies.createdAt")}
-                      </TableHead>
-                      <TableHead className="px-4">
-                        {t("agencies.updatedAt")}
-                      </TableHead>
-                      <TableHead className="px-4 text-right">
-                        {t("agencies.actions")}
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAgencies.map((agency) => (
-                      <TableRow className="hover:bg-muted/50" key={agency.id}>
-                        <TableCell className="px-4">
-                          {agency.code ? (
-                            <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 font-medium text-xs">
-                              {agency.code}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="max-w-[300px] truncate px-4 font-medium">
-                          {agency.name}
-                        </TableCell>
-                        <TableCell className="px-4">
-                          {agency.isActive ? (
-                            <span className="inline-flex items-center rounded-md border border-green-500/25 bg-green-500/15 px-2 py-0.5 font-medium text-green-600 text-xs">
-                              {t("agencies.active")}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center rounded-md border border-gray-500/25 bg-gray-500/15 px-2 py-0.5 font-medium text-gray-600 text-xs">
-                              {t("agencies.inactive")}
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="px-4">
-                          <span className="text-muted-foreground text-xs underline">
-                            {agency.createdAt
-                              ? new Date(agency.createdAt).toLocaleDateString()
-                              : "-"}
-                          </span>
-                        </TableCell>
-                        <TableCell className="px-4">
-                          <span className="text-muted-foreground text-xs underline">
-                            {agency.updatedAt
-                              ? new Date(agency.updatedAt).toLocaleDateString()
-                              : "-"}
-                          </span>
-                        </TableCell>
-                        <TableCell className="px-4">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              onClick={() => setEditingAgency(agency)}
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              onClick={() => setDeletingAgency(agency)}
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </div>
+              ) : (
+                <AnimatedEmpty
+                  action={{
+                    label: t("agencies.clearFilters", "Effacer les filtres"),
+                    onClick: () => {
+                      setSearch("");
+                      setStatusFilter("all");
+                    },
+                  }}
+                  description={t(
+                    "agencies.noAgenciesFoundDescription",
+                    "Aucune agence ne correspond a vos filtres actuels"
+                  )}
+                  icons={[Building2, Building2, Building2]}
+                  title={t("agencies.noAgenciesFound", "Aucune agence trouvee")}
+                />
+              )}
+            </div>
+          ) : (
+            <AgencyTable
+              agencies={filteredAgencies}
+              onDelete={handleDeleteClick}
+              onEdit={handleEditClick}
+            />
+          )}
         </div>
       </div>
-
-      {/* Create Dialog */}
-      {isCreateDialogOpen && (
-        <CreateAgencyDialog onClose={() => setIsCreateDialogOpen(false)} />
-      )}
-
-      {/* Edit Dialog */}
-      {editingAgency && (
-        <EditAgencyDialog
-          agency={editingAgency}
-          onClose={() => setEditingAgency(null)}
-          onSave={handleUpdateAgency}
-        />
-      )}
-
-      {/* Delete Dialog */}
-      {deletingAgency && (
-        <DeleteAgencyDialog
-          agency={deletingAgency}
-          onClose={() => setDeletingAgency(null)}
-          onConfirm={handleDeleteAgency}
-        />
-      )}
-    </>
-  );
-}
-
-function generateCode(name: string): string {
-  return name
-    .toUpperCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Z0-9]/g, "_");
-}
-
-function CreateAgencyDialog({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation();
-  const createAgency = useCreateAgency();
-  const [name, setName] = useState("");
-  const [isActive, setIsActive] = useState(true);
-
-  const handleSubmit = () => {
-    createAgency.mutate(
-      { name, code: generateCode(name), isActive },
-      { onSuccess: onClose }
-    );
-  };
-
-  return (
-    <Dialog onOpenChange={onClose} open>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("agencies.addAgency")}</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">{t("agencies.name")}</Label>
-            <Input
-              id="name"
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t("agencies.namePlaceholder")}
-              value={name}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              checked={isActive}
-              id="isActive"
-              onChange={(e) => setIsActive(e.target.checked)}
-              type="checkbox"
-            />
-            <Label htmlFor="isActive">{t("agencies.active")}</Label>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button onClick={onClose} variant="outline">
-            {t("common.cancel")}
-          </Button>
-          <Button disabled={!name} onClick={handleSubmit}>
-            {t("common.save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function EditAgencyDialog({
-  agency,
-  onClose,
-  onSave,
-}: {
-  agency: any;
-  onClose: () => void;
-  onSave: (data: any) => void;
-}) {
-  const { t } = useTranslation();
-  const updateAgency = useUpdateAgency();
-  const [name, setName] = useState(agency.name);
-  const [code, setCode] = useState(agency.code || "");
-  const [isActive, setIsActive] = useState(agency.isActive);
-
-  const handleSubmit = () => {
-    onSave({ name, code: code || undefined, isActive });
-  };
-
-  return (
-    <Dialog onOpenChange={onClose} open>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("agencies.editAgency")}</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="edit-name">{t("agencies.name")}</Label>
-            <Input
-              id="edit-name"
-              onChange={(e) => setName(e.target.value)}
-              value={name}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="edit-code">{t("agencies.code")}</Label>
-            <Input
-              id="edit-code"
-              onChange={(e) => setCode(e.target.value)}
-              value={code}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              checked={isActive}
-              id="edit-isActive"
-              onChange={(e) => setIsActive(e.target.checked)}
-              type="checkbox"
-            />
-            <Label htmlFor="edit-isActive">{t("agencies.active")}</Label>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button onClick={onClose} variant="outline">
-            {t("common.cancel")}
-          </Button>
-          <Button disabled={!name} onClick={handleSubmit}>
-            {t("common.save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function DeleteAgencyDialog({
-  agency,
-  onClose,
-  onConfirm,
-}: {
-  agency: any;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  const { t } = useTranslation();
-  const deleteAgency = useDeleteAgency();
-  const isDeleting = deleteAgency.isPending;
-
-  return (
-    <Dialog onOpenChange={onClose} open>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("agencies.deleteAgency")}</DialogTitle>
-          <DialogDescription>
-            {t("agencies.deleteAgencyMessage", {
-              name: agency.name,
-            })}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button onClick={onClose} variant="outline">
-            {t("common.cancel")}
-          </Button>
-          <Button
-            disabled={isDeleting}
-            onClick={onConfirm}
-            variant="destructive"
-          >
-            {isDeleting ? t("common.deleting") : t("common.delete")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </div>
   );
 }

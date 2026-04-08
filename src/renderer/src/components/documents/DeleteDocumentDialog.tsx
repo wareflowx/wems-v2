@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDeleteDocument } from "@/hooks/use-documents";
 
 interface Document {
   id: string;
@@ -39,6 +40,7 @@ export function DeleteDocumentDialog({
 }: DeleteDocumentDialogProps) {
   const { t } = useTranslation();
   const [confirmationText, setConfirmationText] = useState<string>("");
+  const deleteDocument = useDeleteDocument();
 
   // Reset confirmation text when dialog opens/closes
   useEffect(() => {
@@ -48,10 +50,19 @@ export function DeleteDocumentDialog({
   }, [open]);
 
   const handleSubmit = () => {
-    // TODO: Implement backend logic
-    console.log("Deleting document:", { id: document?.id });
-    onConfirm?.();
-    onOpenChange?.(false);
+    if (!document?.id) {
+      return;
+    }
+    deleteDocument.mutate(document.id, {
+      onSuccess: () => {
+        onConfirm?.();
+        onOpenChange?.(false);
+      },
+      onError: () => {
+        // Error toast is handled by the hook
+        onOpenChange?.(false);
+      },
+    });
   };
 
   const isFormValid = document && confirmationText === document.name;
@@ -127,7 +138,7 @@ export function DeleteDocumentDialog({
           </Button>
           <Button
             className="flex-1"
-            disabled={!isFormValid}
+            disabled={!isFormValid || deleteDocument.isPending}
             onClick={handleSubmit}
             type="button"
             variant="destructive"

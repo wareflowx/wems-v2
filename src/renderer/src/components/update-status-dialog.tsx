@@ -1,3 +1,4 @@
+import { TIMING } from "@@/constants";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,10 +9,18 @@ export function useUpdateStatus() {
 
   useEffect(() => {
     // Access the electron API exposed through preload
-    const electron = (window as Window & { electron?: { onUpdateStatusChanged?: (callback: (status: string) => void) => void } }).electron;
+    const electron = (
+      window as Window & {
+        electron?: {
+          onUpdateStatusChanged?: (callback: (status: string) => void) => void;
+        };
+      }
+    ).electron;
 
     if (!electron?.onUpdateStatusChanged) {
-      console.warn("[UpdateStatus] electron.onUpdateStatusChanged not available");
+      console.warn(
+        "[UpdateStatus] electron.onUpdateStatusChanged not available"
+      );
       return;
     }
 
@@ -22,7 +31,7 @@ export function useUpdateStatus() {
       if (status === "up-to-date" || status === "error") {
         setTimeout(() => {
           setUpdateStatus(null);
-        }, 3000);
+        }, TIMING.UPDATE_STATUS_DISPLAY_MS);
       }
     };
 
@@ -46,7 +55,7 @@ export function UpdateStatusDialog() {
         {updateStatus === "checking" && (
           <>
             <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-            <p className="text-lg font-medium">
+            <p className="font-medium text-lg">
               {t("app.updating", "Checking for updates...")}
             </p>
           </>
@@ -54,7 +63,7 @@ export function UpdateStatusDialog() {
         {updateStatus === "up-to-date" && (
           <>
             <div className="text-4xl">✓</div>
-            <p className="text-lg font-medium">
+            <p className="font-medium text-lg">
               {t("app.upToDate", "You're up to date!")}
             </p>
           </>
@@ -62,7 +71,7 @@ export function UpdateStatusDialog() {
         {updateStatus === "error" && (
           <>
             <div className="text-4xl">⚠</div>
-            <p className="text-lg font-medium">
+            <p className="font-medium text-lg">
               {t("app.updateError", "Update check failed")}
             </p>
           </>

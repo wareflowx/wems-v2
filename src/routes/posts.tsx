@@ -1,10 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PostsPage } from "@/pages/posts-page";
+import { createFileRoute } from '@tanstack/react-router';
+import { lazy } from 'react';
 
-export interface Route {
-  path: "/posts";
-}
-
-export const Route = createFileRoute("/posts")({
-  component: PostsPage,
+export const Route = createFileRoute('/posts')({
+  component: lazy(() => import('@/pages/posts-page').then(m => ({ default: m.PostsPage }))),
 });

@@ -1,5 +1,6 @@
 import { queryKeys } from "@@/lib/query-keys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import * as db from "@/actions/database";
 import { useToast } from "@/utils/toast";
 import { useORPCReady } from "./use-orpc-ready";
@@ -30,12 +31,25 @@ export function useAgencies() {
 export function useCreateAgency() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (data: { name: string; code?: string; isActive?: boolean }) =>
       db.createAgency(data),
 
     onMutate: async (newAgency) => {
+      // Check for duplicate name (case-insensitive)
+      const agencies =
+        queryClient.getQueryData<Agency[]>(queryKeys.agencies.lists()) ?? [];
+      const duplicate = agencies.find(
+        (a) => a.name.toLowerCase() === newAgency.name.toLowerCase()
+      );
+      if (duplicate) {
+        throw new Error(
+          t("agencies.duplicateName", "Une agence avec ce nom existe déjà")
+        );
+      }
+
       await queryClient.cancelQueries({
         queryKey: queryKeys.agencies.lists(),
       });
@@ -75,15 +89,24 @@ export function useCreateAgency() {
       }
 
       toast({
-        title: "Échec de la création de l'agence",
+        title: t("agencies.createError", "Échec de la création de l'agence"),
         description:
-          err instanceof Error ? err.message : "Une erreur est survenue",
+          err instanceof Error
+            ? err.message
+            : t("common.errorOccurred", "Une erreur est survenue"),
         variant: "destructive",
       });
     },
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.agencies.lists() });
+      toast({
+        title: t("agencies.createSuccess", "Agence créée"),
+        description: t(
+          "agencies.createSuccessDesc",
+          "L'agence a été créée avec succès"
+        ),
+      });
     },
   });
 }
@@ -92,6 +115,7 @@ export function useCreateAgency() {
 export function useUpdateAgency() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (data: {
@@ -102,6 +126,21 @@ export function useUpdateAgency() {
     }) => db.updateAgency(data),
 
     onMutate: async ({ id, ...updates }) => {
+      // Check for duplicate name if name is being changed (case-insensitive)
+      if (updates.name) {
+        const agencies =
+          queryClient.getQueryData<Agency[]>(queryKeys.agencies.lists()) ?? [];
+        const duplicate = agencies.find(
+          (a) =>
+            a.id !== id && a.name.toLowerCase() === updates.name!.toLowerCase()
+        );
+        if (duplicate) {
+          throw new Error(
+            t("agencies.duplicateName", "Une agence avec ce nom existe déjà")
+          );
+        }
+      }
+
       await queryClient.cancelQueries({
         queryKey: queryKeys.agencies.lists(),
       });
@@ -133,15 +172,24 @@ export function useUpdateAgency() {
       }
 
       toast({
-        title: "Échec de la mise à jour de l'agence",
+        title: t("agencies.updateError", "Échec de la mise à jour de l'agence"),
         description:
-          err instanceof Error ? err.message : "Une erreur est survenue",
+          err instanceof Error
+            ? err.message
+            : t("common.errorOccurred", "Une erreur est survenue"),
         variant: "destructive",
       });
     },
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.agencies.lists() });
+      toast({
+        title: t("agencies.updateSuccess", "Agence mise à jour"),
+        description: t(
+          "agencies.updateSuccessDesc",
+          "L'agence a été mise à jour avec succès"
+        ),
+      });
     },
   });
 }
@@ -150,6 +198,7 @@ export function useUpdateAgency() {
 export function useDeleteAgency() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (id: number) => db.deleteAgency(id),
@@ -183,15 +232,24 @@ export function useDeleteAgency() {
       }
 
       toast({
-        title: "Échec de la suppression de l'agence",
+        title: t("agencies.deleteError", "Échec de la suppression de l'agence"),
         description:
-          err instanceof Error ? err.message : "Une erreur est survenue",
+          err instanceof Error
+            ? err.message
+            : t("common.errorOccurred", "Une erreur est survenue"),
         variant: "destructive",
       });
     },
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.agencies.lists() });
+      toast({
+        title: t("agencies.deleteSuccess", "Agence supprimée"),
+        description: t(
+          "agencies.deleteSuccessDesc",
+          "L'agence a été supprimée avec succès"
+        ),
+      });
     },
   });
 }

@@ -1,5 +1,11 @@
 "use client";
 
+// Agency dialogs
+import {
+  CreateAgencyDialog,
+  DeleteAgencyDialog,
+  EditAgencyDialog,
+} from "@/components/agencies";
 import { AddCacesDialog } from "@/components/caces/AddCacesDialog";
 import { CreateContractTypeDialog } from "@/components/contract-types/CreateContractTypeDialog";
 import { CreateContractDialog } from "@/components/contracts/CreateContractDialog";
@@ -148,6 +154,15 @@ export function DialogManager() {
 
     case "create-contract-type":
       return <CreateContractTypeDialog onOpenChange={handleOpenChange} open />;
+
+    case "create-agency":
+      return <CreateAgencyDialog />;
+
+    case "edit-agency":
+      return <EditAgencyDialog />;
+
+    case "delete-agency":
+      return <DeleteAgencyDialog />;
 
     default:
       return null;

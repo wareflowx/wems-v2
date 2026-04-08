@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDeleteMedicalVisit } from "@/hooks/use-medical-visits";
 
 interface MedicalVisit {
   id: number;
@@ -39,6 +40,7 @@ export function DeleteMedicalVisitDialog({
 }: DeleteMedicalVisitDialogProps) {
   const { t } = useTranslation();
   const [confirmationText, setConfirmationText] = useState<string>("");
+  const deleteMedicalVisit = useDeleteMedicalVisit();
 
   // Reset confirmation text when dialog opens/closes
   useEffect(() => {
@@ -48,10 +50,19 @@ export function DeleteMedicalVisitDialog({
   }, [open]);
 
   const handleSubmit = () => {
-    // TODO: Implement backend logic
-    console.log("Deleting medical visit:", { id: visit?.id });
-    onConfirm?.();
-    onOpenChange?.(false);
+    if (!visit?.id) {
+      return;
+    }
+    deleteMedicalVisit.mutate(visit.id, {
+      onSuccess: () => {
+        onConfirm?.();
+        onOpenChange?.(false);
+      },
+      onError: () => {
+        // Error toast is handled by the hook
+        onOpenChange?.(false);
+      },
+    });
   };
 
   const isFormValid = visit && confirmationText === visit.employee;
@@ -127,7 +138,7 @@ export function DeleteMedicalVisitDialog({
           </Button>
           <Button
             className="flex-1"
-            disabled={!isFormValid}
+            disabled={!isFormValid || deleteMedicalVisit.isPending}
             onClick={handleSubmit}
             type="button"
             variant="destructive"

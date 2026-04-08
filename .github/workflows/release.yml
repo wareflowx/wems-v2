@@ -43,6 +43,9 @@ jobs:
       - name: Rebuild native modules
         run: npm run rebuild
 
+      - name: Clean dist folder
+        run: Remove-Item -Recurse -Force dist -ErrorAction SilentlyContinue
+
       - name: Build application
         run: npm run build
 

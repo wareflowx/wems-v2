@@ -33,6 +33,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: WINDOW.MIN_WIDTH,
     height: WINDOW.MIN_HEIGHT,
+    show: false, // Don't show until ready
+    backgroundColor: "#1a1a2e", // Match app's dark background
     webPreferences: {
       devTools: inDevelopment,
       contextIsolation: true,
@@ -44,6 +46,11 @@ function createWindow() {
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "hidden",
     trafficLightPosition:
       process.platform === "darwin" ? { x: 5, y: 5 } : undefined,
+  });
+
+  // Show window when ready to prevent visual flash
+  mainWindow.once("ready-to-show", () => {
+    mainWindow?.show();
   });
   ipcContext.setMainWindow(mainWindow);
 

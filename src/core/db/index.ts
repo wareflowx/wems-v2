@@ -144,8 +144,11 @@ export async function getDb(canWrite = true) {
         : new Database(getDbPath(), { readonly: true });
       logToFile("Database connection created");
 
-      // Enable WAL mode for better concurrency
-      sqlite.pragma("journal_mode = WAL");
+      // Enable WAL mode for better concurrency (only if not already WAL)
+      const currentMode = sqlite.pragma("journal_mode", { simple: true });
+      if (currentMode !== "wal") {
+        sqlite.pragma("journal_mode = WAL");
+      }
 
       // Run migrations (only in write mode)
       await runMigrations(sqlite, canWrite);

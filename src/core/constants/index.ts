@@ -29,7 +29,7 @@ export const PAGINATION = {
 // Timeouts and intervals (in milliseconds)
 export const TIMING = {
   // Lock watcher poll interval
-  LOCK_WATCHER_INTERVAL_MS: 2000,
+  LOCK_WATCHER_INTERVAL_MS: 5000, // 5 seconds - reduced from 2s for better performance
   // IPC connection poll interval
   IPC_POLL_INTERVAL_MS: 100,
   // IPC max poll attempts before timeout

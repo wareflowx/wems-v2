@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ContractTypesPage } from "@/pages/contract-types-page";
+import { createFileRoute } from '@tanstack/react-router';
+import { lazy } from 'react';
 
-export const Route = createFileRoute("/contract-types")({
-  component: ContractTypesPage,
+export const Route = createFileRoute('/contract-types')({
+  component: lazy(() => import('@/pages/contract-types-page').then(m => ({ default: m.ContractTypesPage }))),
 });

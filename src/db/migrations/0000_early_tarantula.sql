@@ -10,6 +10,8 @@ CREATE TABLE `attachments` (
 	`file_path` text NOT NULL,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`deleted_at` text,
+	`deleted_by` text,
 	FOREIGN KEY (`employee_id`) REFERENCES `employees`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -22,6 +24,8 @@ CREATE TABLE `caces` (
 	`attachment_id` text,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`deleted_at` text,
+	`deleted_by` text,
 	FOREIGN KEY (`employee_id`) REFERENCES `employees`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`attachment_id`) REFERENCES `attachments`(`id`) ON UPDATE no action ON DELETE set null
 );
@@ -33,9 +37,13 @@ CREATE TABLE `contracts` (
 	`start_date` text NOT NULL,
 	`end_date` text,
 	`is_active` integer DEFAULT true NOT NULL,
+	`agency_id` integer,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	FOREIGN KEY (`employee_id`) REFERENCES `employees`(`id`) ON UPDATE no action ON DELETE cascade
+	`deleted_at` text,
+	`deleted_by` text,
+	FOREIGN KEY (`employee_id`) REFERENCES `employees`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`agency_id`) REFERENCES `agencies`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE TABLE `contract_types` (
@@ -45,7 +53,9 @@ CREATE TABLE `contract_types` (
 	`color` text NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`deleted_at` text,
+	`deleted_by` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `contract_types_code_unique` ON `contract_types` (`code`);--> statement-breakpoint
@@ -56,7 +66,9 @@ CREATE TABLE `departments` (
 	`color` text NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`deleted_at` text,
+	`deleted_by` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `departments_code_unique` ON `departments` (`code`);--> statement-breakpoint
@@ -68,14 +80,18 @@ CREATE TABLE `employees` (
 	`phone` text,
 	`position_id` integer,
 	`work_location_id` integer,
+	`agency_id` integer,
 	`department` text,
 	`status` text DEFAULT 'active' NOT NULL,
 	`hire_date` text NOT NULL,
 	`termination_date` text,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`deleted_at` text,
+	`deleted_by` text,
 	FOREIGN KEY (`position_id`) REFERENCES `positions`(`id`) ON UPDATE no action ON DELETE set null,
-	FOREIGN KEY (`work_location_id`) REFERENCES `work_locations`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`work_location_id`) REFERENCES `work_locations`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`agency_id`) REFERENCES `agencies`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `employees_email_unique` ON `employees` (`email`);--> statement-breakpoint
@@ -90,6 +106,8 @@ CREATE TABLE `medical_visits` (
 	`attachment_id` text,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`deleted_at` text,
+	`deleted_by` text,
 	FOREIGN KEY (`employee_id`) REFERENCES `employees`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`attachment_id`) REFERENCES `attachments`(`id`) ON UPDATE no action ON DELETE set null
 );
@@ -101,14 +119,20 @@ CREATE TABLE `positions` (
 	`color` text NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`deleted_at` text,
+	`deleted_by` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `positions_code_unique` ON `positions` (`code`);--> statement-breakpoint
 CREATE TABLE `posts` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`title` text NOT NULL,
-	`content` text NOT NULL
+	`content` text NOT NULL,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`deleted_at` text,
+	`deleted_by` text
 );
 --> statement-breakpoint
 CREATE TABLE `work_locations` (
@@ -118,7 +142,9 @@ CREATE TABLE `work_locations` (
 	`color` text NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`deleted_at` text,
+	`deleted_by` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `work_locations_code_unique` ON `work_locations` (`code`);

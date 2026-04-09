@@ -16,11 +16,12 @@ CREATE TABLE IF NOT EXISTS driving_authorizations (
     FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
     FOREIGN KEY (attachment_id) REFERENCES attachments(id) ON DELETE SET NULL
 );
-
+--> statement-breakpoint
 -- Create indexes for driving_authorizations
 CREATE INDEX IF NOT EXISTS idx_da_employee ON driving_authorizations(employee_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_da_expiration ON driving_authorizations(expiration_date);
-
+--> statement-breakpoint
 -- Create online_trainings table
 CREATE TABLE IF NOT EXISTS online_trainings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,8 +39,10 @@ CREATE TABLE IF NOT EXISTS online_trainings (
     FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
     FOREIGN KEY (attachment_id) REFERENCES attachments(id) ON DELETE SET NULL
 );
-
+--> statement-breakpoint
 -- Create indexes for online_trainings
 CREATE INDEX IF NOT EXISTS idx_ot_employee ON online_trainings(employee_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_ot_expiration ON online_trainings(expiration_date);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_ot_status ON online_trainings(status);

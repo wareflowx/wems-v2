@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS media (
     updated_at TEXT DEFAULT (datetime('now')),
     deleted_at TEXT
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_media_type ON media(type);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_media_deleted_at ON media(deleted_at);

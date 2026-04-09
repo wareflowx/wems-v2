@@ -16,7 +16,7 @@
   "asar": true,
   "asarUnpack": ["node_modules/better-sqlite3/**"],
   "win": {
-    "target": ["nsis"],
+    "target": ["nsis", "portable"],
     "icon": "build/icon.ico"
   },
   "nsis": {

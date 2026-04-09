@@ -53,8 +53,6 @@ const initApp = async () => {
   ipc.init();
 };
 
-initApp();
-
 export default function App() {
   const { i18n } = useTranslation();
   const [migrationsRan, setMigrationsRan] = useState(initialMigrationDone);

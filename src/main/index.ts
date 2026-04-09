@@ -3,7 +3,7 @@ import { Lock } from "@@/lib/lock";
 import { configure, logger } from "@@/lib/logger";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, dialog } from "electron";
 import { ipcMain, MessageChannelMain } from "electron/main";
 // import { UpdateSourceType, updateElectronApp } from "update-electron-app"; // Disabled for faster startup
 import { IPC_CHANNELS, TIMING, WINDOW } from "../core/constants";
@@ -245,6 +245,10 @@ app.whenReady().then(async () => {
   } catch (error) {
     logger.error("Error during app initialization", error as Error, "main");
     console.error("Error during app initialization:", error);
+    dialog.showErrorBox(
+      "Failed to Start WEMS",
+      `Application initialization failed:\n${(error as Error).message}\n\nThe app will now exit.`
+    );
   }
 });
 

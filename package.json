@@ -9,7 +9,7 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
-    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "rebuild": "electron-rebuild -f -w better-sqlite3 --force",
     "start": "npm run rebuild && npm run dev",
     "package": "npm run rebuild && npm run build && electron-builder --win",
     "dist": "npm run rebuild && npm run build && electron-builder",

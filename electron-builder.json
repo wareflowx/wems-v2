@@ -20,6 +20,7 @@
     "icon": "build/icon.ico"
   },
   "nsis": {
+    "differentialPackage": false,
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
     "perMachine": false,

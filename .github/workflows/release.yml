@@ -45,18 +45,34 @@ jobs:
 
       - name: Clean build folders
         run: |
-          Remove-Item -Recurse -Force dist -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force out -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force "$env:LOCALAPPDATA/electron-builder/Cache" -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force "$env:TEMP/electron-builder-win-*" -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force "$env:APPDATA/electron-builder" -ErrorAction SilentlyContinue
+          $failed = $false
+          foreach ($dir in @("dist", "out")) {
+            if (Test-Path $dir) {
+              Write-Output "Removing $dir..."
+              Remove-Item -Recurse -Force $dir -ErrorAction Stop
+              if ($LASTEXITCODE -ne 0) { $failed = $true }
+            }
+          }
+          foreach ($path in @(
+            "$env:LOCALAPPDATA/electron-builder/Cache",
+            "$env:APPDATA/electron-builder"
+          )) {
+            if (Test-Path $path) {
+              Write-Output "Removing $path..."
+              Remove-Item -Recurse -Force $path -ErrorAction Stop
+              if ($LASTEXITCODE -ne 0) { $failed = $true }
+            }
+          }
+          if ($failed) { exit 1 }
 
       - name: Verify clean dist
         run: |
-          Write-Output "Dist folder after clean:"
-          Get-ChildItem -Recurse dist -ErrorAction SilentlyContinue | Format-Table Name,Length -AutoSize
-          Write-Output "Current package.json version:"
-          Get-Content package.json | Select-String '"version"'
+          if ((Test-Path "dist") -and (Get-ChildItem "dist" -File | Where-Object { $_.Name -match '\.(exe|zip)$' })) {
+            Write-Output "ERROR: Stale artifacts found in dist:"
+            Get-ChildItem "dist" -File | Where-Object { $_.Name -match '\.(exe|zip)$' } | Format-Table Name,Length,LastWriteTime
+            exit 1
+          }
+          Write-Output "Dist is clean."
 
       - name: Build application
         run: npm run build

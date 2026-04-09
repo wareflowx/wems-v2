@@ -32,15 +32,14 @@ export function getEffectiveDataDir(): string {
     if (!fs.existsSync(portablePath)) {
       fs.mkdirSync(portablePath, { recursive: true });
     }
-    logger.debug(`Using portable data directory: ${portablePath}`, "db");
+    console.log(`[DB] Using portable data directory: ${portablePath}`);
     return portablePath;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "EACCES") {
       // Fall back to userData on permission error
       const fallbackPath = app.getPath("userData");
-      logger.debug(
-        `Portable path inaccessible (${portablePath}), falling back to: ${fallbackPath}`,
-        "db"
+      console.log(
+        `[DB] Portable path inaccessible (${portablePath}), falling back to: ${fallbackPath}`
       );
       return fallbackPath;
     }
@@ -69,7 +68,7 @@ function logToFile(message: string, error?: unknown): void {
   try {
     const fs = require("node:fs");
     ensureDataDir();
-    const logPath = path.join(getDataDir(), "debug.log");
+    const logPath = path.join(getEffectiveDataDir(), "debug.log");
     const timestamp = new Date().toISOString();
     const logMessage = error
       ? `${timestamp} - ${message}: ${(error as Error).message}\n${(error as Error).stack}\n`

@@ -1,3 +1,4 @@
+import { app } from "electron";
 import { Lock } from "@@/lib/lock";
 import { isSuccess } from "@@/lib/result";
 import path from "node:path";
@@ -19,15 +20,38 @@ export function getDataDir(): string {
   return path.join(baseDir, "data");
 }
 
-export function ensureDataDir(): void {
-  const dataDir = getDataDir();
-  if (!require("node:fs").existsSync(dataDir)) {
-    try {
-      require("node:fs").mkdirSync(dataDir, { recursive: true });
-    } catch (error) {
-      console.error(`Failed to create data directory at ${dataDir}:`, error);
-      throw new Error(`Cannot create data directory: ${dataDir}`);
+/**
+ * Get the effective data directory with fallback logic.
+ * Tries portable path first, falls back to app.getPath("userData") on EACCES error.
+ */
+export function getEffectiveDataDir(): string {
+  const portablePath = getDataDir();
+  try {
+    // Try to create portable path
+    const fs = require("node:fs");
+    if (!fs.existsSync(portablePath)) {
+      fs.mkdirSync(portablePath, { recursive: true });
     }
+    logger.debug(`Using portable data directory: ${portablePath}`, "db");
+    return portablePath;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EACCES") {
+      // Fall back to userData on permission error
+      const fallbackPath = app.getPath("userData");
+      logger.debug(
+        `Portable path inaccessible (${portablePath}), falling back to: ${fallbackPath}`,
+        "db"
+      );
+      return fallbackPath;
+    }
+    throw error;
+  }
+}
+
+export function ensureDataDir(): void {
+  const dataDir = getEffectiveDataDir();
+  if (!require("node:fs").existsSync(dataDir)) {
+    require("node:fs").mkdirSync(dataDir, { recursive: true });
   }
 }
 
@@ -35,10 +59,10 @@ function getDbPath(): string {
   // Default database file name
   const dbFileName = "database.db";
 
-  // Ensure data directory exists
-  ensureDataDir();
+  // Use effective data directory (with fallback logic built-in)
+  const dataDir = getEffectiveDataDir();
 
-  return path.join(getDataDir(), dbFileName);
+  return path.join(dataDir, dbFileName);
 }
 
 function logToFile(message: string, error?: unknown): void {
@@ -134,8 +158,8 @@ export async function getDb(canWrite = true) {
     try {
       logToFile("Initializing database...");
 
-      // Load better-sqlite3 using module.require to avoid asar issues
-      const Database = module.require("better-sqlite3");
+      // Load better-sqlite3 using require to avoid asar issues
+      const Database = require("better-sqlite3");
       logToFile("Loaded better-sqlite3 via module.require");
 
       // Open database in read-only mode if lock exists

@@ -1,4 +1,5 @@
-import { getDataDir } from "@@/db";
+import { app } from "electron";
+import { getEffectiveDataDir, getDataDir } from "@@/db";
 import { lockEvents } from "@@/lib/lock-events";
 import { configure, logger } from "@@/lib/logger";
 import { isSuccess, Result } from "@@/lib/result";
@@ -39,7 +40,8 @@ let lastKnownWriteMode: boolean | null = null;
 let heartbeatIntervalId: ReturnType<typeof setInterval> | null = null;
 
 function ensureDataDir(): void {
-  const dataDir = getDataDir();
+  // Use the same effective data directory as the db module (with fallback logic)
+  const dataDir = getEffectiveDataDir();
   if (!fs.existsSync(dataDir)) {
     try {
       fs.mkdirSync(dataDir, { recursive: true });
@@ -50,7 +52,7 @@ function ensureDataDir(): void {
 }
 
 function getLockFilePath(): string {
-  return path.join(getDataDir(), LockConfig.fileName);
+  return path.join(getEffectiveDataDir(), LockConfig.fileName);
 }
 
 // Configure lock-specific log level

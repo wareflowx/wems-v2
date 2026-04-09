@@ -32,9 +32,19 @@ class IPCManager {
 
     console.log("[IPC] Initializing ORPC...");
 
+    const IPC_INIT_TIMEOUT_MS = 10000;
+
     // Create promise that resolves when client is ready
-    this._readyPromise = new Promise((resolve) => {
+    this._readyPromise = new Promise((resolve, reject) => {
       this._readyResolve = resolve;
+
+      setTimeout(() => {
+        if (!this._client) {
+          const error = new Error("ORPC initialization timed out after 10s");
+          console.error("[IPC]", error.message);
+          reject(error);
+        }
+      }, IPC_INIT_TIMEOUT_MS);
     });
 
     // Listen for port from preload via window.postMessage

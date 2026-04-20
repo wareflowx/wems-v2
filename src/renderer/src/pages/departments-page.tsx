@@ -1,4 +1,5 @@
-import { generateCode } from "@@/lib/utils";
+import { generateCode } from "@core/lib/utils";
+import { isPresetColor } from "@/lib/colors";
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2, Edit, Plus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -264,7 +265,8 @@ export function DepartmentsPage() {
                         <TableCell className="px-4">
                           <span className="inline-flex items-center rounded-md border border-border bg-muted/50 px-2 py-0.5 font-medium text-xs">
                             <span
-                              className={`mr-1.5 h-2 w-2 rounded-full ${department.color}`}
+                              className={`mr-1.5 h-2 w-2 rounded-full ${isPresetColor(department.color) ? department.color : ""}`}
+                              style={!isPresetColor(department.color) ? { backgroundColor: department.color } : undefined}
                             />
                             {getColorName(department.color)}
                           </span>
@@ -310,7 +312,10 @@ export function DepartmentsPage() {
 
       {/* Create Dialog */}
       {isCreateDialogOpen && (
-        <CreateDepartmentDialog onClose={() => setIsCreateDialogOpen(false)} />
+        <CreateDepartmentDialog
+          open={isCreateDialogOpen}
+          onClose={() => setIsCreateDialogOpen(false)}
+        />
       )}
 
       {/* Edit Dialog */}
@@ -345,18 +350,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
-const COLORS = [
-  { name: "Emerald", value: "bg-emerald-500", hex: "#10b981" },
-  { name: "Amber", value: "bg-amber-500", hex: "#f59e0b" },
-  { name: "Indigo", value: "bg-indigo-500", hex: "#6366f1" },
-  { name: "Rose", value: "bg-rose-500", hex: "#f43f5e" },
-  { name: "Cyan", value: "bg-cyan-500", hex: "#06b6d4" },
-  { name: "Violet", value: "bg-violet-500", hex: "#8b5cf6" },
-  { name: "Blue", value: "bg-blue-500", hex: "#3b82f6" },
-  { name: "Green", value: "bg-green-500", hex: "#22c55e" },
-  { name: "Red", value: "bg-red-500", hex: "#ef4444" },
-  { name: "Orange", value: "bg-orange-500", hex: "#f97316" },
-];
+import { DEFAULT_COLOR } from "@/lib/colors";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 function EditDepartmentDialog({
   department,
@@ -371,7 +366,7 @@ function EditDepartmentDialog({
   const updateDepartment = useUpdateDepartment();
   const [name, setName] = useState(department.name);
   const [selectedColor, setSelectedColor] = useState(
-    department.color || COLORS[0].value
+    department.color || DEFAULT_COLOR
   );
   const [isActive, setIsActive] = useState(department.isActive);
 
@@ -396,21 +391,7 @@ function EditDepartmentDialog({
           </div>
           <div className="grid gap-2">
             <Label>Color</Label>
-            <div className="flex flex-wrap gap-2">
-              {COLORS.map((color) => (
-                <button
-                  className={`h-8 w-8 rounded-md ${color.value} ${
-                    selectedColor === color.value
-                      ? "ring-2 ring-gray-900 ring-offset-2"
-                      : ""
-                  } transition-all hover:scale-110`}
-                  key={color.value}
-                  onClick={() => setSelectedColor(color.value)}
-                  title={color.name}
-                  type="button"
-                />
-              ))}
-            </div>
+            <ColorPicker value={selectedColor} onChange={setSelectedColor} />
           </div>
           <div className="flex items-center gap-2">
             <input

@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { isPresetColor } from "@/lib/colors";
 import { Briefcase, Edit, Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -301,7 +302,8 @@ export function PositionsPage() {
                           <TableCell className="px-4">
                             <span className="inline-flex items-center rounded-md border border-border bg-muted/50 px-2 py-0.5 font-medium text-xs">
                               <span
-                                className={`mr-1.5 h-2 w-2 rounded-full ${position.color}`}
+                                className={`mr-1.5 h-2 w-2 rounded-full ${isPresetColor(position.color) ? position.color : ""}`}
+                                style={!isPresetColor(position.color) ? { backgroundColor: position.color } : undefined}
                               />
                               {getColorName(position.color)}
                             </span>

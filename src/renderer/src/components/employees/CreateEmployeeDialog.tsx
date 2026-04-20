@@ -44,6 +44,13 @@ interface Agency {
   code?: string;
 }
 
+interface ContractType {
+  id: number;
+  name: string;
+  code: string;
+  color?: string;
+}
+
 interface CreateEmployeeDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -52,6 +59,7 @@ interface CreateEmployeeDialogProps {
   positions?: Position[];
   workLocations?: WorkLocation[];
   agencies?: Agency[];
+  contractTypes?: ContractType[];
 }
 
 export interface CreateEmployeeData {
@@ -83,6 +91,7 @@ export function CreateEmployeeDialog({
   positions = [],
   workLocations = [],
   agencies = [],
+  contractTypes = [],
 }: CreateEmployeeDialogProps) {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
@@ -448,10 +457,11 @@ export function CreateEmployeeDialog({
                       />
                     </SelectTrigger>
                     <SelectContent position="popper">
-                      <SelectItem value="CDI">CDI</SelectItem>
-                      <SelectItem value="CDD">CDD</SelectItem>
-                      <SelectItem value="Intérim">Intérim</SelectItem>
-                      <SelectItem value="Alternance">Alternance</SelectItem>
+                      {contractTypes.map((ct) => (
+                        <SelectItem key={ct.id} value={ct.code}>
+                          {ct.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

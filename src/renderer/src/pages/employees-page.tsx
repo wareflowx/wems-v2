@@ -15,6 +15,7 @@ import { PageHeaderCard } from "@/components/ui/page-header-card";
 import {
   useAgencies,
   useAllDrivingAuthorizationStatuses,
+  useContractTypes,
   useContracts,
   useCreateEmployee,
   useDeleteEmployee,
@@ -43,6 +44,7 @@ export function EmployeesPage() {
   const { data: contracts = [] } = useContracts();
   const { data: departments = [] } = useDepartments();
   const { data: agencies = [] } = useAgencies();
+  const { data: contractTypesData = [] } = useContractTypes();
   const { data: authorizationStatusesData = [] } =
     useAllDrivingAuthorizationStatuses();
   const createEmployee = useCreateEmployee();
@@ -216,6 +218,7 @@ export function EmployeesPage() {
       </div>
 
       <CreateEmployeeDialog
+        contractTypes={contractTypesData}
         departments={departments}
         onCreate={handleAddEmployee}
         onOpenChange={setIsCreateDialogOpen}

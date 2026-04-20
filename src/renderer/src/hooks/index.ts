@@ -20,6 +20,9 @@ export * from "./use-positions-worklocations";
 export {
   useContractTypes,
   useDepartments,
+  useCreateDepartment,
+  useUpdateDepartment,
+  useDeleteDepartment,
 } from "./use-positions-worklocations";
 // Generic ORPC hooks
 export * from "./use-query";

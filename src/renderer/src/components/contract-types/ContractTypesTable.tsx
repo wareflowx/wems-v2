@@ -1,5 +1,6 @@
 import { Edit, FileText, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { isPresetColor } from "@/lib/colors";
 import { AnimatedEmpty } from "@/components/ui/animated-empty";
 import { Button } from "@/components/ui/button";
 import {
@@ -96,7 +97,8 @@ export function ContractTypesTable({
                   <TableCell className="px-4">
                     <span className="inline-flex items-center rounded-md border border-border bg-muted/50 px-2 py-0.5 font-medium text-xs">
                       <span
-                        className={`mr-1.5 h-2 w-2 rounded-full ${contractType.color}`}
+                        className={`mr-1.5 h-2 w-2 rounded-full ${isPresetColor(contractType.color) ? contractType.color : ""}`}
+                        style={!isPresetColor(contractType.color) ? { backgroundColor: contractType.color } : undefined}
                       />
                       {getColorName(contractType.color)}
                     </span>

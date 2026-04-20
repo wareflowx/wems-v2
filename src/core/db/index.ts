@@ -32,7 +32,6 @@ export function getEffectiveDataDir(): string {
     if (!fs.existsSync(portablePath)) {
       fs.mkdirSync(portablePath, { recursive: true });
     }
-    console.log(`[DB] Using portable data directory: ${portablePath}`);
     return portablePath;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "EACCES") {

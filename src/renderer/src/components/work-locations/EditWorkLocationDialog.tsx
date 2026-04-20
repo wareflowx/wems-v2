@@ -13,18 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const COLORS = [
-  { name: "Cyan", value: "bg-cyan-500" },
-  { name: "Amber", value: "bg-amber-500" },
-  { name: "Violet", value: "bg-violet-500" },
-  { name: "Emerald", value: "bg-emerald-500" },
-  { name: "Rose", value: "bg-rose-500" },
-  { name: "Blue", value: "bg-blue-500" },
-  { name: "Green", value: "bg-green-500" },
-  { name: "Red", value: "bg-red-500" },
-  { name: "Orange", value: "bg-orange-500" },
-  { name: "Indigo", value: "bg-indigo-500" },
-];
+import { DEFAULT_COLOR } from "@/lib/colors";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 interface WorkLocation {
   id: number;
@@ -55,7 +45,7 @@ export function EditWorkLocationDialog({
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
-  const [selectedColor, setSelectedColor] = useState(COLORS[0].value);
+  const [selectedColor, setSelectedColor] = useState(DEFAULT_COLOR);
   const [isActive, setIsActive] = useState(true);
 
   // Auto-generate code when name changes
@@ -130,21 +120,7 @@ export function EditWorkLocationDialog({
             </div>
             <div className="grid gap-2">
               <Label>{t("workLocations.color")}</Label>
-              <div className="flex flex-wrap gap-2">
-                {COLORS.map((color) => (
-                  <button
-                    className={`h-8 w-8 rounded-md ${color.value} ${
-                      selectedColor === color.value
-                        ? "ring-2 ring-gray-900 ring-offset-2"
-                        : ""
-                    } transition-all hover:scale-110`}
-                    key={color.value}
-                    onClick={() => setSelectedColor(color.value)}
-                    title={color.name}
-                    type="button"
-                  />
-                ))}
-              </div>
+              <ColorPicker value={selectedColor} onChange={setSelectedColor} />
             </div>
             <div className="grid gap-2">
               <Label>{t("workLocations.status")}</Label>

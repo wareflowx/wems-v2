@@ -10,41 +10,19 @@ let db: ReturnType<typeof drizzle> | null = null;
 
 const inDevelopment = process.env.NODE_ENV === "development";
 
-export function getDataDir(): string {
-  // Use directory next to executable for portable data storage
-  // In development: use project root for easier debugging
-  const baseDir = inDevelopment
-    ? process.cwd()
-    : path.dirname(process.execPath);
-
-  return path.join(baseDir, "data");
+/**
+ * Get the effective data directory for the database.
+ * Always uses app.getPath("userData") which NSIS guarantees is writable.
+ */
+export function getEffectiveDataDir(): string {
+  return path.join(app.getPath("userData"), "data");
 }
 
 /**
- * Get the effective data directory with fallback logic.
- * Tries portable path first, falls back to app.getPath("userData") on EACCES error.
+ * Get data directory path.
+ * Kept for backward compatibility - now simply returns userData path.
  */
-export function getEffectiveDataDir(): string {
-  const portablePath = getDataDir();
-  try {
-    // Try to create portable path
-    const fs = require("node:fs");
-    if (!fs.existsSync(portablePath)) {
-      fs.mkdirSync(portablePath, { recursive: true });
-    }
-    return portablePath;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "EACCES") {
-      // Fall back to userData on permission error
-      const fallbackPath = app.getPath("userData");
-      console.log(
-        `[DB] Portable path inaccessible (${portablePath}), falling back to: ${fallbackPath}`
-      );
-      return fallbackPath;
-    }
-    throw error;
-  }
-}
+export const getDataDir = getEffectiveDataDir;
 
 export function ensureDataDir(): void {
   const dataDir = getEffectiveDataDir();
@@ -54,12 +32,8 @@ export function ensureDataDir(): void {
 }
 
 function getDbPath(): string {
-  // Default database file name
   const dbFileName = "database.db";
-
-  // Use effective data directory (with fallback logic built-in)
   const dataDir = getEffectiveDataDir();
-
   return path.join(dataDir, dbFileName);
 }
 

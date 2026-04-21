@@ -1,14 +1,16 @@
 # Electron App Launch Freeze - Deep Analysis Synthesis Report
 
 **Date:** 2026-04-09
-**Status:** Phase 3 Complete - **Revised with Shared Network Install Requirement**
+**Status:** Superseded by NSIS-only data storage plan
 **Analysis:** 5 pillars completed, re-evaluated with shared network install constraint
 
 ---
 
-## Critical Context: Shared Network Install Support
+> **NOTE (2026-04-21):** This report described a portable-first with EACCES fallback strategy. The current plan is **NSIS-only** - the data directory is always `app.getPath("userData")` which NSIS guarantees is writable. The portable target has been removed from electron-builder.json. See `src/core/db/index.ts` for the simplified implementation.
 
-**This is a non-negotiable design requirement** confirmed by the source code comment in `src/core/db/index.ts:13`:
+---
+
+**ARCHIVED CONTENT - Describes the old portable-first strategy (now superseded):**
 
 ```typescript
 export function getDataDir(): string {
@@ -22,7 +24,7 @@ export function getDataDir(): string {
 }
 ```
 
-The app must support **two deployment scenarios**:
+The original design attempted to support **two deployment scenarios**:
 
 | Scenario | Install Location | Data Location | `C:\Program Files\` UAC Issue? |
 |----------|-----------------|---------------|-------------------------------|
@@ -30,9 +32,9 @@ The app must support **two deployment scenarios**:
 | **Local Windows Install** | `C:\Program Files\WEMS\` | `C:\Program Files\WEMS\data\` | **Yes — causes freeze** |
 | Development | `C:\Users\dev\...\wems-v2\` | `C:\Users\dev\...\wems-v2\data\` | No (dev dir is writable) |
 
-**Conclusion:** The current design is CORRECT for shared network installs but FAILS completely for local Windows installs. The fix must preserve shared network support while enabling local installs.
+**Conclusion (old):** The current design is CORRECT for shared network installs but FAILS completely for local Windows installs. The fix must preserve shared network support while enabling local installs.
 
-**The fix CANNOT be `app.getPath('userData')`** — that would break shared network installs by giving each user their own local AppData database instead of a shared database.
+**The fix CANNOT be `app.getPath('userData')`** (old analysis) — that would break shared network installs by giving each user their own local AppData database instead of a shared database.
 
 ---
 

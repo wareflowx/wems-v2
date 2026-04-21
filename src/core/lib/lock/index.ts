@@ -1,5 +1,5 @@
 import { app } from "electron";
-import { getEffectiveDataDir, getDataDir } from "@@/db";
+import { getEffectiveDataDir } from "@@/db";
 import { lockEvents } from "@@/lib/lock-events";
 import { configure, logger } from "@@/lib/logger";
 import { isSuccess, Result } from "@@/lib/result";
@@ -40,7 +40,7 @@ let lastKnownWriteMode: boolean | null = null;
 let heartbeatIntervalId: ReturnType<typeof setInterval> | null = null;
 
 function ensureDataDir(): void {
-  // Use the same effective data directory as the db module (with fallback logic)
+  // Use the same data directory as the db module
   const dataDir = getEffectiveDataDir();
   if (!fs.existsSync(dataDir)) {
     try {

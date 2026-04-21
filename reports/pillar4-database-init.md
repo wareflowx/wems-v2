@@ -2,6 +2,7 @@
 
 **Author:** Senior Database & SQLite Sub-agent
 **Date:** 2026-04-09
+**Status:** Superseded - NSIS-only data storage plan adopted 2026-04-21
 **Files Analyzed:**
 - `src/main/index.ts` (FULL)
 - `src/core/db/index.ts` (FULL)

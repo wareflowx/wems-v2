@@ -113,6 +113,41 @@ db.close();
 Currently available:
 - `docs/learning/orpc-messageport-transfer.md` - How to properly transfer MessagePort between main, preload and renderer in Electron with contextIsolation enabled
 
+## Web Search Tool
+
+**You MUST always use `fresh` for web searches.** This project has a `fresh` CLI tool installed for searching the web.
+
+### Usage
+
+```bash
+# Search the web (always use this for web searches)
+fresh search -q "your search query"
+
+# Fetch content from a specific URL
+fresh fetch https://example.com
+```
+
+### When to Use
+
+- When you need to research a problem or technology
+- When you need to find documentation for a library or framework
+- When you need to check for recent updates or changes to dependencies
+- When the codebase lacks documentation and you need external resources
+- When troubleshooting errors, search for similar issues online
+
+### Examples
+
+```bash
+# Find documentation for a library
+fresh search -q "electron better-sqlite3 migrations best practices"
+
+# Research an error
+fresh search -q "NSIS installer preserve user data on update electron"
+
+# Fetch specific documentation
+fresh fetch https://docs.example.com/api-reference
+```
+
 ## CI/CD & Code Review
 
 ### Marty PR Review Workflow

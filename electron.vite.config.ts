@@ -12,7 +12,7 @@ export default defineConfig({
       },
     },
     build: {
-      external: ["better-sqlite3", "@electron/rebuild"],
+      external: ["better-sqlite3", "@electron/rebuild", "electron-updater", "electron-log"],
     },
   },
 

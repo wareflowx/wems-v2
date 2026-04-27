@@ -47,6 +47,10 @@ contextBridge.exposeInMainWorld("electron", {
     if (lastWriteMode !== null) {
       callback(lastWriteMode);
     }
+    return () => {
+      const index = lockCallbacks.indexOf(callback);
+      if (index > -1) lockCallbacks.splice(index, 1);
+    };
   },
 
   // ============================================
@@ -66,6 +70,10 @@ contextBridge.exposeInMainWorld("electron", {
     }) => void
   ) => {
     updateCallbacks.push(callback);
+    return () => {
+      const index = updateCallbacks.indexOf(callback);
+      if (index > -1) updateCallbacks.splice(index, 1);
+    };
   },
 });
 

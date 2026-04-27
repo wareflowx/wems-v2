@@ -12,7 +12,7 @@ const lockCallbacks: ((writeMode: boolean) => void)[] = [];
 let lastWriteMode: boolean | null = null;
 
 // Store for update status
-const updateCallbacks: ((status: string) => void)[] = [];
+const updateCallbacks: ((data: { status: string; version?: string; error?: string; progress?: { percent: number; bytesPerSecond: number; transferred: number; total: number } }) => void)[] = [];
 
 // ============================================
 // SYSTEM - Window Controls (always available)
@@ -23,6 +23,9 @@ contextBridge.exposeInMainWorld("electron", {
     maximize: () => ipcRenderer.send("win:maximize"),
     close: () => ipcRenderer.send("win:close"),
     getWriteMode: () => ipcRenderer.invoke("get-write-mode"),
+    checkForUpdates: () => ipcRenderer.invoke("update:check"),
+    downloadUpdate: () => ipcRenderer.invoke("update:download"),
+    installUpdate: () => ipcRenderer.send("update:install"),
   },
 
   // ============================================
@@ -49,7 +52,19 @@ contextBridge.exposeInMainWorld("electron", {
   // ============================================
   // UPDATE STATUS - Event-based updates
   // ============================================
-  onUpdateStatusChanged: (callback: (status: string) => void) => {
+  onUpdateStatusChanged: (
+    callback: (data: {
+      status: string;
+      version?: string;
+      error?: string;
+      progress?: {
+        percent: number;
+        bytesPerSecond: number;
+        transferred: number;
+        total: number;
+      };
+    }) => void
+  ) => {
     updateCallbacks.push(callback);
   },
 });
@@ -66,9 +81,9 @@ ipcRenderer.on(
 // Listen for update status changes from main
 ipcRenderer.on(
   IPC_CHANNELS.UPDATE_STATUS,
-  (_event, data: { status: string }) => {
+  (_event, data: { status: string; version?: string; error?: string; progress?: { percent: number; bytesPerSecond: number; transferred: number; total: number } }) => {
     console.log("[PRELOAD] Update status received:", data.status);
-    updateCallbacks.forEach((cb) => cb(data.status));
+    updateCallbacks.forEach((cb) => cb(data));
   }
 );
 

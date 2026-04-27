@@ -5,8 +5,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow, dialog } from "electron";
 import { ipcMain, MessageChannelMain } from "electron/main";
-// import { UpdateSourceType, updateElectronApp } from "update-electron-app"; // Disabled for faster startup
 import { IPC_CHANNELS, TIMING, WINDOW } from "../core/constants";
+import { getUpdateManager } from "./update-manager";
 import {
   getDb,
   isWriteMode,
@@ -79,16 +79,20 @@ async function installExtensions() {
 }
 
 function checkForUpdates() {
-  // Update check disabled for faster startup
-  // TODO: Re-enable after optimizing update check
-  console.log("[MAIN] Update check disabled");
-  mainWindow?.webContents.send(IPC_CHANNELS.UPDATE_STATUS, {
-    status: "up-to-date",
-  });
+  // Don't check for updates in development mode
+  if (inDevelopment) {
+    logger.info("[MAIN] Skipping update check in development mode", "main");
+    return;
+  }
 
-  // Original code (disabled):
-  // mainWindow?.webContents.send(IPC_CHANNELS.UPDATE_STATUS, { status: "checking" });
-  // updateElectronApp({ ... })
+  logger.info("[MAIN] Checking for updates...", "main");
+  const updateManager = getUpdateManager();
+  updateManager.setMainWindow(mainWindow);
+
+  // Check for updates after a short delay to not block startup
+  setTimeout(() => {
+    updateManager.checkForUpdates();
+  }, 5000);
 }
 
 async function setupORPC() {

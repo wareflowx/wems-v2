@@ -4,7 +4,6 @@
 export * from "./use-agencies";
 export * from "./use-alerts";
 export * from "./use-caces";
-export * from "./use-contracts";
 export * from "./use-dialog";
 export * from "./use-documents";
 export * from "./use-driving-authorizations";

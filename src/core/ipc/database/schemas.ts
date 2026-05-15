@@ -87,8 +87,9 @@ export const createEmployeeInputSchema = z.object({
   status: z.enum(["active", "on_leave", "terminated"]).default("active"),
   hireDate: z.string().min(1, "Hire date is required"),
   terminationDate: z.string().optional(),
-  // Contract info - will create contract record
-  contractType: z.string().min(1, "Contract type is required"),
+  contractTypeId: z.number().optional(),
+  // Legacy fields (ignored)
+  contractType: z.string().optional(),
   contractStartDate: z.string().optional(),
   contractEndDate: z.string().optional(),
 });
@@ -110,6 +111,7 @@ export const updateEmployeeInputSchema = z.object({
   status: z.enum(["active", "on_leave", "terminated"]).optional(),
   hireDate: z.string().min(1, "Hire date is required").optional(),
   terminationDate: z.string().optional().nullable(),
+  contractTypeId: z.number().optional().nullable(),
 });
 
 export const deleteEmployeeInputSchema = z.object({

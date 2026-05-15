@@ -43,6 +43,7 @@ import {
   useMedicalVisits,
   useOnlineTrainings,
 } from "@/hooks";
+import { UpdateSidebarBanner } from "./update-sidebar-banner";
 
 interface NavItemProps {
   path: string;
@@ -197,11 +198,6 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                   label={t("sidebar.onlineTrainings")}
                   path="/online-trainings"
                 />
-                <NavItem
-                  icon={FileText}
-                  label={t("sidebar.contracts")}
-                  path="/contracts"
-                />
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -255,6 +251,9 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+
+          {/* Update notification banner */}
+          <UpdateSidebarBanner />
         </SidebarContent>
 
         <SidebarRail />

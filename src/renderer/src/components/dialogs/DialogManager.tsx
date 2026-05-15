@@ -8,7 +8,6 @@ import {
 } from "@/components/agencies";
 import { AddCacesDialog } from "@/components/caces/AddCacesDialog";
 import { CreateContractTypeDialog } from "@/components/contract-types/CreateContractTypeDialog";
-import { CreateContractDialog } from "@/components/contracts/CreateContractDialog";
 import { CreateDepartmentDialog } from "@/components/departments/CreateDepartmentDialog";
 import { AddDocumentDialog } from "@/components/documents/AddDocumentDialog";
 import { AddDrivingAuthorizationDialog } from "@/components/driving-authorizations/AddDrivingAuthorizationDialog";
@@ -21,7 +20,6 @@ import {
   useAgencies,
   useContractTypes,
   useCreateCaces,
-  useCreateContract,
   useCreateContractType,
   useCreateDepartment,
   useCreateDocument,
@@ -57,7 +55,6 @@ export function DialogManager() {
   const createMedicalVisit = useCreateMedicalVisit();
   const createDrivingAuthorization = useCreateDrivingAuthorization();
   const createOnlineTraining = useCreateOnlineTraining();
-  const createContract = useCreateContract();
   const createPosition = useCreatePosition();
   const createWorkLocation = useCreateWorkLocation();
   const createDepartment = useCreateDepartment();
@@ -75,6 +72,7 @@ export function DialogManager() {
       return (
         <CreateEmployeeDialog
           agencies={agencies}
+          contractTypes={contractTypes}
           departments={departments}
           onCreate={(data) => createEmployee.mutate(data)}
           onOpenChange={handleOpenChange}
@@ -127,17 +125,6 @@ export function DialogManager() {
         <AddOnlineTrainingDialog
           employees={employees}
           onAdd={(data) => createOnlineTraining.mutate(data)}
-          onOpenChange={handleOpenChange}
-          open
-        />
-      );
-
-    case "create-contract":
-      return (
-        <CreateContractDialog
-          contractTypes={contractTypes}
-          employees={employees}
-          onCreate={(data) => createContract.mutate(data)}
           onOpenChange={handleOpenChange}
           open
         />

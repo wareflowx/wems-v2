@@ -240,55 +240,6 @@ export async function deleteEmployee(id: number) {
   return client.database.deleteEmployee({ id });
 }
 
-// Contracts
-export async function getContracts() {
-  const client = getClient();
-  if (!client) {
-    return [];
-  }
-  return client.database.getContracts();
-}
-
-export async function getContractsByEmployee(employeeId: number) {
-  const client = getClient();
-  if (!client) {
-    return [];
-  }
-  return client.database.getContractsByEmployee({ employeeId });
-}
-
-export async function getActiveContractByEmployee(employeeId: number) {
-  const client = getClient();
-  if (!client) {
-    return null;
-  }
-  return client.database.getActiveContractByEmployee({ employeeId });
-}
-
-export async function createContract(data: any) {
-  const client = getClient();
-  if (!client) {
-    return null;
-  }
-  return client.database.createContract(data);
-}
-
-export async function updateContract(data: any) {
-  const client = getClient();
-  if (!client) {
-    return null;
-  }
-  return client.database.updateContract(data);
-}
-
-export async function deleteContract(id: number) {
-  const client = getClient();
-  if (!client) {
-    return null;
-  }
-  return client.database.deleteContract({ id });
-}
-
 // Media
 export async function getAllMedia(
   type?: "logo" | "template" | "document" | "other"

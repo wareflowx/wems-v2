@@ -1,5 +1,5 @@
 import type { Agency } from "@@/db/schema/agencies";
-import type { Contract } from "@@/db/schema/contracts";
+import type { ContractType } from "@@/db/schema/contract-types";
 import type { Employee } from "@@/db/schema/employees";
 import type { Position } from "@@/db/schema/positions";
 import type { WorkLocation } from "@@/db/schema/work-locations";
@@ -49,7 +49,7 @@ interface EmployeesTableProps {
   positions: Position[];
   workLocations: WorkLocation[];
   agencies?: Agency[];
-  contracts: Contract[];
+  contractTypes?: ContractType[];
   authorizationStatuses?: Map<number, DrivingAuthorizationStatusResult>;
   onDeleteClick: (employee: { id: number; name: string }) => void;
   onAddClick?: () => void;
@@ -62,7 +62,7 @@ export function EmployeesTable({
   positions,
   workLocations,
   agencies,
-  contracts,
+  contractTypes,
   authorizationStatuses,
   onDeleteClick,
   onAddClick,
@@ -74,47 +74,40 @@ export function EmployeesTable({
   const [contractFilter, setContractFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // Get contract for an employee - stabilized with useCallback to prevent infinite re-renders
-  const getEmployeeContract = useCallback(
-    (employeeId: number): Contract | undefined => {
-      const now = new Date();
-      return contracts.find((c) => {
-        if (c.employeeId !== employeeId || !c.isActive) {
-          return false;
-        }
-        // Check if contract has ended
-        if (c.endDate && new Date(c.endDate) < now) {
-          return false;
-        }
-        return true;
-      });
+  // Get employee contract type from their contractTypeId
+  const getEmployeeContractType = useCallback(
+    (employee: Employee): ContractType | undefined => {
+      if (!employee.contractTypeId || !contractTypes) {
+        return undefined;
+      }
+      return contractTypes.find((ct) => ct.id === employee.contractTypeId);
     },
-    [contracts]
+    [contractTypes]
   );
 
-  // Get unique contracts and statuses
-  const uniqueContracts = useMemo(() => {
-    const contractTypes = new Set(contracts.map((c) => c.contractType));
-    return Array.from(contractTypes);
-  }, [contracts]);
+  // Get unique contract types and statuses
+  const uniqueContractTypes = useMemo(() => {
+    if (!contractTypes) return [];
+    return contractTypes.filter((ct) => ct.isActive).map((ct) => ct.name);
+  }, [contractTypes]);
 
   const uniqueStatuses = useMemo(() => {
     const statuses = new Set(employees.map((e) => e.status));
     return Array.from(statuses);
   }, [employees]);
 
-  // Filter data manually for contract and status, use TanStack for search
+  // Filter data manually for contract type and status, use TanStack for search
   const filteredData = useMemo(() => {
     return employees.filter((employee) => {
-      const employeeContract = getEmployeeContract(employee.id);
+      const employeeContractType = getEmployeeContractType(employee);
       const matchesContract =
         contractFilter === "all" ||
-        employeeContract?.contractType === contractFilter;
+        employeeContractType?.name === contractFilter;
       const matchesStatus =
         statusFilter === "all" || employee.status === statusFilter;
       return matchesContract && matchesStatus;
     });
-  }, [employees, contractFilter, statusFilter, getEmployeeContract]);
+  }, [employees, contractFilter, statusFilter, getEmployeeContractType]);
 
   const columns: ColumnDef<Employee>[] = useMemo(
     () => [
@@ -144,8 +137,8 @@ export function EmployeesTable({
         header: t("employees.currentContract"),
         cell: ({ row }) => {
           const employee = row.original;
-          const contract = getEmployeeContract(employee.id);
-          const contractType = contract?.contractType || "-";
+          const contractType = getEmployeeContractType(employee);
+          const contractTypeName = contractType?.name || "-";
           const contractColors: { [key: string]: string } = {
             CDI: "bg-blue-500/15 border border-blue-500/25 text-blue-600",
             CDD: "bg-orange-500/15 border border-orange-500/25 text-orange-600",
@@ -154,13 +147,13 @@ export function EmployeesTable({
               "bg-purple-500/15 border border-purple-500/25 text-purple-600",
           };
           const colors =
-            contractColors[contractType] ||
+            contractColors[contractTypeName] ||
             "bg-gray-500/15 border border-gray-500/25 text-gray-600";
           return (
             <span
               className={`inline-flex items-center rounded-md px-2 py-0.5 font-medium text-xs ${colors}`}
             >
-              {contractType}
+              {contractTypeName}
             </span>
           );
         },
@@ -214,8 +207,7 @@ export function EmployeesTable({
         header: t("employees.agency"),
         cell: ({ row }) => {
           const employee = row.original;
-          const contract = getEmployeeContract(employee.id);
-          const agencyId = contract?.agencyId ?? null;
+          const agencyId = employee.agencyId ?? null;
           if (!agencyId) {
             return <span className="text-muted-foreground text-xs">-</span>;
           }
@@ -270,23 +262,7 @@ export function EmployeesTable({
           return <span className="text-gray-700">{getValue() as string}</span>;
         },
       },
-      {
-        id: "contractEndDate",
-        header: t("contracts.endDate"),
-        cell: ({ row }) => {
-          const employee = row.original;
-          const contract = getEmployeeContract(employee.id);
-          if (!(contract && contract.endDate)) {
-            return <span className="text-muted-foreground text-xs">-</span>;
-          }
-          return (
-            <span className="text-gray-700 text-xs">
-              {new Date(contract.endDate).toLocaleDateString()}
-            </span>
-          );
-        },
-      },
-      {
+            {
         id: "actions",
         header: t("employees.actions"),
         cell: ({ row }) => {
@@ -370,9 +346,9 @@ export function EmployeesTable({
           </SelectTrigger>
           <SelectContent position="popper">
             <SelectItem value="all">{t("common.allContracts")}</SelectItem>
-            {uniqueContracts.map((contract) => (
-              <SelectItem key={contract} value={contract}>
-                {contract}
+            {uniqueContractTypes.map((contractTypeName) => (
+              <SelectItem key={contractTypeName} value={contractTypeName}>
+                {contractTypeName}
               </SelectItem>
             ))}
           </SelectContent>

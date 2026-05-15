@@ -44,6 +44,13 @@ interface Agency {
   code?: string;
 }
 
+interface ContractType {
+  id: number;
+  name: string;
+  code: string;
+  color?: string;
+}
+
 interface Employee {
   id: number;
   firstName: string;
@@ -57,15 +64,7 @@ interface Employee {
   status?: "active" | "on_leave" | "terminated";
   hireDate: string;
   terminationDate?: string;
-}
-
-interface Contract {
-  id: number;
-  employeeId: number;
-  contractType: string;
-  startDate: string;
-  endDate?: string;
-  isActive: boolean;
+  contractTypeId?: number;
 }
 
 interface EditEmployeeDialogProps {
@@ -73,11 +72,11 @@ interface EditEmployeeDialogProps {
   onOpenChange?: (open: boolean) => void;
   onEdit?: (data: EditEmployeeData) => void;
   employee?: Employee | null;
-  contract?: Contract | null;
   departments?: Department[];
   positions?: Position[];
   workLocations?: WorkLocation[];
   agencies?: Agency[];
+  contractTypes?: ContractType[];
 }
 
 export interface EditEmployeeData {
@@ -93,10 +92,7 @@ export interface EditEmployeeData {
   status?: "active" | "on_leave" | "terminated";
   hireDate: string;
   terminationDate?: string;
-  contractType?: string;
-  contractStartDate?: string;
-  contractEndDate?: string;
-  contractIsActive?: boolean;
+  contractTypeId?: number | null;
 }
 
 export function EditEmployeeDialog({
@@ -104,11 +100,11 @@ export function EditEmployeeDialog({
   onOpenChange,
   onEdit,
   employee,
-  contract,
   departments = [],
   positions = [],
   workLocations = [],
   agencies = [],
+  contractTypes = [],
 }: EditEmployeeDialogProps) {
   const { t } = useTranslation();
 
@@ -125,10 +121,7 @@ export function EditEmployeeDialog({
     status: "active",
     hireDate: "",
     terminationDate: "",
-    contractType: "",
-    contractStartDate: "",
-    contractEndDate: "",
-    contractIsActive: true,
+    contractTypeId: undefined,
   });
 
   // Update form when employee changes
@@ -147,13 +140,10 @@ export function EditEmployeeDialog({
         status: employee.status as "active" | "on_leave" | "terminated",
         hireDate: employee.hireDate,
         terminationDate: employee.terminationDate || "",
-        contractType: contract?.contractType || "",
-        contractStartDate: contract?.startDate || "",
-        contractEndDate: contract?.endDate || "",
-        contractIsActive: contract?.isActive ?? true,
+        contractTypeId: employee.contractTypeId,
       });
     }
-  }, [employee, contract]);
+  }, [employee]);
 
   const updateFormData = <K extends keyof EditEmployeeData>(
     field: K,
@@ -183,10 +173,7 @@ export function EditEmployeeDialog({
         status: employee.status as "active" | "on_leave" | "terminated",
         hireDate: employee.hireDate,
         terminationDate: employee.terminationDate || "",
-        contractType: contract?.contractType || "",
-        contractStartDate: contract?.startDate || "",
-        contractEndDate: contract?.endDate || "",
-        contractIsActive: contract?.isActive ?? true,
+        contractTypeId: employee.contractTypeId,
       });
     }
     onOpenChange?.(open);
@@ -195,8 +182,6 @@ export function EditEmployeeDialog({
   const handleSubmit = () => {
     onEdit?.(formData);
   };
-
-  const contractTypes = ["CDI", "CDD", "Intérim", "Stage", "Apprentissage"];
 
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
@@ -401,6 +386,31 @@ export function EditEmployeeDialog({
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.name}>
                       {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contractType">
+                {t("employeeDetail.contractType")}
+              </Label>
+              <Select
+                onValueChange={(value) =>
+                  updateFormData("contractTypeId", Number(value))
+                }
+                value={formData.contractTypeId?.toString() || ""}
+              >
+                <SelectTrigger id="contractType">
+                  <SelectValue
+                    placeholder={t("employeeDetail.contractType")}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {contractTypes.map((ct) => (
+                    <SelectItem key={ct.id} value={ct.id.toString()}>
+                      {ct.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

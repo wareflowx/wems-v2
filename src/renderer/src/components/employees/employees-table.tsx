@@ -301,7 +301,7 @@ export function EmployeesTable({
       workLocations,
       agencies,
       onDeleteClick,
-      getEmployeeContract,
+      getEmployeeContractType,
       onEditClick,
       onRowClick,
     ]

@@ -12,9 +12,13 @@ const inDevelopment = process.env.NODE_ENV === "development";
 
 /**
  * Get the effective data directory for the database.
- * Always uses app.getPath("userData") which NSIS guarantees is writable.
+ * In dev: project root /data folder
+ * In prod: app.getPath("userData")/data (NSIS guarantees it's writable)
  */
 export function getEffectiveDataDir(): string {
+  if (inDevelopment) {
+    return path.join(process.cwd(), "data");
+  }
   return path.join(app.getPath("userData"), "data");
 }
 

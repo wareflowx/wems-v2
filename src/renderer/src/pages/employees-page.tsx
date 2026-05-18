@@ -16,7 +16,6 @@ import {
   useAgencies,
   useAllDrivingAuthorizationStatuses,
   useContractTypes,
-  useContracts,
   useCreateEmployee,
   useDeleteEmployee,
   useDepartments,
@@ -41,7 +40,6 @@ export function EmployeesPage() {
   const { data: employees = [], isLoading, error } = useEmployees();
   const { data: positions = [] } = usePositions();
   const { data: workLocations = [] } = useWorkLocations();
-  const { data: contracts = [] } = useContracts();
   const { data: departments = [] } = useDepartments();
   const { data: agencies = [] } = useAgencies();
   const { data: contractTypesData = [] } = useContractTypes();
@@ -205,7 +203,7 @@ export function EmployeesPage() {
             <EmployeesTable
               agencies={agencies}
               authorizationStatuses={authorizationStatuses}
-              contracts={contracts}
+              contractTypes={contractTypesData}
               employees={employees}
               onAddClick={() => setIsCreateDialogOpen(true)}
               onDeleteClick={handleDeleteClick}
@@ -235,13 +233,7 @@ export function EmployeesPage() {
       />
       <EditEmployeeDialog
         agencies={agencies}
-        contract={
-          employeeToEdit
-            ? contracts.find(
-                (c: any) => c.employeeId === employeeToEdit.id && c.isActive
-              )
-            : undefined
-        }
+        contractTypes={contractTypesData}
         departments={departments}
         employee={employeeToEdit}
         onEdit={handleEditSubmit}

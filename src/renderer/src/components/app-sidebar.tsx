@@ -198,11 +198,6 @@ export function AppSidebar({ onQuickActionsClick, ...props }: AppSidebarProps) {
                   label={t("sidebar.onlineTrainings")}
                   path="/online-trainings"
                 />
-                <NavItem
-                  icon={FileText}
-                  label={t("sidebar.contracts")}
-                  path="/contracts"
-                />
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

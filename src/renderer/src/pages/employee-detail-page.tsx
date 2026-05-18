@@ -1,7 +1,6 @@
 import { useParams } from "@tanstack/react-router";
 import {
   Car,
-  FileSignature,
   FileText,
   GraduationCap,
   TestTubes,
@@ -26,7 +25,7 @@ import {
 import {
   useAgencies,
   useCaces,
-  useContracts,
+  useContractTypes,
   useDepartments,
   useDrivingAuthorizations,
   useEmployee,
@@ -54,7 +53,7 @@ export function EmployeeDetailPage() {
   // Fetch related data
   const { data: positions = [] } = usePositions();
   const { data: workLocations = [] } = useWorkLocations();
-  const { data: contracts = [] } = useContracts();
+  const { data: contractTypes = [] } = useContractTypes();
   const { data: departments = [] } = useDepartments();
   const { data: agencies = [] } = useAgencies();
   const { data: caces = [] } = useCaces();
@@ -62,23 +61,6 @@ export function EmployeeDetailPage() {
   const { data: drivingAuthorizations = [] } = useDrivingAuthorizations();
   const { data: onlineTrainings = [] } = useOnlineTrainings();
   const updateEmployee = useUpdateEmployee();
-
-  // Get employee's current contract
-  const currentContract = useMemo(() => {
-    if (!employeeData) {
-      return undefined;
-    }
-    const now = new Date();
-    return contracts.find((c) => {
-      if (c.employeeId !== employeeData.id || !c.isActive) {
-        return false;
-      }
-      if (c.endDate && new Date(c.endDate) < now) {
-        return false;
-      }
-      return true;
-    });
-  }, [contracts, employeeData]);
 
   // Get employee's data
   const employeeCaces = useMemo(() => {
@@ -110,14 +92,6 @@ export function EmployeeDetailPage() {
     }
     return onlineTrainings.filter((t) => t.employeeId === employeeData.id);
   }, [onlineTrainings, employeeData]);
-
-  // Get all contracts for the employee
-  const employeeContracts = useMemo(() => {
-    if (!employeeData) {
-      return [];
-    }
-    return contracts.filter((c) => c.employeeId === employeeData.id);
-  }, [contracts, employeeData]);
 
   // Get position and work location
   const position = employeeData
@@ -253,7 +227,7 @@ export function EmployeeDetailPage() {
           <div className="mt-4 flex gap-2">
             <EditEmployeeDialog
               agencies={agencies}
-              contract={currentContract}
+              contractTypes={contractTypes}
               departments={departments}
               employee={employeeData}
               onEdit={(data) => updateEmployee.mutate(data)}
@@ -294,74 +268,6 @@ export function EmployeeDetailPage() {
               </p>
               <p className="mt-0.5 text-sm">{employeeData.hireDate}</p>
             </Card>
-            <Card className="p-3">
-              <p className="text-muted-foreground text-xs">
-                {t("contracts.title")}
-              </p>
-              <p className="mt-0.5 text-sm">
-                {currentContract ? (
-                  <span className="font-medium">
-                    {currentContract.contractType}
-                  </span>
-                ) : (
-                  "-"
-                )}
-              </p>
-            </Card>
-          </div>
-
-          {/* Contracts Table (separate section) */}
-          <div className="mt-4">
-            <h3 className="mb-2 font-medium text-sm">Contracts History</h3>
-            <div className="overflow-x-auto rounded-lg border bg-card">
-              {employeeContracts.length === 0 ? (
-                <AnimatedEmpty
-                  bordered={false}
-                  description="This employee has no contracts on file."
-                  icons={[FileSignature, FileSignature, FileSignature]}
-                  title="No contracts"
-                />
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="px-4">Type</TableHead>
-                      <TableHead className="px-4">Start Date</TableHead>
-                      <TableHead className="px-4">End Date</TableHead>
-                      <TableHead className="px-4">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {employeeContracts.map((contract: any) => {
-                      const isActive =
-                        contract.isActive &&
-                        (!contract.endDate ||
-                          new Date(contract.endDate) >= new Date());
-                      return (
-                        <TableRow key={contract.id}>
-                          <TableCell className="px-4 font-medium">
-                            {contract.contractType}
-                          </TableCell>
-                          <TableCell className="px-4">
-                            {contract.startDate}
-                          </TableCell>
-                          <TableCell className="px-4">
-                            {contract.endDate || "-"}
-                          </TableCell>
-                          <TableCell className="px-4">
-                            {isActive ? (
-                              <StatusBadge color="green">Active</StatusBadge>
-                            ) : (
-                              <StatusBadge color="gray">Inactive</StatusBadge>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-            </div>
           </div>
         </div>
 

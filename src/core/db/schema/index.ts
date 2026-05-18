@@ -6,7 +6,6 @@ export * from "./agencies";
 export * from "./attachments";
 export * from "./caces";
 export * from "./contract-types";
-export * from "./contracts";
 export * from "./departments";
 export * from "./driving-authorizations";
 export * from "./employees";

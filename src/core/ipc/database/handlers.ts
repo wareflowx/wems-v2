@@ -4,7 +4,6 @@ import {
   agencies,
   attachments,
   caces,
-  contracts,
   contractTypes,
   departments,
   drivingAuthorizations,
@@ -350,34 +349,16 @@ export const createEmployee = os.handler(async ({ input }) => {
     const db = await getDb();
 
     // Extract contract info from input
-    const {
-      contractType,
-      contractStartDate,
-      contractEndDate,
-      ...employeeData
-    } = validatedData;
+    const { contractType, contractTypeId, contractStartDate, contractEndDate, ...employeeData } = validatedData;
 
-    // Insert employee first
+    // Insert employee
     const [newEmployee] = await db
       .insert(employees)
-      .values(employeeData)
+      .values({
+        ...employeeData,
+        contractTypeId: contractTypeId || null,
+      })
       .returning();
-
-    // Then insert contract with the employee's ID
-    // Use try-catch with manual rollback to ensure atomicity
-    try {
-      await db.insert(contracts).values({
-        employeeId: newEmployee.id,
-        contractType,
-        startDate: contractStartDate || employeeData.hireDate,
-        endDate: contractEndDate || null,
-        isActive: true,
-      });
-    } catch (contractError) {
-      // Rollback: delete the employee if contract creation fails
-      await db.delete(employees).where(eq(employees.id, newEmployee.id));
-      throw contractError;
-    }
 
     return newEmployee;
   } catch (error) {
@@ -402,7 +383,8 @@ export const updateEmployee = os.handler(async ({ input }) => {
       | "department"
       | "status"
       | "hireDate"
-      | "terminationDate";
+      | "terminationDate"
+      | "contractTypeId";
     const updateData: Partial<Pick<typeof employees, EmployeeUpdateKeys>> = {};
     if (validatedData.firstName !== undefined) {
       updateData.firstName = validatedData.firstName;
@@ -434,6 +416,9 @@ export const updateEmployee = os.handler(async ({ input }) => {
     if (validatedData.terminationDate !== undefined) {
       updateData.terminationDate = validatedData.terminationDate;
     }
+    if (validatedData.contractTypeId !== undefined) {
+      updateData.contractTypeId = validatedData.contractTypeId;
+    }
 
     const [updated] = await db
       .update(employees)
@@ -458,117 +443,6 @@ export const deleteEmployee = os.handler(async ({ input }) => {
     return { success: true };
   } catch (error) {
     console.error("Error in deleteEmployee:", error);
-    throw error;
-  }
-});
-
-// Contracts handlers
-export const getContracts = os.handler(async () => {
-  try {
-    const db = await getDb();
-    return await db
-      .select()
-      .from(contracts)
-      .where(isNull(contracts.deletedAt))
-      .orderBy(desc(contracts.id));
-  } catch (error) {
-    console.error("Error in getContracts:", error);
-    throw error;
-  }
-});
-
-export const getContractsByEmployee = os.handler(async ({ input }) => {
-  try {
-    const db = await getDb();
-    return await db
-      .select()
-      .from(contracts)
-      .where(
-        and(
-          eq(contracts.employeeId, input.employeeId),
-          isNull(contracts.deletedAt)
-        )
-      )
-      .orderBy(desc(contracts.startDate));
-  } catch (error) {
-    console.error("Error in getContractsByEmployee:", error);
-    throw error;
-  }
-});
-
-export const getActiveContractByEmployee = os.handler(async ({ input }) => {
-  try {
-    const db = await getDb();
-    const result = await db
-      .select()
-      .from(contracts)
-      .where(
-        and(
-          eq(contracts.employeeId, input.employeeId),
-          isNull(contracts.deletedAt)
-        )
-      )
-      .orderBy(desc(contracts.id))
-      .limit(1);
-    return result[0] || null;
-  } catch (error) {
-    console.error("Error in getActiveContractByEmployee:", error);
-    throw error;
-  }
-});
-
-export const createContract = os.handler(async ({ input }) => {
-  try {
-    const db = await getDb();
-    const [newContract] = await db
-      .insert(contracts)
-      .values({
-        employeeId: input.employeeId,
-        agencyId: input.agencyId || null,
-        contractType: input.contractType,
-        startDate: input.startDate,
-        endDate: input.endDate || null,
-        isActive: input.isActive ?? true,
-      })
-      .returning();
-    return newContract;
-  } catch (error) {
-    console.error("Error in createContract:", error);
-    throw error;
-  }
-});
-
-export const updateContract = os.handler(async ({ input }) => {
-  try {
-    const db = await getDb();
-    const [updated] = await db
-      .update(contracts)
-      .set({
-        agencyId: input.agencyId ?? null,
-        contractType: input.contractType,
-        startDate: input.startDate,
-        endDate: input.endDate || null,
-        isActive: input.isActive,
-      })
-      .where(eq(contracts.id, input.id))
-      .returning();
-    return updated;
-  } catch (error) {
-    console.error("Error in updateContract:", error);
-    throw error;
-  }
-});
-
-export const deleteContract = os.handler(async ({ input }) => {
-  try {
-    const db = await getDb();
-    await db
-      .update(contracts)
-      .set({ deletedAt: new Date().toISOString() })
-      .where(eq(contracts.id, input.id));
-    return { success: true };
-  } catch (error) {
-    console.error("Error in deleteContract:", error);
     throw error;
   }
 });
@@ -2134,52 +2008,6 @@ export const getAlerts = os.handler(
         }
       }
 
-      // Get all Contracts (only if contract alerts enabled, excluding soft-deleted)
-      if (appSettings?.contractAlerts) {
-        const allContracts = await db
-          .select()
-          .from(contracts)
-          .where(
-            and(eq(contracts.isActive, true), isNull(contracts.deletedAt))
-          );
-
-        for (const contract of allContracts) {
-          if (!contract.endDate) {
-            continue;
-          }
-
-          const endDate = new Date(contract.endDate);
-          endDate.setHours(0, 0, 0, 0);
-
-          const daysUntilEnd = Math.ceil(
-            (endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-          );
-
-          if (daysUntilEnd < 0) {
-            // Contract expired - critical
-            alerts.push({
-              id: `contract-expired-${contract.id}`,
-              type: "Contrat expiré",
-              employee: employeeMap.get(contract.employeeId) || "Unknown",
-              employeeId: contract.employeeId,
-              severity: "critical",
-              date: contract.endDate,
-            });
-          } else if (daysUntilEnd <= 30) {
-            // Contract expiring soon - warning
-            alerts.push({
-              id: `contract-warning-${contract.id}`,
-              type: "Contrat expiration proche",
-              employee: employeeMap.get(contract.employeeId) || "Unknown",
-              employeeId: contract.employeeId,
-              daysLeft: daysUntilEnd,
-              severity: daysUntilEnd <= 7 ? "critical" : "warning",
-              date: contract.endDate,
-            });
-          }
-        }
-      }
-
       // Get all Driving Authorizations (excluding soft-deleted)
       const allDrivingAuthorizations = await db
         .select()
@@ -2374,9 +2202,6 @@ export const permanentDeleteEmployee = os.handler(async ({ input }) => {
       }
 
       // Permanently delete related records
-      await tx
-        .delete(contracts)
-        .where(eq(contracts.employeeId, validatedData.id));
       await tx.delete(caces).where(eq(caces.employeeId, validatedData.id));
       await tx
         .delete(medicalVisits)
@@ -2768,7 +2593,7 @@ import {
   getExcelExtension,
   writeExcelToFile,
 } from "@@/lib/exporters/excel-exporter";
-import { and, gte, isNull, lte } from "drizzle-orm";
+import { gte, lte } from "drizzle-orm";
 import * as fs from "fs";
 import * as path from "path";
 

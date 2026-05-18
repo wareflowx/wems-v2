@@ -110,13 +110,6 @@ export function QuickActionsDialog({
       icon: GraduationCap,
     },
     {
-      id: "contracts",
-      title: "Contracts",
-      shortcut: "G O",
-      action: () => navigate({ to: "/contracts" }),
-      icon: FileText,
-    },
-    {
       heading: "Reference Data",
     },
     {
@@ -190,13 +183,6 @@ export function QuickActionsDialog({
       title: "New Online Training",
       shortcut: "C T",
       action: () => openDialog("create-online-training"),
-      icon: Plus,
-    },
-    {
-      id: "create-contract",
-      title: "New Contract",
-      shortcut: "C O",
-      action: () => openDialog("create-contract"),
       icon: Plus,
     },
     {

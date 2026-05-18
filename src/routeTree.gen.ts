@@ -23,7 +23,6 @@ import { Route as DrivingAuthorizationsRouteImport } from './routes/driving-auth
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DepartmentsRouteImport } from './routes/departments'
 import { Route as AgenciesRouteImport } from './routes/agencies'
-import { Route as ContractsRouteImport } from './routes/contracts'
 import { Route as ContractTypesRouteImport } from './routes/contract-types'
 import { Route as CacesRouteImport } from './routes/caces'
 import { Route as AlertsRouteImport } from './routes/alerts'
@@ -99,11 +98,6 @@ const AgenciesRoute = AgenciesRouteImport.update({
   path: '/agencies',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ContractsRoute = ContractsRouteImport.update({
-  id: '/contracts',
-  path: '/contracts',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ContractTypesRoute = ContractTypesRouteImport.update({
   id: '/contract-types',
   path: '/contract-types',
@@ -130,8 +124,7 @@ export interface FileRoutesByFullPath {
   '/alerts': typeof AlertsRoute
   '/caces': typeof CacesRoute
   '/contract-types': typeof ContractTypesRoute
-  '/contracts': typeof ContractsRoute
-  '/departments': typeof DepartmentsRoute
+    '/departments': typeof DepartmentsRoute
   '/agencies': typeof AgenciesRoute
   '/documents': typeof DocumentsRoute
   '/driving-authorizations': typeof DrivingAuthorizationsRoute
@@ -151,8 +144,7 @@ export interface FileRoutesByTo {
   '/alerts': typeof AlertsRoute
   '/caces': typeof CacesRoute
   '/contract-types': typeof ContractTypesRoute
-  '/contracts': typeof ContractsRoute
-  '/departments': typeof DepartmentsRoute
+    '/departments': typeof DepartmentsRoute
   '/agencies': typeof AgenciesRoute
   '/documents': typeof DocumentsRoute
   '/driving-authorizations': typeof DrivingAuthorizationsRoute
@@ -173,8 +165,7 @@ export interface FileRoutesById {
   '/alerts': typeof AlertsRoute
   '/caces': typeof CacesRoute
   '/contract-types': typeof ContractTypesRoute
-  '/contracts': typeof ContractsRoute
-  '/departments': typeof DepartmentsRoute
+    '/departments': typeof DepartmentsRoute
   '/agencies': typeof AgenciesRoute
   '/documents': typeof DocumentsRoute
   '/driving-authorizations': typeof DrivingAuthorizationsRoute
@@ -254,7 +245,6 @@ export interface RootRouteChildren {
   AlertsRoute: typeof AlertsRoute
   CacesRoute: typeof CacesRoute
   ContractTypesRoute: typeof ContractTypesRoute
-  ContractsRoute: typeof ContractsRoute
   DepartmentsRoute: typeof DepartmentsRoute
   DocumentsRoute: typeof DocumentsRoute
   DrivingAuthorizationsRoute: typeof DrivingAuthorizationsRoute
@@ -370,14 +360,7 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgenciesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/contracts': {
-      id: '/contracts'
-      path: '/contracts'
-      fullPath: '/contracts'
-      preLoaderRoute: typeof ContractsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contract-types': {
+        '/contract-types': {
       id: '/contract-types'
       path: '/contract-types'
       fullPath: '/contract-types'
@@ -413,8 +396,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlertsRoute: AlertsRoute,
   CacesRoute: CacesRoute,
   ContractTypesRoute: ContractTypesRoute,
-  ContractsRoute: ContractsRoute,
-  DepartmentsRoute: DepartmentsRoute,
+    DepartmentsRoute: DepartmentsRoute,
   AgenciesRoute: AgenciesRoute,
   DocumentsRoute: DocumentsRoute,
   DrivingAuthorizationsRoute: DrivingAuthorizationsRoute,

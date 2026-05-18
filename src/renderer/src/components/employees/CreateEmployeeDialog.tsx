@@ -69,12 +69,11 @@ export interface CreateEmployeeData {
   phone?: string;
   positionId?: number;
   workLocationId?: number;
-  contractType: string;
+  contractTypeId?: number;
   department: string;
   agencyId?: number | null;
   status?: "active" | "on_leave" | "terminated";
   hireDate: string;
-  contractEndDate?: string;
 }
 
 const steps = [
@@ -104,11 +103,10 @@ export function CreateEmployeeDialog({
     phone: "",
     positionId: undefined,
     workLocationId: undefined,
-    contractType: "",
+    contractTypeId: undefined,
     department: "",
     agencyId: undefined,
     hireDate: "",
-    contractEndDate: "",
   });
 
   const updateFormData = <K extends keyof CreateEmployeeData>(
@@ -146,10 +144,9 @@ export function CreateEmployeeDialog({
         phone: "",
         positionId: undefined,
         workLocationId: undefined,
-        contractType: "",
+        contractTypeId: undefined,
         department: "",
         hireDate: "",
-        contractEndDate: "",
       });
       setCurrentStep(1);
     }
@@ -173,7 +170,7 @@ export function CreateEmployeeDialog({
         );
       case 2:
         return (
-          formData.department && formData.contractType && formData.hireDate
+          formData.department && formData.hireDate
         );
       default:
         return true;
@@ -196,19 +193,12 @@ export function CreateEmployeeDialog({
     return workLocations.find((w) => w.id === id)?.name || "-";
   };
 
-  // Map contract value to display
-  const getContractDisplay = (contract: string) => {
-    const map: Record<string, string> = {
-      CDI: "CDI",
-      cdi: "CDI",
-      CDD: "CDD",
-      cdd: "CDD",
-      Intérim: "Intérim",
-      interim: "Intérim",
-      Alternance: "Alternance",
-      alternance: "Alternance",
-    };
-    return map[contract] || contract;
+  // Get contract type name for display
+  const getContractTypeName = (id?: number) => {
+    if (!id) {
+      return "-";
+    }
+    return contractTypes.find((ct) => ct.id === id)?.name || "-";
   };
 
   return (
@@ -442,23 +432,23 @@ export function CreateEmployeeDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="contract">
-                    {t("employeeDetail.contractType")} *
+                  <Label htmlFor="contractType">
+                    {t("employeeDetail.contractType")}
                   </Label>
                   <Select
                     onValueChange={(value) =>
-                      updateFormData("contractType", value)
+                      updateFormData("contractTypeId", Number(value))
                     }
-                    value={formData.contractType}
+                    value={formData.contractTypeId?.toString() || ""}
                   >
-                    <SelectTrigger id="contract">
+                    <SelectTrigger id="contractType">
                       <SelectValue
                         placeholder={t("employeeDetail.contractType")}
                       />
                     </SelectTrigger>
                     <SelectContent position="popper">
                       {contractTypes.map((ct) => (
-                        <SelectItem key={ct.id} value={ct.code}>
+                        <SelectItem key={ct.id} value={ct.id.toString()}>
                           {ct.name}
                         </SelectItem>
                       ))}
@@ -477,28 +467,6 @@ export function CreateEmployeeDialog({
                     value={formData.hireDate}
                   />
                 </div>
-
-                {/* Contract end date - optional for CDD/Intérim */}
-                {["CDD", "Intérim", "Alternance"].includes(
-                  formData.contractType
-                ) && (
-                  <div className="space-y-2">
-                    <Label htmlFor="contractEndDate">
-                      {t("contracts.endDate")}
-                    </Label>
-                    <Input
-                      id="contractEndDate"
-                      onChange={(e) =>
-                        updateFormData("contractEndDate", e.target.value)
-                      }
-                      type="date"
-                      value={formData.contractEndDate}
-                    />
-                    <p className="text-muted-foreground text-xs">
-                      {t("contracts.endDateHint")}
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -575,7 +543,7 @@ export function CreateEmployeeDialog({
                         {t("employeeDetail.contractType")}:
                       </span>
                       <span className="font-medium">
-                        {getContractDisplay(formData.contractType)}
+                        {getContractTypeName(formData.contractTypeId)}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -586,16 +554,6 @@ export function CreateEmployeeDialog({
                         {formData.hireDate || "-"}
                       </span>
                     </div>
-                    {formData.contractEndDate && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">
-                          {t("contracts.endDate")}:
-                        </span>
-                        <span className="font-medium">
-                          {formData.contractEndDate}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

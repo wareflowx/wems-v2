@@ -1,5 +1,6 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { agencies } from "./agencies";
+import { contractTypes } from "./contract-types";
 import { timestampsWithSoftDelete } from "./columns.helpers";
 import { positions } from "./positions";
 import { workLocations } from "./work-locations";
@@ -34,6 +35,12 @@ export const employees = sqliteTable("employees", {
   status: text("status").notNull().default("active"), // 'active' | 'on_leave' | 'terminated'
   hireDate: text("hire_date").notNull(),
   terminationDate: text("termination_date"),
+
+  // Contract type (FK)
+  contractTypeId: integer("contract_type_id").references(
+    () => contractTypes.id,
+    { onDelete: "set null" }
+  ),
 
   // Reusable timestamp columns with soft delete
   ...timestampsWithSoftDelete,

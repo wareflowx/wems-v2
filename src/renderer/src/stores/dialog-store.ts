@@ -19,9 +19,6 @@ export type DialogId =
   | "create-online-training"
   | "edit-online-training"
   | "delete-online-training"
-  | "create-contract"
-  | "edit-contract"
-  | "delete-contract"
   | "create-position"
   | "edit-position"
   | "delete-position"
@@ -51,8 +48,6 @@ interface DialogData {
   drivingAuthorizationId?: number;
   // Online Training
   onlineTrainingId?: number;
-  // Contract
-  contractId?: number;
   // Position
   positionId?: number;
   // Work Location
